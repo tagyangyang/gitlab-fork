@@ -329,6 +329,10 @@ GEM
     grpc (1.1.2)
       google-protobuf (~> 3.1)
       googleauth (~> 0.5.1)
+    grape-swagger (0.26.0)
+      grape (>= 0.16.2)
+    grape-swagger-rails (0.3.0)
+      railties (>= 3.2.12)
     haml (4.0.7)
       tilt
     haml_lint (0.21.0)
@@ -908,6 +912,8 @@ DEPENDENCIES
   grape (~> 0.19.0)
   grape-entity (~> 0.6.0)
   haml_lint (~> 0.21.0)
+  grape-swagger
+  grape-swagger-rails
   hamlit (~> 2.6.1)
   health_check (~> 2.6.0)
   hipchat (~> 1.5.0)
