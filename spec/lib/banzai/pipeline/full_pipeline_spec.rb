@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Banzai::Pipeline::WikiPipeline do
+describe Banzai::Pipeline::FullPipeline do
   describe 'TableOfContents' do
     it 'replaces the tag with the TableOfContentsFilter result' do
       markdown = <<-MD.strip_heredoc

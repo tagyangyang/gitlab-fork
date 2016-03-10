@@ -23,6 +23,16 @@ module Banzai
 
         result[:toc] = ""
 
+        add_header_anchors
+        result[:toc] = %Q{<ul class="section-nav">\n#{result[:toc]}</ul>} unless result[:toc].empty?
+        replace_toc_tag
+
+        doc
+      end
+
+      private
+
+      def add_header_anchors
         headers = Hash.new(0)
 
         doc.css('h1, h2, h3, h4, h5, h6').each do |node|
@@ -42,13 +52,7 @@ module Banzai
             header_content.add_previous_sibling(anchor_tag(href))
           end
         end
-
-        result[:toc] = %Q{<ul class="section-nav">\n#{result[:toc]}</ul>} unless result[:toc].empty?
-
-        doc
       end
-
-      private
 
       def anchor_tag(href)
         %Q{<a id="#{href}" class="anchor" href="##{href}" aria-hidden="true"></a>}
@@ -56,6 +60,27 @@ module Banzai
 
       def push_toc(href, text)
         result[:toc] << %Q{<li><a href="##{href}">#{text}</a></li>\n}
+      end
+
+      def replace_toc_tag
+        search_text_nodes(doc).each do |node|
+          if toc_tag?(node)
+            process_toc_tag(node)
+          end
+        end
+      end
+
+      # A Gollum-compatible ToC tag is `[[_TOC_]]`, but due to MarkdownFilter
+      # running before this one, it will be converted into `[[<em>TOC</em>]]`
+      def toc_tag?(node)
+        node.content == 'TOC' &&
+          node.parent.name == 'em' &&
+          node.parent.parent.text == '[[TOC]]'
+      end
+
+      # Replace an entire `[[<em>TOC</em>]]` node with our result
+      def process_toc_tag(node)
+        node.parent.parent.replace(result[:toc].presence || '')
       end
     end
   end

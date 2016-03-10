@@ -70,6 +70,22 @@ describe Banzai::Filter::TableOfContentsFilter, lib: true do
     end
   end
 
+  describe 'TOC tag' do
+    it 'replaces [[<em>TOC</em>]] with ToC result' do
+      doc = described_class.call("<p>[[<em>TOC</em>]]</p><h1>Foo</h1>")
+
+      expect(doc.to_html).not_to include('TOC')
+      expect(doc.to_html).to include('<a href="#foo">Foo</a>')
+    end
+
+    it 'handles an empty ToC result' do
+      input = "<p>[[<em>TOC</em>]]</p>"
+      doc = described_class.call(input)
+
+      expect(doc.to_html).to eq ''
+    end
+  end
+
   describe 'result' do
     def result(html)
       HTML::Pipeline.new([described_class]).call(html)
