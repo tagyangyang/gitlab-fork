@@ -159,7 +159,7 @@ describe 'Issues', feature: true do
         bar.update(due_date: 6.days.from_now)
       end
 
-      it 'sorts by recently due date' do
+      it 'sorts by due soon' do
         visit namespace_project_issues_path(project.namespace, project, sort: sort_value_due_date_soon)
 
         expect(first_issue).to include('foo')

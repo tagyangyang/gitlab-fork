@@ -50,8 +50,8 @@ class Issue < ActiveRecord::Base
   scope :due_before, ->(date) { where('issues.due_date < ?', date) }
   scope :due_between, ->(from_date, to_date) { where('issues.due_date >= ?', from_date).where('issues.due_date <= ?', to_date) }
 
-  scope :order_due_date_asc, -> { reorder('issues.due_date IS NULL, issues.due_date ASC') }
-  scope :order_due_date_desc, -> { reorder('issues.due_date IS NULL, issues.due_date DESC') }
+  scope :order_due_date_asc, -> { reorder(due_date: :asc) }
+  scope :order_due_date_desc, -> { reorder(due_date: :desc) }
 
   state_machine :state, initial: :opened do
     event :close do
