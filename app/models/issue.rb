@@ -51,7 +51,6 @@ class Issue < ActiveRecord::Base
   scope :due_between, ->(from_date, to_date) { where('issues.due_date >= ?', from_date).where('issues.due_date <= ?', to_date) }
 
   scope :order_due_date_asc, -> { reorder(due_date: :asc) }
-  scope :order_due_date_desc, -> { reorder(due_date: :desc) }
 
   state_machine :state, initial: :opened do
     event :close do
@@ -99,7 +98,6 @@ class Issue < ActiveRecord::Base
   def self.sort(method)
     case method.to_s
     when 'due_date_asc' then order_due_date_asc
-    when 'due_date_desc'  then order_due_date_desc
     else
       super
     end

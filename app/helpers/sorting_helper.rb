@@ -9,7 +9,6 @@ module SortingHelper
       sort_value_milestone_soon => sort_title_milestone_soon,
       sort_value_milestone_later => sort_title_milestone_later,
       sort_value_due_date_soon => sort_title_due_date_soon,
-      sort_value_due_date_later => sort_title_due_date_later,
       sort_value_largest_repo => sort_title_largest_repo,
       sort_value_recently_signin => sort_title_recently_signin,
       sort_value_oldest_signin => sort_title_oldest_signin,
@@ -54,10 +53,6 @@ module SortingHelper
 
   def sort_title_due_date_soon
     'Due soon'
-  end
-
-  def sort_title_due_date_later
-    'Due later'
   end
 
   def sort_title_name
@@ -110,10 +105,6 @@ module SortingHelper
 
   def sort_value_due_date_soon
     'due_date_asc'
-  end
-
-  def sort_value_due_date_later
-    'due_date_desc'
   end
 
   def sort_value_name
