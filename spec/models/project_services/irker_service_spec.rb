@@ -43,7 +43,7 @@ describe IrkerService, models: true do
   end
 
   describe 'Execute' do
-    let(:irker) { IrkerService.new }
+    let(:irker) { described_class.new }
     let(:user) { create(:user) }
     let(:project) { create(:project) }
     let(:sample_data) { Gitlab::PushDataBuilder.build_sample(project, user) }

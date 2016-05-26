@@ -11,7 +11,7 @@ describe Milestones::CloseService, services: true do
 
   describe :execute do
     before do
-      Milestones::CloseService.new(project, user, {}).execute(milestone)
+      described_class.new(project, user, {}).execute(milestone)
     end
 
     it { expect(milestone).to be_valid }

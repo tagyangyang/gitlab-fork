@@ -26,7 +26,7 @@ describe GlobalMilestone, models: true do
           milestone2_project3
         ]
 
-      @global_milestones = GlobalMilestone.build_collection(milestones)
+      @global_milestones = described_class.build_collection(milestones)
     end
 
     it 'should have all project milestones' do
@@ -51,7 +51,7 @@ describe GlobalMilestone, models: true do
           milestone1_project3,
         ]
 
-      @global_milestone = GlobalMilestone.new(milestone1_project1.title, milestones)
+      @global_milestone = described_class.new(milestone1_project1.title, milestones)
     end
 
     it 'should have exactly one group milestone' do
@@ -67,7 +67,7 @@ describe GlobalMilestone, models: true do
     let(:milestone) { create(:milestone, title: "git / test", project: project1) }
 
     it 'should strip out slashes and spaces' do
-      global_milestone = GlobalMilestone.new(milestone.title, [milestone])
+      global_milestone = described_class.new(milestone.title, [milestone])
 
       expect(global_milestone.safe_title).to eq('git-test')
     end

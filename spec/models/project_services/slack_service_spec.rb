@@ -42,7 +42,7 @@ describe SlackService, models: true do
   end
 
   describe "Execute" do
-    let(:slack)   { SlackService.new }
+    let(:slack)   { described_class.new }
     let(:user)    { create(:user) }
     let(:project) { create(:project) }
     let(:push_sample_data) { Gitlab::PushDataBuilder.build_sample(project, user) }
@@ -139,7 +139,7 @@ describe SlackService, models: true do
   end
 
   describe "Note events" do
-    let(:slack)   { SlackService.new }
+    let(:slack)   { described_class.new }
     let(:user) { create(:user) }
     let(:project) { create(:project, creator_id: user.id) }
     let(:issue)         { create(:issue, project: project) }

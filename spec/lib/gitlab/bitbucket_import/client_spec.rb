@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Gitlab::BitbucketImport::Client, lib: true do
   let(:token) { '123456' }
   let(:secret) { 'secret' }
-  let(:client) { Gitlab::BitbucketImport::Client.new(token, secret) }
+  let(:client) { described_class.new(token, secret) }
 
   before do
     Gitlab.config.omniauth.providers << OpenStruct.new(app_id: "asd123", app_secret: "asd123", name: "bitbucket")

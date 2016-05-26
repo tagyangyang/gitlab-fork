@@ -29,13 +29,13 @@ describe Milestone, models: true do
 
   describe "unique milestone title per project" do
     it "shouldn't accept the same title in a project twice" do
-      new_milestone = Milestone.new(project: milestone.project, title: milestone.title)
+      new_milestone = described_class.new(project: milestone.project, title: milestone.title)
       expect(new_milestone).not_to be_valid
     end
 
     it "should accept the same title in another project" do
       project = build(:project)
-      new_milestone = Milestone.new(project: project, title: milestone.title)
+      new_milestone = described_class.new(project: project, title: milestone.title)
 
       expect(new_milestone).to be_valid
     end
@@ -223,7 +223,7 @@ describe Milestone, models: true do
 
     # The call to `#try` is because this returns a relation with a Postgres DB,
     # and an array of IDs with a MySQL DB.
-    let(:milestone_ids) { Milestone.upcoming_ids_by_projects(projects).map { |id| id.try(:id) || id } }
+    let(:milestone_ids) { described_class.upcoming_ids_by_projects(projects).map { |id| id.try(:id) || id } }
 
     it 'returns the next upcoming open milestone ID for each project' do
       expect(milestone_ids).to contain_exactly(current_milestone_project_1.id, current_milestone_project_2.id)

@@ -5,7 +5,7 @@ describe Grack::Auth, lib: true do
   let(:project) { create(:project) }
 
   let(:app)   { lambda { |env| [200, {}, "Success!"] } }
-  let!(:auth) { Grack::Auth.new(app) }
+  let!(:auth) { described_class.new(app) }
   let(:env) do
     {
       'rack.input'     => '',

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Ci::Ansi2html, lib: true do
-  subject { Ci::Ansi2html }
+  subject { described_class }
 
   it "prints non-ansi as-is" do
     expect(subject.convert("Hello")[:html]).to eq('Hello')

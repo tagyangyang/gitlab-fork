@@ -7,7 +7,7 @@ describe BuildEmailWorker do
   let(:user) { create(:user) }
   let(:data) { Gitlab::BuildDataBuilder.build(build) }
 
-  subject { BuildEmailWorker.new }
+  subject { described_class.new }
 
   before do
     allow(build).to receive(:execute_hooks).and_return(false)

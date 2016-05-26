@@ -12,7 +12,7 @@ describe API::API, api: true  do
       get api("/internal/check"), secret_token: secret_token
 
       expect(response.status).to eq(200)
-      expect(json_response['api_version']).to eq(API::API.version)
+      expect(json_response['api_version']).to eq(described_class.version)
     end
   end
 

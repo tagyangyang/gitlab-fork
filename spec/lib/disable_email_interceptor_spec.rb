@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe DisableEmailInterceptor, lib: true do
   before do
-    ActionMailer::Base.register_interceptor(DisableEmailInterceptor)
+    ActionMailer::Base.register_interceptor(described_class)
   end
 
   it 'should not send emails' do

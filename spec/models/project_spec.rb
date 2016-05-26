@@ -69,7 +69,7 @@ describe Project, models: true do
       project = create(:empty_project)
       create(:empty_project, pending_delete: true)
 
-      expect(Project.all).to eq [project]
+      expect(described_class.all).to eq [project]
     end
   end
 
@@ -104,7 +104,7 @@ describe Project, models: true do
   end
 
   it 'should return valid url to repo' do
-    project = Project.new(path: 'somewhere')
+    project = described_class.new(path: 'somewhere')
     expect(project.url_to_repo).to eq(Gitlab.config.gitlab_shell.ssh_path_prefix + 'somewhere.git')
   end
 
@@ -220,9 +220,9 @@ describe Project, models: true do
         @project = create(:project, name: 'gitlabhq', namespace: @group)
       end
 
-      it { expect(Project.find_with_namespace('gitlab/gitlabhq')).to eq(@project) }
-      it { expect(Project.find_with_namespace('GitLab/GitlabHQ')).to eq(@project) }
-      it { expect(Project.find_with_namespace('gitlab-ci')).to be_nil }
+      it { expect(described_class.find_with_namespace('gitlab/gitlabhq')).to eq(@project) }
+      it { expect(described_class.find_with_namespace('GitLab/GitlabHQ')).to eq(@project) }
+      it { expect(described_class.find_with_namespace('gitlab-ci')).to be_nil }
     end
   end
 

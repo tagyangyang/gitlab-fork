@@ -12,7 +12,7 @@ describe Notify do
       let(:new_user) { create(:user, email: new_user_address, created_by_id: 1) }
       let(:token) { 'kETLwRaayvigPq_x3SNM' }
 
-      subject { Notify.new_user_email(new_user.id, token) }
+      subject { described_class.new_user_email(new_user.id, token) }
 
       it_behaves_like 'an email sent from GitLab'
       it_behaves_like 'a new user email'
@@ -41,7 +41,7 @@ describe Notify do
       let(:example_site_path) { root_path }
       let(:new_user) { create(:user, email: new_user_address, password: "securePassword") }
 
-      subject { Notify.new_user_email(new_user.id) }
+      subject { described_class.new_user_email(new_user.id) }
 
       it_behaves_like 'an email sent from GitLab'
       it_behaves_like 'a new user email'
@@ -56,7 +56,7 @@ describe Notify do
     describe 'user added ssh key' do
       let(:key) { create(:personal_key) }
 
-      subject { Notify.new_ssh_key_email(key.id) }
+      subject { described_class.new_ssh_key_email(key.id) }
 
       it_behaves_like 'an email sent from GitLab'
       it_behaves_like 'it should not have Gmail Actions links'
@@ -79,14 +79,14 @@ describe Notify do
       end
 
       context 'with SSH key that does not exist' do
-        it { expect { Notify.new_ssh_key_email('foo') }.not_to raise_error }
+        it { expect { described_class.new_ssh_key_email('foo') }.not_to raise_error }
       end
     end
 
     describe 'user added email' do
       let(:email) { create(:email) }
 
-      subject { Notify.new_email_email(email.id) }
+      subject { described_class.new_email_email(email.id) }
 
       it_behaves_like 'it should not have Gmail Actions links'
       it_behaves_like 'a user cannot unsubscribe through footer link'

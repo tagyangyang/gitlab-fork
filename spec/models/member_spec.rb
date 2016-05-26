@@ -6,7 +6,7 @@ describe Member, models: true do
   end
 
   describe "Validation" do
-    subject { Member.new(access_level: Member::GUEST) }
+    subject { described_class.new(access_level: Member::GUEST) }
 
     it { is_expected.to validate_presence_of(:user) }
     it { is_expected.to validate_presence_of(:source) }
@@ -66,7 +66,7 @@ describe Member, models: true do
 
     context "when called with a user id" do
       it "adds the user as a member" do
-        Member.add_user(project.project_members, user.id, ProjectMember::MASTER)
+        described_class.add_user(project.project_members, user.id, ProjectMember::MASTER)
 
         expect(project.users).to include(user)
       end
@@ -74,7 +74,7 @@ describe Member, models: true do
 
     context "when called with a user object" do
       it "adds the user as a member" do
-        Member.add_user(project.project_members, user, ProjectMember::MASTER)
+        described_class.add_user(project.project_members, user, ProjectMember::MASTER)
 
         expect(project.users).to include(user)
       end
@@ -82,7 +82,7 @@ describe Member, models: true do
 
     context "when called with a known user email" do
       it "adds the user as a member" do
-        Member.add_user(project.project_members, user.email, ProjectMember::MASTER)
+        described_class.add_user(project.project_members, user.email, ProjectMember::MASTER)
 
         expect(project.users).to include(user)
       end
@@ -90,7 +90,7 @@ describe Member, models: true do
 
     context "when called with an unknown user email" do
       it "adds a member invite" do
-        Member.add_user(project.project_members, "user@example.com", ProjectMember::MASTER)
+        described_class.add_user(project.project_members, "user@example.com", ProjectMember::MASTER)
 
         expect(project.project_members.invite.pluck(:invite_email)).to include("user@example.com")
       end

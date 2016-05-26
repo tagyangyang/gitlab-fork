@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Gitlab::GitlabImport::Client, lib: true do
   let(:token) { '123456' }
-  let(:client) { Gitlab::GitlabImport::Client.new(token) }
+  let(:client) { described_class.new(token) }
 
   before do
     Gitlab.config.omniauth.providers << OpenStruct.new(app_id: "asd123", app_secret: "asd123", name: "gitlab")

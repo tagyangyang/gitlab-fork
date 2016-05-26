@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Gitlab::LDAP::Adapter, lib: true do
-  let(:adapter) { Gitlab::LDAP::Adapter.new 'ldapmain' }
+  let(:adapter) { described_class.new 'ldapmain' }
 
   describe '#dn_matches_filter?' do
     let(:ldap) { double(:ldap) }

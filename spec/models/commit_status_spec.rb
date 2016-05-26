@@ -118,7 +118,7 @@ describe CommitStatus, models: true do
   end
   
   describe :latest do
-    subject { CommitStatus.latest.order(:id) }
+    subject { described_class.latest.order(:id) }
 
     before do
       @commit1 = FactoryGirl.create :commit_status, commit: commit, name: 'aa', ref: 'bb', status: 'running'
@@ -134,7 +134,7 @@ describe CommitStatus, models: true do
   end
 
   describe :running_or_pending do
-    subject { CommitStatus.running_or_pending.order(:id) }
+    subject { described_class.running_or_pending.order(:id) }
 
     before do
       @commit1 = FactoryGirl.create :commit_status, commit: commit, name: 'aa', ref: 'bb', status: 'running'
@@ -179,7 +179,7 @@ describe CommitStatus, models: true do
     end
 
     context 'stages list' do
-      subject { CommitStatus.where(commit: commit).stages }
+      subject { described_class.where(commit: commit).stages }
 
       it 'return ordered list of stages' do
         is_expected.to eq(%w(build test deploy))
@@ -187,7 +187,7 @@ describe CommitStatus, models: true do
     end
 
     context 'stages with statuses' do
-      subject { CommitStatus.where(commit: commit).stages_status }
+      subject { described_class.where(commit: commit).stages_status }
 
       it 'return list of stages with statuses' do
         is_expected.to eq({

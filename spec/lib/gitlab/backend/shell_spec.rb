@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Gitlab::Shell, lib: true do
   let(:project) { double('Project', id: 7, path: 'diaspora') }
-  let(:gitlab_shell) { Gitlab::Shell.new }
+  let(:gitlab_shell) { described_class.new }
 
   before do
     allow(Project).to receive(:find).and_return(project)

@@ -5,7 +5,7 @@ describe ProjectWiki, models: true do
   let(:repository) { project.repository }
   let(:user) { project.owner }
   let(:gitlab_shell) { Gitlab::Shell.new }
-  let(:project_wiki) { ProjectWiki.new(project, user) }
+  let(:project_wiki) { described_class.new(project, user) }
 
   subject { project_wiki }
   before { project_wiki.wiki }

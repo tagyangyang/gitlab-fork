@@ -47,7 +47,7 @@ describe GemnasiumService, models: true do
     let(:project) { create(:project) }
 
     before do
-      @gemnasium_service = GemnasiumService.new
+      @gemnasium_service = described_class.new
       allow(@gemnasium_service).to receive_messages(
         project_id: project.id,
         project: project,

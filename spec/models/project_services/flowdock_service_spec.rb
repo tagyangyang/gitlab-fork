@@ -45,7 +45,7 @@ describe FlowdockService, models: true do
     let(:project) { create(:project) }
 
     before do
-      @flowdock_service = FlowdockService.new
+      @flowdock_service = described_class.new
       allow(@flowdock_service).to receive_messages(
         project_id: project.id,
         project: project,

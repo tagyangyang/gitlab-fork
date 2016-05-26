@@ -4,8 +4,8 @@ describe Milestone, "StripAttribute" do
   let(:milestone) { create(:milestone) }
 
   describe ".strip_attributes" do
-    it { expect(Milestone).to respond_to(:strip_attributes) }
-    it { expect(Milestone.strip_attrs).to include(:title) }
+    it { expect(described_class).to respond_to(:strip_attributes) }
+    it { expect(described_class.strip_attrs).to include(:title) }
   end
 
   describe "#strip_attributes" do

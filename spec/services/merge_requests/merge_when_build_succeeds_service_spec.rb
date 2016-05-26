@@ -12,7 +12,7 @@ describe MergeRequests::MergeWhenBuildSucceedsService do
 
   let(:project) { create(:project) }
   let(:ci_commit) { create(:ci_commit_with_one_job, ref: mr_merge_if_green_enabled.source_branch, project: project) }
-  let(:service) { MergeRequests::MergeWhenBuildSucceedsService.new(project, user, commit_message: 'Awesome message') }
+  let(:service) { described_class.new(project, user, commit_message: 'Awesome message') }
 
   describe "#execute" do
     context 'first time enabling' do
@@ -35,7 +35,7 @@ describe MergeRequests::MergeWhenBuildSucceedsService do
     end
 
     context 'already approved' do
-      let(:service) { MergeRequests::MergeWhenBuildSucceedsService.new(project, user, new_key: true) }
+      let(:service) { described_class.new(project, user, new_key: true) }
       let(:build)   { create(:ci_build, ref: mr_merge_if_green_enabled.source_branch) }
 
       before do

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Ci::Variable, models: true do
-  subject { Ci::Variable.new }
+  subject { described_class.new }
 
   let(:secret_value) { 'secret' }
 

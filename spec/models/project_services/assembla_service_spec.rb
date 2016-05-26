@@ -31,7 +31,7 @@ describe AssemblaService, models: true do
     let(:project) { create(:project) }
 
     before do
-      @assembla_service = AssemblaService.new
+      @assembla_service = described_class.new
       allow(@assembla_service).to receive_messages(
         project_id: project.id,
         project: project,

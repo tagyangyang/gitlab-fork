@@ -13,7 +13,7 @@ describe MergeRequests::MergeService, services: true do
 
   describe :execute do
     context 'valid params' do
-      let(:service) { MergeRequests::MergeService.new(project, user, commit_message: 'Awesome message') }
+      let(:service) { described_class.new(project, user, commit_message: 'Awesome message') }
 
       before do
         allow(service).to receive(:execute_hooks)
@@ -42,7 +42,7 @@ describe MergeRequests::MergeService, services: true do
       let(:service) do
         merge_request.merge_params['force_remove_source_branch'] = '1'
         merge_request.save!
-        MergeRequests::MergeService.new(project, user, commit_message: 'Awesome message')
+        described_class.new(project, user, commit_message: 'Awesome message')
       end
 
       it 'removes the source branch' do
@@ -54,7 +54,7 @@ describe MergeRequests::MergeService, services: true do
     end
 
     context "error handling" do
-      let(:service) { MergeRequests::MergeService.new(project, user, commit_message: 'Awesome message') }
+      let(:service) { described_class.new(project, user, commit_message: 'Awesome message') }
 
       it 'saves error if there is an exception' do
         allow(service).to receive(:repository).and_raise("error")

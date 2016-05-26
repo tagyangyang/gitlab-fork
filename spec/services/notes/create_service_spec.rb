@@ -15,7 +15,7 @@ describe Notes::CreateService, services: true do
           noteable_id: issue.id
         }
         
-        @note = Notes::CreateService.new(project, user, opts).execute
+        @note = described_class.new(project, user, opts).execute
       end
 
       it { expect(@note).to be_valid }
@@ -35,7 +35,7 @@ describe Notes::CreateService, services: true do
         noteable_id: issue.id
       }
 
-      @note = Notes::CreateService.new(project, user, opts).execute
+      @note = described_class.new(project, user, opts).execute
 
       expect(@note).to be_valid
       expect(@note.note).to eq('smile')
@@ -49,7 +49,7 @@ describe Notes::CreateService, services: true do
         noteable_id: issue.id
       }
 
-      @note = Notes::CreateService.new(project, user, opts).execute
+      @note = described_class.new(project, user, opts).execute
 
       expect(@note).to be_valid
       expect(@note.note).to eq(opts[:note])

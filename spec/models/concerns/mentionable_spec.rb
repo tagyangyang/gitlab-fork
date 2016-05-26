@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Mentionable do
-  include Mentionable
+  include described_class
 
   def author
     nil

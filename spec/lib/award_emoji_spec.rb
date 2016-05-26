@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe AwardEmoji do
   describe '.urls' do
-    subject { AwardEmoji.urls }
+    subject { described_class.urls }
 
     it { is_expected.to be_an_instance_of(Array) }
     it { is_expected.not_to be_empty }
@@ -19,7 +19,7 @@ describe AwardEmoji do
 
   describe '.emoji_by_category' do
     it "only contains known categories" do
-      undefined_categories = AwardEmoji.emoji_by_category.keys - AwardEmoji::CATEGORIES.keys
+      undefined_categories = described_class.emoji_by_category.keys - AwardEmoji::CATEGORIES.keys
       expect(undefined_categories).to be_empty
     end
   end

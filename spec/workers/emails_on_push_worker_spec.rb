@@ -9,7 +9,7 @@ describe EmailsOnPushWorker do
   let(:recipients) { user.email }
   let(:perform) { subject.perform(project.id, recipients, data.stringify_keys) }
 
-  subject { EmailsOnPushWorker.new }
+  subject { described_class.new }
 
   describe "#perform" do
     context "when there are no errors in sending" do

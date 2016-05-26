@@ -8,7 +8,7 @@ describe TestHookService, services: true do
   describe :execute do
     it "should execute successfully" do
       stub_request(:post, hook.url).to_return(status: 200)
-      expect(TestHookService.new.execute(hook, user)).to be_truthy
+      expect(described_class.new.execute(hook, user)).to be_truthy
     end
   end
 end

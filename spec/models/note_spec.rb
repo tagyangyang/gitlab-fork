@@ -120,13 +120,13 @@ describe Note, models: true do
     end
 
     it "returns grouped hash of notes" do
-      expect(Note.grouped_awards.keys.size).to eq(3)
-      expect(Note.grouped_awards["smile"]).to match_array(Note.all)
+      expect(described_class.grouped_awards.keys.size).to eq(3)
+      expect(described_class.grouped_awards["smile"]).to match_array(described_class.all)
     end
 
     it "returns thumbsup and thumbsdown always" do
-      expect(Note.grouped_awards["thumbsup"]).to match_array(Note.none)
-      expect(Note.grouped_awards["thumbsdown"]).to match_array(Note.none)
+      expect(described_class.grouped_awards["thumbsup"]).to match_array(described_class.none)
+      expect(described_class.grouped_awards["thumbsdown"]).to match_array(described_class.none)
     end
   end
 

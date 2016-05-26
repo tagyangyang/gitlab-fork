@@ -7,7 +7,7 @@ describe MergeRequests::AddTodoWhenBuildFailsService do
   let(:project) { create(:project) }
   let(:sha) { '1234567890abcdef1234567890abcdef12345678' }
   let(:ci_commit) { create(:ci_commit_with_one_job, ref: merge_request.source_branch, project: project, sha: sha) }
-  let(:service) { MergeRequests::AddTodoWhenBuildFailsService.new(project, user, commit_message: 'Awesome message') }
+  let(:service) { described_class.new(project, user, commit_message: 'Awesome message') }
   let(:todo_service) { TodoService.new }
 
   let(:merge_request) do

@@ -14,7 +14,7 @@ describe MergeRequests::CloseService, services: true do
 
   describe :execute do
     context 'valid params' do
-      let(:service) { MergeRequests::CloseService.new(project, user, {}) }
+      let(:service) { described_class.new(project, user, {}) }
 
       before do
         allow(service).to receive(:execute_hooks)

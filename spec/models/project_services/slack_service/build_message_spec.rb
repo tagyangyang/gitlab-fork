@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe SlackService::BuildMessage do
-  subject { SlackService::BuildMessage.new(args) }
+  subject { described_class.new(args) }
 
   let(:args) do
     {

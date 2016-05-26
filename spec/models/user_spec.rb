@@ -299,50 +299,50 @@ describe User, models: true do
     let(:user) { double }
 
     it 'filters by active users by default' do
-      expect(User).to receive(:active).and_return([user])
+      expect(described_class).to receive(:active).and_return([user])
 
-      expect(User.filter(nil)).to include user
+      expect(described_class.filter(nil)).to include user
     end
 
     it 'filters by admins' do
-      expect(User).to receive(:admins).and_return([user])
+      expect(described_class).to receive(:admins).and_return([user])
 
-      expect(User.filter('admins')).to include user
+      expect(described_class.filter('admins')).to include user
     end
 
     it 'filters by blocked' do
-      expect(User).to receive(:blocked).and_return([user])
+      expect(described_class).to receive(:blocked).and_return([user])
 
-      expect(User.filter('blocked')).to include user
+      expect(described_class.filter('blocked')).to include user
     end
 
     it 'filters by two_factor_disabled' do
-      expect(User).to receive(:without_two_factor).and_return([user])
+      expect(described_class).to receive(:without_two_factor).and_return([user])
 
-      expect(User.filter('two_factor_disabled')).to include user
+      expect(described_class.filter('two_factor_disabled')).to include user
     end
 
     it 'filters by two_factor_enabled' do
-      expect(User).to receive(:with_two_factor).and_return([user])
+      expect(described_class).to receive(:with_two_factor).and_return([user])
 
-      expect(User.filter('two_factor_enabled')).to include user
+      expect(described_class.filter('two_factor_enabled')).to include user
     end
 
     it 'filters by wop' do
-      expect(User).to receive(:without_projects).and_return([user])
+      expect(described_class).to receive(:without_projects).and_return([user])
 
-      expect(User.filter('wop')).to include user
+      expect(described_class.filter('wop')).to include user
     end
   end
 
   describe :not_in_project do
     before do
-      User.delete_all
+      described_class.delete_all
       @user = create :user
       @project = create :project
     end
 
-    it { expect(User.not_in_project(@project)).to include(@user, @project.owner) }
+    it { expect(described_class.not_in_project(@project)).to include(@user, @project.owner) }
   end
 
   describe 'user creation' do
@@ -357,7 +357,7 @@ describe User, models: true do
     end
 
     describe 'with defaults' do
-      let(:user) { User.new }
+      let(:user) { described_class.new }
 
       it "should apply defaults to user" do
         expect(user.projects_limit).to eq(Gitlab.config.gitlab.default_projects_limit)
@@ -368,7 +368,7 @@ describe User, models: true do
     end
 
     describe 'with default overrides' do
-      let(:user) { User.new(projects_limit: 123, can_create_group: false, can_create_team: true, theme_id: 1) }
+      let(:user) { described_class.new(projects_limit: 123, can_create_group: false, can_create_team: true, theme_id: 1) }
 
       it "should apply defaults to user" do
         expect(user.projects_limit).to eq(123)
@@ -382,18 +382,18 @@ describe User, models: true do
     it 'finds by primary email' do
       user = create(:user, email: 'foo@example.com')
 
-      expect(User.find_by_any_email(user.email)).to eq user
+      expect(described_class.find_by_any_email(user.email)).to eq user
     end
 
     it 'finds by secondary email' do
       email = create(:email, email: 'foo@example.com')
       user  = email.user
 
-      expect(User.find_by_any_email(email.email)).to eq user
+      expect(described_class.find_by_any_email(email.email)).to eq user
     end
 
     it 'returns nil when nothing found' do
-      expect(User.find_by_any_email('')).to be_nil
+      expect(described_class.find_by_any_email('')).to be_nil
     end
   end
 
@@ -441,10 +441,10 @@ describe User, models: true do
     let(:user1) { create(:user, username: 'foo') }
 
     it "should get the correct user" do
-      expect(User.by_username_or_id(user1.id)).to eq(user1)
-      expect(User.by_username_or_id('foo')).to eq(user1)
-      expect(User.by_username_or_id(-1)).to be_nil
-      expect(User.by_username_or_id('bar')).to be_nil
+      expect(described_class.by_username_or_id(user1.id)).to eq(user1)
+      expect(described_class.by_username_or_id('foo')).to eq(user1)
+      expect(described_class.by_username_or_id(-1)).to be_nil
+      expect(described_class.by_username_or_id('bar')).to be_nil
     end
   end
 
@@ -453,12 +453,12 @@ describe User, models: true do
     let!(:user) { create(:user, username: username) }
 
     it 'should get the correct user' do
-      expect(User.by_login(user.email.upcase)).to eq user
-      expect(User.by_login(user.email)).to eq user
-      expect(User.by_login(username.downcase)).to eq user
-      expect(User.by_login(username)).to eq user
-      expect(User.by_login(nil)).to be_nil
-      expect(User.by_login('')).to be_nil
+      expect(described_class.by_login(user.email.upcase)).to eq user
+      expect(described_class.by_login(user.email)).to eq user
+      expect(described_class.by_login(username.downcase)).to eq user
+      expect(described_class.by_login(username)).to eq user
+      expect(described_class.by_login(nil)).to be_nil
+      expect(described_class.by_login('')).to be_nil
     end
   end
 
@@ -500,7 +500,7 @@ describe User, models: true do
   end
 
   describe :requires_ldap_check? do
-    let(:user) { User.new }
+    let(:user) { described_class.new }
 
     it 'is false when LDAP is disabled' do
       # Create a condition which would otherwise cause 'true' to be returned
@@ -659,29 +659,29 @@ describe User, models: true do
 
   describe "#sort" do
     before do
-      User.delete_all
+      described_class.delete_all
       @user = create :user, created_at: Date.today, last_sign_in_at: Date.today, name: 'Alpha'
       @user1 = create :user, created_at: Date.today - 1, last_sign_in_at: Date.today - 1, name: 'Omega'
     end
 
     it "sorts users by the recent sign-in time" do
-      expect(User.sort('recent_sign_in').first).to eq(@user)
+      expect(described_class.sort('recent_sign_in').first).to eq(@user)
     end
 
     it "sorts users by the oldest sign-in time" do
-      expect(User.sort('oldest_sign_in').first).to eq(@user1)
+      expect(described_class.sort('oldest_sign_in').first).to eq(@user1)
     end
 
     it "sorts users in descending order by their creation time" do
-      expect(User.sort('created_desc').first).to eq(@user)
+      expect(described_class.sort('created_desc').first).to eq(@user)
     end
 
     it "sorts users in ascending order by their creation time" do
-      expect(User.sort('created_asc').first).to eq(@user1)
+      expect(described_class.sort('created_asc').first).to eq(@user1)
     end
 
     it "sorts users by id in descending order when nil is passed" do
-      expect(User.sort(nil).first).to eq(@user1)
+      expect(described_class.sort(nil).first).to eq(@user1)
     end
   end
 

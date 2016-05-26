@@ -57,7 +57,7 @@ describe Event, models: true do
     let(:confidential_issue) { create(:issue, :confidential, project: project, author: author, assignee: assignee) }
     let(:note_on_issue) { create(:note_on_issue, noteable: issue, project: project) }
     let(:note_on_confidential_issue) { create(:note_on_issue, noteable: confidential_issue, project: project) }
-    let(:event) { Event.new(project: project, target: target, author_id: author.id) }
+    let(:event) { described_class.new(project: project, target: target, author_id: author.id) }
 
     before do
       project.team << [member, :developer]
@@ -113,13 +113,13 @@ describe Event, models: true do
     let!(:event2) { create(:closed_issue_event) }
 
     describe 'without an explicit limit' do
-      subject { Event.limit_recent }
+      subject { described_class.limit_recent }
 
       it { is_expected.to eq([event2, event1]) }
     end
 
     describe 'with an explicit limit' do
-      subject { Event.limit_recent(1) }
+      subject { described_class.limit_recent(1) }
 
       it { is_expected.to eq([event2]) }
     end

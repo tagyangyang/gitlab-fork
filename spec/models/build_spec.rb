@@ -13,9 +13,9 @@ describe Ci::Build, models: true do
     let(:first) { FactoryGirl.create :ci_build, commit: commit, status: 'pending', created_at: Date.yesterday }
     let(:second) { FactoryGirl.create :ci_build, commit: commit, status: 'pending' }
     before { first; second }
-    subject { Ci::Build.first_pending }
+    subject { described_class.first_pending }
 
-    it { is_expected.to be_a(Ci::Build) }
+    it { is_expected.to be_a(described_class) }
     it('returns with the first pending build') { is_expected.to eq(first) }
   end
 
@@ -24,12 +24,12 @@ describe Ci::Build, models: true do
       build.status = 'success'
       build.save
     end
-    let(:create_from_build) { Ci::Build.create_from build }
+    let(:create_from_build) { described_class.create_from build }
 
     it 'there should be a pending task' do
-      expect(Ci::Build.pending.count(:all)).to eq 0
+      expect(described_class.pending.count(:all)).to eq 0
       create_from_build
-      expect(Ci::Build.pending.count(:all)).to be > 0
+      expect(described_class.pending.count(:all)).to be > 0
     end
   end
 
@@ -349,7 +349,7 @@ describe Ci::Build, models: true do
       end
 
       it 'that cannot handle build' do
-        expect_any_instance_of(Ci::Build).to receive(:can_be_served?).and_return(false)
+        expect_any_instance_of(described_class).to receive(:can_be_served?).and_return(false)
         is_expected.to be_falsey
       end
 
@@ -447,7 +447,7 @@ describe Ci::Build, models: true do
     end
 
     it 'to have retried builds instead the original ones' do
-      retried_rspec = Ci::Build.retry(rspec_test)
+      retried_rspec = described_class.retry(rspec_test)
       expect(staging.depends_on_builds.map(&:id)).to contain_exactly(build.id, retried_rspec.id, rubocop_test.id)
     end
   end

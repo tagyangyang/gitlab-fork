@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Gitlab::Workhorse, lib: true do
   let(:project) { create(:project) }
-  let(:subject) { Gitlab::Workhorse }
+  let(:subject) { described_class }
 
   describe "#send_git_archive" do
     context "when the repository doesn't have an archive file path" do

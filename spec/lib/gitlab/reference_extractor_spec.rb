@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Gitlab::ReferenceExtractor, lib: true do
   let(:project) { create(:project) }
 
-  subject { Gitlab::ReferenceExtractor.new(project, project.creator) }
+  subject { described_class.new(project, project.creator) }
 
   it 'accesses valid user objects' do
     @u_foo = create(:user, username: 'foo')

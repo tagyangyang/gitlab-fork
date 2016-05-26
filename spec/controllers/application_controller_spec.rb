@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ApplicationController do
   describe '#check_password_expiration' do
     let(:user) { create(:user) }
-    let(:controller) { ApplicationController.new }
+    let(:controller) { described_class.new }
 
     it 'should redirect if the user is over their password expiry' do
       user.password_expires_at = Time.new(2002)

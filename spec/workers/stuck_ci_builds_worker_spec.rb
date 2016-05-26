@@ -16,13 +16,13 @@ describe StuckCiBuildsWorker do
 
       it 'gets dropped if it was updated over 2 days ago' do
         build.update!(updated_at: 2.days.ago)
-        StuckCiBuildsWorker.new.perform
+        described_class.new.perform
         is_expected.to eq('failed')
       end
 
       it "is still #{status}" do
         build.update!(updated_at: 1.minute.ago)
-        StuckCiBuildsWorker.new.perform
+        described_class.new.perform
         is_expected.to eq(status)
       end
     end
@@ -36,7 +36,7 @@ describe StuckCiBuildsWorker do
 
       it "is still #{status}" do
         build.update!(updated_at: 2.days.ago)
-        StuckCiBuildsWorker.new.perform
+        described_class.new.perform
         is_expected.to eq(status)
       end
     end

@@ -260,15 +260,15 @@ describe Issue, "Issuable" do
     end
 
     it 'finds the correct issue containing just enhancement label' do
-      expect(Issue.with_label(enhancement.title)).to match_array([issue2])
+      expect(described_class.with_label(enhancement.title)).to match_array([issue2])
     end
 
     it 'finds the correct issues containing the same label' do
-      expect(Issue.with_label(bug.title)).to match_array([issue1, issue2])
+      expect(described_class.with_label(bug.title)).to match_array([issue1, issue2])
     end
 
     it 'finds the correct issues containing only both labels' do
-      expect(Issue.with_label([bug.title, enhancement.title])).to match_array([issue2])
+      expect(described_class.with_label([bug.title, enhancement.title])).to match_array([issue2])
     end
   end
 end

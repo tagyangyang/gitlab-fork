@@ -9,7 +9,7 @@ describe DeleteUserService, services: true do
 
     context 'no options are given' do
       it 'deletes the user' do
-        DeleteUserService.new(current_user).execute(user)
+        described_class.new(current_user).execute(user)
 
         expect { User.find(user.id)       }.to  raise_error(ActiveRecord::RecordNotFound)
       end
@@ -17,7 +17,7 @@ describe DeleteUserService, services: true do
       it 'will delete the project in the near future' do
         expect_any_instance_of(Projects::DestroyService).to receive(:pending_delete!).once
 
-        DeleteUserService.new(current_user).execute(user)
+        described_class.new(current_user).execute(user)
       end
     end
 
@@ -28,7 +28,7 @@ describe DeleteUserService, services: true do
 
       before do
         solo_owned.group_members = [member]
-        DeleteUserService.new(current_user).execute(user)
+        described_class.new(current_user).execute(user)
       end
 
       it 'does not delete the user' do
@@ -43,7 +43,7 @@ describe DeleteUserService, services: true do
 
       before do
         solo_owned.group_members = [member]
-        DeleteUserService.new(current_user).execute(user, delete_solo_owned_groups: true)
+        described_class.new(current_user).execute(user, delete_solo_owned_groups: true)
       end
 
       it 'deletes solo owned groups' do

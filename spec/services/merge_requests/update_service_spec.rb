@@ -44,7 +44,7 @@ describe MergeRequests::UpdateService, services: true do
         }
       end
 
-      let(:service) { MergeRequests::UpdateService.new(project, user, opts) }
+      let(:service) { described_class.new(project, user, opts) }
 
       before do
         allow(service).to receive(:execute_hooks)
@@ -192,7 +192,7 @@ describe MergeRequests::UpdateService, services: true do
         opts = { label_ids: [label.id] }
 
         perform_enqueued_jobs do
-          @merge_request = MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+          @merge_request = described_class.new(project, user, opts).execute(merge_request)
         end
 
         should_email(subscriber)
@@ -206,7 +206,7 @@ describe MergeRequests::UpdateService, services: true do
           opts = { label_ids: [label.id, label2.id] }
 
           perform_enqueued_jobs do
-            @merge_request = MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+            @merge_request = described_class.new(project, user, opts).execute(merge_request)
           end
 
           should_not_email(subscriber)
@@ -217,7 +217,7 @@ describe MergeRequests::UpdateService, services: true do
           opts = { label_ids: [label2.id] }
 
           perform_enqueued_jobs do
-            @merge_request = MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+            @merge_request = described_class.new(project, user, opts).execute(merge_request)
           end
 
           should_not_email(subscriber)

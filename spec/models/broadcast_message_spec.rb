@@ -26,19 +26,19 @@ describe BroadcastMessage, models: true do
     it "should return last message if time match" do
       message = create(:broadcast_message)
 
-      expect(BroadcastMessage.current).to eq message
+      expect(described_class.current).to eq message
     end
 
     it "should return nil if time not come" do
       create(:broadcast_message, :future)
 
-      expect(BroadcastMessage.current).to be_nil
+      expect(described_class.current).to be_nil
     end
 
     it "should return nil if time has passed" do
       create(:broadcast_message, :expired)
 
-      expect(BroadcastMessage.current).to be_nil
+      expect(described_class.current).to be_nil
     end
   end
 

@@ -46,7 +46,7 @@ describe GitlabIssueTrackerService, models: true do
 
     context 'with absolute urls' do
       before do
-        GitlabIssueTrackerService.default_url_options[:script_name] = "/gitlab/root"
+        described_class.default_url_options[:script_name] = "/gitlab/root"
         @service = project.create_gitlab_issue_tracker_service(active: true)
       end
 
@@ -63,7 +63,7 @@ describe GitlabIssueTrackerService, models: true do
 
     context 'with relative urls' do
       before do
-        GitlabIssueTrackerService.default_url_options[:script_name] = "/gitlab/root"
+        described_class.default_url_options[:script_name] = "/gitlab/root"
         @service = project.create_gitlab_issue_tracker_service(active: true)
       end
 

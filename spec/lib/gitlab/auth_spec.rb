@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Gitlab::Auth, lib: true do
-  let(:gl_auth) { Gitlab::Auth.new }
+  let(:gl_auth) { described_class.new }
 
   describe :find do
     let!(:user) do

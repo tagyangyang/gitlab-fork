@@ -48,7 +48,7 @@ describe BuildkiteService, models: true do
       @project = Project.new
       allow(@project).to receive(:default_branch).and_return('default-brancho')
 
-      @service = BuildkiteService.new
+      @service = described_class.new
       allow(@service).to receive_messages(
         project: @project,
         service_hook: true,

@@ -6,7 +6,7 @@ describe Gitlab::Diff::Parser, lib: true do
   let(:project) { create(:project) }
   let(:commit) { project.commit(sample_commit.id) }
   let(:diff) { commit.diffs.first }
-  let(:parser) { Gitlab::Diff::Parser.new }
+  let(:parser) { described_class.new }
 
   describe :parse do
     let(:diff) do

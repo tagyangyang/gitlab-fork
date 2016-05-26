@@ -16,7 +16,7 @@ describe Issues::CloseService, services: true do
     context "valid params" do
       before do
         perform_enqueued_jobs do
-          @issue = Issues::CloseService.new(project, user, {}).execute(issue)
+          @issue = described_class.new(project, user, {}).execute(issue)
         end
       end
 
@@ -42,7 +42,7 @@ describe Issues::CloseService, services: true do
     context "external issue tracker" do
       before do
         allow(project).to receive(:default_issues_tracker?).and_return(false)
-        @issue = Issues::CloseService.new(project, user, {}).execute(issue)
+        @issue = described_class.new(project, user, {}).execute(issue)
       end
 
       it { expect(@issue).to be_valid }

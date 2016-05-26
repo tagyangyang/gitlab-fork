@@ -7,7 +7,7 @@ RSpec.describe NotificationSetting, type: :model do
   end
 
   describe "Validation" do
-    subject { NotificationSetting.new(source_id: 1, source_type: 'Project') }
+    subject { described_class.new(source_id: 1, source_type: 'Project') }
 
     it { is_expected.to validate_presence_of(:user) }
     it { is_expected.to validate_presence_of(:source) }

@@ -5,14 +5,14 @@ describe WikiPage, models: true do
   let(:user) { project.owner }
   let(:wiki) { ProjectWiki.new(project, user) }
 
-  subject { WikiPage.new(wiki) }
+  subject { described_class.new(wiki) }
 
   describe "#initialize" do
     context "when initialized with an existing gollum page" do
       before do
         create_page("test page", "test content")
         @page = wiki.wiki.paged("test page")
-        @wiki_page = WikiPage.new(wiki, @page, true)
+        @wiki_page = described_class.new(wiki, @page, true)
       end
 
       it "sets the slug attribute" do

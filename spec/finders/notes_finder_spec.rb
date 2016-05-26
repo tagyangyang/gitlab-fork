@@ -20,18 +20,18 @@ describe NotesFinder do
     end
 
     it 'should find all notes' do
-      notes = NotesFinder.new.execute(project, user, params)
+      notes = described_class.new.execute(project, user, params)
       expect(notes.size).to eq(2)
     end
 
     it 'should raise an exception for an invalid target_type' do
       params.merge!(target_type: 'invalid')
-      expect { NotesFinder.new.execute(project, user, params) }.to raise_error('invalid target_type')
+      expect { described_class.new.execute(project, user, params) }.to raise_error('invalid target_type')
     end
 
     it 'filters out old notes' do
       note2.update_attribute(:updated_at, 2.hours.ago)
-      notes = NotesFinder.new.execute(project, user, params)
+      notes = described_class.new.execute(project, user, params)
       expect(notes).to eq([note1])
     end
   end

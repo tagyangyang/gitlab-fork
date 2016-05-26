@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe NotificationService, services: true do
-  let(:notification) { NotificationService.new }
+  let(:notification) { described_class.new }
 
   around(:each) do |example|
     perform_enqueued_jobs do

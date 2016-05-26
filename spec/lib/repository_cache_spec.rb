@@ -2,7 +2,7 @@ require_relative '../../lib/repository_cache'
 
 describe RepositoryCache, lib: true do
   let(:backend) { double('backend').as_null_object }
-  let(:cache) { RepositoryCache.new('example', backend) }
+  let(:cache) { described_class.new('example', backend) }
 
   describe '#cache_key' do
     it 'includes the namespace' do

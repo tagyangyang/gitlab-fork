@@ -61,7 +61,7 @@ describe ProjectMember, models: true do
       @user_1 = create :user
       @user_2 = create :user
 
-      ProjectMember.add_users_into_projects(
+      described_class.add_users_into_projects(
         [@project_1.id, @project_2.id],
         [@user_1.id, @user_2.id],
         ProjectMember::MASTER
@@ -87,7 +87,7 @@ describe ProjectMember, models: true do
       @project_1.team << [ @user_1, :developer]
       @project_2.team << [ @user_2, :reporter]
 
-      ProjectMember.truncate_teams([@project_1.id, @project_2.id])
+      described_class.truncate_teams([@project_1.id, @project_2.id])
     end
 
     it { expect(@project_1.users).to be_empty }

@@ -25,7 +25,7 @@ describe IssuesFinder do
   describe '#execute' do
     let(:search_user) { user }
     let(:params) { {} }
-    let(:issues) { IssuesFinder.new(search_user, params.merge(scope: scope, state: 'opened')).execute }
+    let(:issues) { described_class.new(search_user, params.merge(scope: scope, state: 'opened')).execute }
 
     context 'scope: all' do
       let(:scope) { 'all' }

@@ -56,7 +56,7 @@ describe JiraService, models: true do
     let(:merge_request) { create(:merge_request) }
 
     before do
-      @jira_service = JiraService.new
+      @jira_service = described_class.new
       allow(@jira_service).to receive_messages(
         project_id: project.id,
         project: project,
@@ -96,7 +96,7 @@ describe JiraService, models: true do
 
     context "when a password was previously set" do
       before do
-        @jira_service = JiraService.create!(
+        @jira_service = described_class.create!(
           project: create(:project),
           properties: {
             api_url: 'http://jira.example.com/rest/api/2',
@@ -136,7 +136,7 @@ describe JiraService, models: true do
 
     context "when no password was previously set" do
       before do
-        @jira_service = JiraService.create(
+        @jira_service = described_class.create(
           project: create(:project),
           properties: {
             api_url: 'http://jira.example.com/rest/api/2',

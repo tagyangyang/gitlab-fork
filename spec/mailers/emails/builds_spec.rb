@@ -29,7 +29,7 @@ describe Notify do
     end
 
     describe 'build success' do
-      subject { Notify.build_success_email(build.id, 'wow@example.com') }
+      subject { described_class.build_success_email(build.id, 'wow@example.com') }
       before { build.success }
 
       it_behaves_like 'build email'
@@ -46,7 +46,7 @@ describe Notify do
     end
 
     describe 'build fail' do
-      subject { Notify.build_fail_email(build.id, 'wow@example.com') }
+      subject { described_class.build_fail_email(build.id, 'wow@example.com') }
       before { build.drop }
 
       it_behaves_like 'build email'

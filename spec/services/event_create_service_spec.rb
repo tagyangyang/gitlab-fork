@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe EventCreateService, services: true do
-  let(:service) { EventCreateService.new }
+  let(:service) { described_class.new }
 
   describe 'Issues' do
     describe :open_issue do

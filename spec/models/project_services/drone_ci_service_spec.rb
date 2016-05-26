@@ -44,7 +44,7 @@ describe DroneCiService, models: true do
   end
 
   shared_context :drone_ci_service do
-    let(:drone)      { DroneCiService.new }
+    let(:drone)      { described_class.new }
     let(:project)    { create(:project, name: 'project') }
     let(:path)       { "#{project.namespace.path}/#{project.path}" }
     let(:drone_url)  { 'http://drone.example.com' }

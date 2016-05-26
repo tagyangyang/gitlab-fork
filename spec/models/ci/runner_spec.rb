@@ -48,7 +48,7 @@ describe Ci::Runner, models: true do
   end
 
   describe :online do
-    subject { Ci::Runner.online }
+    subject { described_class.online }
 
     before do
       @runner1 = FactoryGirl.create(:ci_runner, :shared, contacted_at: 1.year.ago)

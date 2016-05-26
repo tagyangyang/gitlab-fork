@@ -17,7 +17,7 @@ describe MergeRequests::CreateService, services: true do
         }
       end
 
-      let(:service) { MergeRequests::CreateService.new(project, user, opts) }
+      let(:service) { described_class.new(project, user, opts) }
 
       before do
         project.team << [user, :master]

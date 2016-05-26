@@ -25,7 +25,7 @@ describe Issues::BulkUpdateService, services: true do
     end
 
     it do
-      result = Issues::BulkUpdateService.new(@project, @user, @params).execute
+      result = described_class.new(@project, @user, @params).execute
       expect(result[:success]).to be_truthy
       expect(result[:count]).to eq(@issues.count)
 
@@ -48,7 +48,7 @@ describe Issues::BulkUpdateService, services: true do
     end
 
     it do
-      result = Issues::BulkUpdateService.new(@project, @user, @params).execute
+      result = described_class.new(@project, @user, @params).execute
       expect(result[:success]).to be_truthy
       expect(result[:count]).to eq(@issues.count)
 
@@ -69,7 +69,7 @@ describe Issues::BulkUpdateService, services: true do
     end
 
     it do
-      result = Issues::BulkUpdateService.new(@project, @user, @params).execute
+      result = described_class.new(@project, @user, @params).execute
       expect(result[:success]).to be_truthy
       expect(result[:count]).to eq(1)
 
@@ -82,7 +82,7 @@ describe Issues::BulkUpdateService, services: true do
 
       @params[:assignee_id] = -1
 
-      Issues::BulkUpdateService.new(@project, @user, @params).execute
+      described_class.new(@project, @user, @params).execute
       expect(@project.issues.first.assignee).to be_nil
     end
 
@@ -92,7 +92,7 @@ describe Issues::BulkUpdateService, services: true do
 
       @params[:assignee_id] = ''
 
-      Issues::BulkUpdateService.new(@project, @user, @params).execute
+      described_class.new(@project, @user, @params).execute
       expect(@project.issues.first.assignee).not_to be_nil
     end
   end
@@ -108,7 +108,7 @@ describe Issues::BulkUpdateService, services: true do
     end
 
     it do
-      result = Issues::BulkUpdateService.new(@project, @user, @params).execute
+      result = described_class.new(@project, @user, @params).execute
       expect(result[:success]).to be_truthy
       expect(result[:count]).to eq(1)
 

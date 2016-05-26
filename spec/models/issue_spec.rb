@@ -49,7 +49,7 @@ describe Issue, models: true do
       user = create(:user)
       create_list(:issue, 2, assignee: user)
 
-      expect(Issue.open_for(user).count).to eq 2
+      expect(described_class.open_for(user).count).to eq 2
     end
   end
 

@@ -81,13 +81,13 @@ describe WebHook, models: true do
     end
 
     it "catches exceptions" do
-      expect(WebHook).to receive(:post).and_raise("Some HTTP Post error")
+      expect(described_class).to receive(:post).and_raise("Some HTTP Post error")
 
       expect { project_hook.execute(@data, 'push_hooks') }.to raise_error(RuntimeError)
     end
 
     it "handles SSL exceptions" do
-      expect(WebHook).to receive(:post).and_raise(OpenSSL::SSL::SSLError.new('SSL error'))
+      expect(described_class).to receive(:post).and_raise(OpenSSL::SSL::SSLError.new('SSL error'))
 
       expect(project_hook.execute(@data, 'push_hooks')).to eq([false, 'SSL error'])
     end

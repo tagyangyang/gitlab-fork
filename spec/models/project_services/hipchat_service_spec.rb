@@ -41,7 +41,7 @@ describe HipchatService, models: true do
   end
 
   describe "Execute" do
-    let(:hipchat) { HipchatService.new }
+    let(:hipchat) { described_class.new }
     let(:user)    { create(:user, username: 'username') }
     let(:project) { create(:project, name: 'project') }
     let(:api_url) { 'https://hipchat.example.com/v2/room/123456/notification?auth_token=verySecret' }

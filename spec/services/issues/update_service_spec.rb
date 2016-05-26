@@ -39,7 +39,7 @@ describe Issues::UpdateService, services: true do
         }
 
         perform_enqueued_jobs do
-          @issue = Issues::UpdateService.new(project, user, opts).execute(issue)
+          @issue = described_class.new(project, user, opts).execute(issue)
         end
 
         @issue.reload
@@ -175,7 +175,7 @@ describe Issues::UpdateService, services: true do
         opts = { label_ids: [label.id] }
 
         perform_enqueued_jobs do
-          @issue = Issues::UpdateService.new(project, user, opts).execute(issue)
+          @issue = described_class.new(project, user, opts).execute(issue)
         end
 
         should_email(subscriber)
@@ -189,7 +189,7 @@ describe Issues::UpdateService, services: true do
           opts = { label_ids: [label.id, label2.id] }
 
           perform_enqueued_jobs do
-            @issue = Issues::UpdateService.new(project, user, opts).execute(issue)
+            @issue = described_class.new(project, user, opts).execute(issue)
           end
 
           should_not_email(subscriber)
@@ -200,7 +200,7 @@ describe Issues::UpdateService, services: true do
           opts = { label_ids: [label2.id] }
 
           perform_enqueued_jobs do
-            @issue = Issues::UpdateService.new(project, user, opts).execute(issue)
+            @issue = described_class.new(project, user, opts).execute(issue)
           end
 
           should_not_email(subscriber)

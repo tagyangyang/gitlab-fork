@@ -8,7 +8,7 @@ describe Gitlab::Highlight, lib: true do
 
   describe '.highlight_lines' do
     let(:lines) do
-      Gitlab::Highlight.highlight_lines(project.repository, commit.id, 'files/ruby/popen.rb')
+      described_class.highlight_lines(project.repository, commit.id, 'files/ruby/popen.rb')
     end
 
     it 'should properly highlight all the lines' do

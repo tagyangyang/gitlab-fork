@@ -47,7 +47,7 @@ describe Gitlab::BitbucketImport::Importer, lib: true do
       import_data: ProjectImportData.new(credentials: data)
     )
   end
-  let(:importer) { Gitlab::BitbucketImport::Importer.new(project) }
+  let(:importer) { described_class.new(project) }
   let(:issues_statuses_sample_data) do
     {
       count: sample_issues_statuses.count,

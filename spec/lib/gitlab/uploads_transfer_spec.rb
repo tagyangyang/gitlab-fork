@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Gitlab::UploadsTransfer, lib: true do
   before do
     @root_dir = File.join(Rails.root, "public", "uploads")
-    @upload_transfer = Gitlab::UploadsTransfer.new
+    @upload_transfer = described_class.new
 
     @project_path_was = "test_project_was"
     @project_path = "test_project"
