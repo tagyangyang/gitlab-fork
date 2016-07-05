@@ -126,6 +126,10 @@ module LabelsHelper
     label.subscribed?(current_user) ? 'subscribed' : 'unsubscribed'
   end
 
+  def label_subscription_toggle_icon(label)
+    label.subscribed?(current_user) ? 'eye-slash' : 'eye'
+  end
+
   def label_subscription_toggle_button_text(label)
     label.subscribed?(current_user) ? 'Unsubscribe' : 'Subscribe'
   end

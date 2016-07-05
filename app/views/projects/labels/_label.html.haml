@@ -16,7 +16,7 @@
             = pluralize label.open_issues_count(current_user), 'open issue'
         - if current_user
           %li.label-subscription{ data: { url: toggle_subscription_namespace_project_label_path(@project.namespace, @project, label) } }
-            %a.js-subscribe-button.label-subscribe-button.subscription-status{ role: "button", href: "#", data: { toggle: "tooltip", status: label_subscription_status(label) } }
+            %a.js-subscribe-button.label-subscribe-button.subscription-status{ role: "button", href: "#", data: { toggle: "tooltip", status: label_subscription_status(label), original_title: label_subscription_toggle_button_text(label) } }
               %span= label_subscription_toggle_button_text(label)
         - if can? current_user, :admin_label, @project
           %li
@@ -32,9 +32,9 @@
 
     - if current_user
       .label-subscription.inline{ data: { url: toggle_subscription_namespace_project_label_path(@project.namespace, @project, label) } }
-        %button.js-subscribe-button.label-subscribe-button.btn.btn-transparent.btn-action.subscription-status{ type: "button", title: label_subscription_toggle_button_text(label), data: { toggle: "tooltip", status: label_subscription_status(label) } }
+        %button.js-subscribe-button.label-subscribe-button.btn.btn-transparent.btn-action.subscription-status.subscription-icon{ type: "button", title: label_subscription_toggle_button_text(label), data: { toggle: "tooltip", status: label_subscription_status(label), icon: label_subscription_toggle_icon(label), original_title: label_subscription_toggle_button_text(label) } }
           %span.sr-only= label_subscription_toggle_button_text(label)
-          = icon('eye', class: 'label-subscribe-button-icon')
+          = icon(label_subscription_toggle_icon(label), class: 'label-subscribe-button-icon')
           = icon('spinner spin', class: 'label-subscribe-button-loading')
 
     - if can? current_user, :admin_label, @project
