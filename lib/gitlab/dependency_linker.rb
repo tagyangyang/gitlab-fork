@@ -3,6 +3,7 @@ module Gitlab
     LINKERS = [
       GemfileLinker,
       GemspecLinker,
+      PackageJsonLinker,
     ]
 
     def self.link(blob_name, plain_text, highlighted_text)

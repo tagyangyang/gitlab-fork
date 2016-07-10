@@ -74,6 +74,50 @@ module Gitlab
         link_regex(/#{Regexp.union(method_names)}\s*[(=]?\s*['"](?<name>#{value})['"]/, &url_proc)
       end
 
+      # Links package names in a JSON key or values.
+      #
+      # Example:
+      #   link_json("name")
+      #   # Will link `package` in `"name": "package"`
+      #
+      #   link_json("name", "specific_package")
+      #   # Will link `specific_package` in `"name": "specific_package"`
+      #
+      #   link_json("name", /[^\/]+\/[^\/]+/)
+      #   # Will link `user/repo` in `"name": "user/repo"`, but not `"name": "package"`
+      #
+      #   link_json("specific_package", "1.0.1", package: :key)
+      #   # Will link `specific_package` in `"specific_package": "1.0.1"`
+      def link_json(key, value = nil, package: :value, &url_proc)
+        key =
+          case key
+          when String
+            Regexp.escape(key)
+          when nil
+            '[^"]+'
+          else
+            key
+          end
+
+        value =
+          case value
+          when String
+            Regexp.escape(value)
+          when nil
+            '[^"]+'
+          else
+            value
+          end
+
+        if package == :value
+          value = "(?<name>#{value})"
+        else
+          key = "(?<name>#{key})"
+        end
+
+        link_regex(/"#{key}":\s*"#{value}"/, &url_proc)
+      end
+
       # Links package names based on regex.
       #
       # Example:
