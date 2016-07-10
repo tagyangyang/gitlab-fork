@@ -4,6 +4,7 @@ module Gitlab
       GemfileLinker,
       GemspecLinker,
       PackageJsonLinker,
+      ComposerJsonLinker,
     ]
 
     def self.link(blob_name, plain_text, highlighted_text)
