@@ -51,7 +51,7 @@ module Gitlab
       #   link_method_call("gem", "specific_package")
       #   # Will link `specific_package` in `gem "specific_package"`
       #
-      #   link_method_call("github", /[^\/]+\/[^\/]+/)
+      #   link_method_call("github", /[^\/"]+\/[^\/"]+/)
       #   # Will link `user/repo` in `github "user/repo"`, but not `github "package"`
       #
       #   link_method_call(%w[add_dependency add_development_dependency])
