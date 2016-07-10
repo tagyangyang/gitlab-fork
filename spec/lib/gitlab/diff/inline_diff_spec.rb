@@ -3,17 +3,17 @@ require 'spec_helper'
 describe Gitlab::Diff::InlineDiff, lib: true do
   describe '.for_lines' do
     let(:diff) do
-      <<eos
- class Test
--  def initialize(test = true)
-+  def initialize(test = false)
-     @test = test
-   end
- end
-eos
+      <<-EOS.strip_heredoc
+         class Test
+        -  def initialize(test = true)
+        +  def initialize(test = false)
+             @test = test
+           end
+         end
+      EOS
     end
 
-    let(:subject) { described_class.for_lines(diff.lines) }
+    subject { described_class.for_lines(diff.lines) }
 
     it 'finds all inline diffs' do
       expect(subject[0]).to be_nil
@@ -28,7 +28,7 @@ eos
   describe "#inline_diffs" do
     let(:old_line) { "XXX def initialize(test = true)" }
     let(:new_line) { "YYY def initialize(test = false)" }
-    let(:subject) { described_class.new(old_line, new_line, offset: 3).inline_diffs }
+    subject { described_class.new(old_line, new_line, offset: 3).inline_diffs }
 
     it "finds the inline diff" do
       old_diffs, new_diffs = subject

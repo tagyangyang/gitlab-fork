@@ -10,7 +10,7 @@ describe Gitlab::Diff::Highlight, lib: true do
 
   describe '#highlight' do
     context "with a diff file" do
-      let(:subject) { Gitlab::Diff::Highlight.new(diff_file, repository: project.repository).highlight }
+      subject { Gitlab::Diff::Highlight.new(diff_file, repository: project.repository).highlight }
 
       it 'should return Gitlab::Diff::Line elements' do
         expect(subject.first).to be_an_instance_of(Gitlab::Diff::Line)
@@ -41,7 +41,7 @@ describe Gitlab::Diff::Highlight, lib: true do
     end
 
     context "with diff lines" do
-      let(:subject) { Gitlab::Diff::Highlight.new(diff_file.diff_lines, repository: project.repository).highlight }
+      subject { Gitlab::Diff::Highlight.new(diff_file.diff_lines, repository: project.repository).highlight }
 
       it 'should return Gitlab::Diff::Line elements' do
         expect(subject.first).to be_an_instance_of(Gitlab::Diff::Line)

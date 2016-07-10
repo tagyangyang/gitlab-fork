@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe Gitlab::Workhorse, lib: true do
   let(:project) { create(:project) }
-  let(:subject) { Gitlab::Workhorse }
 
   describe "#send_git_archive" do
     context "when the repository doesn't have an archive file path" do
@@ -11,7 +10,7 @@ describe Gitlab::Workhorse, lib: true do
       end
 
       it "raises an error" do
-        expect { subject.send_git_archive(project.repository, ref: "master", format: "zip") }.to raise_error(RuntimeError)
+        expect { described_class.send_git_archive(project.repository, ref: "master", format: "zip") }.to raise_error(RuntimeError)
       end
     end
   end

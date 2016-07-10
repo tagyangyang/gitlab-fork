@@ -212,7 +212,7 @@ describe Issue, models: true do
   end
 
   it_behaves_like 'a Taskable' do
-    let(:subject) { create :issue }
+    subject { create :issue }
   end
 
   describe "#to_branch_name" do

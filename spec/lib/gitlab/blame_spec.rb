@@ -7,7 +7,7 @@ describe Gitlab::Blame, lib: true do
   let(:blob) { project.repository.blob_at(commit.id, path) }
 
   describe "#groups" do
-    let(:subject) { described_class.new(blob, commit).groups(highlight: false) }
+    subject { described_class.new(blob, commit).groups(highlight: false) }
 
     it 'groups lines properly' do
       expect(subject.count).to eq(18)
