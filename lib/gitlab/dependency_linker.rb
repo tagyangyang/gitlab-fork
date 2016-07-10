@@ -2,6 +2,7 @@ module Gitlab
   module DependencyLinker
     LINKERS = [
       GemfileLinker,
+      GemspecLinker,
     ]
 
     def self.link(blob_name, plain_text, highlighted_text)

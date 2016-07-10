@@ -28,6 +28,10 @@ module Gitlab
         raise NotImplementedError
       end
 
+      def license_url(name)
+        "http://spdx.org/licenses/#{name}.html" if name =~ /[A-Za-z0-9.-]+/
+      end
+
       def package_link(name, url = package_url(name))
         return name unless url
 
