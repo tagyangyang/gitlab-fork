@@ -7,6 +7,7 @@ module Gitlab
       ComposerJsonLinker,
       PodfileLinker,
       PodspecLinker,
+      PodspecJsonLinker,
     ]
 
     def self.link(blob_name, plain_text, highlighted_text)
