@@ -54,7 +54,8 @@ module Banzai
         #
         # The final argument tells Rinku to link short URLs that don't include a
         # period (e.g., http://localhost:3000/)
-        rinku = Rinku.auto_link(html, :urls, options, IGNORE_PARENTS.to_a, 1)
+        mode = context[:autolink_emails] ? :all : :urls
+        rinku = Rinku.auto_link(html, mode, options, ignore_parents.to_a, 1)
 
         # Rinku returns a String, so parse it back to a Nokogiri::XML::Document
         # for further processing.
@@ -67,7 +68,7 @@ module Banzai
         search_text_nodes(doc).each do |node|
           content = node.to_html
 
-          next if has_ancestor?(node, IGNORE_PARENTS)
+          next if has_ancestor?(node, ignore_parents)
           next unless content.match(LINK_PATTERN)
 
           # If Rinku didn't link this, there's probably a good reason, so we'll
@@ -99,6 +100,14 @@ module Banzai
 
       def link_options
         @link_options ||= context[:link_attr] || {}
+      end
+
+      def ignore_parents
+        @ignore_parents ||= begin
+          parents = IGNORE_PARENTS
+          parents -= %w[code pre] if context[:autolink_in_code]
+          parents
+        end
       end
     end
   end

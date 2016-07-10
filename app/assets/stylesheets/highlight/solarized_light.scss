@@ -51,6 +51,11 @@
     background-color: #eee8d5 !important;
   }
 
+  // Links to URLs, emails, or dependencies
+  a {
+    color: #268bd2;
+  }
+
   /* Solarized Light
 
   For use with Jekyll and Pygments

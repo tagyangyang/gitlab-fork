@@ -9,7 +9,7 @@ describe Gitlab::Highlight, lib: true do
 
   describe '.highlight_lines' do
     let(:lines) do
-      Gitlab::Highlight.highlight_lines(project.repository, commit.id, 'files/ruby/popen.rb')
+      described_class.highlight_lines(project.repository, commit.id, 'files/ruby/popen.rb')
     end
 
     it 'should properly highlight all the lines' do
@@ -45,4 +45,71 @@ describe Gitlab::Highlight, lib: true do
       end
     end
   end
+
+  describe '#highlight' do
+    subject { described_class.highlight(file_name, file_content, nowrap: false) }
+
+    context "plain text file" do
+      let(:file_name) { "example.txt" }
+      let(:file_content) do
+        <<-CONTENT.strip_heredoc
+          URL: http://www.google.com
+          Email: hello@example.com
+        CONTENT
+      end
+
+      it "links URLs" do
+        expect(subject).to include(%{<a href="http://www.google.com" rel="nofollow noreferrer" target="_blank">http://www.google.com</a>})
+      end
+
+      it "links emails" do
+        expect(subject).to include(%{<a href="mailto:hello@example.com">hello@example.com</a>})
+      end
+    end
+
+    context "file with highlighting" do
+      let(:file_name) { "example.rb" }
+      let(:file_content) do
+        <<-CONTENT.strip_heredoc
+          # URL in comment: http://www.google.com
+          # Email in comment: hello@example.com
+
+          "URL in string: http://www.google.com"
+          "Email in string: hello@example.com"
+
+          URL: http://www.google.com
+          Email: hello@example.com
+        CONTENT
+      end
+
+      context "in a comment" do
+        it "links URLs" do
+          expect(subject).to include(%{URL in comment: <a href="http://www.google.com" rel="nofollow noreferrer" target="_blank">http://www.google.com</a>})
+        end
+
+        it "links emails" do
+          expect(subject).to include(%{Email in comment: <a href="mailto:hello@example.com">hello@example.com</a>})
+        end
+      end
+
+      context "in a string" do
+        it "links URLs" do
+          expect(subject).to include(%{URL in string: <a href="http://www.google.com" rel="nofollow noreferrer" target="_blank">http://www.google.com</a>})
+        end
+
+        it "links emails" do
+          expect(subject).to include(%{Email in string: <a href="mailto:hello@example.com">hello@example.com</a>})
+        end
+      end
+
+      context "outside of comments and strings" do
+        it "doesn't link URLs" do
+          expect(subject).not_to include(%{URL: <a href="http://www.google.com" rel="nofollow noreferrer" target="_blank">http://www.google.com</a>})
+        end
+
+        it "doesn't link emails" do
+          expect(subject).not_to include(%{Email: <a href="mailto:hello@example.com">hello@example.com</a>})
+        end
+      end
+    end
 end

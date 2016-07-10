@@ -52,6 +52,11 @@
     color: #000 !important;
   }
 
+  // Links to URLs, emails, or dependencies
+  a {
+    color: #81a2be;
+  }
+
   .hll { background-color: #373b41 }
   .c { color: #969896 } /* Comment */
   .err { color: #c66 } /* Error */

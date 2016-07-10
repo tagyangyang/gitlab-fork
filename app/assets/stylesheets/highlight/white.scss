@@ -77,6 +77,11 @@
     background-color: #fafe3d !important;
   }
 
+  // Links to URLs, emails, or dependencies
+  a {
+    color: #0086b3;
+  }
+
   .hll { background-color: #f8f8f8 }
   .c { color: #998; font-style: italic; }
   .err { color: #a61717; background-color: #e3d2d2; }
