@@ -76,9 +76,6 @@ describe Gitlab::Highlight, lib: true do
 
           "URL in string: http://www.google.com"
           "Email in string: hello@example.com"
-
-          URL: http://www.google.com
-          Email: hello@example.com
         CONTENT
       end
 
@@ -101,15 +98,13 @@ describe Gitlab::Highlight, lib: true do
           expect(subject).to include(%{Email in string: <a href="mailto:hello@example.com">hello@example.com</a>})
         end
       end
-
-      context "outside of comments and strings" do
-        it "doesn't link URLs" do
-          expect(subject).not_to include(%{URL: <a href="http://www.google.com" rel="nofollow noreferrer" target="_blank">http://www.google.com</a>})
-        end
-
-        it "doesn't link emails" do
-          expect(subject).not_to include(%{Email: <a href="mailto:hello@example.com">hello@example.com</a>})
-        end
-      end
     end
+
+    it 'links dependencies via DependencyLinker' do
+      expect(Gitlab::DependencyLinker).to receive(:link).
+        with('file.name', 'Contents', anything).and_call_original
+
+      described_class.highlight('file.name', 'Contents')
+    end
+  end
 end
