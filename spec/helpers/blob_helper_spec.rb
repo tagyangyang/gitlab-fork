@@ -17,12 +17,12 @@ describe BlobHelper do
   describe '#highlight' do
     it 'should return plaintext for unknown lexer context' do
       result = helper.highlight(blob_name, no_context_content, nowrap: true)
-      expect(result).to eq('<span id="LC1" class="line">:type &quot;assem&quot;))</span>')
+      expect(result).to eq('<span id="LC1" class="line">:type "assem"))</span>')
     end
 
     it 'should highlight single block' do
       expected = %Q[<span id="LC1" class="line"><span class="p">(</span><span class="nb">make-pathname</span> <span class="ss">:defaults</span> <span class="nv">name</span></span>
-<span id="LC2" class="line"><span class="ss">:type</span> <span class="s">&quot;assem&quot;</span><span class="p">))</span></span>]
+<span id="LC2" class="line"><span class="ss">:type</span> <span class="s">"assem"</span><span class="p">))</span></span>]
 
       expect(helper.highlight(blob_name, blob_content, nowrap: true)).to eq(expected)
     end
@@ -59,7 +59,7 @@ describe BlobHelper do
       # Both lines have LC1 as ID since formatter doesn't support continue at the moment
       expected = [
         '<span id="LC1" class="line"><span class="p">(</span><span class="nb">make-pathname</span> <span class="ss">:defaults</span> <span class="nv">name</span></span>',
-        '<span id="LC1" class="line"><span class="ss">:type</span> <span class="s">&quot;assem&quot;</span><span class="p">))</span></span>'
+        '<span id="LC1" class="line"><span class="ss">:type</span> <span class="s">"assem"</span><span class="p">))</span></span>'
       ]
 
       highlighter = helper.highlighter(blob_name, blob_content, nowrap: true)
