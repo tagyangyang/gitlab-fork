@@ -31,7 +31,7 @@ module Gitlab
 
     def highlight(text, continue: true, plain: false)
       highlighted_text = highlight_text(text, continue: continue, plain: plain)
-      highlighted_text = link_dependencies(text, highlighted_text)
+      highlighted_text = link_dependencies(text, highlighted_text) if blob_name
       autolink_strings(highlighted_text)
     end
 
