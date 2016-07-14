@@ -6,8 +6,8 @@ class AddLockToIssuables < ActiveRecord::Migration
   disable_ddl_transaction!
 
   def up
-    add_column_with_default :issues, :lock_version, :integer, default: 0
-    add_column_with_default :merge_requests, :lock_version, :integer, default: 0
+    add_column :issues, :lock_version, :integer
+    add_column :merge_requests, :lock_version, :integer
   end
 
   def down
