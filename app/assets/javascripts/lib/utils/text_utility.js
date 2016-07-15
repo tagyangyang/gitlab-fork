@@ -104,6 +104,9 @@
         return self.updateText($this.closest('.md-area').find('textarea'), $this.data('md-tag'), $this.data('md-block'), !$this.data('md-prepend'));
       });
     };
+    gl.text.dasherize = function(str) {
+      return str.trim().replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
+    };
     return gl.text.removeListeners = function(form) {
       return $('.js-md', form).off();
     };

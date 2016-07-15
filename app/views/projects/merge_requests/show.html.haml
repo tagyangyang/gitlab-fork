@@ -1,1 +1,26 @@
-= render "show"
+- if @merge_request.id == 96
+  - commit = @merge_request.diff_head_commit
+  - content_for :page_specific_javascripts do
+    :javascript
+      // MR initial State
+      var mergeRequestInitialState = {
+        state: {
+          mergeRequest: {
+            targetBranch: 'master',
+            hash: '5f8de3b0',
+            status: 'opened',  // opened, reopened, closed, merged, locked
+            mergeStatus: 'unchecked', // unchecked, can_be_merged, cannot_be_merged
+            commitUrl: "#{namespace_project_commit_path(@merge_request.source_project.namespace, @merge_request.source_project, commit)}"
+          },
+          ci: {
+            buildUrl: '/gitlab-org/gitlab-ce/merge_requests/74/builds', // ci_build_details_path(@merge_request)
+            status: 'pending', // pending, running, failed, success, canceled, skipped
+          }
+        }
+      };
+
+    = page_specific_javascript_tag('lib/vue')
+    = page_specific_javascript_tag('merge_request/merge_request_bundle.js')
+  = render 'new_show'
+- else
+  = render 'show'
