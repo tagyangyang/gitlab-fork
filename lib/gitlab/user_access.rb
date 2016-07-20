@@ -29,7 +29,7 @@ module Gitlab
     def can_push_to_branch?(ref)
       return false unless user
 
-      if project.protected_branch?(ref) && !project.developers_can_push_to_protected_branch?(ref)
+      if (project.protected_branch?(ref) && !project.developers_can_push_to_protected_branch?(ref)) || project.empty_repo?
         user.can?(:push_code_to_protected_branches, project)
       else
         user.can?(:push_code, project)

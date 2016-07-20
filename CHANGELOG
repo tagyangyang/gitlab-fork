@@ -4,6 +4,7 @@ v 8.11.0 (unreleased)
   - Limit git rev-list output count to one in forced push check
 
 v 8.10.0 (unreleased)
+  - Developers cannot push to a protected branch without permission not even when project is still empty (tiagonbotelho)
   - Fix profile activity heatmap to show correct day name (eanplatter)
   - Speed up ExternalWikiHelper#get_project_wiki_path
   - Expose {should,force}_remove_source_branch (Ben Boeckel)

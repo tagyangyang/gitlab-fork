@@ -23,6 +23,23 @@ describe Gitlab::UserAccess, lib: true do
       end
     end
 
+    describe 'push to empty project' do
+      let(:empty_project) { create(:project_empty_repo) }
+      let(:project_access) { Gitlab::UserAccess.new(user, project: empty_project) }
+
+      it 'returns true if user is master' do
+        empty_project.team << [user, :master]
+
+        expect(project_access.can_push_to_branch?('master')).to be_truthy
+      end
+
+      it 'returns false if user is developer' do
+        empty_project.team << [user, :developer]
+
+        expect(project_access.can_push_to_branch?('master')).to be_falsey
+      end
+    end
+
     describe 'push to protected branch' do
       let(:branch) { create :protected_branch, project: project }
 
