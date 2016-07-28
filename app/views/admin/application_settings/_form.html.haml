@@ -46,6 +46,25 @@
         = select(:application_setting, :enabled_git_access_protocol, [['Both SSH and HTTP(S)', nil], ['Only SSH', 'ssh'], ['Only HTTP(S)', 'http']], {}, class: 'form-control')
         %span.help-block#clone-protocol-help
           Allow only the selected protocols to be used for Git access.
+    .form-group
+      = f.label :allowed_key_types, 'Allowed SSH keys', class: 'control-label col-sm-2'
+      .col-sm-10
+        - allowed_key_types_checkboxes('allowed-key-types-help').each do |key_type_checkbox|
+          .checkbox= key_type_checkbox
+        %span.help-block#allowed-key-types-help
+          Only SSH keys with allowed algorithms can be uploaded.
+    .form-group
+      = f.label :minimum_rsa_bits, 'Minimum RSA key length', class: 'control-label col-sm-2'
+      .col-sm-10
+        = f.number_field :minimum_rsa_bits, class: 'form-control'
+        %span.help-block#session_expire_delay_help_block
+          The minimum length for user RSA SSH keys (in bits)
+    .form-group
+      = f.label :minimum_ecdsa_bits, 'Minimum ECDSA key length', class: 'control-label col-sm-2'
+      .col-sm-10
+        = f.number_field :minimum_ecdsa_bits, class: 'form-control'
+        %span.help-block#session_expire_delay_help_block
+          The minimum elliptic curve size for user ECDSA SSH keys (in bits)
 
   %fieldset
     %legend Account and Limit Settings

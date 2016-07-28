@@ -1,11 +1,47 @@
+require 'net/ssh'
+
 module Gitlab
-  class KeyFingerprint
+  class SSHPublicKey
     include Gitlab::Popen
 
-    attr_accessor :key
+    UnsupportedSSHPublicKeyTypeError = Class.new(ArgumentError)
 
-    def initialize(key)
-      @key = key
+    TYPES = %i[rsa dsa ecdsa].freeze
+
+    def initialize(key_text)
+      @key_text = key_text
+    end
+
+    def valid?
+      type.present?
+    end
+
+    def type
+      @type ||=
+        case key
+        when OpenSSL::PKey::EC
+          :ecdsa
+        when OpenSSL::PKey::RSA
+          :rsa
+        when OpenSSL::PKey::DSA
+          :dsa
+        else
+          raise UnsupportedSSHPublicKeyTypeError, "#{key.class} is not supported"
+        end
+    end
+
+    def size
+      @size ||=
+        case type
+        when :ecdsa
+          key.public_key.to_bn.num_bits / 2
+        when :rsa
+          key.n.num_bits
+        when :dsa
+          1024
+        else
+          raise UnsupportedSSHPublicKeyTypeError, "#{key.class} is not supported"
+        end
     end
 
     def fingerprint
@@ -13,7 +49,7 @@ module Gitlab
       cmd_output = ''
 
       Tempfile.open('gitlab_key_file') do |file|
-        file.puts key
+        file.puts key_text
         file.rewind
 
         cmd = []
@@ -35,6 +71,18 @@ module Gitlab
 
     private
 
+    attr_accessor :key_text
+
+    def key
+      return @key if defined?(@key)
+
+      @key = begin
+        Net::SSH::KeyFactory.load_data_public_key(key_text)
+      rescue StandardError, NotImplementedError
+        nil
+      end
+    end
+
     def explicit_fingerprint_algorithm?
       # OpenSSH 6.8 introduces a new default output format for fingerprints.
       # Check the version and decide which command to use.
@@ -49,7 +97,7 @@ module Gitlab
 
       required_version_info = Gitlab::VersionInfo.new(6, 8)
 
-      version_info >= required_version_info 
+      version_info >= required_version_info
     end
   end
 end

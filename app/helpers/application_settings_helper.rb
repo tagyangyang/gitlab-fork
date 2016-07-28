@@ -93,6 +93,19 @@ module ApplicationSettingsHelper
     end
   end
 
+  def allowed_key_types_checkboxes(help_block_id)
+    Gitlab::SSHPublicKey::TYPES.map do |type|
+      checked = current_application_settings.allowed_key_types.include?(type.to_sym)
+      checkbox_name = 'application_setting[allowed_key_types][]'
+
+      label_tag(checkbox_name, class: checked ? 'active' : nil) do
+        check_box_tag(checkbox_name, type, checked,
+                      autocomplete: 'off',
+                      'aria-describedby' => help_block_id) + type.upcase
+      end
+    end
+  end
+
   def repository_storages_options_for_select
     options = Gitlab.config.repositories.storages.map do |name, path|
       ["#{name} - #{path}", name]

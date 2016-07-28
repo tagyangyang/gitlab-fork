@@ -20,6 +20,7 @@ class ApplicationSetting < ActiveRecord::Base
   serialize :domain_blacklist, Array
   serialize :repository_storages
   serialize :sidekiq_throttling_queues, Array
+  serialize :allowed_key_types, Array
 
   cache_markdown_field :sign_in_text
   cache_markdown_field :help_page_text
@@ -115,6 +116,14 @@ class ApplicationSetting < ActiveRecord::Base
             presence: true,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+  validates :minimum_rsa_bits,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :minimum_ecdsa_bits,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
   validates_each :restricted_visibility_levels do |record, attr, value|
     value&.each do |level|
       unless Gitlab::VisibilityLevel.options.has_value?(level)
@@ -135,6 +144,16 @@ class ApplicationSetting < ActiveRecord::Base
     value&.each do |source|
       unless Devise.omniauth_providers.include?(source.to_sym)
         record.errors.add(attr, "'#{source}' is not an OAuth sign-in source")
+      end
+    end
+  end
+
+  validates_each :allowed_key_types do |record, attr, value|
+    unless value.nil?
+      value.each do |type|
+        unless Gitlab::SSHPublicKey::TYPES.include?(type.to_sym)
+          record.errors.add(attr, "'#{type}' is not an valid SSH key type")
+        end
       end
     end
   end
@@ -167,6 +186,7 @@ class ApplicationSetting < ActiveRecord::Base
     {
       after_sign_up_text: nil,
       akismet_enabled: false,
+      allowed_key_types: Gitlab::SSHPublicKey::TYPES,
       container_registry_token_expire_delay: 5,
       default_branch_protection: Settings.gitlab['default_branch_protection'],
       default_project_visibility: Settings.gitlab.default_projects_features['visibility_level'],
@@ -186,6 +206,8 @@ class ApplicationSetting < ActiveRecord::Base
       koding_url: nil,
       max_artifacts_size: Settings.artifacts['max_size'],
       max_attachment_size: Settings.gitlab['max_attachment_size'],
+      minimum_rsa_bits: 1024,
+      minimum_ecdsa_bits: 256,
       plantuml_enabled: false,
       plantuml_url: nil,
       recaptcha_enabled: false,
@@ -282,11 +304,14 @@ class ApplicationSetting < ActiveRecord::Base
     sidekiq_throttling_enabled
   end
 
+  def allowed_key_types
+    read_attribute(:allowed_key_types).map(&:to_sym)
+  end
+
   private
 
   def check_repository_storages
     invalid = repository_storages - Gitlab.config.repositories.storages.keys
-    errors.add(:repository_storages, "can't include: #{invalid.join(", ")}") unless
-      invalid.empty?
+    errors.add(:repository_storages, "can't include: #{invalid.join(", ")}") unless invalid.empty?
   end
 end

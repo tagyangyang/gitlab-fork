@@ -63,6 +63,15 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       end
     end
 
+    allowed_key_types = params[:application_setting][:allowed_key_types]
+    if allowed_key_types.nil?
+      params[:application_setting][:allowed_key_types] = []
+    else
+      allowed_key_types.map! do |type|
+        type.to_sym
+      end
+    end
+
     enabled_oauth_sign_in_sources = params[:application_setting].delete(:enabled_oauth_sign_in_sources)
 
     params[:application_setting][:disabled_oauth_sign_in_sources] =
@@ -118,6 +127,8 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       :metrics_port,
       :metrics_sample_interval,
       :metrics_timeout,
+      :minimum_rsa_bits,
+      :minimum_ecdsa_bits,
       :recaptcha_enabled,
       :recaptcha_private_key,
       :recaptcha_site_key,
@@ -140,6 +151,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       :version_check_enabled,
       :terminal_max_session_time,
 
+      allowed_key_types: [],
       disabled_oauth_sign_in_sources: [],
       import_sources: [],
       repository_storages: [],

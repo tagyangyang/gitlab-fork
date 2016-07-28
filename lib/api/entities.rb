@@ -573,6 +573,9 @@ module API
       expose :plantuml_enabled
       expose :plantuml_url
       expose :terminal_max_session_time
+      expose :minimum_rsa_bits
+      expose :minimum_ecdsa_bits
+      expose :allowed_key_types
     end
 
     class Release < Grape::Entity

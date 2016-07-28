@@ -2,6 +2,12 @@ require 'spec_helper'
 
 describe Key, models: true do
   include EmailHelpers
+  include Gitlab::CurrentSettings
+
+  describe 'modules' do
+    subject { described_class }
+    it { is_expected.to include_module(Gitlab::CurrentSettings) }
+  end
 
   describe "Associations" do
     it { is_expected.to belong_to(:user) }
@@ -100,6 +106,56 @@ describe Key, models: true do
       key = build(:key)
       key.key.tr!(' ', "\n")
       expect(key).not_to be_valid
+    end
+  end
+
+  context 'validate it meets minimum bit length' do
+    it 'accepts a RSA key of the minimum bit length' do
+      expect(build(:key)).to be_valid
+    end
+
+    it 'accepts a RSA key above the minimum bit length' do
+      expect(build(:another_key)).to be_valid
+    end
+
+    it 'rejects a RSA key below minimum bit length' do
+      stub_application_setting(minimum_rsa_bits: 2048)
+
+      expect(build(:key)).not_to be_valid
+    end
+
+    it 'accepts an ECDSA key above the minimum bit length' do
+      expect(build(:ecdsa_key)).to be_valid
+    end
+
+    it 'rejects an ECDSA key below minimum bit length' do
+      stub_application_setting(minimum_ecdsa_bits: 384)
+
+      expect(build(:ecdsa_key)).not_to be_valid
+    end
+  end
+
+  context 'validate the key type is allowed' do
+    it 'accepts a key if type is allowed' do
+      expect(build(:key)).to be_valid
+    end
+
+    it 'rejects RSA key if RSA is not an allowed type' do
+      stub_application_setting(allowed_key_types: [:dsa])
+
+      expect(build(:key)).not_to be_valid
+    end
+
+    it 'rejects DSA key if DSA is not an allowed type' do
+      stub_application_setting(allowed_key_types: [:ecdsa])
+
+      expect(build(:dsa_key)).not_to be_valid
+    end
+
+    it 'rejects ECDSA key if ECDSA is not an allowed type' do
+      stub_application_setting(allowed_key_types: [:rsa])
+
+      expect(build(:ecdsa_key)).not_to be_valid
     end
   end
 

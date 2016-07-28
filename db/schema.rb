@@ -98,6 +98,9 @@ ActiveRecord::Schema.define(version: 20170215200045) do
     t.text "help_page_text_html"
     t.text "shared_runners_text_html"
     t.text "after_sign_up_text_html"
+    t.integer "minimum_rsa_bits", default: 1024, null: false
+    t.integer "minimum_ecdsa_bits", default: 256, null: false
+    t.text "allowed_key_types", default: "---\n- rsa\n- dsa\n- ecdsa\n", null: false
     t.boolean "housekeeping_enabled", default: true, null: false
     t.boolean "housekeeping_bitmaps_enabled", default: true, null: false
     t.integer "housekeeping_incremental_repack_period", default: 10, null: false
@@ -111,6 +114,9 @@ ActiveRecord::Schema.define(version: 20170215200045) do
     t.boolean "plantuml_enabled"
     t.integer "max_pages_size", default: 100, null: false
     t.integer "terminal_max_session_time", default: 0, null: false
+    t.integer "minimum_rsa_bits", default: 1024
+    t.integer "minimum_ecdsa_bits", default: 256
+    t.text "allowed_key_types"
   end
 
   create_table "audit_events", force: :cascade do |t|

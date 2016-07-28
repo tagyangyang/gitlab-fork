@@ -37,6 +37,16 @@ describe ApplicationSetting, models: true do
         .is_greater_than(0)
     end
 
+    it { is_expected.to validate_presence_of(:minimum_rsa_bits) }
+    it { is_expected.to validate_numericality_of(:minimum_rsa_bits).only_integer.is_greater_than(0) }
+    it { is_expected.to validate_presence_of(:minimum_ecdsa_bits) }
+    it { is_expected.to validate_numericality_of(:minimum_ecdsa_bits).only_integer.is_greater_than(0) }
+
+    describe 'allowed_key_types validations' do
+      it { is_expected.to allow_value([:rsa], [:rsa, :dsa, :ecdsa]).for(:allowed_key_types) }
+      it { is_expected.not_to allow_value([:foo]).for(:allowed_key_types) }
+    end
+
     it_behaves_like 'an object with email-formated attributes', :admin_notification_email do
       subject { setting }
     end
@@ -174,6 +184,18 @@ describe ApplicationSetting, models: true do
     it 'sets multiple domain with file' do
       setting.domain_blacklist_file = File.open(Rails.root.join('spec/fixtures/', 'domain_blacklist.txt'))
       expect(setting.domain_blacklist).to contain_exactly('example.com', 'test.com', 'foo.bar')
+    end
+  end
+
+  context 'allowed key types attribute' do
+    it 'set value with array of symbols' do
+      setting.allowed_key_types = [:rsa]
+      expect(setting.allowed_key_types).to contain_exactly(:rsa)
+    end
+
+    it 'get value as array of symbols' do
+      setting.allowed_key_types = ['rsa']
+      expect(setting.allowed_key_types).to eq([:rsa])
     end
   end
 end
