@@ -34,19 +34,15 @@ class AutocompleteController < ApplicationController
 
   def projects
     project = Project.find_by_id(params[:project_id])
+    projects = projects_finder.execute(project, search: params[:search], offset_id: params[:offset_id])
 
-    projects = current_user.authorized_projects
-    projects = projects.search(params[:search]) if params[:search].present?
-    projects = projects.select do |project|
-      current_user.can?(:admin_issue, project)
-    end
+    ActiveRecord::Associations::Preloader.new.preload(projects, { namespace: :owner })
 
     no_project = {
       id: 0,
       name_with_namespace: 'No project',
     }
-    projects.unshift(no_project)
-    projects.delete(project)
+    projects.unshift(no_project) unless params[:offset_id].present?
 
     render json: projects.to_json(only: [:id, :name_with_namespace], methods: :name_with_namespace)
   end
@@ -70,5 +66,9 @@ class AutocompleteController < ApplicationController
       else
         User.none
       end
+  end
+
+  def projects_finder
+    MoveToProjectFinder.new(current_user)
   end
 end
