@@ -21,14 +21,14 @@ class SlackService < Service
     'A team communication tool for the 21st century'
   end
 
-  def to_param
-    'slack'
-  end
-
   def help
     'This service sends notifications to your Slack channel.<br/>
     To setup this Service you need to create a new <b>"Incoming webhook"</b> in your Slack integration panel,
     and enter the Webhook URL below.'
+  end
+
+  def to_param
+    'slack'
   end
 
   def fields

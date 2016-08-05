@@ -58,23 +58,22 @@ class Service < ActiveRecord::Base
   end
 
   def title
-    # implement inside child
+    raise NotImplementedError
   end
 
   def description
-    # implement inside child
+    raise NotImplementedError
   end
 
   def help
-    # implement inside child
+    ''
   end
 
   def to_param
-    # implement inside child
+    raise NotImplementedError
   end
 
   def fields
-    # implement inside child
     []
   end
 
@@ -99,7 +98,7 @@ class Service < ActiveRecord::Base
   end
 
   def execute(data)
-    # implement inside child
+    raise NotImplementedError
   end
 
   def test(data)
