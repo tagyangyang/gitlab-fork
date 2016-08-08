@@ -5,6 +5,18 @@ class ProjectTeam
     @project = project
   end
 
+  class << self
+    def preload_max_member_access(project_teams)
+      projects = project_teams.map(&:project)
+      run_preload(projects, [:namespace, :group])
+      run_preload(projects.select(&:allowed_to_share_with_group?), [project_group_links: :group])
+    end
+
+    def run_preload(projects, associations)
+      ActiveRecord::Associations::Preloader.new.preload(projects, associations)
+    end
+  end
+
   # Shortcut to add users
   #
   # Use:
@@ -162,7 +174,7 @@ class ProjectTeam
 
       # Each group produces a list of maximum access level per user. We take the
       # max of the values produced by each group.
-      if project.invited_groups.any? && project.allowed_to_share_with_group?
+      if project.allowed_to_share_with_group?
         project.project_group_links.each do |group_link|
           invited_access = max_invited_level_for_users(group_link, user_ids)
           merge_max!(access, invited_access)
@@ -201,7 +213,7 @@ class ProjectTeam
     group_members = group ? group.members : []
     invited_members = []
 
-    if project.invited_groups.any? && project.allowed_to_share_with_group?
+    if project.allowed_to_share_with_group? && project.invited_groups.any?
       project.project_group_links.includes(group: [:group_members]).each do |group_link|
         invited_group = group_link.group
         im = invited_group.members
