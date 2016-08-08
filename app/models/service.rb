@@ -203,6 +203,7 @@ class Service < ActiveRecord::Base
       hipchat
       irker
       jira
+      mattermost
       pivotaltracker
       pushover
       redmine
