@@ -11,15 +11,6 @@ const mergeRequest = {
   },
 };
 
-const mrActionsApp = {
-  el: '#mr-actions',
-  methods: {
-    getMergeStatus(state) {
-      return mrService.getMergeStatus(state);
-    },
-  },
-};
-
 // Partials
 Vue.partial('ci-icon-pending', ciIconPartialPending);
 Vue.partial('ci-icon-running', ciIconPartialRunning);
@@ -30,7 +21,6 @@ Vue.partial('ci-icon-success-with-warnings', ciIconPartialSuccessWithWarnings);
 Vue.partial('ci-icon-success', ciIconPartialSuccess);
 
 // Register Global Components
-Vue.component('mr-headline', mrHeadlineComponent);
 Vue.component('mr-accept-button', mrAcceptButtonComponent);
 Vue.component('author-link', authorLinkComponent);
 Vue.component('timeago', timeagoComponent);
