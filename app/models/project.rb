@@ -109,11 +109,11 @@ class Project < ActiveRecord::Base
   has_many :hooks,              dependent: :destroy, class_name: 'ProjectHook'
   has_many :protected_branches, dependent: :destroy
 
-  has_many :project_members, -> { where(requested_at: nil) }, dependent: :destroy, as: :source, class_name: 'ProjectMember'
+  has_many :project_members, -> { merge(Member.non_request) }, dependent: :destroy, as: :source, class_name: 'ProjectMember'
   alias_method :members, :project_members
   has_many :users, through: :project_members
 
-  has_many :requesters, -> { where.not(requested_at: nil) }, dependent: :destroy, as: :source, class_name: 'ProjectMember'
+  has_many :requesters, -> { merge(Member.request) }, dependent: :destroy, as: :source, class_name: 'ProjectMember'
 
   has_many :deploy_keys_projects, dependent: :destroy
   has_many :deploy_keys, through: :deploy_keys_projects

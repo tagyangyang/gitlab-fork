@@ -6,10 +6,33 @@ class ProjectTeam
   end
 
   class << self
-    def preload_max_member_access(project_teams)
+    def preload_max_member_access(user_id, project_teams)
       projects = project_teams.map(&:project)
       run_preload(projects, [:namespace, :group])
       run_preload(projects.select(&:allowed_to_share_with_group?), [project_group_links: :group])
+      load_max_accesses_for_user_id_on(user_id, project_teams) if RequestStore.active?
+    end
+
+    def load_max_accesses_for_user_id_on(user_id, project_teams)
+      project_accesses = Member.access_for_user_id_on_sources(user_id, project_teams.map(&:project))
+      group_accesses = Member.access_for_user_id_on_sources(user_id, project_teams.map(&:group).compact.uniq)
+
+      project_teams.each do |project_team|
+        max_access = [ Gitlab::Access::NO_ACCESS,
+                       project_accesses[project_team.project.id],
+                       group_accesses[project_team.project.group.try(:id)] ]
+
+        project = project_team.project
+
+        if project.allowed_to_share_with_group?
+          project.project_group_links.each do |group_link|
+            max_access << project_team.max_invited_level_for_users(group_link, user_id)
+          end
+        end
+
+        max_access = max_access.compact.max
+        project_team.cache_max_member_access_for_user_id!(max_access, user_id)
+      end
     end
 
     def run_preload(projects, associations)
@@ -149,13 +172,11 @@ class ProjectTeam
   # Returns a Hash mapping user ID -> maximum access level.
   def max_member_access_for_user_ids(user_ids)
     user_ids = user_ids.uniq
-    key = "max_member_access:#{project.id}"
-
     access = {}
 
     if RequestStore.active?
-      RequestStore.store[key] ||= {}
-      access = RequestStore.store[key]
+      RequestStore.store[max_member_access_key] ||= {}
+      access = RequestStore.store[max_member_access_key]
     end
 
     # Lookup only the IDs we need
@@ -185,11 +206,17 @@ class ProjectTeam
     access
   end
 
+  def cache_max_member_access_for_user_id!(max_access, user_id)
+    if RequestStore.active?
+      RequestStore.store[max_member_access_key] ||= {}
+      access = RequestStore.store[max_member_access_key]
+      access[user_id] = max_access
+    end
+  end
+
   def max_member_access(user_id)
     max_member_access_for_user_ids([user_id])[user_id]
   end
-
-  private
 
   # For a given group, return the maximum access level for the user. This is the min of
   # the invited access level of the group and the access level of the user within the group.
@@ -206,6 +233,16 @@ class ProjectTeam
 
     # Cap the maximum access by the invited level access
     access.each { |key, value| access[key] = [value, capped_access_level].min }
+  end
+
+  def group
+    project.group
+  end
+
+  private
+
+  def max_member_access_key
+    @key ||= "max_member_access:#{project.id}"
   end
 
   def fetch_members(level = nil)
@@ -251,10 +288,6 @@ class ProjectTeam
     user_ids.push(*group_members.pluck(:user_id)) if group
 
     User.where(id: user_ids)
-  end
-
-  def group
-    project.group
   end
 
   def merge_max!(first_hash, second_hash)

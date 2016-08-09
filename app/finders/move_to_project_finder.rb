@@ -9,7 +9,7 @@ class MoveToProjectFinder
     projects = @user.authorized_projects
     projects = projects.search(search) if search.present?
     projects = skip_projects_before(projects, offset_id.to_i) if offset_id.present?
-    ProjectTeam.preload_max_member_access(projects.map(&:team))
+    ProjectTeam.preload_max_member_access(@user.id, projects.map(&:team))
     projects = take_projects(projects)
     projects.delete(from_project)
     projects

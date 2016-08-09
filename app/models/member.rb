@@ -29,6 +29,7 @@ class Member < ActiveRecord::Base
 
   scope :invite, -> { where.not(invite_token: nil) }
   scope :non_invite, -> { where(invite_token: nil) }
+  scope :non_request, -> { where(requested_at: nil) }
   scope :request, -> { where.not(requested_at: nil) }
   scope :has_access, -> { where('access_level > 0') }
 
@@ -53,6 +54,10 @@ class Member < ActiveRecord::Base
   default_value_for :notification_level, NotificationSetting.levels[:global]
 
   class << self
+    def access_for_user_id_on_sources(user_id, sources)
+      where(source: sources, user_id: user_id).non_request.has_access.pluck(:source_id, :access_level).to_h
+    end
+
     def access_for_user_ids(user_ids)
       where(user_id: user_ids).has_access.pluck(:user_id, :access_level).to_h
     end
