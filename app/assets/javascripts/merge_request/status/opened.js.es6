@@ -1,4 +1,5 @@
 const mrWidgetOpened = {
+  mixins: [devMixin],
   props: ['ci', 'mergeRequest'],
   data: () => ({
     removeBranch: false,
@@ -14,12 +15,6 @@ const mrWidgetOpened = {
     toggleCommitMessage() {
       this.showCommitMessage = !this.showCommitMessage;
     },
-  },
-  ready: () => {
-    mrService.getMergeStatus();
-    mrService.getCiStatus();
-    // only for testing purposes
-    mrService.setCiStatus('success');
   },
   template: `<div class="mr-state-widget">
               <ci-status :ci="ci" :merge-request="mergeRequest"></ci-status>

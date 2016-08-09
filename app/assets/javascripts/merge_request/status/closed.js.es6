@@ -1,4 +1,5 @@
 const mrWidgetClosed = {
+  mixins: [devMixin],
   props: ['ci', 'mergeRequest'],
   template: `<div class="mr-state-widget">
               <ci-status :ci="ci" :merge-request="mergeRequest" ></ci-status>
