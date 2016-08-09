@@ -5,18 +5,6 @@ class ProjectTeam
     @project = project
   end
 
-  class << self
-    def preload_max_member_access(project_teams)
-      projects = project_teams.map(&:project)
-      run_preload(projects, [:namespace, :group])
-      run_preload(projects.select(&:allowed_to_share_with_group?), [project_group_links: :group])
-    end
-
-    def run_preload(projects, associations)
-      ActiveRecord::Associations::Preloader.new.preload(projects, associations)
-    end
-  end
-
   # Shortcut to add users
   #
   # Use:

@@ -36,8 +36,6 @@ class AutocompleteController < ApplicationController
     project = Project.find_by_id(params[:project_id])
     projects = projects_finder.execute(project, search: params[:search], offset_id: params[:offset_id])
 
-    ActiveRecord::Associations::Preloader.new.preload(projects, { namespace: :owner })
-
     no_project = {
       id: 0,
       name_with_namespace: 'No project',

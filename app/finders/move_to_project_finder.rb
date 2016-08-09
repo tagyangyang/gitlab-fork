@@ -6,26 +6,15 @@ class MoveToProjectFinder
   end
 
   def execute(from_project, search: nil, offset_id: nil)
-    projects = @user.authorized_projects
+    projects = @user.projects_where_can_admin_issues
     projects = projects.search(search) if search.present?
-    projects = skip_projects_before(projects, offset_id.to_i) if offset_id.present?
-    ProjectTeam.preload_max_member_access(projects.map(&:team))
-    projects = take_projects(projects)
-    projects.delete(from_project)
-    projects
-  end
+    projects = projects.where.not(id: from_project.id).order(id: :desc)
 
-  private
+    # infinite scroll using offset
+    projects = projects.where("projects.id < #{offset_id}") if offset_id.present?
+    projects = projects.limit(PAGE_SIZE)
 
-  def skip_projects_before(projects, offset_project_id)
-    index = projects.index { |project| project.id == offset_project_id }
-
-    index ? projects.drop(index + 1) : projects
-  end
-
-  def take_projects(projects)
-    projects.lazy.select do |project|
-      @user.can?(:admin_issue, project)
-    end.take(PAGE_SIZE).to_a
+    # to ask for Project#name_with_namespace
+    projects.preload(namespace: :owner)
   end
 end
