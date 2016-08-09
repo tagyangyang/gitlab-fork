@@ -4,7 +4,7 @@ const mrWidgetMerged = {
               <div class="mr-widget-body">
                 <h4>
                   Merged by
-                  <author-link></author-link>
+                  <author-link :author="mergeRequest.author"></author-link>
                   <timeago></timeago>
                 </h4>
                 <p>

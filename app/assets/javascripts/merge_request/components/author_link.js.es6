@@ -1,6 +1,4 @@
 const authorLinkComponent = {
-  template: `<a class="author_link" href="/u/root">
-              <img width="16" class="avatar avatar-inline s16" alt="User avatar" src="http://localhost:3000/uploads/user/avatar/1/avatar.png">
-              <span class="author ">Alfredo Sumaran</span>
-            </a>`,
+  props: ['author'],
+  template: `<a class="author_link" href="{{author.profile}}"><img width="16" class="avatar avatar-inline s16" alt="User avatar" v-bind:src="author.avatar"><span class="author">{{author.name}}</span></a>`,
 };
