@@ -27,6 +27,9 @@ Vue.component('timeago', timeagoComponent);
 Vue.component('ci-status', ciStatusComponent);
 Vue.component('ci-icon', ciIconComponent);
 
+// States
+Vue.component('cannot-be-merged', mergeStatusCannotBeMerged);
+
 $(() => {
   // Initialize App
   window.vmMergeRequest = new Vue(mergeRequest);

@@ -4,4 +4,5 @@
 //= require ./merge_request_partials
 //= require_directory ./components
 //= require_directory ./status
+//= require_directory ./merge_status
 //= require ./merge_request

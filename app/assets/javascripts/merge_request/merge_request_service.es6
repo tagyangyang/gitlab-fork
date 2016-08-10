@@ -13,7 +13,7 @@ const mrService = {
 
     setTimeout(() => {
       successCallback();
-    }, 2000);
+    }, 1000);
   },
 
   getState(state) {
@@ -36,15 +36,15 @@ const mrService = {
 
   getMergeStatus() {
     const successCallback = () => {
-      mrStore.updateMergeStatus('can_be_merged');
+      mrStore.updateMergeStatus('cannot_be_merged');
     };
-    setTimeout(successCallback, 1000);
+    setTimeout(successCallback, 4000);
   },
 
   getCiStatus() {
     setTimeout(() => {
       mrStore.updateCiStatus('running');
-    }, 3000);
+    }, 5000);
   },
 
   // only for testing purposes
@@ -52,7 +52,7 @@ const mrService = {
     setTimeout(() => {
       console.log('xx');
       mrStore.updateCiStatus(ciStatus);
-    }, 5000);
+    }, 6000);
 
   }
 };
