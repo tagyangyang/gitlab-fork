@@ -28,7 +28,7 @@ Vue.component('ci-status', ciStatusComponent);
 Vue.component('ci-icon', ciIconComponent);
 
 // States
-Vue.component('cannot-be-merged', mergeStatusCannotBeMerged);
+Vue.component('merge-status', mergeStatusComponent);
 
 $(() => {
   // Initialize App

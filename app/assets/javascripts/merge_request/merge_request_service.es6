@@ -36,9 +36,9 @@ const mrService = {
 
   getMergeStatus() {
     const successCallback = () => {
-      mrStore.updateMergeStatus('cannot_be_merged');
+      mrStore.updateMergeStatus('can_be_merged');
     };
-    setTimeout(successCallback, 4000);
+    setTimeout(successCallback, 1000);
   },
 
   getCiStatus() {
@@ -50,7 +50,6 @@ const mrService = {
   // only for testing purposes
   setCiStatus(ciStatus) {
     setTimeout(() => {
-      console.log('xx');
       mrStore.updateCiStatus(ciStatus);
     }, 6000);
 
