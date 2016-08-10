@@ -1,4 +1,4 @@
-- if @merge_request.id == 39
+- if @merge_request.id == 41
   - commit = @merge_request.diff_head_commit
   - content_for :page_specific_javascripts do
     :javascript
@@ -6,6 +6,7 @@
       var mergeRequestInitialState = {
         state: {
           mergeRequest: {
+            userCanMerge: #{@merge_request.can_be_merged_by?(current_user)},
             status: '#{@merge_request.state}',  // opened, reopened, closed, merged, locked
             mergeStatus: '#{@merge_request.merge_status}', // unchecked, can_be_merged, cannot_be_merged
             sha: '#{@pipeline.short_sha}',
