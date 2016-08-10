@@ -21,7 +21,7 @@ const ciStatusComponent = {
   template: `<div v-bind:class="cssClasses">
               <ci-icon :type="ci.status"></ci-icon>
                 CI build {{ciLabel}} for
-              <a class="monospace" href="{{mergeRequest.commitUrl}}">{{mergeRequest.hash}}</a>.
+              <a class="monospace" href="{{mergeRequest.commitUrl}}">{{mergeRequest.sha}}</a>.
               <a href="{{ci.detailsUrl}}">View Details</a>
             </div>`,
 };

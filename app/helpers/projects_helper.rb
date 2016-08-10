@@ -49,6 +49,15 @@ module ProjectsHelper
     end
   end
 
+  def event_author_details(event_name)
+    if @merge_request.merge_event == event_name
+      author = { name: @merge_request.closed_event.author.name, profile: user_path(@merge_request.closed_event.author), avatar: avatar_icon(@merge_request.closed_event.author, 16) }
+    elsif @merge_request.closed_event == event_name
+      author = { name: @merge_request.closed_event.author.name, profile: user_path(@merge_request.closed_event.author), avatar: avatar_icon(@merge_request.closed_event.author, 16) }
+    end
+    author
+  end 
+
   def project_title(project, name = nil, url = nil)
     namespace_link =
       if project.group
