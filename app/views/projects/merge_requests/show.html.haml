@@ -1,15 +1,25 @@
-- if @merge_request.id == 41
+%h5= @merge_request.id
+- if @merge_request.id == 49
+  %h5 vue.js activo
   - commit = @merge_request.diff_head_commit
   - content_for :page_specific_javascripts do
     :javascript
       // MR initial State
       var mergeRequestInitialState = {
         state: {
+          project: {
+            isArchived: #{@project.archived?},
+          },
           mergeRequest: {
-            userCanMerge: #{@merge_request.can_be_merged_by?(current_user)},
+            branchMissing: '#{@merge_request.branch_missing?}',
+            sourceBranch: '#{@merge_request.source_branch}',
+            sourceBranchUrl: '#{namespace_project_commits_path(@merge_request.source_project.namespace, @merge_request.source_project, @merge_request.source_branch)}',
+            sourceBranchExists: #{@merge_request.source_branch_exists?},
+            userNotAllowed: #{!@merge_request.can_be_merged_by?(current_user)},
+            forceRemoveSourceBranch: #{@merge_request.force_remove_source_branch?},
             status: '#{@merge_request.state}',  // opened, reopened, closed, merged, locked
             mergeStatus: '#{@merge_request.merge_status}', // unchecked, can_be_merged, cannot_be_merged
-            sha: '#{@pipeline.short_sha}',
+            sha: '#{@pipeline.present? ? @pipeline.short_sha : ''}',
             commitUrl: "#{namespace_project_commit_path(@merge_request.source_project.namespace, @merge_request.source_project, commit)}",
             targetBranch: '#{@merge_request.target_branch}',
             mergeCommitMessage: "#{escape_javascript(@merge_request.merge_commit_message)}",
@@ -17,7 +27,7 @@
           },
           ci: {
             detailsUrl: '/gitlab-org/gitlab-ce/merge_requests/74/builds', // ci_build_details_path(@merge_request)
-            status: 'pending', // pending, running, failed, success, canceled, skipped
+            status: '#{@merge_request.pipeline ? @merge_request.pipeline.status : ''}', // pending, running, failed, success, canceled, skipped
           }
         }
       };

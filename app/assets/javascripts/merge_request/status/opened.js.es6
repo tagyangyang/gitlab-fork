@@ -1,16 +1,36 @@
 const mrWidgetOpened = {
   mixins: [devMixin],
-  props: ['ci', 'mergeRequest'],
+  props: ['ci', 'mergeRequest', 'project'],
+  computed: {
+    status() {
+      let status;
+
+      if (this.project.isArchived) {
+        status = 'archived';
+      } else if (this.mergeRequest.branchMissing) {
+        status = 'branch_missing'
+      }else if (this.mergeRequest.userNotAllowed) {
+        status = 'not_allowed';
+      } else {
+        status = this.mergeRequest.mergeStatus;
+      }
+
+      return status;
+    },
+    showCiStatus() {
+      let show = true;
+
+      if (this.project.isArchived) {
+        show = false;
+      }
+
+      return show;
+    }
+  },
   template: `<div class="mr-state-widget">
-              <ci-status :ci="ci" :merge-request="mergeRequest"></ci-status>
+              <ci-status v-if="showCiStatus" :ci="ci" :merge-request="mergeRequest"></ci-status>
               <div class="mr-widget-body">
-                <template v-if="mergeRequest.userCanMerge">
-                  <merge-status :merge-request="mergeRequest" :ci="ci"></merge-status>
-                </template>
-                <template v-else>
-                  <h4>Ready to be merged automatically</h4>
-                  <p>Ask someone with write access to this repository to merge this request.</p>
-                </template>
+                <merge-status :merge-request="mergeRequest" :ci="ci" :status="status"></merge-status>
               </div>
             </div>`,
 };

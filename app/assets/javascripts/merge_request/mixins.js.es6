@@ -1,8 +1,8 @@
 // Mixin
 const devMixin = {
   ready: () => {
-    mrService.getMergeStatus();
-    mrService.getCiStatus();
-    mrService.setCiStatus('success');
+    // mrService.getMergeStatus();
+    // mrService.getCiStatus();
+    // mrService.setCiStatus('success');
   },
 };
