@@ -3,7 +3,7 @@ require 'sidekiq/testing'
 Sidekiq::Testing.inline! do
   Gitlab::Seeder.quiet do
     project_urls = [
-      'https://github.com/documentcloud/underscore.git',
+      'https://gitlab.com/gitlab-com/www-gitlab-com.git',
       'https://gitlab.com/gitlab-org/gitlab-ce.git',
       'https://gitlab.com/gitlab-org/gitlab-ci.git',
       'https://gitlab.com/gitlab-org/gitlab-shell.git',
