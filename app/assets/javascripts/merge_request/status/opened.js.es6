@@ -9,6 +9,8 @@ const mrWidgetOpened = {
         status = 'archived';
       } else if (this.mergeRequest.branchMissing) {
         status = 'branch_missing'
+      }else if (this.mergeRequest.workInProgress) {
+        status = 'wip'
       }else if (this.mergeRequest.userNotAllowed) {
         status = 'not_allowed';
       } else {

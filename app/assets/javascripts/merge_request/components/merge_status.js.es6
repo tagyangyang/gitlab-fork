@@ -6,10 +6,11 @@ const mergeStatusComponent = {
     can_be_merged: mergeStatusCanBeMerged,
     cannot_be_merged: mergeStatusCannotBeMerged,
 
-    // Custom statuses
+    // Additional statuses
     not_allowed: userNotAllowed,
     branch_missing: branchMissing,
     archived: projectArchived,
+    wip: workInProgress,
   },
   template: `<component :is="status" :ci="ci" :merge-request="mergeRequest"></component>`,
 };

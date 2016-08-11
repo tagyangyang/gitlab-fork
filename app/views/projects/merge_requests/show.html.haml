@@ -1,5 +1,5 @@
 %h5= @merge_request.id
-- if @merge_request.id == 49
+- if @merge_request.id == 50
   %h5 vue.js activo
   - commit = @merge_request.diff_head_commit
   - content_for :page_specific_javascripts do
@@ -11,7 +11,9 @@
             isArchived: #{@project.archived?},
           },
           mergeRequest: {
-            branchMissing: '#{@merge_request.branch_missing?}',
+            workInProgress: #{@merge_request.work_in_progress?},
+            removeWipUrl: '#{remove_wip_namespace_project_merge_request_path(@project.namespace, @project, @merge_request)}',
+            branchMissing: #{@merge_request.branch_missing?},
             sourceBranch: '#{@merge_request.source_branch}',
             sourceBranchUrl: '#{namespace_project_commits_path(@merge_request.source_project.namespace, @merge_request.source_project, @merge_request.source_branch)}',
             sourceBranchExists: #{@merge_request.source_branch_exists?},
