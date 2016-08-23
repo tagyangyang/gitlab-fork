@@ -1,41 +1,74 @@
 (function() {
-  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
   this.Subscription = (function() {
+    var ICON_SUBSCRIBE = 'eye';
+    var ICON_UNSUBSCRIBE = 'eye-slash';
+
     function Subscription(container) {
-      this.toggleSubscription = bind(this.toggleSubscription, this);
-      var $container;
-      $container = $(container);
+      var $container = $(container);
+
       this.url = $container.attr('data-url');
-      this.subscribe_button = $container.find('.js-subscribe-button');
-      this.subscription_status = $container.find('.subscription-status');
-      this.subscribe_button.unbind('click').click(this.toggleSubscription);
+      this.$subscribeButton = $container.find('.js-subscribe-button');
+      this.$subscriptionStatus = $container.find('.subscription-status');
+      this.$subscriptionIcon = $container.find('.subscription-icon');
+
+      this.bindEvents();
     }
 
-    Subscription.prototype.toggleSubscription = function(event) {
-      var action, btn, current_status;
-      btn = $(event.currentTarget);
-      action = btn.find('span').text();
-      current_status = this.subscription_status.attr('data-status');
-      btn.addClass('disabled');
-      return $.post(this.url, (function(_this) {
-        return function() {
-          var status;
-          btn.removeClass('disabled');
-          status = current_status === 'subscribed' ? 'unsubscribed' : 'subscribed';
-          _this.subscription_status.attr('data-status', status);
-          action = status === 'subscribed' ? 'Unsubscribe' : 'Subscribe';
-          btn.find('span').text(action);
-          _this.subscription_status.find('>div').toggleClass('hidden');
-          if (btn.attr('data-original-title')) {
-            return btn.tooltip('hide').attr('data-original-title', action).tooltip('fixTitle');
-          }
-        };
-      })(this));
+    Subscription.prototype.bindEvents = function () {
+      var self = this;
+
+      this.$subscribeButton.off('click').on('click', function (e) {
+        e.preventDefault();
+        self.toggleSubscription();
+      });
     };
 
-    return Subscription;
+    Subscription.prototype.toggleSubscription = function() {
+      this.$subscribeButton.addClass('disabled'); // disable only the visible button that was clicked
 
+      $.post(this.url)
+        .success(this.onToggleSubscriptionSuccess.bind(this))
+        .fail(this.onToggleSubscriptionFail.bind(this))
+        .always(function () {
+          this.$subscribeButton.removeClass('disabled');  // enable only the visible button that was clicked
+        }.bind(this));
+    };
+
+    Subscription.prototype.onToggleSubscriptionSuccess = function() {
+      var currentIcon = this.$subscriptionIcon.attr('data-icon');
+      var icon = currentIcon === ICON_SUBSCRIBE ? ICON_UNSUBSCRIBE : ICON_SUBSCRIBE;
+      var currentStatus = this.$subscriptionStatus.attr('data-status');
+      var status = currentStatus === 'subscribed' ? 'unsubscribed' : 'subscribed';
+      var action = status === 'subscribed' ? 'Unsubscribe' : 'Subscribe';
+
+      this.$subscriptionIcon
+        .attr('data-icon', icon)
+        .find('.label-subscribe-button-icon')
+        .removeClass("fa-" + currentIcon)
+        .addClass("fa-" + icon);
+
+      this.$subscriptionStatus
+        .attr('data-status', status)
+        .find('> div')
+        .toggleClass('hidden');
+
+      this.$subscribeButton
+        .find('span')
+        .text(action);
+
+      if (this.$subscribeButton.attr('data-original-title')) {
+        this.$subscribeButton
+          .tooltip('hide')
+          .attr('data-original-title', action)
+          .tooltip('fixTitle');
+      }
+    }
+
+    Subscription.prototype.onToggleSubscriptionFail = function() {
+      new Flash('Failed to update subscription');
+    }
+
+    return Subscription;
   })();
 
 }).call(this);
