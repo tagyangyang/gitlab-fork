@@ -59,6 +59,8 @@
           new GLForm($('.issue-form'));
           new IssuableForm($('.issue-form'));
           new IssuableTemplateSelectors();
+          new LabelsSelect();
+          new MilestoneSelect();
           break;
         case 'projects:merge_requests:new':
         case 'projects:merge_requests:edit':
@@ -67,6 +69,8 @@
           new GLForm($('.merge-request-form'));
           new IssuableForm($('.merge-request-form'));
           new IssuableTemplateSelectors();
+          new LabelsSelect();
+          new MilestoneSelect();
           break;
         case 'projects:tags:new':
           new ZenMode();

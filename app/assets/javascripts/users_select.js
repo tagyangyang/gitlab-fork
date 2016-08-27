@@ -146,7 +146,9 @@
               page = $('body').data('page');
               isIssueIndex = page === 'projects:issues:index';
               isMRIndex = (page === page && page === 'projects:merge_requests:index');
-              if ($dropdown.hasClass('js-filter-bulk-update')) {
+              if ($dropdown.hasClass('js-filter-bulk-update') || $dropdown.hasClass('js-issuable-form-dropdown')) {
+                e.preventDefault();
+                selectedId = user.id;
                 return;
               }
               if (page === 'projects:boards:show') {
@@ -163,6 +165,9 @@
                 selected = $dropdown.closest('.selectbox').find("input[name='" + ($dropdown.data('field-name')) + "']").val();
                 return assignTo(selected);
               }
+            },
+            id: function(user) {
+              return user.id;
             },
             renderRow: function(user) {
               var avatar, img, listClosingTags, listWithName, listWithUserName, selected, username;

@@ -58,7 +58,7 @@
                   title: 'Upcoming'
                 });
               }
-              if (extraOptions.length > 2) {
+              if (extraOptions.length > 0) {
                 extraOptions.push('divider');
               }
               return callback(extraOptions.concat(data));

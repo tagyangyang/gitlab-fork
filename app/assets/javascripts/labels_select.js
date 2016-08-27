@@ -124,20 +124,22 @@
                 };
               }).value();
               if ($dropdown.hasClass('js-extra-options')) {
-                if (showNo) {
-                  data.unshift({
-                    id: 0,
-                    title: 'No Label'
-                  });
-                }
+                var extraData = [];
                 if (showAny) {
-                  data.unshift({
+                  extraData.push({
                     isAny: true,
                     title: 'Any Label'
                   });
                 }
-                if (data.length > 2) {
-                  data.splice(2, 0, 'divider');
+                if (showNo) {
+                 extraData.push({
+                   id: 0,
+                   title: 'No Label'
+                 });
+                }
+                if (extraData.length) {
+                  extraData.push('divider');
+                  data = extraData.concat(data);
                 }
               }
               return callback(data);
@@ -226,6 +228,13 @@
           },
           fieldName: $dropdown.data('field-name'),
           id: function(label) {
+            if ($dropdown.hasClass('js-issuable-form-dropdown')) {
+              if (label.id === 0) {
+                return;
+              } else {
+                return label.id;
+              }
+            }
             if ($dropdown.hasClass("js-filter-submit") && (label.isAny == null)) {
               return label.title;
             } else {
@@ -239,9 +248,7 @@
             isMRIndex = page === 'projects:merge_requests:index';
             $selectbox.hide();
             $value.removeAttr('style');
-            if (page === 'projects:boards:show') {
-              return;
-            }
+            if (page === 'projects:boards:show' || $dropdown.hasClass('js-issuable-form-dropdown')) return;
             if ($dropdown.hasClass('js-multiselect')) {
               if ($dropdown.hasClass('js-filter-submit') && (isIssueIndex || isMRIndex)) {
                 selectedLabels = $dropdown.closest('form').find("input:hidden[name='" + ($dropdown.data('fieldName')) + "']");
@@ -264,9 +271,7 @@
           clicked: function(label, $el, e) {
             var isIssueIndex, isMRIndex, page;
             _this.enableBulkLabelDropdown();
-            if ($dropdown.hasClass('js-filter-bulk-update')) {
-              return;
-            }
+            if ($dropdown.hasClass('js-filter-bulk-update') || $dropdown.hasClass('js-issuable-form-dropdown')) return;
             page = $('body').data('page');
             isIssueIndex = page === 'projects:issues:index';
             isMRIndex = page === 'projects:merge_requests:index';
