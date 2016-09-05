@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require 'slack_bot_server'
+require 'slack_bot_server/redis_queue'
+require 'slack_bot_server/remote_control'
+
+queue = SlackBotServer::RedisQueue.new
+slack_remote = SlackBotServer::RemoteControl.new(queue: queue)
+
+slack_remote.add_bot(ENV['SLACK_BOT_KEY'])

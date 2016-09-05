@@ -172,6 +172,9 @@ gem 'gemnasium-gitlab-service', '~> 0.2'
 # Slack integration
 gem 'slack-notifier', '~> 1.2.0'
 
+# Slack chatbot
+gem 'slack-bot-server'
+
 # Asana integration
 gem 'asana', '~> 0.4.0'
 

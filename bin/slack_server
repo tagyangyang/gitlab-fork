@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require 'sidekiq'
+
+require 'slack_bot_server'
+require 'slack_bot_server/redis_queue'
+
+module SlackBotServer
+  class PongServer < SlackBotServer::Bot
+    username 'Tanuki'
+
+    on_mention do |data|
+      reply text: "PONG"
+    end
+
+    on_im do |data|
+      reply text: "PONG"
+    end
+  end
+end
+
+queue = SlackBotServer::RedisQueue.new
+server = SlackBotServer::Server.new(queue: queue)
+
+server.on_add do |token|
+  SlackBotServer::PongServer.new(token: token)
+end
+
+# This is a blocking call, code placed after this line will not be executed
+server.start
