@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
 
   add_authentication_token_field :authentication_token
 
-  default_value_for :admin, false
+  default_value_for :role_type, :default
   default_value_for(:external) { current_application_settings.user_default_external }
   default_value_for :can_create_group, gitlab_config.default_can_create_group
   default_value_for :can_create_team, false
@@ -136,6 +136,10 @@ class User < ActiveRecord::Base
   # Note: When adding an option, it MUST go on the end of the array.
   enum project_view: [:readme, :activity, :files]
 
+  # User's role
+  # Note: When adding an option, it MUST go on the end of the array.
+  enum role_type: [:default, :admin, :auditor]
+
   alias_attribute :private_token, :authentication_token
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
@@ -165,7 +169,8 @@ class User < ActiveRecord::Base
   mount_uploader :avatar, AvatarUploader
 
   # Scopes
-  scope :admins, -> { where(admin: true) }
+  scope :admins, -> { where(role_type: 1) }
+  scope :auditors, -> { where(role_type: 2) }
   scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
   scope :external, -> { where(external: true) }
   scope :active, -> { with_state(:active) }
@@ -223,6 +228,8 @@ class User < ActiveRecord::Base
       case filter_name
       when 'admins'
         self.admins
+      when 'auditors'
+        self.auditors
       when 'blocked'
         self.blocked
       when 'two_factor_disabled'
@@ -437,7 +444,11 @@ class User < ActiveRecord::Base
   end
 
   def is_admin?
-    admin
+    role_type == 'admin'
+  end
+
+  def is_auditor?
+    role_type == 'auditor'
   end
 
   def require_ssh_key?
@@ -461,7 +472,7 @@ class User < ActiveRecord::Base
   end
 
   def can_select_namespace?
-    several_namespaces? || admin
+    several_namespaces? || is_admin?
   end
 
   def can?(action, subject)

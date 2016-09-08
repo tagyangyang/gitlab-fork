@@ -2,7 +2,7 @@
   = @user.name
   - if @user.blocked?
     %span.cred (Blocked)
-  - if @user.admin
+  - if @user.is_admin?
     %span.cred (Admin)
 
   .pull-right

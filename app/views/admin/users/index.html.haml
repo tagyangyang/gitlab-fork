@@ -46,6 +46,10 @@
           = link_to admin_users_path(filter: "admins") do
             Admins
             %small.badge= number_with_delimiter(User.admins.count)
+        = nav_link(html_options: { class: ('active' if params[:filter] == 'auditors') }) do
+          = link_to admin_users_path(filter: "auditors") do
+            Auditors
+            %small.badge= number_with_delimiter(User.auditors.count)
         = nav_link(html_options: { class: "#{'active' if params[:filter] == 'two_factor_enabled'} filter-two-factor-enabled" }) do
           = link_to admin_users_path(filter: 'two_factor_enabled') do
             2FA Enabled

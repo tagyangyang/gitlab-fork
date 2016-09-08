@@ -51,12 +51,12 @@
         .col-sm-10= f.check_box :can_create_group
 
       .form-group
-        = f.label :admin, class: 'control-label'
+        = f.label :role_type, class: 'control-label'
         - if current_user == @user
-          .col-sm-10= f.check_box :admin, disabled: true
-          .col-sm-10 You cannot remove your own admin rights.
+          .col-sm-10= f.select :role_type, role_type_choices, {}, class: 'form-control', disabled: true
+          .col-sm-10.col-sm-push-2 You cannot remove your own admin rights.
         - else
-          .col-sm-10= f.check_box :admin
+          .col-sm-10= f.select :role_type, role_type_choices, {}, class: 'form-control'
 
       .form-group
         = f.label :external, class: 'control-label'

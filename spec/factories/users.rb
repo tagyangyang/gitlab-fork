@@ -11,7 +11,7 @@ FactoryGirl.define do
     can_create_group true
 
     trait :admin do
-      admin true
+      role_type 'admin'
     end
 
     trait :two_factor do
