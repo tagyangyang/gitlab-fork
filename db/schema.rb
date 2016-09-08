@@ -1088,7 +1088,6 @@ ActiveRecord::Schema.define(version: 20160920160832) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "name"
-    t.boolean  "admin",                       default: false, null: false
     t.integer  "projects_limit",              default: 10
     t.string   "skype",                       default: "",    null: false
     t.string   "linkedin",                    default: "",    null: false
@@ -1132,9 +1131,9 @@ ActiveRecord::Schema.define(version: 20160920160832) do
     t.datetime "otp_grace_period_started_at"
     t.boolean  "ldap_email",                  default: false, null: false
     t.boolean  "external",                    default: false
+    t.integer  "role_type",                   default: 0,     null: false
   end
 
-  add_index "users", ["admin"], name: "index_users_on_admin", using: :btree
   add_index "users", ["authentication_token"], name: "index_users_on_authentication_token", unique: true, using: :btree
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
   add_index "users", ["created_at"], name: "index_users_on_created_at", using: :btree
