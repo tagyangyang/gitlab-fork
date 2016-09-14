@@ -6,7 +6,7 @@
         %h3 Import projects from GitLab.com
       .modal-body
         To enable importing projects from GitLab.com,
-        - if current_user.admin?
+        - if current_user.is_admin?
           as administrator you need to configure
         - else
           ask your GitLab administrator to configure

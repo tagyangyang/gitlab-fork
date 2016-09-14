@@ -83,7 +83,7 @@
                   .col-md-3
                     = project_feature_access_select(:snippets_access_level)
 
-            - if Gitlab.config.lfs.enabled && current_user.admin?
+            - if Gitlab.config.lfs.enabled && current_user.is_admin?
               .row
                 .col-md-9
                   = f.label :lfs_enabled, 'LFS', class: 'label-light'

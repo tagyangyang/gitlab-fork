@@ -2,7 +2,7 @@ class ProjectPolicy < BasePolicy
   def rules
     team_access!(user)
 
-    owner = user.admin? ||
+    owner = user.is_admin? ||
             project.owner == user ||
             (project.group && project.group.has_owner?(user))
 

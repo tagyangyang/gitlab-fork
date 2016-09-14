@@ -6,8 +6,10 @@
       = link_to user.name, [:admin, user]
     - if user.blocked?
       %span.label.label-danger blocked
-    - if user.admin?
+    - if user.is_admin?
       %span.label.label-success Admin
+    - if user.is_auditor?
+      %span.label.label-success Auditor
     - if user.external?
       %span.label.label-default External
     - if user == current_user
