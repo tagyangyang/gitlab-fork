@@ -8,6 +8,8 @@ class ProjectPolicy < BasePolicy
 
     owner_access! if owner
 
+    read_only_access! if user.is_auditor?
+
     if project.public? || (project.internal? && !user.external?)
       guest_access!
       public_access!
@@ -212,6 +214,31 @@ class ProjectPolicy < BasePolicy
 
     # Allow to read builds by anonymous user if guests are allowed
     can! :read_build if project.public_builds?
+
+    disabled_features!
+  end
+
+  # This is similar to anonymous but doesn't check to see if the repo or builds
+  # are public.
+  def read_only_access!
+    can! :read_project
+    can! :read_board
+    can! :read_list
+    can! :read_wiki
+    can! :read_label
+    can! :read_milestone
+    can! :read_project_snippet
+    can! :read_project_member
+    can! :read_merge_request
+    can! :read_note
+    can! :read_pipeline
+    can! :read_commit_status
+    can! :read_container_image
+    can! :download_code
+    can! :read_build
+
+    # NOTE: may be overridden by IssuePolicy
+    can! :read_issue
 
     disabled_features!
   end
