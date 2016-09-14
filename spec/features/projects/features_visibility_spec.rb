@@ -96,7 +96,7 @@ describe 'Edit Project Settings', feature: true do
 
     context 'admin user' do
       before do
-        non_member.update_attribute(:admin, true)
+        non_member.update_attribute(:role_type, 'admin')
         login_as(non_member)
       end
 

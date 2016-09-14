@@ -4,7 +4,7 @@ describe Projects::UpdateService, services: true do
   describe :update_by_user do
     before do
       @user = create :user
-      @admin = create :user, admin: true
+      @admin = create :admin
       @project = create :project, creator_id: @user.id, namespace: @user.namespace
       @opts = {}
     end
@@ -101,7 +101,7 @@ describe Projects::UpdateService, services: true do
   end
 
   describe :visibility_level do
-    let(:user) { create :user, admin: true }
+    let(:user) { create :admin }
     let(:project) { create(:project, :internal) }
     let(:forked_project) { create(:forked_project_with_submodules, :internal) }
     let(:opts) { {} }

@@ -16,7 +16,7 @@ module SharedUser
   protected
 
   def user_exists(name, options = {})
-    User.find_by(name: name) || create(:user, { name: name, admin: false }.merge(options))
+    User.find_by(name: name) || create(:user, { name: name }.merge(options))
   end
 
   step 'I have an ssh key' do

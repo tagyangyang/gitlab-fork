@@ -45,7 +45,7 @@ describe ProjectFeature do
       end
 
       it "returns true if user is an admin" do
-        user.update_attribute(:admin, true)
+        user.update_attribute(:role_type, 'admin')
 
         features.each do |feature|
           project.project_feature.update_attribute("#{feature}_access_level".to_sym, ProjectFeature::PRIVATE)

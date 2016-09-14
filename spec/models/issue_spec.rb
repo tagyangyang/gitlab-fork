@@ -494,18 +494,18 @@ describe Issue, models: true do
 
     context 'with an admin user' do
       let(:project) { create(:empty_project) }
-      let(:user) { create(:user, admin: true) }
+      let(:admin) { create(:admin) }
 
       it 'returns true for a regular issue' do
         issue = build(:issue, project: project)
 
-        expect(issue).to be_readable_by(user)
+        expect(issue).to be_readable_by(admin)
       end
 
       it 'returns true for a confidential issue' do
         issue = build(:issue, :confidential, project: project)
 
-        expect(issue).to be_readable_by(user)
+        expect(issue).to be_readable_by(admin)
       end
     end
   end

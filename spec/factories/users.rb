@@ -14,6 +14,10 @@ FactoryGirl.define do
       role_type 'admin'
     end
 
+    trait :auditor do
+      role_type 'auditor'
+    end
+
     trait :two_factor do
       two_factor_via_otp
     end
@@ -51,5 +55,6 @@ FactoryGirl.define do
     end
 
     factory :admin, traits: [:admin]
+    factory :auditor, traits: [:auditor]
   end
 end

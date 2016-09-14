@@ -3,7 +3,7 @@ require 'spec_helper'
 describe CreateSnippetService, services: true do
   before do
     @user = create :user
-    @admin = create :user, admin: true
+    @admin = create :admin
     @opts = {
       title: 'Test snippet',
       file_name: 'snippet.rb',

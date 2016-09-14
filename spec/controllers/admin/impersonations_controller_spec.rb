@@ -39,7 +39,7 @@ describe Admin::ImpersonationsController do
 
         context "when the impersonator is not admin (anymore)" do
           before do
-            impersonator.admin = false
+            impersonator.role_type = 'default'
             impersonator.save
           end
 

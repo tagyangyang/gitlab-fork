@@ -190,7 +190,7 @@ describe Gitlab::GitAccess, lib: true do
         describe "#{role} access" do
           before do
             if role == :admin
-              user.update_attribute(:admin, true)
+              user.update_attribute(:role_type, 'admin')
             else
               project.team << [user, role]
             end

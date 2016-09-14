@@ -72,7 +72,7 @@ describe Ability, lib: true do
       let(:project) { create(:project, :internal) }
 
       it 'returns users that are administrators' do
-        user = build(:user, admin: true)
+        user = build(:user, role_type: 'admin')
 
         expect(described_class.users_that_can_read_project([user], project)).
           to eq([user])
@@ -123,7 +123,7 @@ describe Ability, lib: true do
       let(:project) { create(:project, :private) }
 
       it 'returns users that are administrators' do
-        user = build(:user, admin: true)
+        user = build(:user, role_type: 'admin')
 
         expect(described_class.users_that_can_read_project([user], project)).
           to eq([user])
@@ -174,7 +174,7 @@ describe Ability, lib: true do
   describe '.issues_readable_by_user' do
     context 'with an admin user' do
       it 'returns all given issues' do
-        user = build(:user, admin: true)
+        user = build(:user, role_type: 'admin')
         issue = build(:issue)
 
         expect(described_class.issues_readable_by_user([issue], user)).
