@@ -2,8 +2,8 @@ namespace :gitlab do
   namespace :import do
     desc "GitLab | Add all users to all projects (admin users are added as masters)"
     task all_users_to_all_projects: :environment  do |t, args|
-      user_ids = User.where(admin: false).pluck(:id)
-      admin_ids = User.where(admin: true).pluck(:id)
+      user_ids = User.where(role_type: User.role_types[:regular]).pluck(:id)
+      admin_ids = User.where(role_type: User.role_types[:regular]).pluck(:id)
       project_ids = Project.pluck(:id)
 
       puts "Importing #{user_ids.size} users into #{project_ids.size} projects"
@@ -23,8 +23,8 @@ namespace :gitlab do
 
     desc "GitLab | Add all users to all groups (admin users are added as owners)"
     task all_users_to_all_groups: :environment  do |t, args|
-      user_ids = User.where(admin: false).pluck(:id)
-      admin_ids = User.where(admin: true).pluck(:id)
+      user_ids = User.where(role_type: User.role_types[:regular]).pluck(:id)
+      admin_ids = User.where(role_type: User.role_types[:admin]).pluck(:id)
       groups = Group.all
 
       puts "Importing #{user_ids.size} users into #{groups.size} groups"

@@ -6,7 +6,7 @@ Gitlab::Seeder.quiet do
     s.notification_email = 'admin@example.com'
     s.username = 'root'
     s.password = '5iveL!fe'
-    s.admin = true
+    s.role_type = 'admin'
     s.projects_limit = 100
     s.confirmed_at = DateTime.now
   end
