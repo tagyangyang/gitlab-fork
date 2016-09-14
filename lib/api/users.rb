@@ -65,7 +65,7 @@ module API
       #   provider                          - External provider
       #   bio                               - Bio
       #   location                          - Location of the user
-      #   admin                             - User is admin - true or false (default)
+      #   role_type                         - User is admin - true or false (default)
       #   can_create_group                  - User can create groups - true or false
       #   confirm                           - Require user confirmation - true (default) or false
       #   external                          - Flags the user as external - true or false(default)
@@ -74,11 +74,15 @@ module API
       post do
         authenticated_as_admin!
         required_attributes! [:email, :password, :name, :username]
-        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :projects_limit, :username, :bio, :location, :can_create_group, :admin, :confirm, :external]
-        admin = attrs.delete(:admin)
+        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :projects_limit, :username, :bio, :location, :can_create_group, :role_type, :confirm, :external]
+        role_type = attrs.delete(:role_type)
         confirm = !(attrs.delete(:confirm) =~ /(false|f|no|0)$/i)
         user = User.build_user(attrs)
-        user.admin = admin unless admin.nil?
+        user.role_type = case role_type
+                         when 'admin' then 'admin'
+                         when 'auditor' then 'auditor'
+                         else 'default'
+                         end
         user.skip_confirmation! unless confirm
         identity_attrs = attributes_for_keys [:provider, :extern_uid]
 
@@ -114,7 +118,7 @@ module API
       #   projects_limit                    - Limit projects each user can create
       #   bio                               - Bio
       #   location                          - Location of the user
-      #   admin                             - User is admin - true or false (default)
+      #   role_type                         - User is admin - true or false (default)
       #   can_create_group                  - User can create groups - true or false
       #   external                          - Flags the user as external - true or false(default)
       # Example Request:
@@ -122,12 +126,18 @@ module API
       put ":id" do
         authenticated_as_admin!
 
-        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :website_url, :projects_limit, :username, :bio, :location, :can_create_group, :admin, :external]
+        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :website_url, :projects_limit, :username, :bio, :location, :can_create_group, :role_type, :external]
         user = User.find(params[:id])
         not_found!('User') unless user
 
-        admin = attrs.delete(:admin)
-        user.admin = admin unless admin.nil?
+        role_type = attrs.delete(:role_type)
+        unless role_type.nil?
+          user.role_type = case role_type
+                           when 'admin' then 'admin'
+                           when 'auditor' then 'auditor'
+                           else 'default'
+                           end
+        end
 
         conflict!('Email has already been taken') if attrs[:email] &&
             User.where(email: attrs[:email]).

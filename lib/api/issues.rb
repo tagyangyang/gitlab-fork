@@ -153,7 +153,7 @@ module API
         required_attributes! [:title]
 
         keys = [:title, :description, :assignee_id, :milestone_id, :due_date, :confidential]
-        keys << :created_at if current_user.admin? || user_project.owner == current_user
+        keys << :created_at if current_user.is_admin? || user_project.owner == current_user
         attrs = attributes_for_keys(keys)
 
         # Validate label names in advance
@@ -200,7 +200,7 @@ module API
         issue = user_project.issues.find(params[:issue_id])
         authorize! :update_issue, issue
         keys = [:title, :description, :assignee_id, :milestone_id, :state_event, :due_date, :confidential]
-        keys << :updated_at if current_user.admin? || user_project.owner == current_user
+        keys << :updated_at if current_user.is_admin? || user_project.owner == current_user
         attrs = attributes_for_keys(keys)
 
         # Validate label names in advance

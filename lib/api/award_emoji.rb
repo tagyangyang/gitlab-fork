@@ -76,7 +76,7 @@ module API
           delete "#{endpoint}/:award_id" do
             award = awardable.award_emoji.find(params[:award_id])
 
-            unauthorized! unless award.user == current_user || current_user.admin?
+            unauthorized! unless award.user == current_user || current_user.is_admin?
 
             award.destroy
             present award, with: Entities::AwardEmoji

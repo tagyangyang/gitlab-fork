@@ -105,7 +105,7 @@ describe API::API, api: true  do
     end
 
     it "creates user with correct attributes" do
-      post api('/users', admin), attributes_for(:user, admin: true, can_create_group: true)
+      post api('/users', admin), attributes_for(:user, role_type: 'admin', can_create_group: true)
       expect(response).to have_http_status(201)
       user_id = json_response['id']
       new_user = User.find(user_id)
@@ -115,12 +115,22 @@ describe API::API, api: true  do
     end
 
     it "creates non-admin user" do
-      post api('/users', admin), attributes_for(:user, admin: false, can_create_group: false)
+      post api('/users', admin), attributes_for(:user, role_type: 'default', can_create_group: false)
       expect(response).to have_http_status(201)
       user_id = json_response['id']
       new_user = User.find(user_id)
       expect(new_user).not_to eq(nil)
       expect(new_user.admin).to eq(false)
+      expect(new_user.can_create_group).to eq(false)
+    end
+
+    it "creates auditor user" do
+      post api('/users', admin), attributes_for(:user, role_type: 'auditor', can_create_group: false)
+      expect(response).to have_http_status(201)
+      user_id = json_response['id']
+      new_user = User.find(user_id)
+      expect(new_user).not_to eq(nil)
+      expect(new_user.is_auditor?).to eq(true)
       expect(new_user.can_create_group).to eq(false)
     end
 
@@ -293,10 +303,17 @@ describe API::API, api: true  do
     end
 
     it "updates admin status" do
-      put api("/users/#{user.id}", admin), { admin: true }
+      put api("/users/#{user.id}", admin), { role_type: 'admin' }
       expect(response).to have_http_status(200)
       expect(json_response['is_admin']).to eq(true)
       expect(user.reload.admin).to eq(true)
+    end
+
+    it "updates auditor status" do
+      put api("/users/#{user.id}", admin), { role_type: 'auditor' }
+      expect(response).to have_http_status(200)
+      expect(json_response['is_auditor']).to eq(true)
+      expect(user.reload.is_auditor?).to eq(true)
     end
 
     it "updates external status" do
