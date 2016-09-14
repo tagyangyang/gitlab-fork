@@ -62,7 +62,7 @@
       - if artifacts.present? || actions.any?
         .btn-group.inline
           - if actions.any?
-            .btn-group
+            .btn-group.gl-overflow-dropdown
               %a.dropdown-toggle.btn.btn-default{type: 'button', 'data-toggle' => 'dropdown'}
                 = custom_icon('icon_play')
                 %b.caret
@@ -73,7 +73,7 @@
                       = custom_icon('icon_play')
                       %span= build.name.humanize
           - if artifacts.present?
-            .btn-group
+            .btn-group.gl-overflow-dropdown
               %a.dropdown-toggle.btn.btn-default.build-artifacts{type: 'button', 'data-toggle' => 'dropdown'}
                 = icon("download")
                 %b.caret

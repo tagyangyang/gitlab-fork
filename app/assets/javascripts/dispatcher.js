@@ -69,6 +69,9 @@
           new IssuableForm($('.merge-request-form'));
           new IssuableTemplateSelectors();
           break;
+        case 'projects:pipelines:index':
+          $('.content-list.pipelines').glOverflowDropdown();
+          break;
         case 'projects:tags:new':
           new ZenMode();
           new GLForm($('.tag-form'));
