@@ -12,6 +12,10 @@ module SharedAuthentication
     login_as :admin
   end
 
+  step 'I sign in as an auditor' do
+    login_as :auditor
+  end
+
   step 'I sign in as "John Doe"' do
     login_with(user_exists("John Doe"))
   end

@@ -3,6 +3,7 @@ require 'spec_helper'
 describe GroupsFinder do
   describe '#execute' do
     let(:user)            { create(:user) }
+    let(:auditor)         { create(:auditor) }
     let!(:private_group)  { create(:group, :private) }
     let!(:internal_group) { create(:group, :internal) }
     let!(:public_group)   { create(:group, :public) }
@@ -26,6 +27,11 @@ describe GroupsFinder do
           let(:user) { create(:user, external: true) }
 
           it { is_expected.to eq([public_group]) }
+        end
+
+        describe 'with an audit user' do
+          subject { finder.execute(auditor) }
+          it { is_expected.to eq([public_group, internal_group, private_group]) }
         end
       end
     end

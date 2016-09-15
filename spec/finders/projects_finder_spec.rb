@@ -2,7 +2,9 @@ require 'spec_helper'
 
 describe ProjectsFinder do
   describe '#execute' do
-    let(:user) { create(:user) }
+    let(:user)    { create(:user) }
+    let(:auditor) { create(:auditor) }
+
     let(:group) { create(:group, :public) }
 
     let!(:private_project) do
@@ -45,6 +47,11 @@ describe ProjectsFinder do
           is_expected.to eq([public_project, internal_project, private_project])
         end
       end
+    end
+
+    describe 'with an audit user' do
+      subject { finder.execute(auditor) }
+      it { is_expected.to eq([shared_project, public_project, internal_project, private_project]) }
     end
 
     describe 'with project_ids_relation' do

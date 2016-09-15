@@ -9,6 +9,7 @@ class GroupsFinder < UnionFinder
 
   def all_groups(current_user)
     groups = []
+    return [Group.all] if current_user && current_user.is_auditor?
 
     groups << current_user.authorized_groups if current_user
     groups << Group.unscoped.public_to_user(current_user)
