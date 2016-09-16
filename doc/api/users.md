@@ -51,6 +51,9 @@ GET /users
     "web_url": "http://localhost:3000/u/john_smith",
     "created_at": "2012-05-23T08:00:58Z",
     "is_admin": false,
+    "admin": false,
+    "auditor": false,
+    "role_type": "regular",
     "bio": null,
     "location": null,
     "skype": "",
@@ -83,6 +86,9 @@ GET /users
     "web_url": "http://localhost:3000/u/jack_smith",
     "created_at": "2012-05-23T08:01:01Z",
     "is_admin": false,
+    "admin": false,
+    "auditor": false,
+    "role_type": "regular",
     "bio": null,
     "location": null,
     "skype": "",
@@ -142,6 +148,9 @@ Parameters:
   "web_url": "http://localhost:3000/u/john_smith",
   "created_at": "2012-05-23T08:00:58Z",
   "is_admin": false,
+  "admin": false,
+  "auditor": false,
+  "role_type": "regular",
   "bio": null,
   "location": null,
   "skype": "",
@@ -172,6 +181,9 @@ Parameters:
   "web_url": "http://localhost:3000/u/john_smith",
   "created_at": "2012-05-23T08:00:58Z",
   "is_admin": false,
+  "admin": false,
+  "auditor": false,
+  "role_type": "regular",
   "bio": null,
   "location": null,
   "skype": "",
@@ -219,7 +231,8 @@ Parameters:
 - `provider` (optional)         - External provider name
 - `bio` (optional)              - User's biography
 - `location` (optional)         - User's location
-- `admin` (optional)            - User is admin - true or false (default)
+- `admin`                       - User is admin - true or false (default)
+- `role_type` (optional)        - The users role - (regular, admin, or auditor)
 - `can_create_group` (optional) - User can create groups - true or false
 - `confirm` (optional)          - Require confirmation - true (default) or false
 - `external` (optional)         - Flags the user as external - true or false(default)
@@ -247,7 +260,8 @@ Parameters:
 - `provider`                    - External provider name
 - `bio`                         - User's biography
 - `location` (optional)         - User's location
-- `admin` (optional)            - User is admin - true or false (default)
+- `admin`                       - User is admin - true or false (default)
+- `role_type` (optional)        - The users role - (regular, admin, or auditor)
 - `can_create_group` (optional) - User can create groups - true or false
 - `external` (optional)         - Flags the user as external - true or false(default)
 
@@ -290,6 +304,9 @@ GET /user
   "web_url": "http://localhost:3000/u/john_smith",
   "created_at": "2012-05-23T08:00:58Z",
   "is_admin": false,
+  "admin": false,
+  "auditor": false,
+  "role_type": "regular",
   "bio": null,
   "location": null,
   "skype": "",

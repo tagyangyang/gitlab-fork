@@ -14,9 +14,10 @@ module API
 
     class User < UserBasic
       expose :created_at
-      expose :is_admin?, as: :is_admin
-      expose :is_auditor?, as: :is_auditor
-      expose :bio, :location, :skype, :linkedin, :twitter, :website_url
+      expose :admin?, as: :is_admin
+      expose :admin?, as: :admin
+      expose :auditor?, as: :auditor
+      expose :bio, :location, :skype, :linkedin, :twitter, :website_url, :role_type
     end
 
     class Identity < Grape::Entity

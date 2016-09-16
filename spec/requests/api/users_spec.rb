@@ -306,14 +306,17 @@ describe API::API, api: true  do
       put api("/users/#{user.id}", admin), { role_type: 'admin' }
       expect(response).to have_http_status(200)
       expect(json_response['is_admin']).to eq(true)
-      expect(user.reload.is_admin?).to eq(true)
+      expect(json_response['admin']).to eq(true)
+      expect(json_response['role_type']).to eq('admin')
+      expect(user.reload.admin?).to eq(true)
     end
 
     it "updates auditor status" do
       put api("/users/#{user.id}", admin), { role_type: 'auditor' }
       expect(response).to have_http_status(200)
-      expect(json_response['is_auditor']).to eq(true)
-      expect(user.reload.is_auditor?).to eq(true)
+      expect(json_response['auditor']).to eq(true)
+      expect(json_response['role_type']).to eq('auditor')
+      expect(user.reload.auditor?).to eq(true)
     end
 
     it "updates external status" do
@@ -327,7 +330,9 @@ describe API::API, api: true  do
       put api("/users/#{admin_user.id}", admin), { can_create_group: false }
       expect(response).to have_http_status(200)
       expect(json_response['is_admin']).to eq(true)
-      expect(admin_user.reload.is_admin?).to eq(true)
+      expect(json_response['admin']).to eq(true)
+      expect(json_response['role_type']).to eq('admin')
+      expect(admin_user.reload.admin?).to eq(true)
       expect(admin_user.can_create_group).to eq(false)
     end
 
@@ -618,7 +623,7 @@ describe API::API, api: true  do
       get api("/user", user)
       expect(response).to have_http_status(200)
       expect(json_response['email']).to eq(user.email)
-      expect(json_response['is_admin']).to eq(user.is_admin?)
+      expect(json_response['is_admin']).to eq(user.admin?)
       expect(json_response['can_create_project']).to eq(user.can_create_project?)
       expect(json_response['can_create_group']).to eq(user.can_create_group?)
       expect(json_response['projects_limit']).to eq(user.projects_limit)

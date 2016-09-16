@@ -65,7 +65,8 @@ module API
       #   provider                          - External provider
       #   bio                               - Bio
       #   location                          - Location of the user
-      #   role_type                         - User is admin - true or false (default)
+      #   admin                             - User is admin - true or false (default)
+      #   role_type                         - Possible role type to apply - regular (default), admin, auditor
       #   can_create_group                  - User can create groups - true or false
       #   confirm                           - Require user confirmation - true (default) or false
       #   external                          - Flags the user as external - true or false(default)
@@ -74,15 +75,22 @@ module API
       post do
         authenticated_as_admin!
         required_attributes! [:email, :password, :name, :username]
-        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :projects_limit, :username, :bio, :location, :can_create_group, :role_type, :confirm, :external]
+        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :projects_limit, :username, :bio, :location, :can_create_group, admin, :role_type, :confirm, :external]
+        admin = attrs.delete(:admin)
         role_type = attrs.delete(:role_type)
         confirm = !(attrs.delete(:confirm) =~ /(false|f|no|0)$/i)
         user = User.build_user(attrs)
-        user.role_type = case role_type
-                         when 'admin' then 'admin'
-                         when 'auditor' then 'auditor'
-                         else 'default'
-                         end
+
+        unless admin.nil?
+          user.role_type = User.role_type[:admin]
+        else
+          user.role_type = case role_type
+                           when 'admin' then User.role_type[:admin]
+                           when 'auditor' then User.role_type[:auditor]
+                           else User.role_type[:regular]
+                           end
+        end
+
         user.skip_confirmation! unless confirm
         identity_attrs = attributes_for_keys [:provider, :extern_uid]
 
@@ -118,7 +126,8 @@ module API
       #   projects_limit                    - Limit projects each user can create
       #   bio                               - Bio
       #   location                          - Location of the user
-      #   role_type                         - User is admin - true or false (default)
+      #   admin                             - User is admin - true or false (default)
+      #   role_type                         - Possible role type to apply - regular (default), admin, auditor
       #   can_create_group                  - User can create groups - true or false
       #   external                          - Flags the user as external - true or false(default)
       # Example Request:
@@ -126,16 +135,20 @@ module API
       put ":id" do
         authenticated_as_admin!
 
-        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :website_url, :projects_limit, :username, :bio, :location, :can_create_group, :role_type, :external]
+        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :website_url, :projects_limit, :username, :bio, :location, :can_create_group, :admin, :role_type, :external]
         user = User.find(params[:id])
         not_found!('User') unless user
 
         role_type = attrs.delete(:role_type)
-        unless role_type.nil?
+        admin = attrs.delete(:admin)
+
+        if admin.nil?
+          user.role_type = User.role_type[:admin]
+        elsif role_type.nil?
           user.role_type = case role_type
-                           when 'admin' then 'admin'
-                           when 'auditor' then 'auditor'
-                           else 'default'
+                           when 'admin' then User.role_type[:admin]
+                           when 'auditor' then User.role_type[:auditor]
+                           else User.role_type[:regular]
                            end
         end
 
