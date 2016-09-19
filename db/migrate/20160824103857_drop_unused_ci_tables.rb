@@ -5,7 +5,7 @@ class DropUnusedCiTables < ActiveRecord::Migration
   DOWNTIME = false
 
   def change
-    drop_table(:ci_services)
-    drop_table(:ci_web_hooks)
+    drop_table(:ci_services, force: :cascade)
+    drop_table(:ci_web_hooks, force: :cascade)
   end
 end
