@@ -11,11 +11,11 @@ FactoryGirl.define do
     can_create_group true
 
     trait :admin do
-      role_type 'admin'
+      role_type User.role_types[:admin]
     end
 
     trait :auditor do
-      role_type 'auditor'
+      role_type User.role_types[:auditor]
     end
 
     trait :two_factor do

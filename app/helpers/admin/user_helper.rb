@@ -3,7 +3,7 @@ module Admin
   module UserHelper
     def role_type_choices
       [
-        ['Default', :default],
+        ['Regular', :regular],
         ['Admin', :admin],
         ['Auditor', :auditor]
       ]

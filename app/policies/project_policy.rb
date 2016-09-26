@@ -2,13 +2,13 @@ class ProjectPolicy < BasePolicy
   def rules
     team_access!(user)
 
-    owner = user.is_admin? ||
+    owner = user.admin? ||
             project.owner == user ||
             (project.group && project.group.has_owner?(user))
 
     owner_access! if owner
 
-    read_only_access! if user.is_auditor?
+    read_only_access! if user.auditor?
 
     if project.public? || (project.internal? && !user.external?)
       guest_access!

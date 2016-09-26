@@ -20,6 +20,6 @@ module SpammableActions
   end
 
   def authorize_submit_spammable!
-    access_denied! unless current_user.is_admin?
+    access_denied! unless current_user.admin?
   end
 end

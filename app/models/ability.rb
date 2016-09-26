@@ -7,7 +7,7 @@ class Ability
         users
       else
         users.select do |user|
-          if user.is_admin?
+          if user.admin?
             true
           elsif project.internal? && !user.external?
             true
@@ -27,7 +27,7 @@ class Ability
     # issues - The issues to reduce down to those readable by the user.
     # user - The User for which to check the issues
     def issues_readable_by_user(issues, user = nil)
-      return issues if user && user.is_admin?
+      return issues if user && user.admin?
 
       issues.select { |issue| issue.visible_to_user?(user) }
     end
@@ -35,7 +35,7 @@ class Ability
     # TODO: make this private and use the actual abilities stuff for this
     def can_edit_note?(user, note)
       return false if !note.editable? || !user.present?
-      return true if note.author == user || user.is_admin?
+      return true if note.author == user || user.admin?
 
       if note.project
         max_access_level = note.project.team.max_member_access(user.id)

@@ -90,8 +90,8 @@ class Issue < ActiveRecord::Base
 
   def self.visible_to_user(user)
     return where('issues.confidential IS NULL OR issues.confidential IS FALSE') if user.blank?
-    return all if user.is_admin?
-    return all if user.is_auditor?
+    return all if user.admin?
+    return all if user.auditor?
 
     # Check if we are scoped to a specific project's issues
     if owner_project
@@ -247,9 +247,9 @@ class Issue < ActiveRecord::Base
 
   # Returns `true` if the given User can read the current Issue.
   def readable_by?(user)
-    if user.is_admin?
+    if user.admin?
       true
-    elsif user.is_auditor?
+    elsif user.auditor?
       true
     elsif project.owner == user
       true

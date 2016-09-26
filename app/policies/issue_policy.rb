@@ -18,8 +18,8 @@ class IssuePolicy < IssuablePolicy
 
   def can_read_confidential?
     return false unless @user
-    return true if @user.is_admin?
-    return true if @user.is_auditor?
+    return true if @user.admin?
+    return true if @user.auditor?
     return true if @subject.author == @user
     return true if @subject.assignee == @user
     return true if @subject.project.team.member?(@user, Gitlab::Access::REPORTER)

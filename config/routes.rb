@@ -80,7 +80,7 @@ Rails.application.routes.draw do
   API::API.logger Rails.logger
   mount API::API => '/api'
 
-  constraint = lambda { |request| request.env['warden'].authenticate? and request.env['warden'].user.is_admin? }
+  constraint = lambda { |request| request.env['warden'].authenticate? and request.env['warden'].user.admin? }
   constraints constraint do
     mount Sidekiq::Web, at: '/admin/sidekiq', as: :sidekiq
   end

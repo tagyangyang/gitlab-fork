@@ -110,7 +110,7 @@ describe API::API, api: true  do
       user_id = json_response['id']
       new_user = User.find(user_id)
       expect(new_user).not_to eq(nil)
-      expect(new_user.is_admin?).to eq(true)
+      expect(new_user.admin?).to eq(true)
       expect(new_user.can_create_group).to eq(true)
     end
 
@@ -120,7 +120,7 @@ describe API::API, api: true  do
       user_id = json_response['id']
       new_user = User.find(user_id)
       expect(new_user).not_to eq(nil)
-      expect(new_user.is_admin?).to eq(false)
+      expect(new_user.admin?).to eq(false)
       expect(new_user.can_create_group).to eq(false)
     end
 
@@ -130,7 +130,7 @@ describe API::API, api: true  do
       user_id = json_response['id']
       new_user = User.find(user_id)
       expect(new_user).not_to eq(nil)
-      expect(new_user.is_auditor?).to eq(true)
+      expect(new_user.auditor?).to eq(true)
       expect(new_user.can_create_group).to eq(false)
     end
 
@@ -140,7 +140,7 @@ describe API::API, api: true  do
       user_id = json_response['id']
       new_user = User.find(user_id)
       expect(new_user).not_to eq(nil)
-      expect(new_user.is_admin?).to eq(false)
+      expect(new_user.admin?).to eq(false)
     end
 
     it "returns 201 Created on success" do

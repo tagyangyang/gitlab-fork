@@ -149,7 +149,7 @@ module Gitlab
       end
 
       def admin_user?
-        @user.is_admin?
+        @user.admin?
       end
 
       def parsed_relation_hash

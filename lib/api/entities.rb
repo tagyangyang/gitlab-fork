@@ -533,9 +533,9 @@ module API
       expose :locked
       expose :version, :revision, :platform, :architecture
       expose :contacted_at
-      expose :token, if: lambda { |runner, options| options[:current_user].is_admin? || !runner.is_shared? }
+      expose :token, if: lambda { |runner, options| options[:current_user].admin? || !runner.is_shared? }
       expose :projects, with: Entities::BasicProjectDetails do |runner, options|
-        if options[:current_user].is_admin?
+        if options[:current_user].admin?
           runner.projects
         else
           options[:current_user].authorized_projects.where(id: runner.projects)

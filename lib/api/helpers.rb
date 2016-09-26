@@ -45,7 +45,7 @@ module API
 
       # If the sudo is the current user do nothing
       if identifier && !(@current_user.id == identifier || @current_user.username == identifier)
-        forbidden!('Must be admin to use sudo') unless @current_user.is_admin?
+        forbidden!('Must be admin to use sudo') unless @current_user.admin?
         @current_user = User.by_username_or_id(identifier)
         not_found!("No user id or username for: #{identifier}") if @current_user.nil?
       end
@@ -143,7 +143,7 @@ module API
     end
 
     def authenticated_as_admin!
-      forbidden! unless current_user.is_admin?
+      forbidden! unless current_user.admin?
     end
 
     def authorize!(action, subject = nil)

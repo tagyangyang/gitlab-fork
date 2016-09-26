@@ -9,7 +9,7 @@ module API
       # Example Request:
       #  GET /namespaces
       get do
-        @namespaces = if current_user.is_admin?
+        @namespaces = if current_user.admin?
                         Namespace.all
                       else
                         current_user.namespaces

@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
 
   add_authentication_token_field :authentication_token
 
-  default_value_for :role_type, :default
+  default_value_for :role_type, :regular
   default_value_for(:external) { current_application_settings.user_default_external }
   default_value_for :can_create_group, gitlab_config.default_can_create_group
   default_value_for :can_create_team, false
@@ -138,7 +138,7 @@ class User < ActiveRecord::Base
 
   # User's role
   # Note: When adding an option, it MUST go on the end of the array.
-  enum role_type: [:default, :admin, :auditor]
+  enum role_type: [:regular, :admin, :auditor]
 
   alias_attribute :private_token, :authentication_token
 
@@ -169,8 +169,8 @@ class User < ActiveRecord::Base
   mount_uploader :avatar, AvatarUploader
 
   # Scopes
-  scope :admins, -> { where(role_type: 1) }
-  scope :auditors, -> { where(role_type: 2) }
+  scope :admins, -> { admin } # `admin` comes from the enum attribute on `role_type`
+  scope :auditors, -> { auditor } # `auditor` comes from the enum attribute on `role_type`
   scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
   scope :external, -> { where(external: true) }
   scope :active, -> { with_state(:active) }
@@ -443,14 +443,6 @@ class User < ActiveRecord::Base
     authorized_projects(Gitlab::Access::REPORTER).non_archived.with_issues_enabled
   end
 
-  def is_admin?
-    role_type == 'admin'
-  end
-
-  def is_auditor?
-    role_type == 'auditor'
-  end
-
   def require_ssh_key?
     keys.count == 0
   end
@@ -472,7 +464,7 @@ class User < ActiveRecord::Base
   end
 
   def can_select_namespace?
-    several_namespaces? || is_admin?
+    several_namespaces? || admin?
   end
 
   def can?(action, subject)

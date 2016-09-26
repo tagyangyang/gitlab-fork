@@ -56,7 +56,7 @@ module API
       #   GET /project/:id/services/gitlab-ci
       #
       get ':id/services/:service_slug' do
-        present project_service, with: Entities::ProjectService, include_passwords: current_user.is_admin?
+        present project_service, with: Entities::ProjectService, include_passwords: current_user.admin?
       end
     end
   end

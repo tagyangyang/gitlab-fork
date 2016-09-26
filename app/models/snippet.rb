@@ -143,7 +143,7 @@ class Snippet < ActiveRecord::Base
 
     def accessible_to(user)
       return are_public unless user.present?
-      return all if user.is_admin?
+      return all if user.admin?
 
       where(
         'visibility_level IN (:visibility_levels)

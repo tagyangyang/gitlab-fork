@@ -2,8 +2,10 @@
   = @user.name
   - if @user.blocked?
     %span.cred (Blocked)
-  - if @user.is_admin?
+  - if @user.admin?
     %span.cred (Admin)
+  - if @user.auditor?
+    %span.cred (Auditor)
 
   .pull-right
     - unless @user == current_user || @user.blocked?

@@ -220,7 +220,7 @@ describe "Admin::Users", feature: true  do
       it "changes user entry" do
         @simple_user.reload
         expect(@simple_user.name).to eq('Big Bang')
-        expect(@simple_user.is_admin?).to be_truthy
+        expect(@simple_user.admin?).to be_truthy
         expect(@simple_user.password_expires_at).to be <= Time.now
       end
     end
@@ -237,7 +237,7 @@ describe "Admin::Users", feature: true  do
 
       it "changes user entry" do
         @simple_user.reload
-        expect(@simple_user.is_auditor?).to be_truthy
+        expect(@simple_user.auditor?).to be_truthy
       end
     end
   end

@@ -59,7 +59,7 @@ class ProjectFeature < ActiveRecord::Base
     when DISABLED
       false
     when PRIVATE
-      user && (project.team.member?(user) || user.is_admin?)
+      user && (project.team.member?(user) || user.admin?)
     when ENABLED
       true
     else
