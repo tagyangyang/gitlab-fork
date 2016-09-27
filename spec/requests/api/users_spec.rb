@@ -104,6 +104,16 @@ describe API::API, api: true  do
       end.to change { User.count }.by(1)
     end
 
+    it "creates user with correct attributes with admin bool" do
+      post api('/users', admin), attributes_for(:user, admin: true, can_create_group: true)
+      expect(response).to have_http_status(201)
+      user_id = json_response['id']
+      new_user = User.find(user_id)
+      expect(new_user).not_to eq(nil)
+      expect(new_user.admin?).to eq(true)
+      expect(new_user.can_create_group).to eq(true)
+    end
+
     it "creates user with correct attributes" do
       post api('/users', admin), attributes_for(:user, role_type: 'admin', can_create_group: true)
       expect(response).to have_http_status(201)
@@ -115,7 +125,7 @@ describe API::API, api: true  do
     end
 
     it "creates non-admin user" do
-      post api('/users', admin), attributes_for(:user, role_type: 'default', can_create_group: false)
+      post api('/users', admin), attributes_for(:user, can_create_group: false)
       expect(response).to have_http_status(201)
       user_id = json_response['id']
       new_user = User.find(user_id)
@@ -300,6 +310,22 @@ describe API::API, api: true  do
       expect(response).to have_http_status(200)
       expect(user.reload.identities.first.extern_uid).to eq('67890')
       expect(user.reload.identities.first.provider).to eq('github')
+    end
+
+    it "updates admin status with admin bool" do
+      put api("/users/#{user.id}", admin), { admin: true }
+      expect(response).to have_http_status(200)
+      expect(json_response['is_admin']).to eq(true)
+      expect(json_response['role_type']).to eq('admin')
+      expect(user.reload.admin?).to eq(true)
+    end
+
+    it "updates admin status with admin bool to regular user" do
+      put api("/users/#{user.id}", admin), { admin: false }
+      expect(response).to have_http_status(200)
+      expect(json_response['is_admin']).to eq(false)
+      expect(json_response['role_type']).to eq('regular')
+      expect(user.reload.admin?).to eq(false)
     end
 
     it "updates admin status" do

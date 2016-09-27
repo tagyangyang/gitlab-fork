@@ -81,14 +81,10 @@ module API
         confirm = !(attrs.delete(:confirm) =~ /(false|f|no|0)$/i)
         user = User.build_user(attrs)
 
-        unless admin.nil?
-          user.role_type = admin
-        else
-          user.role_type = case role_type
-                           when 'admin' then User.role_types[:admin]
-                           when 'auditor' then User.role_types[:auditor]
-                           else User.role_types[:regular]
-                           end
+        if admin == 'true'
+          user.role_type = User.role_types[:admin]
+        elsif User.role_types.keys.include?(role_type)
+          user.role_type = role_type
         end
 
         user.skip_confirmation! unless confirm
@@ -142,14 +138,12 @@ module API
         role_type = attrs.delete(:role_type)
         admin = attrs.delete(:admin)
 
-        if !admin.nil?
-          user.role_type = admin
-        elsif !role_type.nil?
-          user.role_type = case role_type
-                           when 'admin' then User.role_types[:admin]
-                           when 'auditor' then User.role_types[:auditor]
-                           else User.role_types[:regular]
-                           end
+        if admin == 'true'
+          user.role_type = User.role_types[:admin]
+        elsif admin == 'false'
+          user.role_type = User.role_types[:regular]
+        elsif User.role_types.keys.include?(role_type)
+          user.role_type = role_type
         end
 
         conflict!('Email has already been taken') if attrs[:email] &&
