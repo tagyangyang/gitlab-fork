@@ -2,11 +2,7 @@
 module Admin
   module UserHelper
     def role_type_choices
-      [
-        ['Regular', :regular],
-        ['Admin', :admin],
-        ['Auditor', :auditor]
-      ]
+      User.role_types.keys.collect{|k| [k.titleize, k]}
     end
   end
 end
