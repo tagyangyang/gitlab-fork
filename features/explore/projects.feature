@@ -134,35 +134,10 @@ Feature: Explore Projects
     And I should not see project "Enterprise"
     And I should not see project "Archive"
 
-  Scenario: Trending page as auditor
-    Given project "Community" has comments
-    And project "Enterprise" has comments
-    And I sign in as an auditor
-    When I visit the explore trending projects
-    Then I should see project "Community"
-    And I should not see project "Internal"
-    And I should see project "Enterprise"
-
   Scenario: Most starred page
     Given archived project "Archive"
     And I sign in as a user
     When I visit the explore starred projects
     Then I should see project "Community"
     And I should see project "Internal"
-    And I should not see project "Archive"
-
-  Scenario: Most starred page as auditor
-    Given I sign in as an auditor
-    When I visit the explore starred projects
-    Then I should see project "Community"
-    And I should see project "Internal"
-    And I should see project "Enterprise"
-
-  Scenario: I visit public area as an auditor
-    Given archived project "Archive"
-    And I sign in as an auditor
-    When I visit the public projects area
-    Then I should see project "Community"
-    And I should see project "Internal"
-    And I should see project "Enterprise"
     And I should not see project "Archive"

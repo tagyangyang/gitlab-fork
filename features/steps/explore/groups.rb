@@ -62,11 +62,6 @@ class Spinach::Features::ExploreGroups < Spinach::FeatureSteps
     expect(page).to have_content "John Doe"
   end
 
-  step 'private group "TestGroup"' do
-    g = Group.find_by(name: "TestGroup")
-    g.update_attributes(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-  end
-
   protected
 
   def group_has_project(groupname, projectname, visibility_level)

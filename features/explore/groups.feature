@@ -91,15 +91,3 @@ Feature: Explore Groups
     When I sign in as a user
     And I visit the public groups area
     Then I should see group "TestGroup"
-
-  Scenario: I visit public area
-    Given private group "TestGroup"
-    And I sign in as a user
-    When I visit the public groups area
-    Then I should not see group "TestGroup"
-
-  Scenario: I visit public area as an auditor
-    Given private group "TestGroup"
-    And I sign in as an auditor
-    When I visit the public groups area
-    Then I should see group "TestGroup"

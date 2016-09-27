@@ -218,11 +218,6 @@ module SharedProject
     2.times { create(:note_on_issue, project: project) }
   end
 
-  step 'project "Enterprise" has comments' do
-    project = Project.find_by(name: "Enterprise")
-    2.times { create(:note_on_issue, project: project) }
-  end
-
   step 'project "Shop" has labels: "bug", "feature", "enhancement"' do
     project = Project.find_by(name: "Shop")
     create(:label, project: project, title: 'bug')
