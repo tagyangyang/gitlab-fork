@@ -10,7 +10,7 @@ be able to create issues, leave comments, and pull or download the project code.
 GitLab administrators receive all permissions.
 
 GitLab auditors receive read-only admin permissions. Access to view all
-proejects and groups without the ability to modify them.
+projects and groups without the ability to modify them.
 
 To add or import a user, you can follow the [project users and members
 documentation](../workflow/add-user/add-user.md).

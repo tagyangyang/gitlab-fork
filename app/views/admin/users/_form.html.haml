@@ -57,6 +57,10 @@
           .col-sm-10.col-sm-push-2 You cannot remove your own admin rights.
         - else
           .col-sm-10= f.select :role_type, role_type_choices, {}, class: 'form-control'
+        .col-sm-10.col-sm-offset-2
+          Role types offer users different types of permissions. Check out the
+          = link_to 'Permissions documentation', 'https://docs.gitlab.com/ce/user/permissions.html'
+          for more info.
 
       .form-group
         = f.label :external, class: 'control-label'
