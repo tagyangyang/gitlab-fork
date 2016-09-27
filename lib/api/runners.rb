@@ -149,7 +149,7 @@ module API
       end
 
       def authenticate_show_runner!(runner)
-        return if runner.is_shared || current_user.admin?
+        return if runner.is_shared || current_user.admin? || current_user.auditor?
         forbidden!("No access granted") unless user_can_access_runner?(runner)
       end
 

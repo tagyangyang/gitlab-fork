@@ -9,7 +9,7 @@ module API
       # Example Request:
       #  GET /groups
       get do
-        @groups = if current_user.admin?
+        @groups = if current_user.admin? || current_user.auditor?
                     Group.all
                   else
                     current_user.groups
