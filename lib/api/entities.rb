@@ -16,7 +16,7 @@ module API
       expose :created_at
       expose :admin?, as: :is_admin
       expose :auditor?, as: :is_auditor
-      expose :bio, :location, :skype, :linkedin, :twitter, :website_url, :role_type
+      expose :bio, :location, :skype, :linkedin, :twitter, :website_url, :role_type, :organization
     end
 
     class Identity < Grape::Entity

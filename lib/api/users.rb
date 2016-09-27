@@ -60,6 +60,7 @@ module API
       #   linkedin                          - Linkedin
       #   twitter                           - Twitter account
       #   website_url                       - Website url
+      #   organization                      - Organization
       #   projects_limit                    - Number of projects user can create
       #   extern_uid                        - External authentication provider UID
       #   provider                          - External provider
@@ -75,7 +76,7 @@ module API
       post do
         authenticated_as_admin!
         required_attributes! [:email, :password, :name, :username]
-        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :projects_limit, :username, :bio, :location, :can_create_group, :admin, :role_type, :confirm, :external]
+        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :projects_limit, :username, :bio, :location, :can_create_group, :admin, :role_type, :confirm, :external, :organization]
         admin = attrs.delete(:admin)
         role_type = attrs.delete(:role_type)
         confirm = !(attrs.delete(:confirm) =~ /(false|f|no|0)$/i)
@@ -119,6 +120,7 @@ module API
       #   linkedin                          - Linkedin
       #   twitter                           - Twitter account
       #   website_url                       - Website url
+      #   organization                      - Organization
       #   projects_limit                    - Limit projects each user can create
       #   bio                               - Bio
       #   location                          - Location of the user
@@ -131,7 +133,7 @@ module API
       put ":id" do
         authenticated_as_admin!
 
-        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :website_url, :projects_limit, :username, :bio, :location, :can_create_group, :admin, :role_type, :external]
+        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :website_url, :projects_limit, :username, :bio, :location, :can_create_group, :admin, :role_type, :external, :organization]
         user = User.find(params[:id])
         not_found!('User') unless user
 

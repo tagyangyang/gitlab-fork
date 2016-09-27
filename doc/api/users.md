@@ -60,6 +60,7 @@ GET /users
     "linkedin": "",
     "twitter": "",
     "website_url": "",
+    "organization": "",
     "last_sign_in_at": "2012-06-01T11:41:01Z",
     "confirmed_at": "2012-05-23T09:05:22Z",
     "theme_id": 1,
@@ -95,6 +96,7 @@ GET /users
     "linkedin": "",
     "twitter": "",
     "website_url": "",
+    "organization": "",
     "last_sign_in_at": null,
     "confirmed_at": "2012-05-30T16:53:06.148Z",
     "theme_id": 1,
@@ -156,7 +158,8 @@ Parameters:
   "skype": "",
   "linkedin": "",
   "twitter": "",
-  "website_url": ""
+  "website_url": "",
+  "organization": ""
 }
 ```
 
@@ -190,6 +193,7 @@ Parameters:
   "linkedin": "",
   "twitter": "",
   "website_url": "",
+  "organization": "",
   "last_sign_in_at": "2012-06-01T11:41:01Z",
   "confirmed_at": "2012-05-23T09:05:22Z",
   "theme_id": 1,
@@ -226,6 +230,7 @@ Parameters:
 - `linkedin` (optional)         - LinkedIn
 - `twitter` (optional)          - Twitter account
 - `website_url` (optional)      - Website URL
+- `organization` (optional)     - Organization name
 - `projects_limit` (optional)   - Number of projects user can create
 - `extern_uid` (optional)       - External UID
 - `provider` (optional)         - External provider name
@@ -255,6 +260,7 @@ Parameters:
 - `linkedin`                    - LinkedIn
 - `twitter`                     - Twitter account
 - `website_url`                 - Website URL
+- `organization`                - Organization name
 - `projects_limit`              - Limit projects each user can create
 - `extern_uid`                  - External UID
 - `provider`                    - External provider name
@@ -313,6 +319,7 @@ GET /user
   "linkedin": "",
   "twitter": "",
   "website_url": "",
+  "organization": "",
   "last_sign_in_at": "2012-06-01T11:41:01Z",
   "confirmed_at": "2012-05-23T09:05:22Z",
   "theme_id": 1,
