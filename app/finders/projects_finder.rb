@@ -9,9 +9,9 @@ class ProjectsFinder < UnionFinder
   private
 
   def all_projects(current_user)
-    projects = []
     return [Project.all] if current_user && current_user.auditor?
 
+    projects = []
     projects << current_user.authorized_projects if current_user
     projects << Project.unscoped.public_to_user(current_user)
 
