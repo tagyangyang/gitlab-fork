@@ -15,8 +15,7 @@ module API
     class User < UserBasic
       expose :created_at
       expose :admin?, as: :is_admin
-      expose :admin?, as: :admin
-      expose :auditor?, as: :auditor
+      expose :auditor?, as: :is_auditor
       expose :bio, :location, :skype, :linkedin, :twitter, :website_url, :role_type
     end
 

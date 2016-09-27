@@ -75,19 +75,19 @@ module API
       post do
         authenticated_as_admin!
         required_attributes! [:email, :password, :name, :username]
-        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :projects_limit, :username, :bio, :location, :can_create_group, admin, :role_type, :confirm, :external]
+        attrs = attributes_for_keys [:email, :name, :password, :skype, :linkedin, :twitter, :projects_limit, :username, :bio, :location, :can_create_group, :admin, :role_type, :confirm, :external]
         admin = attrs.delete(:admin)
         role_type = attrs.delete(:role_type)
         confirm = !(attrs.delete(:confirm) =~ /(false|f|no|0)$/i)
         user = User.build_user(attrs)
 
         unless admin.nil?
-          user.role_type = User.role_type[:admin]
+          user.role_type = admin
         else
           user.role_type = case role_type
-                           when 'admin' then User.role_type[:admin]
-                           when 'auditor' then User.role_type[:auditor]
-                           else User.role_type[:regular]
+                           when 'admin' then User.role_types[:admin]
+                           when 'auditor' then User.role_types[:auditor]
+                           else User.role_types[:regular]
                            end
         end
 
@@ -142,13 +142,13 @@ module API
         role_type = attrs.delete(:role_type)
         admin = attrs.delete(:admin)
 
-        if admin.nil?
-          user.role_type = User.role_type[:admin]
-        elsif role_type.nil?
+        if !admin.nil?
+          user.role_type = admin
+        elsif !role_type.nil?
           user.role_type = case role_type
-                           when 'admin' then User.role_type[:admin]
-                           when 'auditor' then User.role_type[:auditor]
-                           else User.role_type[:regular]
+                           when 'admin' then User.role_types[:admin]
+                           when 'auditor' then User.role_types[:auditor]
+                           else User.role_types[:regular]
                            end
         end
 

@@ -6,9 +6,9 @@ describe API::API, api: true  do
   let(:user)  { create(:user) }
   let(:admin) { create(:admin) }
   let(:key)   { create(:key, user: user) }
-  let(:email)   { create(:email, user: user) }
-  let(:omniauth_user) { create(:omniauth_user) }
-  let(:ldap_user) { create(:omniauth_user, provider: 'ldapmain') }
+  let(:email) { create(:email, user: user) }
+  let(:omniauth_user)     { create(:omniauth_user) }
+  let(:ldap_user)         { create(:omniauth_user, provider: 'ldapmain') }
   let(:ldap_blocked_user) { create(:omniauth_user, provider: 'ldapmain', state: 'ldap_blocked') }
 
   describe "GET /users" do
@@ -306,7 +306,6 @@ describe API::API, api: true  do
       put api("/users/#{user.id}", admin), { role_type: 'admin' }
       expect(response).to have_http_status(200)
       expect(json_response['is_admin']).to eq(true)
-      expect(json_response['admin']).to eq(true)
       expect(json_response['role_type']).to eq('admin')
       expect(user.reload.admin?).to eq(true)
     end
@@ -314,7 +313,7 @@ describe API::API, api: true  do
     it "updates auditor status" do
       put api("/users/#{user.id}", admin), { role_type: 'auditor' }
       expect(response).to have_http_status(200)
-      expect(json_response['auditor']).to eq(true)
+      expect(json_response['is_auditor']).to eq(true)
       expect(json_response['role_type']).to eq('auditor')
       expect(user.reload.auditor?).to eq(true)
     end
@@ -330,7 +329,6 @@ describe API::API, api: true  do
       put api("/users/#{admin_user.id}", admin), { can_create_group: false }
       expect(response).to have_http_status(200)
       expect(json_response['is_admin']).to eq(true)
-      expect(json_response['admin']).to eq(true)
       expect(json_response['role_type']).to eq('admin')
       expect(admin_user.reload.admin?).to eq(true)
       expect(admin_user.can_create_group).to eq(false)
