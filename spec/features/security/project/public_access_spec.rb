@@ -37,6 +37,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/tree/master" do
@@ -51,6 +52,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/commits/master" do
@@ -65,6 +67,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/commit/:sha" do
@@ -79,6 +82,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/compare" do
@@ -93,6 +97,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/project_members" do
@@ -107,6 +112,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :visitor }
     it { is_expected.to be_allowed_for :external }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/pipelines" do
@@ -121,6 +127,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/pipelines/:id" do
@@ -136,6 +143,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/builds" do
@@ -153,6 +161,7 @@ describe "Public Project Access", feature: true  do
       it { is_expected.to be_allowed_for :user }
       it { is_expected.to be_allowed_for :external }
       it { is_expected.to be_allowed_for :visitor }
+      it { is_expected.to be_allowed_for :auditor }
     end
 
     context "when disallowed for public" do
@@ -163,6 +172,7 @@ describe "Public Project Access", feature: true  do
       it { is_expected.to be_allowed_for master }
       it { is_expected.to be_allowed_for developer }
       it { is_expected.to be_allowed_for reporter }
+      it { is_expected.to be_allowed_for :auditor }
       it { is_expected.to be_denied_for guest }
       it { is_expected.to be_denied_for :user }
       it { is_expected.to be_denied_for :external }
@@ -187,6 +197,7 @@ describe "Public Project Access", feature: true  do
       it { is_expected.to be_allowed_for :user }
       it { is_expected.to be_allowed_for :external }
       it { is_expected.to be_allowed_for :visitor }
+      it { is_expected.to be_allowed_for :auditor }
     end
 
     context "when disallowed for public" do
@@ -197,6 +208,7 @@ describe "Public Project Access", feature: true  do
       it { is_expected.to be_allowed_for master }
       it { is_expected.to be_allowed_for developer }
       it { is_expected.to be_allowed_for reporter }
+      it { is_expected.to be_allowed_for :auditor }
       it { is_expected.to be_denied_for guest }
       it { is_expected.to be_denied_for :user }
       it { is_expected.to be_denied_for :external }
@@ -208,6 +220,7 @@ describe "Public Project Access", feature: true  do
     subject { namespace_project_environments_path(project.namespace, project) }
 
     it { is_expected.to be_allowed_for :admin }
+    it { is_expected.to be_allowed_for :auditor }
     it { is_expected.to be_allowed_for owner }
     it { is_expected.to be_allowed_for master }
     it { is_expected.to be_allowed_for developer }
@@ -223,6 +236,7 @@ describe "Public Project Access", feature: true  do
     subject { namespace_project_environment_path(project.namespace, project, environment) }
 
     it { is_expected.to be_allowed_for :admin }
+    it { is_expected.to be_allowed_for :auditor }
     it { is_expected.to be_allowed_for owner }
     it { is_expected.to be_allowed_for master }
     it { is_expected.to be_allowed_for developer }
@@ -245,6 +259,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
+    it { is_expected.to be_denied_for :auditor }
   end
 
   describe "GET /:project_path/blob" do
@@ -260,6 +275,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for guest }
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/edit" do
@@ -274,6 +290,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
+    it { is_expected.to be_denied_for :auditor }
   end
 
   describe "GET /:project_path/deploy_keys" do
@@ -288,6 +305,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
+    it { is_expected.to be_denied_for :auditor }
   end
 
   describe "GET /:project_path/issues" do
@@ -302,6 +320,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/issues/:id/edit" do
@@ -317,6 +336,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
+    it { is_expected.to be_denied_for :auditor }
   end
 
   describe "GET /:project_path/snippets" do
@@ -345,12 +365,14 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
+    it { is_expected.to be_denied_for :auditor }
   end
 
   describe "GET /:project_path/merge_requests" do
     subject { namespace_project_merge_requests_path(project.namespace, project) }
 
     it { is_expected.to be_allowed_for :admin }
+    it { is_expected.to be_allowed_for :auditor }
     it { is_expected.to be_allowed_for owner }
     it { is_expected.to be_allowed_for master }
     it { is_expected.to be_allowed_for developer }
@@ -373,6 +395,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
+    it { is_expected.to be_denied_for :auditor }
   end
 
   describe "GET /:project_path/branches" do
@@ -392,6 +415,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/tags" do
@@ -411,6 +435,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
     it { is_expected.to be_allowed_for :visitor }
+    it { is_expected.to be_allowed_for :auditor }
   end
 
   describe "GET /:project_path/hooks" do
@@ -425,6 +450,7 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
+    it { is_expected.to be_denied_for :auditor }
   end
 
   describe "GET /:project_path/container_registry" do
@@ -436,6 +462,7 @@ describe "Public Project Access", feature: true  do
     subject { namespace_project_container_registry_index_path(project.namespace, project) }
 
     it { is_expected.to be_allowed_for :admin }
+    it { is_expected.to be_allowed_for :auditor }
     it { is_expected.to be_allowed_for owner }
     it { is_expected.to be_allowed_for master }
     it { is_expected.to be_allowed_for developer }

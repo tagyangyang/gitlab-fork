@@ -30,6 +30,7 @@ describe "Internal Project Snippets Access", feature: true  do
     it { is_expected.to be_allowed_for reporter }
     it { is_expected.to be_allowed_for guest }
     it { is_expected.to be_allowed_for :user }
+    it { is_expected.to be_allowed_for :auditor }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
   end
@@ -46,6 +47,7 @@ describe "Internal Project Snippets Access", feature: true  do
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
+    it { is_expected.to be_denied_for :auditor }
   end
 
   describe "GET /:project_path/snippets/:id for an internal snippet" do
@@ -58,6 +60,7 @@ describe "Internal Project Snippets Access", feature: true  do
     it { is_expected.to be_allowed_for reporter }
     it { is_expected.to be_allowed_for guest }
     it { is_expected.to be_allowed_for :user }
+    it { is_expected.to be_allowed_for :auditor }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
   end
@@ -66,6 +69,7 @@ describe "Internal Project Snippets Access", feature: true  do
     subject { namespace_project_snippet_path(project.namespace, project, private_snippet) }
 
     it { is_expected.to be_allowed_for :admin }
+    it { is_expected.to be_allowed_for :auditor }
     it { is_expected.to be_allowed_for owner }
     it { is_expected.to be_allowed_for master }
     it { is_expected.to be_allowed_for developer }

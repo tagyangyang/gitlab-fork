@@ -235,7 +235,12 @@ class ProjectPolicy < BasePolicy
     can! :read_commit_status
     can! :read_container_image
     can! :download_code
+    can! :read_cycle_analytics
     can! :read_build
+
+    # Abilities anonymous_rules lack
+    can! :read_environment
+    can! :read_deployment
 
     # NOTE: may be overridden by IssuePolicy
     can! :read_issue

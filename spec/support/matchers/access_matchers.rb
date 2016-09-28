@@ -17,6 +17,8 @@ module AccessMatchers
       login_as(create(:admin))
     when :external
       login_as(create(:user, external: true))
+    when :auditor
+      login_as(create(:auditor))
     when User
       login_as(user)
     else
