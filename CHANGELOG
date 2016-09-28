@@ -2,13 +2,22 @@ Please view this file on the master branch, on stable branches it's out of date.
 
 v 8.13.0 (unreleased)
   - Use gitlab-shell v3.6.2 (GIT TRACE logging)
+  - AbstractReferenceFilter caches project_refs on RequestStore when active
   - Speed-up group milestones show page
+  - Log LDAP lookup errors and don't swallow unrelated exceptions. !6103 (Markus Koller)
   - Add more tests for calendar contribution (ClemMakesApps)
+  - Avoid database queries on Banzai::ReferenceParser::BaseParser for nodes without references
+  - Fix permission for setting an issue's due date
   - Fix robots.txt disallowing access to groups starting with "s" (Matt Harrison)
+  - Only update issuable labels if they have been changed
   - Revoke button in Applications Settings underlines on hover.
+  - Update ruby-prof to 0.16.2. !6026 (Elan Ruusamäe)
   - Add organization field to user profile
+  - Added soft wrap option to editor
+  - Optimize GitHub importing for speed and memory
 
 v 8.12.2 (unreleased)
+  - Added University content to doc/university
   - Fix Import/Export not recognising correctly the imported services.
   - Fix snippets pagination
   - Fix List-Unsubscribe header in emails
@@ -16,6 +25,7 @@ v 8.12.2 (unreleased)
   - Fix an issue with the "Commits" section of the cycle analytics summary. !6513
   - Fix errors importing project feature and milestone models using GitLab project import
   - Make JWT messages Docker-compatible
+  - Fix duplicate branch entry in the merge request version compare dropdown
 
 v 8.12.1
   - Fix a memory leak in HTML::Pipeline::SanitizationFilter::WHITELIST
