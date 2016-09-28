@@ -1,8 +1,9 @@
 module API
   class Templates < Grape::API
     GLOBAL_TEMPLATE_TYPES = {
-      gitignores:     Gitlab::Template::GitignoreTemplate,
-      gitlab_ci_ymls: Gitlab::Template::GitlabCiYmlTemplate
+      gitignores:         Gitlab::Template::GitignoreTemplate,
+      gitlab_ci_ymls:     Gitlab::Template::GitlabCiYmlTemplate,
+      kubernetes_config:  Gitlab::Template::KubernetesConfigTemplate
     }.freeze
 
     helpers do
