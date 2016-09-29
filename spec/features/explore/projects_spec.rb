@@ -21,7 +21,7 @@ feature 'Explore Projects Tab', feature: true, js: true do
       expect(page).to have_content 'Enterprise Project'
       expect(page).to have_content 'Internal Project'
       expect(page).to have_content 'Community Project'
-      expect(page).to_not have_content 'Archive Project'
+      expect(page).not_to have_content 'Archive Project'
     end
   end
 
@@ -31,8 +31,8 @@ feature 'Explore Projects Tab', feature: true, js: true do
     it 'shows public projects' do
       expect(page).to have_content 'Community Project'
       expect(page).to have_content 'Internal Project'
-      expect(page).to_not have_content 'Enterprise Project'
-      expect(page).to_not have_content 'Archive Project'
+      expect(page).not_to have_content 'Enterprise Project'
+      expect(page).not_to have_content 'Archive Project'
     end
   end
 end
