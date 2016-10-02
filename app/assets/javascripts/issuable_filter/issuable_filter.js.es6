@@ -28,27 +28,43 @@ $(() => {
       currentDropdown: DEFAULT_DROPDOWN,
       dropdown: {
         filterDropdown: {},
-        // authorDropdown: { show: false },
-        // assigneeDropdown: { show: false },
-        // milestoneDropdown: { show: false },
+        // TODO: authorDropdown: {},
+        // TODO: assigneeDropdown: {},
+        // TODO: milestoneDropdown: {},
         labelDropdown: {},
-        // weightDropdown: { show: false }
+        // TODO: weightDropdown: {}
       },
-      modelWatch: {},
+      modelObserver: {},
       activeFilters: []
     },
     methods: {
+      /**
+       * Opens the default filter dropdown as well as closing any other
+       * open dropdowns.
+       * Lastly, initialise the field model observers.
+       */
       openFilterDropdown() {
         this.closeFilterDropdowns();
         this.$refs[DEFAULT_DROPDOWN].openDropdown();
-        this.initFieldWatchers();
+        this.initFieldObservers();
       },
+      /**
+       * Closes all dropdowns and sets the current dropdown to default.
+       */
       closeFilterDropdowns() {
         for (const dropdownReference in this.dropdown) {
           this.$refs[dropdownReference].closeDropdown();
         }
         this.currentDropdown = DEFAULT_DROPDOWN;
       },
+      /**
+       * Handle a keyup event from the filter input.
+       * On up: Select the previous item of the current dropdown.
+       * On down: Select the next item of the current dropdown.
+       * On enter: Click the current item of the current dropdown.
+       * On esc: Close the dropdowns and open the default dropdown.
+       * @param {Event} event - A keyup event object from the filter input.
+       */
       filterInputKeyup(event) {
         const keycode = event.keyCode || event.which;
         switch (keycode) {
@@ -66,11 +82,25 @@ $(() => {
             break;
         }
       },
+      /**
+       * Opens the dropdown specified from the value of the clicked dropdown
+       * item from the default filter dropdown.
+       * @param {String} clickedDropdownItem - The value of a clicked item,
+       *                    which is a reference to a specific dropdown to open.
+       */
       openSelectedDropdown(clickedDropdownItem) {
         if (!clickedDropdownItem) return;
         this.$refs[clickedDropdownItem].openDropdown();
         this.currentDropdown = clickedDropdownItem;
       },
+      /**
+       * Adds a filter to the active filters array using the updated value of
+       * the filters model of the current dropdown.
+       * @param {String} filterType - The type of filter, specified by the
+       *                            specific filters model observer.
+       * @param {String} filterValue - The new value of the filter model.
+       */
+      // TODO: Split into other methods, probably.
       addFilter(filterType, filterValue) {
         if (!filterValue) return;
         const { valueKey, titleKey } = this.$refs[this.currentDropdown];
@@ -86,23 +116,40 @@ $(() => {
         this.closeFilterDropdowns()
         this.$refs[this.currentDropdown].openDropdown();
       },
+      /**
+       * TODO: Implement submit method.
+       */
       submitFilters() {
         console.log('submitFilters');
       },
-      initFieldWatchers() {
-        this.registerFieldWatch('filterDropdown', () => {
+      /**
+       * Initialises all required model observers that watch for updates in
+       * a specific dropdowns model and adds the updated filter values to the
+       * active filters.
+       */
+      initFieldObservers() {
+        this.registerFieldObserver('filterDropdown', () => {
           return this.$refs.filterDropdown.fieldModel;
         }, this.openSelectedDropdown);
 
-        this.registerFieldWatch('labelDropdown', () => {
+        this.registerFieldObserver('labelDropdown', () => {
           return this.$refs.labelDropdown.fieldModel;
         }, (filterValue) => {
           this.addFilter('label', filterValue);
         });
       },
-      registerFieldWatch(watchName, observable, updateAction) {
-        if (this.modelWatch[watchName]) return;
-        this.modelWatch[watchName] = this.$watch(observable, updateAction);
+      /**
+       * Checks an observer of a specific name is not already active and if not
+       * creates an observer for the specified observable and action.
+       * @param {String} observerName - The unique name of the observer.
+       * @param {Function} observable - A function returning an observable
+       *                              entity.
+       * @param {Function} updateAction - A function to invoke when the
+       *                                observable entity value updates.
+       */
+      registerFieldObserver(observerName, observable, updateAction) {
+        if (this.modelObserver[observerName]) return;
+        this.modelObserver[observerName] = this.$watch(observable, updateAction);
       }
     }
   });
