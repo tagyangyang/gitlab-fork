@@ -1,0 +1,17 @@
+%template#gl-dropdown
+  .gl-dropdown-container
+    %input{ 'type': 'hidden', 'v-model': 'fieldModel', 'v-if': 'fieldName',
+      'name': '{{ fieldName }}', 'id': '{{ fieldName }}' }
+    .dropdown{ 'v-show': 'showDropdown' }
+      %ul.header-items
+        %slot{ name: 'header-item' }
+        %li.header-item{ 'v-for': 'headerItem in headerItems', value: '{{ headerItem[valueKey] }}', ':class': '{ "active": $index === selectedHeaderItemIndex }', '@click': 'clickCurrentHeaderItem($index)' }
+          {{{ headerItem[titleKey] }}}
+      %ul.items
+        %slot{ name: 'item' }
+        %li.item{ 'v-for': 'item in items', value: '{{ item[valueKey] }}', ':class': '{ "active": $index === selectedItemIndex }', '@click': 'clickCurrentItem($index)' }
+          {{{ item[titleKey] }}}
+      %ul.footer-items
+        %slot{ name: 'footer-item' }
+        %li.header-item{ 'v-for': 'footerItem in footerItems', value: '{{ footerItem[valueKey] }}', ':class': '{ "active": $index === selectedFooterItemIndex }', '@click': 'clickCurrentFooterItem($index)' }
+          {{{ footerItem[titleKey] }}}

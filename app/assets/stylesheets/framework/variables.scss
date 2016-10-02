@@ -284,3 +284,19 @@ $ci-output-bg: #1d1f21;
 $ci-text-color: #c5c8c6;
 
 $issue-boards-font-size: 15px;
+
+/*
+ * Issuables filter
+ */
+$filter-focus-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(58, 171, 240, 0.6);
+$filter-icon-color: #b7b7b7;
+$clear-filters-color: #a3a3a3;
+
+/*
+ * Dropdown 2.0
+ */
+$dropdown-2-min-width: 280px;
+$dropdown-2-border-color: #d4d4d4;
+$dropdown-2-item-color: #4a4a4a;
+$dropdown-2-active-item-background-color: #2d68fe;
+$dropdown-2-divider-color: #ddd;

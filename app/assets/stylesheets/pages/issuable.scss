@@ -419,3 +419,62 @@
     }
   }
 }
+
+.issues-other-filters {
+  display: flex;
+
+  form.filter-form {
+    background-color: $white-light;
+    border-radius: $border-radius-default;
+    border: 1px solid $border-color;
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+
+    .filter-icon {
+      color: $filter-icon-color;
+      margin: $btn-side-margin;
+    }
+
+    .clear-filters {
+      color: $clear-filters-color;
+      margin: $btn-side-margin;
+
+      &:hover {
+        color: $black; // Temporary
+      }
+    }
+
+    .issuable-filter-input {
+      border: 0;
+      box-shadow: none;
+      margin: 0;
+      outline: 0;
+      padding: 0;
+      flex-grow: 1;
+    }
+
+    &:focus {
+      border: 1px solid $focus-border-color;
+      box-shadow: $filter-focus-shadow;
+      outline: 0;
+    }
+
+    .filter-badges {
+
+      .filter-badge {
+        display: inline-block;
+      }
+    }
+  }
+
+  .issuable-filter-input {
+    flex-grow: 1
+  }
+
+  .dropdown-filters {
+    position: absolute;
+    top: 38px;
+    z-index: 1;
+  }
+}

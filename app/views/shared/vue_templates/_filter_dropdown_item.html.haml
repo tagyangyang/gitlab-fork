@@ -1,0 +1,6 @@
+%template#filter-dropdown-item
+  %li{ slot: '{{ slot }}', 'value': '{{ value }}' }
+    %i{ class: 'fa fa-{{ icon }}' }
+    {{ title }}
+    %small
+      {{ subtitle }}
