@@ -44,11 +44,6 @@ Lint/UnusedBlockArgument:
 Lint/UnusedMethodArgument:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-Performance/PushSplat:
-  Enabled: false
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Performance/RedundantBlockCall:
