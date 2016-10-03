@@ -609,15 +609,15 @@
   .dropdown {
     background-color: $white-light;
     border-radius: $border-radius-default;
-    min-width: 280px;
     border: 1px solid $dropdown-2-border-color;
+    min-width: 280px;
 
     .items,
     .header-items,
     .footer-items {
       list-style: none;
-      padding: 0;
       margin: 0;
+      padding: 0;
       padding: 6px 0;
     }
 
@@ -632,9 +632,11 @@
     .item,
     .header-item,
     .footer-item,
-    [slot="item"] {
-      padding: $gl-padding;
+    [slot="item"],
+    [slot="header-item"],
+    [slot="footer-item"] {
       color: $dropdown-2-item-color;
+      padding: $gl-padding;
     }
 
     .item,
@@ -646,6 +648,21 @@
         background-color: $dropdown-2-active-item-background-color;
         color: $white-light;
       }
+
+      &.last-header-item {
+        border-bottom: 1px solid $dropdown-2-divider-color;
+      }
+      &.first-footer-item {
+        border-top: 1px solid $dropdown-2-divider-color;
+      }
     }
+  }
+
+  .requesting-icon {
+    display: block;
+    font-size: 32px;
+    width: 32px;
+    // height: 32px;
+    margin: 32px auto;
   }
 }

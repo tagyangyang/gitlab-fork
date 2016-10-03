@@ -35,7 +35,8 @@ $(() => {
         // TODO: weightDropdown: {}
       },
       modelObserver: {},
-      activeFilters: []
+      activeFilters: [],
+      filterInput: ''
     },
     methods: {
       /**
@@ -115,6 +116,15 @@ $(() => {
         this.activeFilters.push(filter);
         this.closeFilterDropdowns()
         this.$refs[this.currentDropdown].openDropdown();
+      },
+      /**
+       * Clears the active filters array and reset the filter input model.
+       * Lastly, it resets the default dropdown.
+       */
+      clearFilters() {
+        this.activeFilters = [];
+        this.filterInput = '';
+        this.closeFilterDropdowns();
       },
       /**
        * TODO: Implement submit method.

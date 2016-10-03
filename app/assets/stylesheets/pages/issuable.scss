@@ -439,6 +439,7 @@
     .clear-filters {
       color: $clear-filters-color;
       margin: $btn-side-margin;
+      cursor: pointer;
 
       &:hover {
         color: $black; // Temporary
@@ -461,7 +462,6 @@
     }
 
     .filter-badges {
-
       .filter-badge {
         display: inline-block;
       }
@@ -469,7 +469,7 @@
   }
 
   .issuable-filter-input {
-    flex-grow: 1
+    flex-grow: 1;
   }
 
   .dropdown-filters {

@@ -1,0 +1,45 @@
+- boards_page = controller.controller_name == 'boards'
+- content_for :page_specific_javascripts do
+  = page_specific_javascript_tag('issuable_filter/issuable_filter.js')
+
+.issues-other-filters.js-issuable-filter
+  = form_tag page_filter_path(without: [:assignee_id, :author_id, :milestone_title, :label_name, :search]), method: :get, class: 'filter-form js-filter-form form-inline', '@submit.prevent': 'submitFilters' do
+    = icon('filter', class: 'filter-icon')
+    .filter-badges
+      .filter-badge{ 'v-for': 'filter in activeFilters' }
+        {{ filter.type }}:{{ filter.title }}
+    = text_field_tag 'issuable-filter-input', nil, class: 'form-control issuable-filter-input', '@focus': 'openFilterDropdown', '@blur': 'closeFilterDropdowns', '@keyup.prevent': 'filterInputKeyup', 'v-model': 'filterInput'
+    = icon('close', class: 'clear-filters', '@click': 'clearFilters')
+
+    .dropdown-filters
+      %gl-dropdown{ ':show-dropdown.sync': 'dropdown.filterDropdown.show', 'v-ref:filter-dropdown': 'true' }
+        %filter-dropdown-item{ slot: 'item', icon: 'search', 'title': 'Keep typing and press Enter', 'non-selectable': 'true' }
+        %filter-dropdown-item{ slot: 'item', value: 'authorDropdown', icon: 'pencil', 'title': 'author:', 'subtitle': '<user>' }
+        %filter-dropdown-item{ slot: 'item', value: 'assigneeDropdown', icon: 'user', 'title': 'assignee:', 'subtitle': '<user>' }
+        %filter-dropdown-item{ slot: 'item', value: 'milestoneDropdown', icon: 'clock-o', 'title': 'milestone:', 'subtitle': '<milestone>' }
+        %filter-dropdown-item{ slot: 'item', value: 'labelDropdown', icon: 'tag', 'title': 'label:', 'subtitle': '<label>' }
+        %filter-dropdown-item{ slot: 'item', value: 'weightDropdown', icon: 'balance-scale', 'title': 'weight:', 'subtitle': '<weight>' }
+
+      %gl-dropdown{ ':show-dropdown.sync': 'dropdown.labelDropdown.show', 'data-endpoint': labels_filter_path, ':defer-request.once': 'true', 'value-key': 'id', 'v-ref:label-dropdown': 'true', 'field-name': 'label_name' }
+        %li{ slot: 'header-item', value: 'any' } Any label
+        %li{ slot: 'header-item', value: 'no' } No label
+        %li{ slot: 'footer-item', value: 'create' } Create new label
+        %li{ slot: 'footer-item', value: 'manage' } Manage labels
+
+  - if boards_page
+    #js-boards-seach.issue-boards-search
+      %input.pull-left.form-control{ type: "search", placeholder: "Filter by name...", "v-model" => "filters.search", "debounce" => "250" }
+      - if can?(current_user, :admin_list, @project)
+        .dropdown.pull-right
+          %button.btn.btn-create.js-new-board-list{ type: "button", data: { toggle: "dropdown", labels: labels_filter_path, project_id: @project.try(:id) } }
+            Create new list
+          .dropdown-menu.dropdown-menu-paging.dropdown-menu-align-right.dropdown-menu-issues-board-new.dropdown-menu-selectable
+            = render partial: "shared/issuable/label_page_default", locals: { show_footer: true, show_create: true, show_boards_content: true, title: "Create a new list" }
+            - if can?(current_user, :admin_label, @project)
+              = render partial: "shared/issuable/label_page_create"
+            = dropdown_loading
+  - else
+    = render 'shared/sort_dropdown'
+
+= render 'shared/vue_templates/gl_dropdown'
+= render 'shared/vue_templates/filter_dropdown_item'
