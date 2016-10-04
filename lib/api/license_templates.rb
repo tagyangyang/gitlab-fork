@@ -12,31 +12,28 @@ module API
         (fullname|name\sof\s(author|copyright\sowner))
       [\>\}\]]/xi.freeze
 
-    # Get the list of the available license templates
-    #
-    # Parameters:
-    #   popular - Filter licenses to only the popular ones
-    #
-    # Example Request:
-    #   GET /licenses
-    #   GET /licenses?popular=1
+    desc 'Get the list of the available license templates' do
+      success Entities::RepoLicense
+    end
+    params do
+      optional :popular, type: String, desc: 'Filter licenses to only the popular ones'
+    end
     get 'licenses' do
       options = {
         featured: params[:popular].present? ? true : nil
       }
+
       present Licensee::License.all(options), with: Entities::RepoLicense
     end
 
-    # Get text for specific license
-    #
-    # Parameters:
-    #   key (required) - The key of a license
-    #   project        - Copyrighted project name
-    #   fullname       - Full name of copyright holder
-    #
-    # Example Request:
-    #   GET /licenses/mit
-    #
+    desc 'Get text for specific license' do
+      success Entities::RepoLicense
+    end
+    params do
+      requires :key, type: String, desc: 'The key of a license'
+      optional :project, type: String, desc: 'Copyrighted project name'
+      optional :fullname, type: String, desc: 'Full name of copyright holder'
+    end
     get 'licenses/:key', requirements: { key: /[\w\.-]+/ } do
       required_attributes! [:key]
 
