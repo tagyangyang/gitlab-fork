@@ -49,6 +49,7 @@
       $($('[slot="header-item"]', this.$el).get().reverse())
         .each(this.createItemFromSlot);
       this.setGlobalIndexes();
+      this.$scrollableContainer = $('.scrollable-container', this.$el);
       if (!this.deferRequest) this.requestData();
     },
     methods: {
@@ -188,36 +189,74 @@
         if (this.deferRequest) this.requestData();
       },
       /**
-       * Hides the dropdown and resets its selected item.
+       * Hides the dropdown and resets its selected item and scroll position.
        */
       closeDropdown() {
-        this.selectedItemIndex = -1;
         this.showDropdown = false;
+        this.selectedItemIndex = -1;
+        this.$scrollableContainer.scrollTop(0);
       },
       /**
        * Increments the selectedItemIndex by one if there is a
-       * next item to select.
+       * next item to select. Lastly, scrolls item into view if needed.
        */
       selectNextItem() {
-        if(this.selectedItemIndex < this.items.length - 1) this.selectedItemIndex++;
+        if(this.selectedItemIndex < this.items.length - 1) {
+          this.selectedItemIndex++;
+          this.scrollSelectedItemIntoView();
+        }
       },
       /**
        * Decrement the selectedItemIndex by one if there is a
-       * previous item to select.
+       * previous item to select. Lastly, scrolls item into view if needed.
        */
       selectPrevItem() {
-        if(this.selectedItemIndex > -1) this.selectedItemIndex--;
+        if(this.selectedItemIndex > -1) {
+          this.selectedItemIndex--;
+          this.scrollSelectedItemIntoView();
+        }
       },
       /**
        * Simulates the clicking of an item by setting the model to the items
        * value. Lastly, it closes the dropdown.
        * TODO: Implement ability to click with mouse, this does not currently
        * work unless invoked directly from instance controller.
+       * This method may be able to be changed a lot depending on what happens
        */
       clickCurrentItem() {
-        selectedItemKey = Object.keys(this.items)[this.selectedItemIndex];
-        this.fieldModel = this.items[selectedItemKey][this.valueKey];
+        this.fieldModel = this.items[this.selectedItemIndex][this.valueKey];
         this.closeDropdown();
+      },
+      /**
+       * Scrolls the currently selected item into view. It queries the set of
+       * selectable items and selects the currently selected one using the
+       * selected item index. If the currently selected item is out of the
+       * bounds of the dropdown it will scroll to keep the item fully in view.
+       */
+      scrollSelectedItemIntoView() {
+        const $item = $('.item', this.$scrollableContainer)
+          .eq(this.selectedItemIndex);
+        if (!$item.length) return;
+
+        let newScrollTop;
+        if (this.selectedItemIndex === -1) {
+          newScrollTop = 0;
+        } else {
+          const scrollTop = this.$scrollableContainer.scrollTop();
+          const containerTop = this.$scrollableContainer.offset().top;
+          const containerBottom = containerTop + this.$scrollableContainer.height();
+          const itemHeight = $item.outerHeight();
+          const itemTop = $item.offset().top;
+          const itemBottom = itemTop + itemHeight;
+
+          if (itemBottom > containerBottom) {
+            newScrollTop = scrollTop + itemHeight;
+          } else if (itemTop < containerTop) {
+            newScrollTop = scrollTop - itemHeight;
+          }
+        }
+
+        this.$scrollableContainer.scrollTop(newScrollTop);
       }
     },
     computed: {
@@ -234,7 +273,9 @@
        * @return {Object} - An array of regular items.
        */
       regularItems() {
-        return this.items.filter((item) => item.slotType === 'item' || !item.slotType);
+        return this.items.filter((item) => {
+          return item.slotType === 'item' || !item.slotType
+        });
       },
       /**
        * Filters an array of only footer items from the default item array.

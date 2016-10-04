@@ -4,20 +4,20 @@
     %input{ 'type': 'hidden', 'v-model': 'fieldModel', 'v-if': 'fieldName', 'name': '{{ fieldName }}', 'id': '{{ fieldName }}' }
 
     .dropdown{ 'v-show': 'showDropdown' }
+      .scrollable-container
+        %ul.header-items{ 'v-show': 'headerItems.length' }
+          %slot{ name: 'header-item' }
+          %li.item{ 'v-for': 'headerItem in headerItems', value: '{{ headerItem[valueKey] }}', ':class': '[headerItem.slotType, { "active": isSelectedItem(headerItem) }]', '@click': 'clickCurrentItem()' }
+            {{{ headerItem[titleKey] }}}
 
-      %ul.header-items{ 'v-show': 'headerItems.length' }
-        %slot{ name: 'header-item' }
-        %li.header-item{ 'v-for': 'headerItem in headerItems', value: '{{ headerItem[valueKey] }}', ':class': '[headerItem.slotType, { "active": isSelectedItem(headerItem) }]', '@click': 'clickCurrentItem()' }
-          {{{ headerItem[titleKey] }}}
+        %ul.items{ 'v-show': 'regularItems.length' }
+          %slot{ name: 'item' }
+          %li.item{ 'v-for': 'regularItem in regularItems', value: '{{ regularItem[valueKey] }}', ':class': '[regularItem.slotType, { "active": isSelectedItem(regularItem) }]', '@click': 'clickCurrentItem()' }
+            {{{ regularItem[titleKey] }}}
 
-      %ul.items{ 'v-show': 'regularItems.length' }
-        %slot{ name: 'item' }
-        %li.item{ 'v-for': 'regularItem in regularItems', value: '{{ regularItem[valueKey] }}', ':class': '[regularItem.slotType, { "active": isSelectedItem(regularItem) }]', '@click': 'clickCurrentItem()' }
-          {{{ regularItem[titleKey] }}}
-
-      %i.fa.fa-spinner.fa-spin.requesting-icon{ 'v-show': 'requestingData' }
+        %i.fa.fa-spinner.fa-spin.requesting-icon{ 'v-show': 'requestingData' }
 
       %ul.footer-items{ 'v-show': 'footerItems.length' }
         %slot{ name: 'footer-item' }
-        %li.footer-item{ 'v-for': 'footerItem in footerItems', value: '{{ footerItem[valueKey] }}', ':class': '[footerItem.slotType, { "active": isSelectedItem(footerItem) }]', '@click': 'clickCurrentItem()' }
+        %li.item{ 'v-for': 'footerItem in footerItems', value: '{{ footerItem[valueKey] }}', ':class': '[footerItem.slotType, { "active": isSelectedItem(footerItem) }]', '@click': 'clickCurrentItem()' }
           {{{ footerItem[titleKey] }}}

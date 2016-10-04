@@ -44,29 +44,27 @@ $(() => {
        * open dropdowns.
        * Lastly, initialise the field model observers.
        */
-      openFilterDropdown() {
-        this.closeFilterDropdowns();
+      openDefaultDropdown() {
+        this.closeDropdowns();
         this.$refs[DEFAULT_DROPDOWN].openDropdown();
         this.initFieldObservers();
       },
       /**
        * Closes all dropdowns and sets the current dropdown to default.
        */
-      closeFilterDropdowns() {
+      closeDropdowns() {
         for (const dropdownReference in this.dropdown) {
           this.$refs[dropdownReference].closeDropdown();
         }
         this.currentDropdown = DEFAULT_DROPDOWN;
       },
       /**
-       * Handle a keyup event from the filter input.
+       * Handle a keydown event from the filter input.
        * On up: Select the previous item of the current dropdown.
        * On down: Select the next item of the current dropdown.
-       * On enter: Click the current item of the current dropdown.
-       * On esc: Close the dropdowns and open the default dropdown.
-       * @param {Event} event - A keyup event object from the filter input.
+       * @param {Event} event - A keydown event object from the filter input.
        */
-      filterInputKeyup(event) {
+      filterInputKeydown(event) {
         const keycode = event.keyCode || event.which;
         switch (keycode) {
           case KEY.UP:
@@ -75,11 +73,22 @@ $(() => {
           case KEY.DOWN:
             this.$refs[this.currentDropdown].selectNextItem();
             break;
+        }
+      },
+      /**
+       * Handle a keyup event from the filter input.
+       * On enter: Click the current item of the current dropdown.
+       * On esc: Close the dropdowns and open the default dropdown.
+       * @param {Event} event - A keyup event object from the filter input.
+       */
+      filterInputKeyup(event) {
+        const keycode = event.keyCode || event.which;
+        switch (keycode) {
           case KEY.ENTER:
             this.$refs[this.currentDropdown].clickCurrentItem();
             break;
           case KEY.ESC:
-            this.openFilterDropdown()
+            this.openDefaultDropdown()
             break;
         }
       },
@@ -91,6 +100,7 @@ $(() => {
        */
       openSelectedDropdown(clickedDropdownItem) {
         if (!clickedDropdownItem) return;
+        this.closeDropdowns();
         this.$refs[clickedDropdownItem].openDropdown();
         this.currentDropdown = clickedDropdownItem;
       },
@@ -105,16 +115,17 @@ $(() => {
       addFilter(filterType, filterValue) {
         if (!filterValue) return;
         const { valueKey, titleKey } = this.$refs[this.currentDropdown];
-        const filterItem = this.$refs[this.currentDropdown].items.find((item) => {
-          return item[valueKey] === filterValue;
-        });
+        const filterItem = this.$refs[this.currentDropdown].items
+          .find((item) => {
+            return item[valueKey] === filterValue;
+          });
         const filter = {
           type: filterType,
           value: filterValue,
           title: filterItem[titleKey]
         };
         this.activeFilters.push(filter);
-        this.closeFilterDropdowns()
+        this.closeDropdowns()
         this.$refs[this.currentDropdown].openDropdown();
       },
       /**
@@ -124,7 +135,7 @@ $(() => {
       clearFilters() {
         this.activeFilters = [];
         this.filterInput = '';
-        this.closeFilterDropdowns();
+        this.closeDropdowns();
       },
       /**
        * TODO: Implement submit method.
@@ -154,12 +165,12 @@ $(() => {
        * @param {String} observerName - The unique name of the observer.
        * @param {Function} observable - A function returning an observable
        *                              entity.
-       * @param {Function} updateAction - A function to invoke when the
+       * @param {Function} action - A function to invoke when the
        *                                observable entity value updates.
        */
-      registerFieldObserver(observerName, observable, updateAction) {
+      registerFieldObserver(observerName, observable, action) {
         if (this.modelObserver[observerName]) return;
-        this.modelObserver[observerName] = this.$watch(observable, updateAction);
+        this.modelObserver[observerName] = this.$watch(observable, action);
       }
     }
   });

@@ -5,7 +5,7 @@
         = check_box_tag "check_all_issues", nil, false,
           class: "check_all_issues left"
 
-    = render 'shared/issuable/issuable_filter'
+    = render 'shared/issuable/issuable_filter_input'
 
     - if @bulk_edit
       .issues_bulk_update.hide
