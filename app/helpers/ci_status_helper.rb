@@ -4,9 +4,9 @@ module CiStatusHelper
     builds_namespace_project_commit_path(project.namespace, project, pipeline.sha)
   end
 
-  def ci_status_with_icon(status, target = nil)
-    content = ci_icon_for_status(status) + '&nbsp;'.html_safe + ci_label_for_status(status)
-    klass = "ci-status ci-#{status}"
+  def ci_status_with_icon(status, target = nil, allow_failure = false)
+    content = ci_icon_for_status(status, allow_failure) + '&nbsp;'.html_safe + ci_label_for_status(status, allow_failure)
+    klass = "ci-status ci-#{ci_css_class_for_status(status)}"
     if target
       link_to content, target, class: klass
     else
@@ -14,12 +14,31 @@ module CiStatusHelper
     end
   end
 
-  def ci_label_for_status(status)
+  def ci_label_for_status(status, allowFailure = false)
     case status
     when 'success'
       'passed'
     when 'success_with_warnings'
       'passed with warnings'
+    when 'failed'
+      if allowFailure
+        'warning'
+      else
+        status
+      end
+    else
+      status
+    end
+  end
+  
+  def ci_css_class_for_status(status, allowFailure = false)
+    case status
+    when 'failed'
+      if allowFailure
+        'warning'
+      else
+        status
+      end
     else
       status
     end
@@ -30,7 +49,7 @@ module CiStatusHelper
     status.humanize
   end
 
-  def ci_icon_for_status(status)
+  def ci_icon_for_status(status, allowFailure = false)
     icon_name =
       case status
       when 'success'
@@ -38,7 +57,11 @@ module CiStatusHelper
       when 'success_with_warnings'
         'icon_status_warning'
       when 'failed'
-        'icon_status_failed'
+        if allowFailure
+          'icon_status_warning'
+        else
+          'icon_status_failed'
+        end
       when 'pending'
         'icon_status_pending'
       when 'running'
