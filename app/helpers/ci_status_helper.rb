@@ -6,7 +6,7 @@ module CiStatusHelper
 
   def ci_status_with_icon(status, target = nil, allow_failure = false)
     content = ci_icon_for_status(status, allow_failure) + '&nbsp;'.html_safe + ci_label_for_status(status, allow_failure)
-    klass = "ci-status ci-#{ci_css_class_for_status(status)}"
+    klass = "ci-status ci-#{ci_css_class_for_status(status, allow_failure)}"
     if target
       link_to content, target, class: klass
     else

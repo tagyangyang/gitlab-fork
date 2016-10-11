@@ -5,13 +5,14 @@
 - stage = local_assigns.fetch(:stage, false)
 - coverage = local_assigns.fetch(:coverage, false)
 - allow_retry = local_assigns.fetch(:allow_retry, false)
+- allow_failure = build.try(:allow_failure)
 
 %tr.build.commit
   %td.status
     - if can?(current_user, :read_build, build)
-      = ci_status_with_icon(build.status, namespace_project_build_url(build.project.namespace, build.project, build))
+      = ci_status_with_icon(build.status, namespace_project_build_url(build.project.namespace, build.project, build), allow_failure)
     - else
-      = ci_status_with_icon(build.status)
+      = ci_status_with_icon(build.status, nil, allow_failure)
 
   %td.branch-commit
     - if can?(current_user, :read_build, build)
@@ -45,8 +46,6 @@
             = tag
       - if build.try(:trigger_request)
         %span.label.label-info triggered
-      - if build.try(:allow_failure)
-        %span.label.label-danger allowed to fail
       - if retried
         %span.label.label-warning retried
       - if build.manual?
