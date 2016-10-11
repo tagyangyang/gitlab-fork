@@ -1,7 +1,8 @@
 - group_status = CommitStatus.where(id: subject).status
+- group_allow_failure = CommitStatus.where(id: subject).try(:allow_failure)
 %button.dropdown-menu-toggle{ type: 'button', data: { toggle: 'dropdown' } }
   %span.ci-status-icon
-    = render_status_with_link('build', group_status)
+    = render_status_with_link('build', group_status, group_allow_failure)
   %span.ci-status-text
     = name
   %span.badge= subject.size
