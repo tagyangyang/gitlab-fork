@@ -14,14 +14,14 @@ module CiStatusHelper
     end
   end
 
-  def ci_label_for_status(status, allowFailure = false)
+  def ci_label_for_status(status, allow_failure = false)
     case status
     when 'success'
       'passed'
     when 'success_with_warnings'
       'passed with warnings'
     when 'failed'
-      if allowFailure
+      if allow_failure
         'warning'
       else
         status
@@ -31,10 +31,10 @@ module CiStatusHelper
     end
   end
   
-  def ci_css_class_for_status(status, allowFailure = false)
+  def ci_css_class_for_status(status, allow_failure = false)
     case status
     when 'failed'
-      if allowFailure
+      if allow_failure
         'warning'
       else
         status
@@ -49,7 +49,7 @@ module CiStatusHelper
     status.humanize
   end
 
-  def ci_icon_for_status(status, allowFailure = false)
+  def ci_icon_for_status(status, allow_failure = false)
     icon_name =
       case status
       when 'success'
@@ -57,7 +57,7 @@ module CiStatusHelper
       when 'success_with_warnings'
         'icon_status_warning'
       when 'failed'
-        if allowFailure
+        if allow_failure
           'icon_status_warning'
         else
           'icon_status_failed'
@@ -80,13 +80,13 @@ module CiStatusHelper
   def render_commit_status(commit, tooltip_placement: 'auto left')
     project = commit.project
     path = pipelines_namespace_project_commit_path(project.namespace, project, commit)
-    render_status_with_link('commit', commit.status, path, tooltip_placement: tooltip_placement)
+    render_status_with_link('commit', commit.status, commit.allow_failure, path, tooltip_placement: tooltip_placement)
   end
 
   def render_pipeline_status(pipeline, tooltip_placement: 'auto left')
     project = pipeline.project
     path = namespace_project_pipeline_path(project.namespace, project, pipeline)
-    render_status_with_link('pipeline', pipeline.status, path, tooltip_placement: tooltip_placement)
+    render_status_with_link('pipeline', pipeline.status, pipeline.allow_failure, path, tooltip_placement: tooltip_placement)
   end
 
   def no_runners_for_project?(project)
@@ -94,16 +94,16 @@ module CiStatusHelper
       Ci::Runner.shared.blank?
   end
 
-  def render_status_with_link(type, status, path = nil, tooltip_placement: 'auto left', cssclass: '', container: 'body')
-    klass = "ci-status-link ci-status-icon-#{status.dasherize} #{cssclass}"
-    title = "#{type.titleize}: #{ci_label_for_status(status)}"
+  def render_status_with_link(type, status, allow_failure = false, path = nil, tooltip_placement: 'auto left', cssclass: '', container: 'body')
+    klass = "ci-status-link ci-status-icon-#{ci_css_class_for_status(status.dasherize, allow_failure)} #{cssclass}"
+    title = "#{type.titleize}: #{ci_label_for_status(status, allow_failure)}"
     data = { toggle: 'tooltip', placement: tooltip_placement, container: container }
 
     if path
-      link_to ci_icon_for_status(status), path,
+      link_to ci_icon_for_status(status, allow_failure), path,
               class: klass, title: title, data: data
     else
-      content_tag :span, ci_icon_for_status(status),
+      content_tag :span, ci_icon_for_status(status, allow_failure),
               class: klass, title: title, data: data
     end
   end
