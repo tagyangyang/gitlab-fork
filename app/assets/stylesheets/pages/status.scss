@@ -51,6 +51,11 @@
         fill: $table-text-gray;
       }
     }
+    
+    &.ci-warning {
+      color: $orange-light;
+      border-color: $orange-light;
+     }
 
     svg {
       height: 13px;
