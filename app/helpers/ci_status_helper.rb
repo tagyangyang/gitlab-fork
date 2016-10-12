@@ -94,7 +94,7 @@ module CiStatusHelper
               class: klass, title: title, data: data
     else
       content_tag :span, ci_icon_for_status(status,
-              class: klass, title: title, data: data
+              class: klass, title: title, data: data)
     end
   end
 end

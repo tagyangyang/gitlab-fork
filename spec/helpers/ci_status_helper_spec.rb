@@ -6,7 +6,8 @@ describe CiStatusHelper do
   let(:success_commit)                { double("Ci::Pipeline", status: 'success') }
   let(:failed_commit)                 { double("Ci::Pipeline", status: 'failed') }
   let(:success_commit_with_warnings)  { double("Ci::Pipeline", status: 'success_with_warnings') }
-  let(:allowed_failed_commit)         { double("Ci::Pipeline", status: 'failed', allow_failure: true) }
+  let(:failed_but_allowed_commit)     { double("Ci::Pipeline", status: 'failed_but_allowed') }
+  let(:canceled_but_allowed_commit)   { double("Ci::Pipeline", status: 'canceled_but_allowed') }
 
   describe 'ci_icon_for_status' do
     it 'renders the correct svg on success' do
@@ -19,9 +20,14 @@ describe CiStatusHelper do
       helper.ci_icon_for_status(failed_commit.status)
     end
 
-    it 'renders the correct svg on failure when allowed to fail' do
+    it 'renders the correct svg on failure but allowed' do
       expect(helper).to receive(:render).with('shared/icons/icon_status_warning.svg', anything)
-      helper.ci_icon_for_status(allowed_failed_commit.status, allowed_failed_commit.allow_failure)
+      helper.ci_icon_for_status(failed_but_allowed_commit.status)
+    end
+    
+    it 'renders the correct svg on canceled but allowed' do
+      expect(helper).to receive(:render).with('shared/icons/icon_status_warning.svg', anything)
+      helper.ci_icon_for_status(canceled_but_allowed_commit.status)
     end
   end
 
@@ -34,8 +40,12 @@ describe CiStatusHelper do
       expect(helper.ci_css_class_for_status(failed_commit.status)).to eq(failed_commit.status)
     end
     
-    it 'returns the correct css class on failure when allowed to fail' do
-      expect(helper.ci_css_class_for_status(allowed_failed_commit.status, allowed_failed_commit.allow_failure)).to eq('warning')
+    it 'returns the correct css class on failure but allowed' do
+      expect(helper.ci_css_class_for_status(failed_but_allowed_commit.status)).to eq('warning')
+    end
+    
+    it 'returns the correct css class on canceled but allowed' do
+      expect(helper.ci_css_class_for_status(canceled_but_allowed_commit.status)).to eq('warning')
     end
   end
   
@@ -52,8 +62,12 @@ describe CiStatusHelper do
       expect(helper.ci_label_for_status(failed_commit.status)).to eq(failed_commit.status)
     end
     
-    it 'returns the correct label on failure when allowed to fail' do
-      expect(helper.ci_label_for_status(allowed_failed_commit.status, allowed_failed_commit.allow_failure)).to eq('warning')
+    it 'returns the correct label on failure but allowed' do
+      expect(helper.ci_label_for_status(failed_but_allowed_commit.status)).to eq('warning')
+    end
+    
+    it 'returns the correct label on canceled but allowed' do
+      expect(helper.ci_label_for_status(canceled_but_allowed_commit.status)).to eq('warning')
     end
   end
 end
