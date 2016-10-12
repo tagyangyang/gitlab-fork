@@ -11,7 +11,7 @@
     - if can?(current_user, :read_build, build)
       = ci_status_with_icon(build.status, namespace_project_build_url(build.project.namespace, build.project, build))
     - else
-      = ci_status_with_icon(build.status, nil)
+      = ci_status_with_icon(build.status)
 
   %td.branch-commit
     - if can?(current_user, :read_build, build)

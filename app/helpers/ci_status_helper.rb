@@ -93,8 +93,8 @@ module CiStatusHelper
       link_to ci_icon_for_status(status), path,
               class: klass, title: title, data: data
     else
-      content_tag :span, ci_icon_for_status(status,
-              class: klass, title: title, data: data)
+      content_tag :span, ci_icon_for_status(status),
+              class: klass, title: title, data: data
     end
   end
 end
