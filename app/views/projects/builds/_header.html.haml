@@ -1,5 +1,5 @@
 .content-block.build-header
-  = ci_status_with_icon(@build.status)
+  = ci_status_with_icon(@build.status, nil, @build.allow_failure)
   Build
   %strong ##{@build.id}
   for commit
