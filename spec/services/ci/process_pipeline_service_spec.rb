@@ -73,12 +73,14 @@ describe Ci::ProcessPipelineService, services: true do
 
         pipeline.builds.running_or_pending.each(&:run)
         pipeline.builds.running_or_pending.each(&:drop)
-        expect(builds.pluck(:status)).to contain_exactly('failed', 'pending')
+        expect(builds.pluck(:status)).
+          to contain_exactly('success_with_warnings', 'pending')
         expect(pipeline.reload.status).to eq('running')
 
         pipeline.builds.running_or_pending.each(&:run)
         pipeline.builds.running_or_pending.each(&:success)
-        expect(builds.pluck(:status)).to contain_exactly('failed', 'success')
+        expect(builds.pluck(:status)).
+          to contain_exactly('success_with_warnings', 'success')
         expect(pipeline.reload.status).to eq('success_with_warnings')
       end
     end

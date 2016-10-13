@@ -27,14 +27,15 @@ class CommitStatus < ActiveRecord::Base
   scope :ordered, -> { order(:name) }
 
   scope :failed_but_allowed, -> do
-    where(allow_failure: true, status: [:failed, :canceled])
+    where(allow_failure: true,
+          status: %i[failed canceled success_with_warnings])
   end
 
   scope :exclude_ignored, -> do
     quoted_when = connection.quote_column_name('when')
     # We want to ignore failed_but_allowed jobs
     where("allow_failure = ? OR status IN (?)",
-      false, all_state_names - [:failed, :canceled]).
+      false, all_state_names - %i[failed canceled success_with_warnings]).
       # We want to ignore skipped manual jobs
       where("#{quoted_when} <> ? OR status <> ?", 'manual', 'skipped').
       # We want to ignore skipped on_failure
@@ -62,6 +63,8 @@ class CommitStatus < ActiveRecord::Base
     end
 
     event :drop do
+      transition [:created, :pending, :running] => :success_with_warnings,
+        if: :allow_failure?
       transition [:created, :pending, :running] => :failed
     end
 
