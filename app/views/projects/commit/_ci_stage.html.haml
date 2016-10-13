@@ -3,7 +3,7 @@
     %strong
       %a{name: stage}
       - status = statuses.latest.status
-      %span{class: "ci-status-link ci-status-icon-#{status}"}
+      %span{class: "ci-status-link ci-status-icon-#{status.dasherize}"}
         = ci_icon_for_status(status)
       - if stage
         &nbsp;

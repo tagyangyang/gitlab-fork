@@ -56,7 +56,7 @@
   .commit-info-row
     Builds for
     = pluralize(@commit.pipelines.count, 'pipeline')
-    = link_to builds_namespace_project_commit_path(@project.namespace, @project, @commit.id), class: "ci-status-link ci-status-icon-#{@commit.status}" do
+    = link_to builds_namespace_project_commit_path(@project.namespace, @project, @commit.id), class: "ci-status-link ci-status-icon-#{@commit.status.dasherize}" do
       = ci_icon_for_status(@commit.status)
       %span.ci-status-label
         = ci_label_for_status(@commit.status)
