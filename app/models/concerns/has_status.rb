@@ -14,10 +14,10 @@ module HasStatus
                 all
               end
       warnings = if respond_to?(:failed_but_allowed)
-                   failed_but_allowed
+                   failed_but_allowed.select('count(*)').to_sql
                  else
-                   none
-                 end.select('count(*)').to_sql
+                   '0'
+                 end
       builds = scope.select('count(*)').to_sql
       created = scope.created.select('count(*)').to_sql
       success = scope.success.select('count(*)').to_sql
