@@ -30,7 +30,7 @@ describe CiStatusHelper do
     end
 
     it 'returns the correct label on failure' do
-      expect(helper.ci_label_for_status(failed_commit.status)).to eq(failed_commit.status)
+      expect(helper.ci_label_for_status(failed_commit.status)).to eq('failed')
     end
 
     it 'returns the correct label on success with warnings' do
