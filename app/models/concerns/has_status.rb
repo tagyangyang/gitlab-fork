@@ -4,7 +4,7 @@ module HasStatus
   AVAILABLE_STATUSES = %w[created pending running success failed canceled skipped]
   STARTED_STATUSES = %w[running success failed skipped]
   ACTIVE_STATUSES = %w[pending running]
-  COMPLETED_STATUSES = %w[success failed canceled]
+  COMPLETED_STATUSES = %w[success success_with_warnings failed canceled]
 
   class_methods do
     def status_sql
@@ -27,11 +27,11 @@ module HasStatus
       canceled = scope.canceled.select('count(*)').to_sql
 
       "(CASE
+        WHEN (#{builds})=(#{success}) AND (#{warnings})>0 THEN 'success_with_warnings'
         WHEN (#{builds})=(#{success}) THEN 'success'
         WHEN (#{builds})=(#{created}) THEN 'created'
-        WHEN (#{builds})=(#{success})+(#{warnings}) THEN 'success_with_warnings'
-        WHEN (#{builds})=(#{success})+(#{warnings})+(#{skipped}) THEN 'skipped'
-        WHEN (#{builds})=(#{success})+(#{warnings})+(#{skipped})+(#{canceled}) THEN 'canceled'
+        WHEN (#{builds})=(#{success})+(#{skipped}) THEN 'skipped'
+        WHEN (#{builds})=(#{success})+(#{skipped})+(#{canceled}) THEN 'canceled'
         WHEN (#{builds})=(#{created})+(#{skipped})+(#{pending}) THEN 'pending'
         WHEN (#{running})+(#{pending})+(#{created})>0 THEN 'running'
         ELSE 'failed'

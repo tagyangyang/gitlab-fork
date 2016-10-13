@@ -40,7 +40,7 @@ describe HasStatus do
            create(type, status: :failed, allow_failure: true)]
         end
 
-        it { is_expected.to eq 'success' }
+        it { is_expected.to eq 'success_with_warnings' }
       end
 
       context 'one failed but allowed to fail' do
@@ -48,7 +48,7 @@ describe HasStatus do
           [create(type, status: :failed, allow_failure: true)]
         end
 
-        it { is_expected.to eq 'success' }
+        it { is_expected.to eq 'success_with_warnings' }
       end
 
       context 'success and canceled' do
@@ -98,7 +98,7 @@ describe HasStatus do
            create(type, status: :canceled, allow_failure: true)]
         end
 
-        it { is_expected.to eq 'success' }
+        it { is_expected.to eq 'success_with_warnings' }
       end
 
       context 'one finished and second running but allowed to fail' do

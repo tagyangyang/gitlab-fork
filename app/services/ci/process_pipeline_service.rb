@@ -52,11 +52,11 @@ module Ci
     def valid_statuses_for_when(value)
       case value
       when 'on_success'
-        %w[success]
+        %w[success success_with_warnings]
       when 'on_failure'
         %w[failed]
       when 'always'
-        %w[success failed]
+        %w[success success_with_warnings failed]
       else
         []
       end

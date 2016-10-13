@@ -175,7 +175,7 @@ describe CommitStatus, models: true do
     end
 
     it 'returns statuses without what we want to ignore' do
-      is_expected.to eq(statuses.values_at(1, 2, 4, 5, 6, 7, 8, 9))
+      is_expected.to eq(statuses.values_at(1, 2, 4, 5, 6, 8, 9))
     end
   end
 
