@@ -44,6 +44,10 @@ module Ci
         transition any => :success
       end
 
+      event :succeed_with_warnings do
+        transition any => :success_with_warnings
+      end
+
       event :cancel do
         transition any => :canceled
       end
@@ -257,6 +261,7 @@ module Ci
         when 'pending' then enqueue
         when 'running' then run
         when 'success' then succeed
+        when 'success_with_warnings' then succeed_with_warnings
         when 'failed' then drop
         when 'canceled' then cancel
         when 'skipped' then skip

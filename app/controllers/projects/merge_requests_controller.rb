@@ -357,12 +357,8 @@ class Projects::MergeRequestsController < Projects::ApplicationController
   def ci_status
     pipeline = @merge_request.pipeline
     if pipeline
-      status = pipeline.status
-      coverage = pipeline.try(:coverage)
-
-      status = "success_with_warnings" if pipeline.success? && pipeline.has_warnings?
-
-      status ||= "preparing"
+      status = pipeline.status || 'preparing'
+      coverage = pipeline.coverage
     else
       ci_service = @merge_request.source_project.ci_service
       status = ci_service.commit_status(merge_request.diff_head_sha, merge_request.source_branch) if ci_service

@@ -6,7 +6,7 @@ module CiStatusHelper
 
   def ci_status_with_icon(status, target = nil)
     content = ci_icon_for_status(status) + '&nbsp;'.html_safe + ci_label_for_status(status)
-    klass = "ci-status ci-#{ci_css_class_for_status(status)}"
+    klass = "ci-status ci-#{status}"
     if target
       link_to content, target, class: klass
     else
@@ -20,17 +20,6 @@ module CiStatusHelper
       'passed'
     when 'success_with_warnings'
       'passed with warnings'
-    when 'failed_but_allowed', 'canceled_but_allowed'
-      'warning'
-    else
-      status
-    end
-  end
-  
-  def ci_css_class_for_status(status)
-    case status
-    when 'failed_but_allowed', 'canceled_but_allowed'
-      'warning'
     else
       status
     end
@@ -47,8 +36,6 @@ module CiStatusHelper
       when 'success'
         'icon_status_success'
       when 'success_with_warnings'
-        'icon_status_warning'
-      when 'failed_but_allowed', 'canceled_but_allowed'
         'icon_status_warning'
       when 'failed'
         'icon_status_failed'
@@ -85,7 +72,7 @@ module CiStatusHelper
   end
 
   def render_status_with_link(type, status, path = nil, tooltip_placement: 'auto left', cssclass: '', container: 'body')
-    klass = "ci-status-link ci-status-icon-#{ci_css_class_for_status(status.dasherize)} #{cssclass}"
+    klass = "ci-status-link ci-status-icon-#{status.dasherize} #{cssclass}"
     title = "#{type.titleize}: #{ci_label_for_status(status)}"
     data = { toggle: 'tooltip', placement: tooltip_placement, container: container }
 

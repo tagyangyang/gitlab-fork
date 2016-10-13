@@ -13,6 +13,11 @@ module HasStatus
               else
                 all
               end
+      warnings = if respond_to?(:failed_but_allowed)
+                   failed_but_allowed
+                 else
+                   none
+                 end.select('count(*)').to_sql
       builds = scope.select('count(*)').to_sql
       created = scope.created.select('count(*)').to_sql
       success = scope.success.select('count(*)').to_sql
@@ -24,8 +29,9 @@ module HasStatus
       "(CASE
         WHEN (#{builds})=(#{success}) THEN 'success'
         WHEN (#{builds})=(#{created}) THEN 'created'
-        WHEN (#{builds})=(#{success})+(#{skipped}) THEN 'skipped'
-        WHEN (#{builds})=(#{success})+(#{skipped})+(#{canceled}) THEN 'canceled'
+        WHEN (#{builds})=(#{success})+(#{warnings}) THEN 'success_with_warnings'
+        WHEN (#{builds})=(#{success})+(#{warnings})+(#{skipped}) THEN 'skipped'
+        WHEN (#{builds})=(#{success})+(#{warnings})+(#{skipped})+(#{canceled}) THEN 'canceled'
         WHEN (#{builds})=(#{created})+(#{skipped})+(#{pending}) THEN 'pending'
         WHEN (#{running})+(#{pending})+(#{created})>0 THEN 'running'
         ELSE 'failed'
@@ -68,8 +74,8 @@ module HasStatus
     scope :pending, -> { where(status: 'pending') }
     scope :success, -> { where(status: 'success') }
     scope :failed, -> { where(status: 'failed')  }
-    scope :canceled, -> { where(status: 'canceled')  }
-    scope :skipped, -> { where(status: 'skipped')  }
+    scope :canceled, -> { where(status: 'canceled') }
+    scope :skipped, -> { where(status: 'skipped') }
     scope :running_or_pending, -> { where(status: [:running, :pending]) }
     scope :finished, -> { where(status: [:success, :failed, :canceled]) }
   end

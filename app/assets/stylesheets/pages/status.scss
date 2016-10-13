@@ -15,10 +15,14 @@
       border-color: $gl-danger;
     }
 
-    &.ci-success,
-    &.ci-success_with_warnings {
+    &.ci-success {
       color: $gl-success;
       border-color: $gl-success;
+    }
+
+    &.ci-success_with_warnings {
+      color: $orange-light;
+      border-color: $orange-light;
     }
 
     &.ci-info {
@@ -51,11 +55,6 @@
         fill: $table-text-gray;
       }
     }
-    
-    &.ci-warning {
-      color: $orange-light;
-      border-color: $orange-light;
-     }
 
     svg {
       height: 13px;
@@ -75,10 +74,10 @@
   }
 
   .ci-status-icon-pending,
-  .ci-status-icon-success_with_warning {
+  .ci-status-icon-success-with-warnings {
     color: $gl-warning;
   }
-  
+
   .ci-status-icon-running {
     color: $blue-normal;
   }
