@@ -1,7 +1,9 @@
 module HasStatus
   extend ActiveSupport::Concern
 
-  AVAILABLE_STATUSES = %w[created pending running success failed canceled skipped]
+  AVAILABLE_STATUSES = %w[created pending running
+                          success success_with_warnings
+                          failed canceled skipped]
   STARTED_STATUSES = %w[running success failed skipped]
   ACTIVE_STATUSES = %w[pending running]
   COMPLETED_STATUSES = %w[success success_with_warnings failed canceled]
@@ -66,6 +68,7 @@ module HasStatus
       state :success, value: 'success'
       state :canceled, value: 'canceled'
       state :skipped, value: 'skipped'
+      state :success_with_warnings, value: 'success_with_warnings'
     end
 
     scope :created, -> { where(status: 'created') }

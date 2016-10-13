@@ -69,9 +69,17 @@ describe Ci::ProcessPipelineService, services: true do
       it 'automatically triggers a next stage when build finishes' do
         expect(process_pipeline).to be_truthy
         expect(builds.pluck(:status)).to contain_exactly('pending')
+        expect(pipeline.reload.status).to eq('pending')
 
+        pipeline.builds.running_or_pending.each(&:run)
         pipeline.builds.running_or_pending.each(&:drop)
         expect(builds.pluck(:status)).to contain_exactly('failed', 'pending')
+        expect(pipeline.reload.status).to eq('running')
+
+        pipeline.builds.running_or_pending.each(&:run)
+        pipeline.builds.running_or_pending.each(&:success)
+        expect(builds.pluck(:status)).to contain_exactly('failed', 'success')
+        expect(pipeline.reload.status).to eq('success_with_warnings')
       end
     end
 
