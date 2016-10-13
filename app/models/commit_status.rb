@@ -64,7 +64,7 @@ class CommitStatus < ActiveRecord::Base
 
     event :drop do
       transition [:created, :pending, :running] => :success_with_warnings,
-        if: :allow_failure?
+                 if: :allow_failure?
       transition [:created, :pending, :running] => :failed
     end
 
