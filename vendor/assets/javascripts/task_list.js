@@ -196,7 +196,8 @@
   $(document).on('change', '.task-list-item-checkbox', function() {
     return updateTaskList($(this));
   });
-
+  
+  // Enables TaskList item changes.
   enableTaskList = function($container) {
     if ($container.find('.js-task-list-field').length > 0) {
       $container.find('.task-list-item').addClass('enabled').find('.task-list-item-checkbox').attr('disabled', null);
