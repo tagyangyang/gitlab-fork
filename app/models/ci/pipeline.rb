@@ -199,10 +199,6 @@ module Ci
         sort_by { |build| build[:stage_idx] }
     end
 
-    def has_warnings?
-      builds.latest.failed_but_allowed.any?
-    end
-
     def config_processor
       return nil unless ci_yaml_file
       return @config_processor if defined?(@config_processor)

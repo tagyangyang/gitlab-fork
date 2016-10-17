@@ -51,6 +51,24 @@ describe HasStatus do
         it { is_expected.to eq 'success_with_warnings' }
       end
 
+      context 'one canceled but allowed to fail' do
+        let!(:statuses) do
+          [create(type, status: :success),
+           create(type, status: :canceled, allow_failure: true)]
+        end
+
+        it { is_expected.to eq 'success_with_warnings' }
+      end
+
+      context 'one success with allowed to fail' do
+        let!(:statuses) do
+          [create(type, status: :success),
+           create(type, status: :success, allow_failure: true)]
+        end
+
+        it { is_expected.to eq 'success' }
+      end
+
       context 'success and canceled' do
         let!(:statuses) do
           [create(type, status: :success), create(type, status: :canceled)]
@@ -90,15 +108,6 @@ describe HasStatus do
         end
 
         it { is_expected.to eq 'canceled' }
-      end
-
-      context 'success and canceled but allowed to fail' do
-        let!(:statuses) do
-          [create(type, status: :success),
-           create(type, status: :canceled, allow_failure: true)]
-        end
-
-        it { is_expected.to eq 'success_with_warnings' }
       end
 
       context 'one finished and second running but allowed to fail' do
