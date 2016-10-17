@@ -172,9 +172,12 @@ module Banzai
             collection.where(id: to_query).each { |row| cache[row.id] = row }
           end
 
-          cache.values
-        else
+          # Return only provided values cache can be exercised on others calls
+          cache.slice(*ids.map(&:to_i)).values
+        elsif ids.any?
           collection.where(id: ids)
+        else
+          collection.none
         end
       end
 

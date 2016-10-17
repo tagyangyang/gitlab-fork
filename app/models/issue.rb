@@ -203,7 +203,7 @@ class Issue < ActiveRecord::Base
 
     ext = all_references(current_user)
 
-    notes.system.each do |note|
+    notes.system.includes(:author).each do |note|
       note.all_references(current_user, extractor: ext)
     end
 
