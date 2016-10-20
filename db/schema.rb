@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161019213545) do
+ActiveRecord::Schema.define(version: 20161020075830) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -713,7 +713,7 @@ ActiveRecord::Schema.define(version: 20161019213545) do
     t.string "avatar"
     t.boolean "share_with_group_lock", default: false
     t.integer "visibility_level", default: 20, null: false
-    t.boolean "request_access_enabled", default: true, null: false
+    t.boolean "request_access_enabled", default: false, null: false
     t.datetime "deleted_at"
     t.boolean "lfs_enabled"
     t.text "description_html"
@@ -843,7 +843,7 @@ ActiveRecord::Schema.define(version: 20161019213545) do
     t.integer "builds_access_level"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "repository_access_level",     default: 20, null: false
+    t.integer "repository_access_level", default: 20, null: false
   end
 
   add_index "project_features", ["project_id"], name: "index_project_features_on_project_id", using: :btree
@@ -899,7 +899,7 @@ ActiveRecord::Schema.define(version: 20161019213545) do
     t.boolean "only_allow_merge_if_build_succeeds", default: false, null: false
     t.boolean "has_external_issue_tracker"
     t.string "repository_storage", default: "default", null: false
-    t.boolean "request_access_enabled", default: true, null: false
+    t.boolean "request_access_enabled", default: false, null: false
     t.boolean "has_external_wiki"
     t.boolean "lfs_enabled"
     t.text "description_html"
