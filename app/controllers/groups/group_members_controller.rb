@@ -17,7 +17,6 @@ class Groups::GroupMembersController < Groups::ApplicationController
       @members = @members.joins(:user).merge(User.sort(@sort = params[:sort]))
     end
 
-
     @members = @members.page(params[:page]).per(50)
     @requesters = AccessRequestsFinder.new(@group).execute(current_user)
 
