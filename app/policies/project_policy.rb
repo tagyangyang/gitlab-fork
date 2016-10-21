@@ -41,6 +41,7 @@ class ProjectPolicy < BasePolicy
     can! :read_project_snippet
     can! :read_project_member
     can! :read_note
+    can! :read_custom_emoji
     can! :create_project
     can! :create_issue
     can! :create_note
@@ -72,6 +73,7 @@ class ProjectPolicy < BasePolicy
   end
 
   def developer_access!
+    can! :admin_custom_emoji
     can! :admin_merge_request
     can! :update_merge_request
     can! :create_commit_status

@@ -69,6 +69,7 @@ class Project < ActiveRecord::Base
 
   has_one :last_event, -> {order 'events.created_at DESC'}, class_name: 'Event', foreign_key: 'project_id'
   has_many :boards, before_add: :validate_board_limit, dependent: :destroy
+  has_many :custom_emoji, dependent: :destroy
 
   # Project services
   has_many :services

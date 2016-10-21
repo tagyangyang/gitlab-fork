@@ -43,3 +43,7 @@
       = link_to namespace_project_pipelines_settings_path(@project.namespace, @project), title: 'CI/CD Pipelines' do
         %span
           CI/CD Pipelines
+    = nav_link(controller: :custom_emoji) do
+      = link_to namespace_project_custom_emoji_index_path(@project.namespace, @project), title: 'CI/CD Pipelines' do
+        %span
+          Custom Emoji

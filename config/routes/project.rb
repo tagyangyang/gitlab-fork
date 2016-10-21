@@ -445,6 +445,8 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
         end
       end
 
+      resources :custom_emoji, except: [:edit], constraints: { id: /\d+/ }
+
       resources :runners, only: [:index, :edit, :update, :destroy, :show] do
         member do
           get :resume

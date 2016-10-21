@@ -10,5 +10,5 @@
 # end
 #
 ActiveSupport::Inflector.inflections do |inflect|
-  inflect.uncountable %w(award_emoji)
+  inflect.uncountable %w(award_emoji custom_emoji)
 end

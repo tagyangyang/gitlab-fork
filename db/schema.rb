@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161017095000) do
+ActiveRecord::Schema.define(version: 20161020163107) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -358,6 +358,17 @@ ActiveRecord::Schema.define(version: 20161017095000) do
   end
 
   add_index "ci_variables", ["gl_project_id"], name: "index_ci_variables_on_gl_project_id", using: :btree
+
+  create_table "custom_emoji", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.string "name"
+    t.string "emoji"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "custom_emoji", ["project_id", "name"], name: "index_custom_emoji_on_project_id_and_name", unique: true, using: :btree
+  add_index "custom_emoji", ["project_id"], name: "index_custom_emoji_on_project_id", using: :btree
 
   create_table "deploy_keys_projects", force: :cascade do |t|
     t.integer "deploy_key_id", null: false
@@ -832,7 +843,7 @@ ActiveRecord::Schema.define(version: 20161017095000) do
     t.integer "builds_access_level"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "repository_access_level",     default: 20, null: false
+    t.integer "repository_access_level", default: 20, null: false
   end
 
   add_index "project_features", ["project_id"], name: "index_project_features_on_project_id", using: :btree
@@ -1212,6 +1223,7 @@ ActiveRecord::Schema.define(version: 20161017095000) do
   add_index "web_hooks", ["project_id"], name: "index_web_hooks_on_project_id", using: :btree
 
   add_foreign_key "boards", "projects"
+  add_foreign_key "custom_emoji", "projects"
   add_foreign_key "issue_metrics", "issues", on_delete: :cascade
   add_foreign_key "lists", "boards"
   add_foreign_key "lists", "labels"
