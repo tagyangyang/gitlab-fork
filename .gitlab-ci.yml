@@ -75,14 +75,14 @@ update-knapsack:
   stage: test
   <<: *use-db
   script:
-    - #bundle exec rake assets:precompile 2>/dev/null
+    - echo bundle exec rake assets:precompile 2>/dev/null
     - JOB_NAME=( $CI_BUILD_NAME )
     - export CI_NODE_INDEX=${JOB_NAME[1]}
     - export CI_NODE_TOTAL=${JOB_NAME[2]}
     - export KNAPSACK_REPORT_PATH=knapsack/rspec_node_${CI_NODE_INDEX}_${CI_NODE_TOTAL}_report.json
     - export KNAPSACK_GENERATE_REPORT=true
     - cp knapsack/rspec_report.json ${KNAPSACK_REPORT_PATH}
-    - #knapsack rspec "--color --format documentation"
+    - echo knapsack rspec "--color --format documentation"
   artifacts:
     expire_in: 31d
     paths:
