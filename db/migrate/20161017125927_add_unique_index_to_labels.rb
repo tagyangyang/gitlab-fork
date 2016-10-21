@@ -13,6 +13,8 @@ class AddUniqueIndexToLabels < ActiveRecord::Migration
       label_id = duplicated_ids.first
       duplicated_ids.delete(label_id)
 
+      next if duplicated_ids.empty?
+
       execute("UPDATE label_links SET label_id = #{label_id} WHERE label_id IN(#{duplicated_ids.join(",")})")
       execute("DELETE FROM labels WHERE id IN(#{duplicated_ids.join(",")})")
     end
