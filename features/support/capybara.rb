@@ -1,5 +1,6 @@
 require 'spinach/capybara'
 require 'capybara/poltergeist'
+require 'capybara/rails'
 
 # Give CI some extra time
 timeout = (ENV['CI'] || ENV['CI_SERVER']) ? 90 : 15
