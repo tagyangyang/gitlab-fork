@@ -1,3 +1,14 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/gitlab_git.git
+  revision: c297aa44713b102584dd6dd79a510693c67c35fc
+  branch: 31-diff-collapsing-changed-in-10-6-9
+  specs:
+    gitlab_git (10.6.9)
+      activesupport (~> 4.0)
+      charlock_holmes (~> 0.7.3)
+      github-linguist (~> 4.7.0)
+      rugged (~> 0.24.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -283,11 +294,6 @@ GEM
       mime-types (>= 1.16, < 3)
       posix-spawn (~> 0.3)
     gitlab-markup (1.5.0)
-    gitlab_git (10.6.8)
-      activesupport (~> 4.0)
-      charlock_holmes (~> 0.7.3)
-      github-linguist (~> 4.7.0)
-      rugged (~> 0.24.0)
     gitlab_omniauth-ldap (1.2.1)
       net-ldap (~> 0.9)
       omniauth (~> 1.0)
@@ -867,7 +873,7 @@ DEPENDENCIES
   github-linguist (~> 4.7.0)
   gitlab-flowdock-git-hook (~> 1.0.1)
   gitlab-markup (~> 1.5.0)
-  gitlab_git (~> 10.6.8)
+  gitlab_git!
   gitlab_omniauth-ldap (~> 1.2.1)
   gollum-lib (~> 4.2)
   gollum-rugged_adapter (~> 0.4.2)
@@ -994,4 +1000,4 @@ DEPENDENCIES
   wikicloth (= 0.8.1)
 
 BUNDLED WITH
-   1.13.2
+   1.13.5

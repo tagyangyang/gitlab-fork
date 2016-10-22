@@ -51,7 +51,7 @@ gem 'browser', '~> 2.2'
 
 # Extracting information from a git repository
 # Provide access to Gitlab::Git library
-gem 'gitlab_git', '~> 10.6.8'
+gem 'gitlab_git', git: 'https://gitlab.com/gitlab-org/gitlab_git.git', branch: '31-diff-collapsing-changed-in-10-6-9' 
 
 # LDAP Auth
 # GitLab fork with several improvements to original library. For full list of changes
