@@ -16,7 +16,7 @@ module Gitlab
 
       USER_REFERENCES = %w[author_id assignee_id updated_by_id user_id created_by_id].freeze
 
-      PROJECT_REFERENCES = %w[project_id source_project_id gl_project_id target_project_id].freeze
+      PROJECT_REFERENCES = %w[project_id source_project_id target_project_id].freeze
 
       BUILD_MODELS = %w[Ci::Build commit_status].freeze
 
@@ -118,7 +118,6 @@ module Gitlab
 
         # project_id may not be part of the export, but we always need to populate it if required.
         @relation_hash['project_id'] = project_id
-        @relation_hash['gl_project_id'] = project_id if @relation_hash['gl_project_id']
         @relation_hash['target_project_id'] = project_id if @relation_hash['target_project_id']
       end
 

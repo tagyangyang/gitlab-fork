@@ -10,11 +10,11 @@ module Ci
           builds.
             # don't run projects which have not enabled shared runners and builds
             joins(:project).where(projects: { shared_runners_enabled: true }).
-            joins('LEFT JOIN project_features ON ci_builds.gl_project_id = project_features.project_id').
+            joins('LEFT JOIN project_features ON ci_builds.project_id = project_features.project_id').
 
             # this returns builds that are ordered by number of running builds
             # we prefer projects that don't use shared runners at all
-            joins("LEFT JOIN (#{running_builds_for_shared_runners.to_sql}) AS project_builds ON ci_builds.gl_project_id=project_builds.gl_project_id").
+            joins("LEFT JOIN (#{running_builds_for_shared_runners.to_sql}) AS project_builds ON ci_builds.project_id=project_builds.project_id").
             where('project_features.builds_access_level IS NULL or project_features.builds_access_level > 0').
             order('COALESCE(project_builds.running_builds, 0) ASC', 'ci_builds.id ASC')
         else
@@ -43,7 +43,7 @@ module Ci
 
     def running_builds_for_shared_runners
       Ci::Build.running.where(runner: Ci::Runner.shared).
-        group(:gl_project_id).select(:gl_project_id, 'count(*) AS running_builds')
+        group(:project_id).select(:project_id, 'count(*) AS running_builds')
     end
   end
 end

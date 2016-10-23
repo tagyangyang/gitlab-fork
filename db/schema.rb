@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161121143500) do
+ActiveRecord::Schema.define(version: 20161121143603) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -200,7 +200,7 @@ ActiveRecord::Schema.define(version: 20161121143500) do
     t.string "target_url"
     t.string "description"
     t.text "artifacts_file"
-    t.integer "gl_project_id"
+    t.integer "project_id"
     t.text "artifacts_metadata"
     t.integer "erased_by_id"
     t.datetime "erased_at"
@@ -219,7 +219,7 @@ ActiveRecord::Schema.define(version: 20161121143500) do
   add_index "ci_builds", ["commit_id", "type", "name", "ref"], name: "index_ci_builds_on_commit_id_and_type_and_name_and_ref", using: :btree
   add_index "ci_builds", ["commit_id", "type", "ref"], name: "index_ci_builds_on_commit_id_and_type_and_ref", using: :btree
   add_index "ci_builds", ["commit_id"], name: "index_ci_builds_on_commit_id", using: :btree
-  add_index "ci_builds", ["gl_project_id"], name: "index_ci_builds_on_gl_project_id", using: :btree
+  add_index "ci_builds", ["project_id"], name: "index_ci_builds_on_project_id", using: :btree
   add_index "ci_builds", ["runner_id"], name: "index_ci_builds_on_runner_id", using: :btree
   add_index "ci_builds", ["status"], name: "index_ci_builds_on_status", using: :btree
   add_index "ci_builds", ["token"], name: "index_ci_builds_on_token", unique: true, using: :btree
@@ -234,7 +234,7 @@ ActiveRecord::Schema.define(version: 20161121143500) do
     t.boolean "tag", default: false
     t.text "yaml_errors"
     t.datetime "committed_at"
-    t.integer "gl_project_id"
+    t.integer "project_id"
     t.string "status"
     t.datetime "started_at"
     t.datetime "finished_at"
@@ -243,9 +243,9 @@ ActiveRecord::Schema.define(version: 20161121143500) do
     t.integer "lock_version"
   end
 
-  add_index "ci_commits", ["gl_project_id", "sha"], name: "index_ci_commits_on_gl_project_id_and_sha", using: :btree
-  add_index "ci_commits", ["gl_project_id", "status"], name: "index_ci_commits_on_gl_project_id_and_status", using: :btree
-  add_index "ci_commits", ["gl_project_id"], name: "index_ci_commits_on_gl_project_id", using: :btree
+  add_index "ci_commits", ["project_id", "sha"], name: "index_ci_commits_on_project_id_and_sha", using: :btree
+  add_index "ci_commits", ["project_id", "status"], name: "index_ci_commits_on_project_id_and_status", using: :btree
+  add_index "ci_commits", ["project_id"], name: "index_ci_commits_on_project_id", using: :btree
   add_index "ci_commits", ["status"], name: "index_ci_commits_on_status", using: :btree
   add_index "ci_commits", ["user_id"], name: "index_ci_commits_on_user_id", using: :btree
 
@@ -276,10 +276,10 @@ ActiveRecord::Schema.define(version: 20161121143500) do
     t.integer "runner_id", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer "gl_project_id"
+    t.integer "project_id"
   end
 
-  add_index "ci_runner_projects", ["gl_project_id"], name: "index_ci_runner_projects_on_gl_project_id", using: :btree
+  add_index "ci_runner_projects", ["project_id"], name: "index_ci_runner_projects_on_project_id", using: :btree
   add_index "ci_runner_projects", ["runner_id"], name: "index_ci_runner_projects_on_runner_id", using: :btree
 
   create_table "ci_runners", force: :cascade do |t|
@@ -339,10 +339,10 @@ ActiveRecord::Schema.define(version: 20161121143500) do
     t.datetime "deleted_at"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer "gl_project_id"
+    t.integer "project_id"
   end
 
-  add_index "ci_triggers", ["gl_project_id"], name: "index_ci_triggers_on_gl_project_id", using: :btree
+  add_index "ci_triggers", ["project_id"], name: "index_ci_triggers_on_project_id", using: :btree
 
   create_table "ci_variables", force: :cascade do |t|
     t.string "key"
@@ -350,10 +350,10 @@ ActiveRecord::Schema.define(version: 20161121143500) do
     t.text "encrypted_value"
     t.string "encrypted_value_salt"
     t.string "encrypted_value_iv"
-    t.integer "gl_project_id"
+    t.integer "project_id"
   end
 
-  add_index "ci_variables", ["gl_project_id"], name: "index_ci_variables_on_gl_project_id", using: :btree
+  add_index "ci_variables", ["project_id"], name: "index_ci_variables_on_project_id", using: :btree
 
   create_table "deploy_keys_projects", force: :cascade do |t|
     t.integer "deploy_key_id", null: false

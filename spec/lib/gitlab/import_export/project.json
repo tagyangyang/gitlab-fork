@@ -6485,7 +6485,6 @@
       "tag": null,
       "yaml_errors": null,
       "committed_at": null,
-      "gl_project_id": 5,
       "status": "failed",
       "started_at": null,
       "finished_at": null,
@@ -6543,7 +6542,6 @@
           "artifacts_file": {
             "url": null
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": null
           },
@@ -6579,7 +6577,6 @@
           "artifacts_file": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/72/p5_build_artifacts.zip"
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/72/p5_build_artifacts_metadata.gz"
           },
@@ -6600,7 +6597,6 @@
       "tag": null,
       "yaml_errors": null,
       "committed_at": null,
-      "gl_project_id": 5,
       "status": "failed",
       "started_at": null,
       "finished_at": null,
@@ -6635,7 +6631,6 @@
           "artifacts_file": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/74/p5_build_artifacts.zip"
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/74/p5_build_artifacts_metadata.gz"
           },
@@ -6671,7 +6666,6 @@
           "artifacts_file": {
             "url": null
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": null
           },
@@ -6692,7 +6686,6 @@
       "tag": null,
       "yaml_errors": null,
       "committed_at": null,
-      "gl_project_id": 5,
       "status": "failed",
       "started_at": null,
       "finished_at": null,
@@ -6727,7 +6720,6 @@
           "artifacts_file": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/76/p5_build_artifacts.zip"
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/76/p5_build_artifacts_metadata.gz"
           },
@@ -6763,7 +6755,6 @@
           "artifacts_file": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/75/p5_build_artifacts.zip"
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/75/p5_build_artifacts_metadata.gz"
           },
@@ -6784,7 +6775,6 @@
       "tag": null,
       "yaml_errors": null,
       "committed_at": null,
-      "gl_project_id": 5,
       "status": "failed",
       "started_at": null,
       "finished_at": null,
@@ -6819,7 +6809,6 @@
           "artifacts_file": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/78/p5_build_artifacts.zip"
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/78/p5_build_artifacts_metadata.gz"
           },
@@ -6855,7 +6844,6 @@
           "artifacts_file": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/77/p5_build_artifacts.zip"
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/77/p5_build_artifacts_metadata.gz"
           },
@@ -6876,7 +6864,6 @@
       "tag": null,
       "yaml_errors": null,
       "committed_at": null,
-      "gl_project_id": 5,
       "status": "failed",
       "started_at": null,
       "finished_at": null,
@@ -6911,7 +6898,6 @@
           "artifacts_file": {
             "url": null
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": null
           },
@@ -6947,7 +6933,6 @@
           "artifacts_file": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/80/p5_build_artifacts.zip"
           },
-          "gl_project_id": 5,
           "artifacts_metadata": {
             "url": "/Users/Test/Test/gitlab-development-kit/gitlab/shared/artifacts/2016_03/5/80/p5_build_artifacts_metadata.gz"
           },

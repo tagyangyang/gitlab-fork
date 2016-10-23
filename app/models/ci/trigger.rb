@@ -4,7 +4,7 @@ module Ci
 
     acts_as_paranoid
 
-    belongs_to :project, foreign_key: :gl_project_id
+    belongs_to :project
     has_many :trigger_requests, dependent: :destroy
 
     validates_presence_of :token
