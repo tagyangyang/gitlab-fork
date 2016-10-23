@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161121143317) do
+ActiveRecord::Schema.define(version: 20161121143500) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -175,7 +175,6 @@ ActiveRecord::Schema.define(version: 20161121143317) do
   end
 
   create_table "ci_builds", force: :cascade do |t|
-    t.integer "project_id"
     t.string "status"
     t.datetime "finished_at"
     t.text "trace"
@@ -221,13 +220,11 @@ ActiveRecord::Schema.define(version: 20161121143317) do
   add_index "ci_builds", ["commit_id", "type", "ref"], name: "index_ci_builds_on_commit_id_and_type_and_ref", using: :btree
   add_index "ci_builds", ["commit_id"], name: "index_ci_builds_on_commit_id", using: :btree
   add_index "ci_builds", ["gl_project_id"], name: "index_ci_builds_on_gl_project_id", using: :btree
-  add_index "ci_builds", ["project_id"], name: "index_ci_builds_on_project_id", using: :btree
   add_index "ci_builds", ["runner_id"], name: "index_ci_builds_on_runner_id", using: :btree
   add_index "ci_builds", ["status"], name: "index_ci_builds_on_status", using: :btree
   add_index "ci_builds", ["token"], name: "index_ci_builds_on_token", unique: true, using: :btree
 
   create_table "ci_commits", force: :cascade do |t|
-    t.integer "project_id"
     t.string "ref"
     t.string "sha"
     t.string "before_sha"
@@ -277,7 +274,6 @@ ActiveRecord::Schema.define(version: 20161121143317) do
 
   create_table "ci_runner_projects", force: :cascade do |t|
     t.integer "runner_id", null: false
-    t.integer "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "gl_project_id"
@@ -340,7 +336,6 @@ ActiveRecord::Schema.define(version: 20161121143317) do
 
   create_table "ci_triggers", force: :cascade do |t|
     t.string "token"
-    t.integer "project_id"
     t.datetime "deleted_at"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -350,7 +345,6 @@ ActiveRecord::Schema.define(version: 20161121143317) do
   add_index "ci_triggers", ["gl_project_id"], name: "index_ci_triggers_on_gl_project_id", using: :btree
 
   create_table "ci_variables", force: :cascade do |t|
-    t.integer "project_id"
     t.string "key"
     t.text "value"
     t.text "encrypted_value"
