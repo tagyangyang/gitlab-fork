@@ -1,4 +1,5 @@
 class ProjectsController < Projects::ApplicationController
+  include IssuableCollections
   include ExtractsPath
 
   before_action :authenticate_user!, except: [:show, :activity, :refs]
@@ -103,16 +104,7 @@ class ProjectsController < Projects::ApplicationController
     respond_to do |format|
       format.html do
         @notification_setting = current_user.notification_settings_for(@project) if current_user
-
-        if @project.repository_exists?
-          if @project.empty_repo?
-            render 'projects/empty'
-          else
-            render :show
-          end
-        else
-          render 'projects/no_repo'
-        end
+        render_landing_page
       end
 
       format.atom do
@@ -137,10 +129,10 @@ class ProjectsController < Projects::ApplicationController
     noteable =
       case params[:type]
       when 'Issue'
-        IssuesFinder.new(current_user, project_id: @project.id, state: 'all').
+        IssuesFinder.new(current_user, project_id: @project.id).
           execute.find_by(iid: params[:type_id])
       when 'MergeRequest'
-        MergeRequestsFinder.new(current_user, project_id: @project.id, state: 'all').
+        MergeRequestsFinder.new(current_user, project_id: @project.id).
           execute.find_by(iid: params[:type_id])
       when 'Commit'
         @project.commit(params[:type_id])
@@ -285,6 +277,26 @@ class ProjectsController < Projects::ApplicationController
 
   private
 
+  # Render project landing depending of which features are available
+  # So if page is not availble in the list it renders the next page
+  #
+  # pages list order: repository readme, wiki home, issues list, customize workflow
+  def render_landing_page
+    if @project.feature_available?(:repository, current_user)
+      return render 'projects/no_repo' unless @project.repository_exists?
+      render 'projects/empty' if @project.empty_repo?
+    else
+      if @project.wiki_enabled?
+        @wiki_home = @project.wiki.find_page('home', params[:version_id])
+      elsif @project.feature_available?(:issues, current_user)
+        @issues = issues_collection
+        @issues = @issues.page(params[:page])
+      end
+
+      render :show
+    end
+  end
+
   def determine_layout
     if [:new, :create].include?(action_name.to_sym)
       'application'
@@ -308,7 +320,8 @@ class ProjectsController < Projects::ApplicationController
         project_feature_attributes:
           [
             :issues_access_level, :builds_access_level,
-            :wiki_access_level, :merge_requests_access_level, :snippets_access_level
+            :wiki_access_level, :merge_requests_access_level,
+            :snippets_access_level, :repository_access_level
           ]
       }
 
@@ -324,7 +337,12 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def repo_exists?
-    project.repository_exists? && !project.empty_repo?
+    project.repository_exists? && !project.empty_repo? && project.repo
+
+  rescue Gitlab::Git::Repository::NoRepository
+    project.repository.expire_exists_cache
+
+    false
   end
 
   def project_view_files?

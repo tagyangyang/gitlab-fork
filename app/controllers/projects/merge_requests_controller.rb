@@ -9,15 +9,18 @@ class Projects::MergeRequestsController < Projects::ApplicationController
 
   before_action :module_enabled
   before_action :merge_request, only: [
-    :edit, :update, :show, :diffs, :commits, :conflicts, :builds, :pipelines, :merge, :merge_check,
-    :ci_status, :toggle_subscription, :cancel_merge_when_build_succeeds, :remove_wip, :resolve_conflicts
+    :edit, :update, :show, :diffs, :commits, :conflicts, :conflict_for_path, :builds, :pipelines, :merge, :merge_check,
+    :ci_status, :ci_environments_status, :toggle_subscription, :cancel_merge_when_build_succeeds, :remove_wip, :resolve_conflicts, :assign_related_issues
   ]
   before_action :validates_merge_request, only: [:show, :diffs, :commits, :builds, :pipelines]
-  before_action :define_show_vars, only: [:show, :diffs, :commits, :conflicts, :builds, :pipelines]
+  before_action :define_show_vars, only: [:show, :diffs, :commits, :conflicts, :conflict_for_path, :builds, :pipelines]
   before_action :define_widget_vars, only: [:merge, :cancel_merge_when_build_succeeds, :merge_check]
   before_action :define_commit_vars, only: [:diffs]
   before_action :define_diff_comment_vars, only: [:diffs]
-  before_action :ensure_ref_fetched, only: [:show, :diffs, :commits, :builds, :conflicts, :pipelines]
+  before_action :ensure_ref_fetched, only: [:show, :diffs, :commits, :builds, :conflicts, :conflict_for_path, :pipelines]
+  before_action :close_merge_request_without_source_project, only: [:show, :diffs, :commits, :builds, :pipelines]
+  before_action :apply_diff_view_cookie!, only: [:new_diffs]
+  before_action :build_merge_request, only: [:new, :new_diffs]
 
   # Allow read any merge_request
   before_action :authorize_read_merge_request!
@@ -28,14 +31,19 @@ class Projects::MergeRequestsController < Projects::ApplicationController
   # Allow modify merge_request
   before_action :authorize_update_merge_request!, only: [:close, :edit, :update, :remove_wip, :sort]
 
-  before_action :authorize_can_resolve_conflicts!, only: [:conflicts, :resolve_conflicts]
+  before_action :authenticate_user!, only: [:assign_related_issues]
+
+  before_action :authorize_can_resolve_conflicts!, only: [:conflicts, :conflict_for_path, :resolve_conflicts]
 
   def index
     @merge_requests = merge_requests_collection
     @merge_requests = @merge_requests.page(params[:page])
     @merge_requests = @merge_requests.preload(:target_project)
 
-    @labels = @project.labels.where(title: params[:label_name])
+    if params[:label_name].present?
+      labels_params = { project_id: @project.id, title: params[:label_name] }
+      @labels = LabelsFinder.new(current_user, labels_params).execute
+    end
 
     respond_to do |format|
       format.html
@@ -165,6 +173,16 @@ class Projects::MergeRequestsController < Projects::ApplicationController
     end
   end
 
+  def conflict_for_path
+    return render_404 unless @merge_request.conflicts_can_be_resolved_in_ui?
+
+    file = @merge_request.conflicts.file_for_path(params[:old_path], params[:new_path])
+
+    return render_404 unless file
+
+    render json: file, full_content: true
+  end
+
   def resolve_conflicts
     return render_404 unless @merge_request.conflicts_can_be_resolved_in_ui?
 
@@ -179,7 +197,7 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       flash[:notice] = 'All merge conflicts were resolved. The merge request can now be merged.'
 
       render json: { redirect_to: namespace_project_merge_request_url(@project.namespace, @project, @merge_request, resolved_conflicts: true) }
-    rescue Gitlab::Conflict::File::MissingResolution => e
+    rescue Gitlab::Conflict::ResolutionError => e
       render status: :bad_request, json: { message: e.message }
     end
   end
@@ -209,29 +227,26 @@ class Projects::MergeRequestsController < Projects::ApplicationController
   end
 
   def new
-    apply_diff_view_cookie!
+    define_new_vars
+  end
 
-    build_merge_request
-    @noteable = @merge_request
+  def new_diffs
+    respond_to do |format|
+      format.html do
+        define_new_vars
+        render "new"
+      end
+      format.json do
+        @diffs = if @merge_request.can_be_created
+                   @merge_request.diffs(diff_options)
+                 else
+                   []
+                 end
+        @diff_notes_disabled = true
 
-    @target_branches = if @merge_request.target_project
-                         @merge_request.target_project.repository.branch_names
-                       else
-                         []
-                       end
-
-    @target_project = merge_request.target_project
-    @source_project = merge_request.source_project
-    @commits = @merge_request.compare_commits.reverse
-    @commit = @merge_request.diff_head_commit
-    @base_commit = @merge_request.diff_base_commit
-    @diffs = @merge_request.diffs(diff_options) if @merge_request.compare
-    @diff_notes_disabled = true
-    @pipeline = @merge_request.pipeline
-    @statuses = @pipeline.statuses.relevant if @pipeline
-
-    @note_counts = Note.where(commit_id: @commits.map(&:id)).
-      group(:commit_id).count
+        render json: { html: view_to_html_string('projects/merge_requests/_new_diffs', diffs: @diffs) }
+      end
+    end
   end
 
   def create
@@ -275,7 +290,7 @@ class Projects::MergeRequestsController < Projects::ApplicationController
   end
 
   def remove_wip
-    MergeRequests::UpdateService.new(project, current_user, title: @merge_request.wipless_title).execute(@merge_request)
+    MergeRequests::UpdateService.new(project, current_user, wip_event: 'unwip').execute(@merge_request)
 
     redirect_to namespace_project_merge_request_path(@project.namespace, @project, @merge_request),
       notice: "The merge request can now be merged."
@@ -307,8 +322,6 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       @status = :sha_mismatch
       return
     end
-
-    TodoService.new.merge_merge_request(merge_request, current_user)
 
     @merge_request.update(merge_error: nil)
 
@@ -356,6 +369,25 @@ class Projects::MergeRequestsController < Projects::ApplicationController
     render layout: false
   end
 
+  def assign_related_issues
+    result = MergeRequests::AssignIssuesService.new(project, current_user, merge_request: @merge_request).execute
+
+    respond_to do |format|
+      format.html do
+        case result[:count]
+        when 0
+          flash[:error] = "Failed to assign you issues related to the merge request"
+        when 1
+          flash[:notice] = "1 issue has been assigned to you"
+        else
+          flash[:notice] = "#{result[:count]} issues have been assigned to you"
+        end
+
+        redirect_to(merge_request_path(@merge_request))
+      end
+    end
+  end
+
   def ci_status
     pipeline = @merge_request.pipeline
     if pipeline
@@ -366,7 +398,7 @@ class Projects::MergeRequestsController < Projects::ApplicationController
 
       status ||= "preparing"
     else
-      ci_service = @merge_request.source_project.ci_service
+      ci_service = @merge_request.source_project.try(:ci_service)
       status = ci_service.commit_status(merge_request.diff_head_sha, merge_request.source_branch) if ci_service
 
       if ci_service.respond_to?(:commit_coverage)
@@ -382,6 +414,36 @@ class Projects::MergeRequestsController < Projects::ApplicationController
     }
 
     render json: response
+  end
+
+  def ci_environments_status
+    environments =
+      begin
+        @merge_request.environments.map do |environment|
+          next unless can?(current_user, :read_environment, environment)
+
+          project = environment.project
+          deployment = environment.first_deployment_for(@merge_request.diff_head_commit)
+
+          stop_url =
+            if environment.stoppable? && can?(current_user, :create_deployment, environment)
+              stop_namespace_project_environment_path(project.namespace, project, environment)
+            end
+
+          {
+            id: environment.id,
+            name: environment.name,
+            url: namespace_project_environment_path(project.namespace, project, environment),
+            stop_url: stop_url,
+            external_url: environment.external_url,
+            external_url_formatted: environment.formatted_external_url,
+            deployed_at: deployment.try(:created_at),
+            deployed_at_formatted: deployment.try(:formatted_deployment_time)
+          }
+        end.compact
+      end
+
+    render json: environments
   end
 
   protected
@@ -418,10 +480,6 @@ class Projects::MergeRequestsController < Projects::ApplicationController
   end
 
   def validates_merge_request
-    # If source project was removed and merge request for some reason
-    # wasn't close (Ex. mr from fork to origin)
-    return invalid_mr if !@merge_request.source_project && @merge_request.open?
-
     # Show git not found page
     # if there is no saved commits between source & target branch
     if @merge_request.commits.blank?
@@ -434,13 +492,12 @@ class Projects::MergeRequestsController < Projects::ApplicationController
     @noteable = @merge_request
     @commits_count = @merge_request.commits.count
 
-    @pipeline = @merge_request.pipeline
-    @statuses = @pipeline.statuses.relevant if @pipeline
-
     if @merge_request.locked_long_ago?
       @merge_request.unlock_mr
       @merge_request.close
     end
+
+    define_pipelines_vars
   end
 
   # Discussion tab data is rendered on html responses of actions
@@ -468,7 +525,6 @@ class Projects::MergeRequestsController < Projects::ApplicationController
 
   def define_widget_vars
     @pipeline = @merge_request.pipeline
-    @pipelines = [@pipeline].compact
   end
 
   def define_commit_vars
@@ -495,8 +551,40 @@ class Projects::MergeRequestsController < Projects::ApplicationController
     )
   end
 
+  def define_pipelines_vars
+    @pipelines = @merge_request.all_pipelines
+
+    if @pipelines.present?
+      @pipeline = @pipelines.first
+      @statuses = @pipeline.statuses.relevant
+    end
+  end
+
+  def define_new_vars
+    @noteable = @merge_request
+
+    @target_branches = if @merge_request.target_project
+                         @merge_request.target_project.repository.branch_names
+                       else
+                         []
+                       end
+
+    @target_project = merge_request.target_project
+    @source_project = merge_request.source_project
+    @commits = @merge_request.compare_commits.reverse
+    @commit = @merge_request.diff_head_commit
+    @base_commit = @merge_request.diff_base_commit
+
+    @note_counts = Note.where(commit_id: @commits.map(&:id)).
+      group(:commit_id).count
+
+    @labels = LabelsFinder.new(current_user, project_id: @project.id).execute
+
+    define_pipelines_vars
+  end
+
   def invalid_mr
-    # Render special view for MR with removed source or target branch
+    # Render special view for MR with removed target branch
     render 'invalid'
   end
 
@@ -526,7 +614,7 @@ class Projects::MergeRequestsController < Projects::ApplicationController
 
   def build_merge_request
     params[:merge_request] ||= ActionController::Parameters.new(source_project: @project)
-    @merge_request = MergeRequests::BuildService.new(project, current_user, merge_request_params).execute
+    @merge_request = MergeRequests::BuildService.new(project, current_user, merge_request_params.merge(diff_options: diff_options)).execute
   end
 
   def compared_diff_version
@@ -537,5 +625,11 @@ class Projects::MergeRequestsController < Projects::ApplicationController
   def original_diff_version
     @diff_notes_disabled = !@merge_request_diff.latest?
     @diffs = @merge_request_diff.diffs(diff_options)
+  end
+
+  def close_merge_request_without_source_project
+    if !@merge_request.source_project && @merge_request.open?
+      @merge_request.close
+    end
   end
 end

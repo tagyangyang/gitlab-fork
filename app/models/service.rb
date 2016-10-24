@@ -136,6 +136,7 @@ class Service < ActiveRecord::Base
         end
 
         def #{arg}=(value)
+          self.properties ||= {}
           updated_properties['#{arg}'] = #{arg} unless #{arg}_changed?
           self.properties['#{arg}'] = value
         end
@@ -195,12 +196,13 @@ class Service < ActiveRecord::Base
   end
 
   def self.available_services_names
-    %w(
+    %w[
       asana
       assembla
       bamboo
       buildkite
       builds_email
+      pipelines_email
       bugzilla
       campfire
       custom_issue_tracker
@@ -217,7 +219,7 @@ class Service < ActiveRecord::Base
       redmine
       slack
       teamcity
-    )
+    ]
   end
 
   def self.create_from_template(project_id, template)

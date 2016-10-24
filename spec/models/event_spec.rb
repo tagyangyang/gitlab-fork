@@ -27,17 +27,44 @@ describe Event, models: true do
   end
 
   describe "Push event" do
-    before do
-      project = create(:project)
-      @user = project.owner
-      @event = create_event(project, @user)
+    let(:project) { create(:project) }
+    let(:user) { project.owner }
+    let(:event) { create_event(project, user) }
+
+    it do
+      expect(event.push?).to be_truthy
+      expect(event.visible_to_user?).to be_truthy
+      expect(event.tag?).to be_falsey
+      expect(event.branch_name).to eq("master")
+      expect(event.author).to eq(user)
+    end
+  end
+
+  describe '#membership_changed?' do
+    context "created" do
+      subject { build(:event, action: Event::CREATED).membership_changed? }
+      it { is_expected.to be_falsey }
     end
 
-    it { expect(@event.push?).to be_truthy }
-    it { expect(@event.visible_to_user?).to be_truthy }
-    it { expect(@event.tag?).to be_falsey }
-    it { expect(@event.branch_name).to eq("master") }
-    it { expect(@event.author).to eq(@user) }
+    context "updated" do
+      subject { build(:event, action: Event::UPDATED).membership_changed? }
+      it { is_expected.to be_falsey }
+    end
+
+    context "expired" do
+      subject { build(:event, action: Event::EXPIRED).membership_changed? }
+      it { is_expected.to be_truthy }
+    end
+
+    context "left" do
+      subject { build(:event, action: Event::LEFT).membership_changed? }
+      it { is_expected.to be_truthy }
+    end
+
+    context "joined" do
+      subject { build(:event, action: Event::JOINED).membership_changed? }
+      it { is_expected.to be_truthy }
+    end
   end
 
   describe '#note?' do
@@ -59,8 +86,8 @@ describe Event, models: true do
   describe '#visible_to_user?' do
     let(:project) { create(:empty_project, :public) }
     let(:non_member) { create(:user) }
-    let(:member)  { create(:user) }
-    let(:guest)  { create(:user) }
+    let(:member) { create(:user) }
+    let(:guest) { create(:user) }
     let(:author) { create(:author) }
     let(:assignee) { create(:user) }
     let(:admin) { create(:admin) }
@@ -79,23 +106,27 @@ describe Event, models: true do
       context 'for non confidential issues' do
         let(:target) { issue }
 
-        it { expect(event.visible_to_user?(non_member)).to eq true }
-        it { expect(event.visible_to_user?(author)).to eq true }
-        it { expect(event.visible_to_user?(assignee)).to eq true }
-        it { expect(event.visible_to_user?(member)).to eq true }
-        it { expect(event.visible_to_user?(guest)).to eq true }
-        it { expect(event.visible_to_user?(admin)).to eq true }
+        it do
+          expect(event.visible_to_user?(non_member)).to eq true
+          expect(event.visible_to_user?(author)).to eq true
+          expect(event.visible_to_user?(assignee)).to eq true
+          expect(event.visible_to_user?(member)).to eq true
+          expect(event.visible_to_user?(guest)).to eq true
+          expect(event.visible_to_user?(admin)).to eq true
+        end
       end
 
       context 'for confidential issues' do
         let(:target) { confidential_issue }
 
-        it { expect(event.visible_to_user?(non_member)).to eq false }
-        it { expect(event.visible_to_user?(author)).to eq true }
-        it { expect(event.visible_to_user?(assignee)).to eq true }
-        it { expect(event.visible_to_user?(member)).to eq true }
-        it { expect(event.visible_to_user?(guest)).to eq false }
-        it { expect(event.visible_to_user?(admin)).to eq true }
+        it do
+          expect(event.visible_to_user?(non_member)).to eq false
+          expect(event.visible_to_user?(author)).to eq true
+          expect(event.visible_to_user?(assignee)).to eq true
+          expect(event.visible_to_user?(member)).to eq true
+          expect(event.visible_to_user?(guest)).to eq false
+          expect(event.visible_to_user?(admin)).to eq true
+        end
       end
     end
 
@@ -103,23 +134,27 @@ describe Event, models: true do
       context 'on non confidential issues' do
         let(:target) { note_on_issue }
 
-        it { expect(event.visible_to_user?(non_member)).to eq true }
-        it { expect(event.visible_to_user?(author)).to eq true }
-        it { expect(event.visible_to_user?(assignee)).to eq true }
-        it { expect(event.visible_to_user?(member)).to eq true }
-        it { expect(event.visible_to_user?(guest)).to eq true }
-        it { expect(event.visible_to_user?(admin)).to eq true }
+        it do
+          expect(event.visible_to_user?(non_member)).to eq true
+          expect(event.visible_to_user?(author)).to eq true
+          expect(event.visible_to_user?(assignee)).to eq true
+          expect(event.visible_to_user?(member)).to eq true
+          expect(event.visible_to_user?(guest)).to eq true
+          expect(event.visible_to_user?(admin)).to eq true
+        end
       end
 
       context 'on confidential issues' do
         let(:target) { note_on_confidential_issue }
 
-        it { expect(event.visible_to_user?(non_member)).to eq false }
-        it { expect(event.visible_to_user?(author)).to eq true }
-        it { expect(event.visible_to_user?(assignee)).to eq true }
-        it { expect(event.visible_to_user?(member)).to eq true }
-        it { expect(event.visible_to_user?(guest)).to eq false }
-        it { expect(event.visible_to_user?(admin)).to eq true }
+        it do
+          expect(event.visible_to_user?(non_member)).to eq false
+          expect(event.visible_to_user?(author)).to eq true
+          expect(event.visible_to_user?(assignee)).to eq true
+          expect(event.visible_to_user?(member)).to eq true
+          expect(event.visible_to_user?(guest)).to eq false
+          expect(event.visible_to_user?(admin)).to eq true
+        end
       end
     end
 
@@ -129,12 +164,27 @@ describe Event, models: true do
       let(:note_on_merge_request) { create(:legacy_diff_note_on_merge_request, noteable: merge_request, project: project) }
       let(:target) { note_on_merge_request }
 
-      it { expect(event.visible_to_user?(non_member)).to eq true }
-      it { expect(event.visible_to_user?(author)).to eq true }
-      it { expect(event.visible_to_user?(assignee)).to eq true }
-      it { expect(event.visible_to_user?(member)).to eq true }
-      it { expect(event.visible_to_user?(guest)).to eq true }
-      it { expect(event.visible_to_user?(admin)).to eq true }
+      it do
+        expect(event.visible_to_user?(non_member)).to eq true
+        expect(event.visible_to_user?(author)).to eq true
+        expect(event.visible_to_user?(assignee)).to eq true
+        expect(event.visible_to_user?(member)).to eq true
+        expect(event.visible_to_user?(guest)).to eq true
+        expect(event.visible_to_user?(admin)).to eq true
+      end
+
+      context 'private project' do
+        let(:project) { create(:project, :private) }
+
+        it do
+          expect(event.visible_to_user?(non_member)).to eq false
+          expect(event.visible_to_user?(author)).to eq true
+          expect(event.visible_to_user?(assignee)).to eq true
+          expect(event.visible_to_user?(member)).to eq true
+          expect(event.visible_to_user?(guest)).to eq false
+          expect(event.visible_to_user?(admin)).to eq true
+        end
+      end
     end
   end
 
@@ -173,13 +223,11 @@ describe Event, models: true do
       it 'updates the project' do
         project.update(last_activity_at: 1.year.ago)
 
-        expect_any_instance_of(Gitlab::ExclusiveLease).
-          to receive(:try_obtain).and_return(true)
-
-        expect(project).to receive(:update_column).
-          with(:last_activity_at, a_kind_of(Time))
-
         create_event(project, project.owner)
+
+        project.reload
+
+        project.last_activity_at <= 1.minute.ago
       end
     end
   end
@@ -205,6 +253,6 @@ describe Event, models: true do
       action: Event::PUSHED,
       data: data,
       author_id: user.id
-    }.merge(attrs))
+    }.merge!(attrs))
   end
 end

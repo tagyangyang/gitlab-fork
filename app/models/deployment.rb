@@ -11,7 +11,7 @@ class Deployment < ActiveRecord::Base
 
   delegate :name, to: :environment, prefix: true
 
-  after_save :keep_around_commit
+  after_create :create_ref
 
   def commit
     project.commit(sha)
@@ -29,18 +29,25 @@ class Deployment < ActiveRecord::Base
     self == environment.last_deployment
   end
 
-  def keep_around_commit
-    project.repository.keep_around(self.sha)
+  def create_ref
+    project.repository.create_ref(ref, ref_path)
   end
 
   def manual_actions
-    deployable.try(:other_actions)
+    @manual_actions ||= deployable.try(:other_actions)
   end
 
   def includes_commit?(commit)
     return false unless commit
 
-    project.repository.is_ancestor?(commit.id, sha)
+    # Before 8.10, deployments didn't have keep-around refs. Any deployment
+    # created before then could have a `sha` referring to a commit that no
+    # longer exists in the repository, so just ignore those.
+    begin
+      project.repository.is_ancestor?(commit.id, sha)
+    rescue Rugged::OdbError
+      false
+    end
   end
 
   def update_merge_request_metrics!
@@ -75,5 +82,26 @@ class Deployment < ActiveRecord::Base
       where(environments: { name: self.environment.name }, ref: self.ref).
       where.not(id: self.id).
       take
+  end
+
+  def stop_action
+    return nil unless on_stop.present?
+    return nil unless manual_actions
+
+    @stop_action ||= manual_actions.find_by(name: on_stop)
+  end
+
+  def stoppable?
+    stop_action.present?
+  end
+
+  def formatted_deployment_time
+    created_at.to_time.in_time_zone.to_s(:medium)
+  end
+
+  private
+
+  def ref_path
+    File.join(environment.ref_path, 'deployments', iid.to_s)
   end
 end

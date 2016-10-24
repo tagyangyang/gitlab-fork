@@ -20,6 +20,7 @@ class GroupPolicy < BasePolicy
     if master
       can! :create_projects
       can! :admin_milestones
+      can! :admin_label
     end
 
     # Only group owner and administrators can admin group

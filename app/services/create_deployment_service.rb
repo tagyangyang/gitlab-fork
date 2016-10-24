@@ -2,28 +2,43 @@ require_relative 'base_service'
 
 class CreateDeploymentService < BaseService
   def execute(deployable = nil)
-    environment = find_or_create_environment
+    return unless executable?
 
-    deployment = project.deployments.create(
-      environment: environment,
-      ref: params[:ref],
-      tag: params[:tag],
-      sha: params[:sha],
-      user: current_user,
-      deployable: deployable
-    )
+    ActiveRecord::Base.transaction do
+      @deployable = deployable
 
-    deployment.update_merge_request_metrics!
+      @environment = environment
+      @environment.external_url = expanded_url if expanded_url
+      @environment.fire_state_event(action)
 
-    deployment
+      return unless @environment.save
+      return if @environment.stopped?
+
+      deploy.tap do |deployment|
+        deployment.update_merge_request_metrics!
+      end
+    end
   end
 
   private
 
-  def find_or_create_environment
-    project.environments.find_or_create_by(name: expanded_name) do |environment|
-      environment.external_url = expanded_url
-    end
+  def executable?
+    project && name.present?
+  end
+
+  def deploy
+    project.deployments.create(
+      environment: @environment,
+      ref: params[:ref],
+      tag: params[:tag],
+      sha: params[:sha],
+      user: current_user,
+      deployable: @deployable,
+      on_stop: options[:on_stop])
+  end
+
+  def environment
+    @environment ||= project.environments.find_or_create_by(name: expanded_name)
   end
 
   def expanded_name
@@ -50,5 +65,9 @@ class CreateDeploymentService < BaseService
 
   def variables
     params[:variables] || []
+  end
+
+  def action
+    options[:action] || 'start'
   end
 end

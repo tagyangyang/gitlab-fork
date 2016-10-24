@@ -6,6 +6,7 @@ class Project < ActiveRecord::Base
   include Gitlab::VisibilityLevel
   include Gitlab::CurrentSettings
   include AccessRequestable
+  include CacheMarkdownField
   include Referable
   include Sortable
   include AfterCommitQueue
@@ -15,7 +16,12 @@ class Project < ActiveRecord::Base
 
   extend Gitlab::ConfigHelper
 
+  class BoardLimitExceeded < StandardError; end
+
+  NUMBER_OF_PERMITTED_BOARDS = 1
   UNKNOWN_IMPORT_URL = 'http://unknown.git'
+
+  cache_markdown_field :description, pipeline: :description
 
   delegate :feature_available?, :builds_enabled?, :wiki_enabled?, :merge_requests_enabled?, to: :project_feature, allow_nil: true
 
@@ -26,8 +32,8 @@ class Project < ActiveRecord::Base
   default_value_for(:shared_runners_enabled) { current_application_settings.shared_runners_enabled }
 
   after_create :ensure_dir_exist
+  after_create :create_project_feature, unless: :project_feature
   after_save :ensure_dir_exist, if: :namespace_id_changed?
-  after_initialize :setup_project_feature
 
   # set last_activity_at to the same as created_at
   after_create :set_last_activity_at
@@ -62,8 +68,7 @@ class Project < ActiveRecord::Base
   belongs_to :namespace
 
   has_one :last_event, -> {order 'events.created_at DESC'}, class_name: 'Event', foreign_key: 'project_id'
-
-  has_one :board, dependent: :destroy
+  has_many :boards, before_add: :validate_board_limit, dependent: :destroy
 
   # Project services
   has_many :services
@@ -71,6 +76,7 @@ class Project < ActiveRecord::Base
   has_one :drone_ci_service, dependent: :destroy
   has_one :emails_on_push_service, dependent: :destroy
   has_one :builds_email_service, dependent: :destroy
+  has_one :pipelines_email_service, dependent: :destroy
   has_one :irker_service, dependent: :destroy
   has_one :pivotaltracker_service, dependent: :destroy
   has_one :hipchat_service, dependent: :destroy
@@ -101,7 +107,7 @@ class Project < ActiveRecord::Base
   # Merge requests from source project should be kept when source project was removed
   has_many :fork_merge_requests, foreign_key: 'source_project_id', class_name: MergeRequest
   has_many :issues,             dependent: :destroy
-  has_many :labels,             dependent: :destroy
+  has_many :labels,             dependent: :destroy, class_name: 'ProjectLabel'
   has_many :services,           dependent: :destroy
   has_many :events,             dependent: :destroy
   has_many :milestones,         dependent: :destroy
@@ -146,6 +152,7 @@ class Project < ActiveRecord::Base
 
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :members, to: :team, prefix: true
+  delegate :add_user, to: :team
 
   # Validations
   validates :creator, presence: true, on: :create
@@ -371,24 +378,19 @@ class Project < ActiveRecord::Base
       %r{(?<project>#{name_pattern}/#{name_pattern})}
     end
 
-    def trending(since = 1.month.ago)
-      # By counting in the JOIN we don't expose the GROUP BY to the outer query.
-      # This means that calls such as "any?" and "count" just return a number of
-      # the total count, instead of the counts grouped per project as a Hash.
-      join_body = "INNER JOIN (
-        SELECT project_id, COUNT(*) AS amount
-        FROM notes
-        WHERE created_at >= #{sanitize(since)}
-        GROUP BY project_id
-      ) join_note_counts ON projects.id = join_note_counts.project_id"
-
-      joins(join_body).reorder('join_note_counts.amount DESC')
+    def trending
+      joins('INNER JOIN trending_projects ON projects.id = trending_projects.project_id').
+        reorder('trending_projects.id ASC')
     end
 
     def cached_count
       Rails.cache.fetch('total_project_count', expires_in: 5.minutes) do
         Project.count
       end
+    end
+
+    def group_ids
+      joins(:namespace).where(namespaces: { type: 'Group' }).pluck(:namespace_id)
     end
   end
 
@@ -493,7 +495,7 @@ class Project < ActiveRecord::Base
   end
 
   def import_url
-    if import_data && super
+    if import_data && super.present?
       import_url = Gitlab::UrlSanitizer.new(super, credentials: import_data.credentials)
       import_url.full_url
     else
@@ -666,6 +668,10 @@ class Project < ActiveRecord::Base
     end
   end
 
+  def issue_reference_pattern
+    issues_tracker.reference_pattern
+  end
+
   def default_issues_tracker?
     !external_issue_tracker
   end
@@ -721,7 +727,7 @@ class Project < ActiveRecord::Base
 
         if template.nil?
           # If no template, we should create an instance. Ex `create_gitlab_ci_service`
-          self.send :"create_#{service_name}_service"
+          public_send("create_#{service_name}_service")
         else
           Service.create_from_template(self.id, template)
         end
@@ -731,10 +737,8 @@ class Project < ActiveRecord::Base
 
   def create_labels
     Label.templates.each do |label|
-      label = label.dup
-      label.template = nil
-      label.project_id = self.id
-      label.save
+      params = label.attributes.except('id', 'template', 'created_at', 'updated_at')
+      Labels::FindOrCreateService.new(owner, self, params).execute
     end
   end
 
@@ -830,11 +834,6 @@ class Project < ActiveRecord::Base
     services.send(hooks_scope).each do |service|
       service.async_execute(data)
     end
-  end
-
-  def update_merge_requests(oldrev, newrev, ref, user)
-    MergeRequests::RefreshService.new(self, user).
-      execute(oldrev, newrev, ref)
   end
 
   def valid_repo?
@@ -1014,10 +1013,6 @@ class Project < ActiveRecord::Base
 
   def project_member(user)
     project_members.find_by(user_id: user)
-  end
-
-  def add_user(user, access_level, current_user: nil, expires_at: nil)
-    team.add_user(user, access_level, current_user: current_user, expires_at: expires_at)
   end
 
   def default_branch
@@ -1304,7 +1299,7 @@ class Project < ActiveRecord::Base
         environment_ids.where(ref: ref)
       end
 
-    environments.where(id: environment_ids).select do |environment|
+    environments.available.where(id: environment_ids).select do |environment|
       environment.includes_commit?(commit)
     end
   end
@@ -1313,11 +1308,6 @@ class Project < ActiveRecord::Base
 
   def pushes_since_gc_redis_key
     "projects/#{id}/pushes_since_gc"
-  end
-
-  # Prevents the creation of project_feature record for every project
-  def setup_project_feature
-    build_project_feature unless project_feature
   end
 
   def default_branch_protected?
@@ -1347,5 +1337,16 @@ class Project < ActiveRecord::Base
     end
 
     shared_projects.any?
+  end
+
+  # Similar to the normal callbacks that hook into the life cycle of an
+  # Active Record object, you can also define callbacks that get triggered
+  # when you add an object to an association collection. If any of these
+  # callbacks throw an exception, the object will not be added to the
+  # collection. Before you add a new board to the boards collection if you
+  # already have 1, 2, or n it will fail, but it if you have 0 that is lower
+  # than the number of permitted boards per project it won't fail.
+  def validate_board_limit(board)
+    raise BoardLimitExceeded, 'Number of permitted boards exceeded' if boards.size >= NUMBER_OF_PERMITTED_BOARDS
   end
 end

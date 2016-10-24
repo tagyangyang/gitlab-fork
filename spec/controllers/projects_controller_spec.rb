@@ -41,6 +41,46 @@ describe ProjectsController do
           end
         end
       end
+
+      describe "when project repository is disabled" do
+        render_views
+
+        before do
+          project.team << [user, :developer]
+          project.project_feature.update_attribute(:repository_access_level, ProjectFeature::DISABLED)
+        end
+
+        it 'shows wiki homepage' do
+          get :show, namespace_id: project.namespace.path, id: project.path
+
+          expect(response).to render_template('projects/_wiki')
+        end
+
+        it 'shows issues list page if wiki is disabled' do
+          project.project_feature.update_attribute(:wiki_access_level, ProjectFeature::DISABLED)
+
+          get :show, namespace_id: project.namespace.path, id: project.path
+
+          expect(response).to render_template('projects/issues/_issues')
+        end
+
+        it 'shows customize workflow page if wiki and issues are disabled' do
+          project.project_feature.update_attribute(:wiki_access_level, ProjectFeature::DISABLED)
+          project.project_feature.update_attribute(:issues_access_level, ProjectFeature::DISABLED)
+
+          get :show, namespace_id: project.namespace.path, id: project.path
+
+          expect(response).to render_template("projects/_customize_workflow")
+        end
+
+        it 'shows activity if enabled by user' do
+          user.update_attribute(:project_view, 'activity')
+
+          get :show, namespace_id: project.namespace.path, id: project.path
+
+          expect(response).to render_template("projects/_activity")
+        end
+      end
     end
 
     context "project with empty repo" do
@@ -58,6 +98,28 @@ describe ProjectsController do
 
           it "renders the empty project view" do
             expect(response).to render_template('empty')
+          end
+        end
+      end
+    end
+
+    context "project with broken repo" do
+      let(:empty_project) { create(:project_broken_repo, :public) }
+
+      before { sign_in(user) }
+
+      User.project_views.keys.each do |project_view|
+        context "with #{project_view} view set" do
+          before do
+            user.update_attributes(project_view: project_view)
+
+            get :show, namespace_id: empty_project.namespace.path, id: empty_project.path
+          end
+
+          it "renders the empty project view" do
+            allow(Project).to receive(:repo).and_raise(Gitlab::Git::Repository::NoRepository)
+
+            expect(response).to render_template('projects/no_repo')
           end
         end
       end

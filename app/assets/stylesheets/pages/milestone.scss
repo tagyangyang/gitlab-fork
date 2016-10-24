@@ -33,6 +33,7 @@
     // Issue title
     span a {
       color: $gl-text-color;
+      word-wrap: break-word;
     }
   }
 }
@@ -58,6 +59,7 @@
       color: $gl-placeholder-color;
       margin-right: 5px;
     }
+
     .avatar {
       float: none;
     }

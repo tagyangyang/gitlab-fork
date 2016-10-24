@@ -31,7 +31,7 @@ class MergeRequest < ActiveRecord::Base
 
   # Temporary fields to store compare vars
   # when creating new merge request
-  attr_accessor :can_be_created, :compare_commits, :compare
+  attr_accessor :can_be_created, :compare_commits, :diff_options, :compare
 
   state_machine :state, initial: :opened do
     event :close do
@@ -137,6 +137,10 @@ class MergeRequest < ActiveRecord::Base
     reference.to_i > 0 && reference.to_i <= Gitlab::Database::MAX_INT_VALUE
   end
 
+  def self.project_foreign_key
+    'target_project_id'
+  end
+
   # Returns all the merge requests from an ActiveRecord:Relation.
   #
   # This method uses a UNION as it usually operates on the result of
@@ -153,6 +157,20 @@ class MergeRequest < ActiveRecord::Base
     union  = Gitlab::SQL::Union.new([source, target])
 
     where("merge_requests.id IN (#{union.to_sql})")
+  end
+
+  WIP_REGEX = /\A\s*(\[WIP\]\s*|WIP:\s*|WIP\s+)+\s*/i.freeze
+
+  def self.work_in_progress?(title)
+    !!(title =~ WIP_REGEX)
+  end
+
+  def self.wipless_title(title)
+    title.sub(WIP_REGEX, "")
+  end
+
+  def self.wip_title(title)
+    work_in_progress?(title) ? title : "WIP: #{title}"
   end
 
   def to_reference(from_project = nil)
@@ -182,7 +200,7 @@ class MergeRequest < ActiveRecord::Base
   end
 
   def diff_size
-    merge_request_diff.size
+    diffs(diff_options).size
   end
 
   def diff_base_commit
@@ -308,21 +326,17 @@ class MergeRequest < ActiveRecord::Base
   def validate_fork
     return true unless target_project && source_project
     return true if target_project == source_project
-    return true unless forked_source_project_missing?
+    return true unless source_project_missing?
 
     errors.add :validate_fork,
                'Source project is not a fork of the target project'
   end
 
   def closed_without_fork?
-    closed? && forked_source_project_missing?
+    closed? && source_project_missing?
   end
 
-  def closed_without_source_project?
-    closed? && !source_project
-  end
-
-  def forked_source_project_missing?
+  def source_project_missing?
     return false unless for_fork?
     return true unless source_project
 
@@ -330,9 +344,7 @@ class MergeRequest < ActiveRecord::Base
   end
 
   def reopenable?
-    return false if closed_without_fork? || closed_without_source_project? || merged?
-
-    closed?
+    closed? && !source_project_missing? && source_branch_exists?
   end
 
   def ensure_merge_request_diff
@@ -389,14 +401,16 @@ class MergeRequest < ActiveRecord::Base
     @closed_event ||= target_project.events.where(target_id: self.id, target_type: "MergeRequest", action: Event::CLOSED).last
   end
 
-  WIP_REGEX = /\A\s*(\[WIP\]\s*|WIP:\s*|WIP\s+)+\s*/i.freeze
-
   def work_in_progress?
-    !!(title =~ WIP_REGEX)
+    self.class.work_in_progress?(title)
   end
 
   def wipless_title
-    self.title.sub(WIP_REGEX, "")
+    self.class.wipless_title(self.title)
+  end
+
+  def wip_title
+    self.class.wip_title(self.title)
   end
 
   def mergeable?(skip_ci_check: false)
@@ -507,9 +521,13 @@ class MergeRequest < ActiveRecord::Base
   # `MergeRequestsClosingIssues` model. This is a performance optimization.
   # Calculating this information for a number of merge requests requires
   # running `ReferenceExtractor` on each of them separately.
+  # This optimization does not apply to issues from external sources.
   def cache_merge_request_closes_issues!(current_user = self.author)
+    return if project.has_external_issue_tracker?
+
     transaction do
       self.merge_requests_closing_issues.delete_all
+
       closes_issues(current_user).each do |issue|
         self.merge_requests_closing_issues.create!(issue: issue)
       end
@@ -638,7 +656,7 @@ class MergeRequest < ActiveRecord::Base
   end
 
   def has_ci?
-    source_project.ci_service && commits.any?
+    source_project.try(:ci_service) && commits.any?
   end
 
   def branch_missing?
@@ -668,12 +686,12 @@ class MergeRequest < ActiveRecord::Base
   def environments
     return [] unless diff_head_commit
 
-    environments = source_project.environments_for(
-      source_branch, diff_head_commit)
-    environments += target_project.environments_for(
-      target_branch, diff_head_commit, with_tags: true)
-
-    environments.uniq
+    @environments ||=
+      begin
+        envs = target_project.environments_for(target_branch, diff_head_commit, with_tags: true)
+        envs.concat(source_project.environments_for(source_branch, diff_head_commit)) if source_project
+        envs.uniq
+      end
   end
 
   def state_human_name
@@ -764,21 +782,21 @@ class MergeRequest < ActiveRecord::Base
   def all_pipelines
     return unless source_project
 
-    @all_pipelines ||= begin
-      sha = if persisted?
-              all_commits_sha
-            else
-              diff_head_sha
-            end
-
-      source_project.pipelines.order(id: :desc).
-        where(sha: sha, ref: source_branch)
-    end
+    @all_pipelines ||= source_project.pipelines
+      .where(sha: all_commits_sha, ref: source_branch)
+      .order(id: :desc)
   end
 
   # Note that this could also return SHA from now dangling commits
+  #
   def all_commits_sha
-    merge_request_diffs.flat_map(&:commits_sha).uniq
+    if persisted?
+      merge_request_diffs.flat_map(&:commits_sha).uniq
+    elsif compare_commits
+      compare_commits.to_a.reverse.map(&:id)
+    else
+      [diff_head_sha]
+    end
   end
 
   def merge_commit
@@ -848,7 +866,7 @@ class MergeRequest < ActiveRecord::Base
       # files.
       conflicts.files.each(&:lines)
       @conflicts_can_be_resolved_in_ui = conflicts.files.length > 0
-    rescue Rugged::OdbError, Gitlab::Conflict::Parser::ParserError, Gitlab::Conflict::FileCollection::ConflictSideMissing
+    rescue Rugged::OdbError, Gitlab::Conflict::Parser::UnresolvableError, Gitlab::Conflict::FileCollection::ConflictSideMissing
       @conflicts_can_be_resolved_in_ui = false
     end
   end

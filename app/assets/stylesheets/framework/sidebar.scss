@@ -4,7 +4,7 @@
 
   &.page-sidebar-pinned {
     .sidebar-wrapper {
-      @include box-shadow(none);
+      box-shadow: none;
     }
   }
 
@@ -17,7 +17,7 @@
     width: 0;
     overflow: hidden;
     transition: width $sidebar-transition-duration;
-    @include box-shadow(2px 0 16px 0 $black-transparent);
+    box-shadow: 2px 0 16px 0 $black-transparent;
   }
 }
 
@@ -100,7 +100,7 @@
   .count {
     float: right;
     padding: 0 8px;
-    @include border-radius(6px);
+    border-radius: 6px;
   }
 }
 
@@ -142,6 +142,7 @@
   transition-duration: .3s;
   position: absolute;
   top: 0;
+  cursor: pointer;
 
   &:hover,
   &:focus {
@@ -184,6 +185,10 @@ header.header-sidebar-pinned {
 
   @media (min-width: $screen-sm-min) {
     padding-right: $sidebar_collapsed_width;
+
+    .merge-request-tabs-holder.affix {
+      right: $sidebar_collapsed_width;
+    }
   }
 
   .sidebar-collapsed-icon {
@@ -206,6 +211,10 @@ header.header-sidebar-pinned {
 
   @media (min-width: $screen-md-min) {
     padding-right: $gutter_width;
+
+    .merge-request-tabs-holder.affix {
+      right: $gutter_width;
+    }
   }
 
   &.with-overlay {

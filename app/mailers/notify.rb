@@ -7,6 +7,7 @@ class Notify < BaseMailer
   include Emails::Projects
   include Emails::Profile
   include Emails::Builds
+  include Emails::Pipelines
   include Emails::Members
 
   add_template_helper MergeRequestsHelper
@@ -92,6 +93,7 @@ class Notify < BaseMailer
     subject = ""
     subject << "#{@project.name} | " if @project
     subject << extra.join(' | ') if extra.present?
+    subject << " | #{Gitlab.config.gitlab.email_subject_suffix}" if Gitlab.config.gitlab.email_subject_suffix.present?
     subject
   end
 

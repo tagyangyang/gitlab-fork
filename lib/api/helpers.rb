@@ -21,8 +21,11 @@ module API
     end
 
     # Check the Rails session for valid authentication details
+    #
+    # Until CSRF protection is added to the API, disallow this method for
+    # state-changing endpoints
     def find_user_from_warden
-      warden ? warden.authenticate : nil
+      warden.try(:authenticate) if %w[GET HEAD].include?(env['REQUEST_METHOD'])
     end
 
     def find_user_by_private_token
@@ -66,6 +69,10 @@ module API
 
     def user_project
       @project ||= find_project(params[:id])
+    end
+
+    def available_labels
+      @available_labels ||= LabelsFinder.new(current_user, project_id: user_project.id).execute
     end
 
     def find_project(id)
@@ -115,7 +122,7 @@ module API
     end
 
     def find_project_label(id)
-      label = user_project.labels.find_by_id(id) || user_project.labels.find_by_title(id)
+      label = available_labels.find_by_id(id) || available_labels.find_by_title(id)
       label || not_found!('Label')
     end
 
@@ -194,16 +201,11 @@ module API
     def validate_label_params(params)
       errors = {}
 
-      if params[:labels].present?
-        params[:labels].split(',').each do |label_name|
-          label = user_project.labels.create_with(
-            color: Label::DEFAULT_COLOR).find_or_initialize_by(
-              title: label_name.strip)
+      params[:labels].to_s.split(',').each do |label_name|
+        label = available_labels.find_or_initialize_by(title: label_name.strip)
+        next if label.valid?
 
-          if label.invalid?
-            errors[label.title] = label.errors
-          end
-        end
+        errors[label.title] = label.errors
       end
 
       errors
@@ -430,7 +432,7 @@ module API
     end
 
     def secret_token
-      File.read(Gitlab.config.gitlab_shell.secret_file).chomp
+      Gitlab::Shell.secret_token
     end
 
     def send_git_blob(repository, blob)

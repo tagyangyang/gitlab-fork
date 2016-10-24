@@ -5,12 +5,11 @@
     namespacesPath: "/api/:version/namespaces.json",
     groupProjectsPath: "/api/:version/groups/:id/projects.json",
     projectsPath: "/api/:version/projects.json?simple=true",
-    labelsPath: "/api/:version/projects/:id/labels",
-    licensePath: "/api/:version/licenses/:key",
-    gitignorePath: "/api/:version/gitignores/:key",
-    gitlabCiYmlPath: "/api/:version/gitlab_ci_ymls/:key",
+    labelsPath: "/:namespace_path/:project_path/labels",
+    licensePath: "/api/:version/templates/licenses/:key",
+    gitignorePath: "/api/:version/templates/gitignores/:key",
+    gitlabCiYmlPath: "/api/:version/templates/gitlab_ci_ymls/:key",
     issuableTemplatePath: "/:namespace_path/:project_path/templates/:type/:key",
-
     group: function(group_id, callback) {
       var url = Api.buildUrl(Api.groupPath)
         .replace(':id', group_id);
@@ -23,12 +22,13 @@
     },
     // Return groups list. Filtered by query
     // Only active groups retrieved
-    groups: function(query, skip_ldap, callback) {
+    groups: function(query, skip_ldap, skip_groups, callback) {
       var url = Api.buildUrl(Api.groupsPath);
       return $.ajax({
         url: url,
         data: {
           search: query,
+          skip_groups: skip_groups,
           per_page: 20
         },
         dataType: "json"
@@ -65,13 +65,14 @@
         return callback(projects);
       });
     },
-    newLabel: function(project_id, data, callback) {
+    newLabel: function(namespace_path, project_path, data, callback) {
       var url = Api.buildUrl(Api.labelsPath)
-        .replace(':id', project_id);
+        .replace(':namespace_path', namespace_path)
+        .replace(':project_path', project_path);
       return $.ajax({
         url: url,
         type: "POST",
-        data: data,
+        data: {'label': data},
         dataType: "json"
       }).done(function(label) {
         return callback(label);
