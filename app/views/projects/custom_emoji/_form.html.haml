@@ -1,0 +1,21 @@
+= form_for [@project.namespace.becomes(Namespace), @project, @custom_emoji], html: { class: 'form-horizontal label-form js-quick-submit js-requires-input' } do |f|
+  = form_errors(@custom_emoji)
+
+  .form-group
+    = f.label :name, class: 'control-label'
+    .col-sm-10
+      = f.text_field :name , class: "form-control", required: true, autofocus: true
+
+    = f.label :emoji, class: 'control-label'
+    .col-sm-10.prepend-top-10
+      %a.choose-btn.btn.js-choose-project-avatar-button
+        Browse file...
+        - # TODO the js class below
+      %span.file_name.prepend-left-default.js-avatar-filename No file chosen
+      - # TODO the class below, code paste this, this seems to work
+      = f.file_field :emoji, class: "js-project-avatar-input hidden"
+      .help-block The maximum file size allowed is 256KB.
+
+    .form-actions
+    = f.submit 'Create custom emoji', class: 'btn btn-create js-save-button'
+    = link_to "Cancel", namespace_project_custom_emoji_index_path(@project.namespace, @project), class: 'btn btn-cancel'

@@ -1,0 +1,29 @@
+- @no_container = true
+- page_title "Custom Emoji"
+- hide_class = ''
+
+%div{ class: container_class }
+  .top-area
+    .nav-text
+      Custom emoji can be used to express yourself like you couldn't do before.
+      To use a custom emoji, type it's name between colons like: <code>:gitlab:</code>
+
+    - if can?(current_user, :admin_custom_emoji, @project)
+      .nav-controls
+        = link_to new_namespace_project_custom_emoji_path(@project.namespace, @project), class: "btn btn-new" do
+          New custom emoji
+
+  .custom-emoji-container
+    - if @custom_emoji.present?
+      .table-holder
+        %table.table.ci-table.environments
+          %tbody
+            %th Name
+            %th Emoji
+            %th
+            %th.hidden-xs
+            = render @custom_emoji
+      = paginate @custom_emoji, theme: 'gitlab'
+    - else
+      .nothing-here-block
+        No custom emoji (yet).

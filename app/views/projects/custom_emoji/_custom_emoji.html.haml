@@ -1,0 +1,10 @@
+%tr
+  %td
+    = custom_emoji.name
+
+  %td
+    = image_tag([gitlab_config.url, custom_emoji.emoji_url].join, alt: custom_emoji.name)
+
+  %td
+    - if can? current_user, :admin_label, @project
+      = link_to "Delete", namespace_project_custom_emoji_path(@project.namespace, @project, custom_emoji), title: "Delete", method: :delete, remote: true, data: {confirm: "Remove this custom emoji? Are you sure?"}
