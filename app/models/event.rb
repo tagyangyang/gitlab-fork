@@ -12,6 +12,7 @@ class Event < ActiveRecord::Base
   JOINED    = 8 # User joined project
   LEFT      = 9 # User left project
   DESTROYED = 10
+  EXPIRED   = 11 # User left project due to expiry
 
   RESET_PROJECT_ACTIVITY_INTERVAL = 1.hour
 
@@ -68,8 +69,10 @@ class Event < ActiveRecord::Base
       true
     elsif issue? || issue_note?
       Ability.allowed?(user, :read_issue, note? ? note_target : target)
+    elsif merge_request? || merge_request_note?
+      Ability.allowed?(user, :read_merge_request, note? ? note_target : target)
     else
-      ((merge_request? || note?) && target.present?) || milestone?
+      milestone?
     end
   end
 
@@ -113,6 +116,10 @@ class Event < ActiveRecord::Base
     action == LEFT
   end
 
+  def expired?
+    action == EXPIRED
+  end
+
   def destroyed?
     action == DESTROYED
   end
@@ -122,7 +129,7 @@ class Event < ActiveRecord::Base
   end
 
   def membership_changed?
-    joined? || left?
+    joined? || left? || expired?
   end
 
   def created_project?
@@ -182,6 +189,8 @@ class Event < ActiveRecord::Base
       'joined'
     elsif left?
       'left'
+    elsif expired?
+      'removed due to membership expiration from'
     elsif destroyed?
       'destroyed'
     elsif commented?
@@ -278,6 +287,10 @@ class Event < ActiveRecord::Base
 
   def issue_note?
     note? && target && target.for_issue?
+  end
+
+  def merge_request_note?
+    note? && target && target.for_merge_request?
   end
 
   def project_snippet_note?

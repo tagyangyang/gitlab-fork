@@ -5,7 +5,7 @@ class CommitStatus < ActiveRecord::Base
 
   self.table_name = 'ci_builds'
 
-  belongs_to :project, class_name: '::Project', foreign_key: :gl_project_id
+  belongs_to :project, foreign_key: :gl_project_id
   belongs_to :pipeline, class_name: 'Ci::Pipeline', foreign_key: :commit_id
   belongs_to :user
 
@@ -86,26 +86,16 @@ class CommitStatus < ActiveRecord::Base
     end
 
     after_transition do |commit_status, transition|
-      return if transition.loopback?
+      next if transition.loopback?
 
       commit_status.run_after_commit do
         pipeline.try do |pipeline|
           if complete?
-            ProcessPipelineWorker.perform_async(pipeline.id)
+            PipelineProcessWorker.perform_async(pipeline.id)
           else
-            UpdatePipelineWorker.perform_async(pipeline.id)
+            PipelineUpdateWorker.perform_async(pipeline.id)
           end
         end
-      end
-    end
-
-    after_transition [:created, :pending, :running] => :success do |commit_status|
-      commit_status.run_after_commit do
-        # TODO, temporary fix for race condition
-        UpdatePipelineWorker.new.perform(pipeline.id)
-
-        MergeRequests::MergeWhenBuildSucceedsService
-          .new(pipeline.project, nil).trigger(self)
       end
     end
 

@@ -54,7 +54,9 @@
       color: #959494;
       border-bottom: 2px solid transparent;
 
-      &:hover, &:active, &:focus {
+      &:hover,
+      &:active,
+      &:focus {
         text-decoration: none;
         outline: none;
       }
@@ -210,7 +212,12 @@
     @media (max-width: $screen-xs-max) {
       padding-bottom: 0;
       width: 100%;
-      .btn, form, .dropdown, .dropdown-menu-toggle, .form-control {
+
+      .btn,
+      form,
+      .dropdown,
+      .dropdown-menu-toggle,
+      .form-control {
         margin: 0 0 10px;
         display: block;
         width: 100%;
@@ -244,7 +251,8 @@
   }
 
   &.adjust {
-    .nav-text, .nav-controls {
+    .nav-text,
+    .nav-controls {
       width: auto;
     }
   }
@@ -308,13 +316,15 @@
         padding-top: 10px;
       }
 
-      a, i {
+      a,
+      i {
         color: $layout-link-gray;
       }
 
       &.active {
 
-        a, i {
+        a,
+        i {
           color: $black;
         }
 
@@ -327,7 +337,8 @@
       }
 
       &:hover {
-        a, i {
+        a,
+        i {
           color: $black;
         }
       }

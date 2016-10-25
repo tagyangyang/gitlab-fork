@@ -167,8 +167,11 @@ class MergeRequestDiff < ActiveRecord::Base
     self == merge_request.merge_request_diff
   end
 
-  def compare_with(sha)
-    CompareService.new.execute(project, head_commit_sha, project, sha)
+  def compare_with(sha, straight: true)
+    # When compare merge request versions we want diff A..B instead of A...B
+    # so we handle cases when user does squash and rebase of the commits between versions.
+    # For this reason we set straight to true by default.
+    CompareService.new.execute(project, head_commit_sha, project, sha, straight: straight)
   end
 
   private
@@ -296,8 +299,10 @@ class MergeRequestDiff < ActiveRecord::Base
   end
 
   def keep_around_commits
-    repository.keep_around(start_commit_sha)
-    repository.keep_around(head_commit_sha)
-    repository.keep_around(base_commit_sha)
+    [repository, merge_request.source_project.repository].each do |repo|
+      repo.keep_around(start_commit_sha)
+      repo.keep_around(head_commit_sha)
+      repo.keep_around(base_commit_sha)
+    end
   end
 end

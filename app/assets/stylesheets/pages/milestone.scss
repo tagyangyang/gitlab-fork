@@ -50,7 +50,8 @@
   }
 }
 
-.issues-sortable-list, .merge_requests-sortable-list {
+.issues-sortable-list,
+.merge_requests-sortable-list {
   .issuable-detail {
     display: block;
     margin-top: 7px;
@@ -59,6 +60,7 @@
       color: $gl-placeholder-color;
       margin-right: 5px;
     }
+
     .avatar {
       float: none;
     }

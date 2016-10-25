@@ -19,6 +19,7 @@
 
   &.diff-collapsed {
     padding: 5px;
+
     .click-to-expand {
       cursor: pointer;
     }
@@ -127,7 +128,8 @@
   position: relative;
 
   .avatar-holder {
-    .avatar, .identicon {
+    .avatar,
+    .identicon {
       margin: 0 auto;
       float: none;
     }
@@ -203,6 +205,7 @@
       }
     }
   }
+
   &.user-cover-block {
     padding: 24px 0 0;
   }

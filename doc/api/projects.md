@@ -436,7 +436,7 @@ Parameters:
 ### Get project events
 
 Get the events for the specified project.
-Sorted from newest to latest
+Sorted from newest to oldest
 
 ```
 GET /projects/:id/events
@@ -465,7 +465,7 @@ Parameters:
       "id": 1,
       "state": "active",
       "avatar_url": "http://localhost:3000/uploads/user/avatar/1/fox_avatar.png",
-      "web_url": "http://localhost:3000/u/root"
+      "web_url": "http://localhost:3000/root"
     },
     "author_username": "root"
   },
@@ -482,7 +482,7 @@ Parameters:
       "id": 1,
       "state": "active",
       "avatar_url": "http://localhost:3000/uploads/user/avatar/1/fox_avatar.png",
-      "web_url": "http://localhost:3000/u/root"
+      "web_url": "http://localhost:3000/root"
     },
     "author_username": "john",
     "data": {
@@ -528,7 +528,7 @@ Parameters:
       "id": 1,
       "state": "active",
       "avatar_url": "http://localhost:3000/uploads/user/avatar/1/fox_avatar.png",
-      "web_url": "http://localhost:3000/u/root"
+      "web_url": "http://localhost:3000/root"
     },
     "author_username": "root"
   },
@@ -552,7 +552,7 @@ Parameters:
         "id": 1,
         "state": "active",
         "avatar_url": "http://localhost:3000/uploads/user/avatar/1/fox_avatar.png",
-        "web_url": "http://localhost:3000/u/root"
+        "web_url": "http://localhost:3000/root"
       },
       "created_at": "2015-12-04T10:33:56.698Z",
       "system": false,
@@ -567,7 +567,7 @@ Parameters:
       "id": 1,
       "state": "active",
       "avatar_url": "http://localhost:3000/uploads/user/avatar/1/fox_avatar.png",
-      "web_url": "http://localhost:3000/u/root"
+      "web_url": "http://localhost:3000/root"
     },
     "author_username": "root"
   }
@@ -1333,8 +1333,6 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `query` (required) - A string contained in the project name
-| `per_page` (optional) - number of projects to return per page
-| `page` (optional) - the page to retrieve
-| `order_by` (optional) - Return requests ordered by `id`, `name`, `created_at` or `last_activity_at` fields
+| `query` | string | yes | A string contained in the project name |
+| `order_by` | string | no | Return requests ordered by `id`, `name`, `created_at` or `last_activity_at` fields |
 | `sort` | string | no | Return requests sorted in `asc` or `desc` order |

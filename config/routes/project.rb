@@ -267,16 +267,19 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
           get :commits
           get :diffs
           get :conflicts
+          get :conflict_for_path
           get :builds
           get :pipelines
           get :merge_check
           post :merge
           post :cancel_merge_when_build_succeeds
           get :ci_status
+          get :ci_environments_status
           post :toggle_subscription
           post :remove_wip
           get :diff_for_path
           post :resolve_conflicts
+          post :assign_related_issues
         end
 
         collection do
@@ -316,7 +319,11 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
         end
       end
 
-      resources :environments
+      resources :environments, except: [:destroy] do
+        member do
+          post :stop
+        end
+      end
 
       resource :cycle_analytics, only: [:show]
 
@@ -406,7 +413,7 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
         end
       end
 
-      resources :group_links, only: [:index, :create, :destroy], constraints: { id: /\d+/ }
+      resources :group_links, only: [:index, :create, :update, :destroy], constraints: { id: /\d+/ }
 
       resources :notes, only: [:index, :create, :destroy, :update], concerns: :awardable, constraints: { id: /\d+/ } do
         member do
@@ -416,7 +423,7 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
         end
       end
 
-      resource :board, only: [:show] do
+      resources :boards, only: [:index, :show] do
         scope module: :boards do
           resources :issues, only: [:update]
 

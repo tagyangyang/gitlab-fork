@@ -7,6 +7,8 @@ module HasStatus
   STARTED_STATUSES = %w[running success failed skipped]
   ACTIVE_STATUSES = %w[pending running]
   COMPLETED_STATUSES = %w[success success_with_warnings failed canceled]
+  ORDERED_STATUSES = %w[failed pending running canceled
+                        success success_with_warnings skipped]
 
   class_methods do
     def status_sql

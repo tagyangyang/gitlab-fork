@@ -71,6 +71,7 @@
       this._location = location;
       this.bindEvents();
       this.activateTab(this.opts.action);
+      this.initAffix();
     }
 
     MergeRequestTabs.prototype.bindEvents = function() {
@@ -281,6 +282,7 @@
             document.querySelector("div#builds").innerHTML = data.html;
             gl.utils.localTimeAgo($('.js-timeago', 'div#builds'));
             _this.buildsLoaded = true;
+            if (!this.pipelines) this.pipelines = new gl.Pipelines();
             return _this.scrollToElement("#builds");
           };
         })(this)
@@ -378,6 +380,43 @@
     // Expand the issuable sidebar unless the user explicitly collapsed it
     // Wait until listeners are set
     // Only when sidebar is collapsed
+    };
+
+    MergeRequestTabs.prototype.initAffix = function () {
+      var $tabs = $('.js-tabs-affix');
+
+      // Screen space on small screens is usually very sparse
+      // So we dont affix the tabs on these
+      if (Breakpoints.get().getBreakpointSize() === 'xs' || !$tabs.length) return;
+
+      var $diffTabs = $('#diff-notes-app'),
+        $fixedNav = $('.navbar-fixed-top'),
+        $layoutNav = $('.layout-nav');
+
+      $tabs.off('affix.bs.affix affix-top.bs.affix')
+        .affix({
+          offset: {
+            top: function () {
+              var tabsTop = $diffTabs.offset().top - $tabs.height();
+              tabsTop = tabsTop - ($fixedNav.height() + $layoutNav.height());
+
+              return tabsTop;
+            }
+          }
+        }).on('affix.bs.affix', function () {
+          $diffTabs.css({
+            marginTop: $tabs.height()
+          });
+        }).on('affix-top.bs.affix', function () {
+          $diffTabs.css({
+            marginTop: ''
+          });
+        });
+
+      // Fix bug when reloading the page already scrolling
+      if ($tabs.hasClass('affix')) {
+        $tabs.trigger('affix.bs.affix');
+      }
     };
 
     return MergeRequestTabs;

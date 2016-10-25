@@ -3,7 +3,8 @@
   width: 100% !important;
 }
 
-.select2-container, .select2-container.select2-drop-above {
+.select2-container,
+.select2-container.select2-drop-above {
   .select2-choice {
     background: #fff;
     border-color: $input-border;
@@ -71,7 +72,8 @@
 }
 
 .select2-container-active {
-  .select2-choice, .select2-choices {
+  .select2-choice,
+  .select2-choices {
     box-shadow: none;
   }
 }
@@ -93,7 +95,7 @@
     background: none;
 
     .select2-search-field input {
-      padding: $gl-padding / 2;
+      padding: 5px $gl-padding / 2;
       font-size: 13px;
       height: auto;
       font-family: inherit;
@@ -101,7 +103,7 @@
     }
 
     .select2-search-choice {
-      margin: 8px 0 0 8px;
+      margin: 5px 0 0 8px;
       box-shadow: none;
       border-color: $input-border;
       color: $gl-text-color;
@@ -137,6 +139,7 @@
 
   .select2-results {
     max-height: 350px;
+
     .select2-highlighted {
       background: $gl-primary;
     }
@@ -212,9 +215,11 @@
   .group-image {
     float: left;
   }
+
   .group-name {
     font-weight: bold;
   }
+
   .group-path {
     color: #999;
   }
@@ -239,6 +244,7 @@
     color: #aaa;
     font-weight: normal;
   }
+
   .namespace-path {
     margin-left: 10px;
     font-weight: bolder;

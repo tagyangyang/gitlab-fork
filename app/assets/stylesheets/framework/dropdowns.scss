@@ -12,6 +12,7 @@
   .dropdown-menu,
   .dropdown-menu-nav {
     display: block;
+
     @media (max-width: $screen-xs-max) {
       width: 100%;
     }
@@ -48,6 +49,7 @@
     margin-top: -6px;
     color: $dropdown-toggle-icon-color;
     font-size: 10px;
+
     &.fa-spinner {
       font-size: 16px;
       margin-top: -8px;
@@ -273,7 +275,8 @@
   a {
     padding-left: 25px;
 
-    &.is-indeterminate, &.is-active {
+    &.is-indeterminate,
+    &.is-active {
       &::before {
         position: absolute;
         left: 5px;
@@ -371,7 +374,8 @@
   }
 }
 
-.dropdown-input-field, .default-dropdown-input {
+.dropdown-input-field,
+.default-dropdown-input {
   width: 100%;
   min-height: 30px;
   padding: 0 7px;
@@ -400,7 +404,7 @@
 
 .dropdown-content {
   max-height: 215px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .dropdown-footer {

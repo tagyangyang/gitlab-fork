@@ -20,13 +20,20 @@
     margin: 4px;
   }
 
-  .table.builds {
+  .table.ci-table {
     min-width: 1200px;
 
-    .branch-commit {
-      width: 33%;
+    .pipeline-id {
+      color: $black;
     }
 
+    .branch-commit {
+      width: 30%;
+
+      .branch-name {
+        max-width: 195px;
+      }
+    }
   }
 }
 
@@ -44,11 +51,18 @@
   overflow: auto;
 }
 
-.table.builds {
+.table.ci-table {
   min-width: 900px;
 
   &.pipeline {
     min-width: 650px;
+  }
+
+  &.builds-page {
+
+    tr {
+      height: 71px;
+    }
   }
 
   tr {
@@ -66,6 +80,10 @@
     border-top-width: 1px;
   }
 
+  .build.retried {
+    background-color: $gray-lightest;
+  }
+
   .commit-link {
 
     .ci-status {
@@ -79,6 +97,15 @@
     a:hover {
       text-decoration: none;
     }
+  }
+
+  .avatar {
+    margin-left: 0;
+    float: none;
+  }
+
+  .api {
+    color: $code-color;
   }
 
   .branch-commit {
@@ -102,12 +129,11 @@
 
     .fa {
       font-size: 12px;
-      color: $table-text-gray;
+      color: $gl-text-color;
     }
 
     .commit-id {
       color: $gl-link-color;
-      margin-right: 8px;
     }
 
     .commit-title {
@@ -116,10 +142,6 @@
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-    }
-
-    .avatar {
-      margin-left: 0;
     }
 
     .label {
@@ -137,17 +159,11 @@
 
   .icon-container {
     display: inline-block;
-    text-align: right;
-    width: 15px;
+    width: 10px;
 
-    .fa {
-      position: relative;
-      right: 3px;
-    }
-
-    svg {
-      position: relative;
-      right: 1px;
+    &.commit-icon {
+      width: 15px;
+      text-align: center;
     }
   }
 
@@ -176,7 +192,7 @@
         &::after {
           content: '';
           width: 8px;
-          position: absolute;;
+          position: absolute;
           right: -7px;
           bottom: 8px;
           border-bottom: 2px solid $border-color;
@@ -232,7 +248,8 @@
         font-size: 14px;
       }
 
-      svg, .fa {
+      svg,
+      .fa {
         margin-right: 0;
       }
     }
@@ -353,9 +370,6 @@
 
     &:hover {
       background-color: $gray-lighter;
-      .dropdown-menu-toggle {
-        background-color: transparent;
-      }
     }
 
     &.playable {
@@ -385,6 +399,15 @@
         }
       }
 
+      .tooltip {
+        white-space: nowrap;
+
+        .tooltip-inner {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
       .ci-status-text {
         width: 135px;
         white-space: nowrap;
@@ -402,6 +425,7 @@
       }
 
       .dropdown-menu-toggle {
+        background-color: transparent;
         border: none;
         width: auto;
         padding: 0;
@@ -420,8 +444,11 @@
         left: auto;
         right: -197px;
         top: -9px;
-        max-height: 245px;
-        overflow-y: scroll;
+
+        ul {
+          max-height: 245px;
+          overflow: auto;
+        }
 
         a {
           color: $gl-text-color;
@@ -503,7 +530,8 @@
 
     // Connect each build (except for first) with curved lines
     &:not(:first-child) {
-      &::after, &::before {
+      &::after,
+      &::before {
         content: '';
         top: -49px;
         position: absolute;
@@ -529,10 +557,12 @@
 
     // Connect second build to first build with smaller curved line
     &:nth-child(2) {
-      &::after, &::before {
+      &::after,
+      &::before {
         height: 29px;
         top: -9px;
       }
+
       .curve {
         display: block;
       }
@@ -543,7 +573,8 @@
     .build {
       // Remove right connecting horizontal line from first build in last stage
       &:first-child {
-        &::after, &::before {
+        &::after,
+        &::before {
           border: none;
         }
       }
@@ -618,19 +649,35 @@
   }
 }
 
-.pipelines.tab-pane {
+.tab-pane {
 
-  .content-list.pipelines {
-    overflow: auto;
+  &.pipelines {
+
+    .ci-table {
+      min-width: 900px;
+    }
+
+    .content-list.pipelines {
+      overflow: auto;
+    }
+
+    .stage {
+      max-width: 100px;
+      width: 100px;
+    }
+
+    .pipeline-actions {
+      min-width: initial;
+    }
   }
 
-  .stage {
-    max-width: 100px;
-    width: 100px;
-  }
+  &.builds {
 
-  .pipeline-actions {
-    min-width: initial;
+    .ci-table {
+      tr {
+        height: 71px;
+      }
+    }
   }
 }
 

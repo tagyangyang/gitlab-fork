@@ -53,7 +53,12 @@ describe API::API, api: true  do
 
         get api("/projects/#{project.id}/repository/commits?until=#{before.utc.iso8601}", user)
 
-        expect(json_response.size).to eq(commits.size - 1)
+        if commits.size >= 20
+          expect(json_response.size).to eq(20)
+        else
+          expect(json_response.size).to eq(commits.size - 1)
+        end
+
         expect(json_response.first["id"]).to eq(commits.second.id)
         expect(json_response.second["id"]).to eq(commits.third.id)
       end
@@ -65,6 +70,17 @@ describe API::API, api: true  do
 
         expect(response).to have_http_status(400)
         expect(json_response['message']).to include "\"since\" must be a timestamp in ISO 8601 format"
+      end
+    end
+
+    context "path optional parameter" do
+      it "returns project commits matching provided path parameter" do
+        path = 'files/ruby/popen.rb'
+
+        get api("/projects/#{project.id}/repository/commits?path=#{path}", user)
+
+        expect(json_response.size).to eq(3)
+        expect(json_response.first["id"]).to eq("570e7b2abdd848b95f2f578043fc23bd6f6fd24d")
       end
     end
   end
@@ -447,11 +463,12 @@ describe API::API, api: true  do
       end
 
       it 'returns the inline comment' do
-        post api("/projects/#{project.id}/repository/commits/#{project.repository.commit.id}/comments", user), note: 'My comment', path: project.repository.commit.raw_diffs.first.new_path, line: 7, line_type: 'new'
+        post api("/projects/#{project.id}/repository/commits/#{project.repository.commit.id}/comments", user), note: 'My comment', path: project.repository.commit.raw_diffs.first.new_path, line: 1, line_type: 'new'
+
         expect(response).to have_http_status(201)
         expect(json_response['note']).to eq('My comment')
         expect(json_response['path']).to eq(project.repository.commit.raw_diffs.first.new_path)
-        expect(json_response['line']).to eq(7)
+        expect(json_response['line']).to eq(1)
         expect(json_response['line_type']).to eq('new')
       end
 

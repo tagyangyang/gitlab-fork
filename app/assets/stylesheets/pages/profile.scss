@@ -243,6 +243,7 @@
       .btn {
         -webkit-flex-grow: 1;
         flex-grow: 1;
+
         &:first-child {
           margin-left: 0;
         }
@@ -252,7 +253,8 @@
 }
 
 table.u2f-registrations {
-  th:not(:last-child), td:not(:last-child) {
+  th:not(:last-child),
+  td:not(:last-child) {
     border-right: solid 1px transparent;
   }
 }

@@ -25,7 +25,9 @@
       a {
         color: $color-light;
 
-        &:hover, &:focus, &:active {
+        &:hover,
+        &:focus,
+        &:active {
           background: $color-dark;
         }
 
@@ -62,7 +64,7 @@
         }
 
         i {
-          color: $white-light
+          color: $white-light;
         }
 
         path,

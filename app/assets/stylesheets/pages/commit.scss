@@ -2,14 +2,16 @@
   display: block;
 }
 
-.commit-author, .commit-committer {
+.commit-author,
+.commit-committer {
   display: block;
   color: #999;
   font-weight: normal;
   font-style: italic;
 }
 
-.commit-author strong, .commit-committer strong {
+.commit-author strong,
+.commit-committer strong {
   font-weight: bold;
   font-style: normal;
 }
@@ -51,6 +53,7 @@
       margin-left: 4px;
     }
   }
+
   .commit-committer-link,
   .commit-author-link {
     color: $gl-gray;
@@ -108,21 +111,25 @@
       line-height: 20px;
     }
   }
+
   .new-file {
     a {
       color: $gl-text-green;
     }
   }
+
   .renamed-file {
     a {
       color: $gl-text-orange;
     }
   }
+
   .deleted-file {
     a {
       color: $gl-text-red;
     }
   }
+
   .edit-file {
     a {
       color: $gl-text-color;
@@ -158,6 +165,7 @@
     position: absolute;
     z-index: 1;
   }
+
   > textarea {
     background-color: rgba(0, 0, 0, 0.0);
     font-family: inherit;
