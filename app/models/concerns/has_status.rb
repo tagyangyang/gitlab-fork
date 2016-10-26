@@ -18,6 +18,10 @@ module HasStatus
       %w[success failed canceled]
     end
 
+    def ordered_statuses
+      %w[failed pending running canceled success skipped]
+    end
+
     def status
       all.pluck(status_sql).first
     end

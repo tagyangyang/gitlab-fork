@@ -52,7 +52,7 @@ module Ci
       super << 'success_with_warnings'
     end
 
-    statuses = available_statuses # local binding for state_machine
+    statuses = available_statuses # local for state_machine and validations
     validates :status, inclusion: { in: statuses }
     state_machine :status, initial: :created do
       statuses.each do |status|

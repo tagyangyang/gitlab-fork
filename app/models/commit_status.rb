@@ -67,11 +67,7 @@ class CommitStatus < ActiveRecord::Base
     END)"
   end
 
-  def self.ordered_statuses
-    %w[failed pending running canceled success skipped]
-  end
-
-  statuses = available_statuses # local binding for state_machine
+  statuses = available_statuses # local for state_machine and validations
   validates :status, inclusion: { in: statuses }
   state_machine :status do
     statuses.each do |status|
