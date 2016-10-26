@@ -110,6 +110,14 @@ module Ci
       END)"
     end
 
+    def self.available_statuses
+      super << 'success_with_warnings'
+    end
+
+    def self.completed_statuses
+      super << 'success_with_warnings'
+    end
+
     # ref can't be HEAD or SHA, can only be branch/tag name
     def self.latest_successful_for(ref)
       where(ref: ref).order(id: :desc).success.first

@@ -26,7 +26,7 @@ describe Gitlab::Auth, lib: true do
         end
       end
 
-      (HasStatus::AVAILABLE_STATUSES - ['running']).each do |build_status|
+      (Ci::Build.available_statuses - ['running']).each do |build_status|
         context "for #{build_status} build" do
           let!(:build) { create(:ci_build, status: build_status) }
           let(:project) { build.project }

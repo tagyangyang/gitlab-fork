@@ -124,10 +124,6 @@ class Gitlab::Seeder::Pipelines
     @project.team.users.sample
   end
 
-  def build_status
-    Ci::Build::AVAILABLE_STATUSES.sample
-  end
-
   def stage_index(stage)
     STAGES.index(stage) || 0
   end

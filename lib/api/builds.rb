@@ -238,7 +238,7 @@ module API
       def filter_builds(builds, scope)
         return builds if scope.nil? || scope.empty?
 
-        available_statuses = ::CommitStatus::AVAILABLE_STATUSES
+        available_statuses = ::CommitStatus.available_statuses
 
         unknown = scope - available_statuses
         render_api_error!('Scope contains invalid value(s)', 400) unless unknown.empty?

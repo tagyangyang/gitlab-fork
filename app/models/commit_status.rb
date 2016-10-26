@@ -140,6 +140,10 @@ class CommitStatus < ActiveRecord::Base
     END)"
   end
 
+  def self.ordered_statuses
+    %w[failed pending running canceled success skipped]
+  end
+
   def self.stages
     # We group by stage name, but order stages by theirs' index
     unscoped.from(all, :sg).group('stage').order('max(stage_idx)', 'stage').pluck('sg.stage')

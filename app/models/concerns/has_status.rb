@@ -1,16 +1,23 @@
 module HasStatus
   extend ActiveSupport::Concern
 
-  AVAILABLE_STATUSES = %w[created pending running
-                          success success_with_warnings
-                          failed canceled skipped]
-  STARTED_STATUSES = %w[running success failed skipped]
-  ACTIVE_STATUSES = %w[pending running]
-  COMPLETED_STATUSES = %w[success success_with_warnings failed canceled]
-  ORDERED_STATUSES = %w[failed pending running canceled
-                        success success_with_warnings skipped]
-
   class_methods do
+    def available_statuses
+      %w[created pending running success failed canceled skipped]
+    end
+
+    def started_statuses
+      %w[running success failed skipped]
+    end
+
+    def active_statuses
+      %w[pending running]
+    end
+
+    def completed_statuses
+      %w[success failed canceled]
+    end
+
     def status
       all.pluck(status_sql).first
     end
@@ -29,7 +36,7 @@ module HasStatus
   end
 
   included do
-    validates :status, inclusion: { in: AVAILABLE_STATUSES }
+    validates :status, inclusion: { in: available_statuses }
 
     state_machine :status, initial: :created do
       state :created, value: 'created'
@@ -54,15 +61,15 @@ module HasStatus
   end
 
   def started?
-    STARTED_STATUSES.include?(status) && started_at
+    self.class.started_statuses.include?(status) && started_at
   end
 
   def active?
-    ACTIVE_STATUSES.include?(status)
+    self.class.active_statuses.include?(status)
   end
 
   def complete?
-    COMPLETED_STATUSES.include?(status)
+    self.class.completed_statuses.include?(status)
   end
 
   private

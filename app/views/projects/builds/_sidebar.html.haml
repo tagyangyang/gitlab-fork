@@ -123,7 +123,7 @@
               %a.stage-item= stage
 
   .builds-container
-    - HasStatus::ORDERED_STATUSES.each do |build_status|
+    - Ci::Build.ordered_statuses.each do |build_status|
       - builds.select{|build| build.status == build_status}.each do |build|
         .build-job{class: sidebar_build_class(build, @build), data: {stage: build.stage}}
           = link_to namespace_project_build_path(@project.namespace, @project, build) do
