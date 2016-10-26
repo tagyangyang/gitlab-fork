@@ -33,7 +33,7 @@ module Ci
       current_status = status_for_prior_stages(index)
 
       created_builds_in_stage(index).select do |build|
-        if CommitStatus.completed_statuses.include?(current_status)
+        if Ci::Pipeline.completed_statuses.include?(current_status)
           process_build(build, current_status)
         end
       end

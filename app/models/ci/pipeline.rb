@@ -23,8 +23,41 @@ module Ci
 
     delegate :stages, to: :statuses
 
+    # Used in HasStatus
+    def self.status_sql
+      builds = all.select('count(*)').to_sql
+      created = all.created.select('count(*)').to_sql
+      success = all.success.select('count(*)').to_sql
+      pending = all.pending.select('count(*)').to_sql
+      running = all.running.select('count(*)').to_sql
+      skipped = all.skipped.select('count(*)').to_sql
+      canceled = all.canceled.select('count(*)').to_sql
+
+      "(CASE
+        WHEN (#{builds})=(#{success}) THEN 'success'
+        WHEN (#{builds})=(#{created}) THEN 'created'
+        WHEN (#{builds})=(#{success})+(#{skipped}) THEN 'skipped'
+        WHEN (#{builds})=(#{success})+(#{skipped})+(#{canceled}) THEN 'canceled'
+        WHEN (#{builds})=(#{created})+(#{skipped})+(#{pending}) THEN 'pending'
+        WHEN (#{running})+(#{pending})+(#{created})>0 THEN 'running'
+        ELSE 'failed'
+      END)"
+    end
+
+    def self.available_statuses
+      super << 'success_with_warnings'
+    end
+
+    def self.completed_statuses
+      super << 'success_with_warnings'
+    end
+
+    statuses = available_statuses # local binding for state_machine
+    validates :status, inclusion: { in: statuses }
     state_machine :status, initial: :created do
-      state :success_with_warnings, value: 'success_with_warnings'
+      statuses.each do |status|
+        state status.to_sym, value: status
+      end
 
       event :enqueue do
         transition created: :pending
@@ -87,35 +120,6 @@ module Ci
           PipelineHooksWorker.perform_async(id)
         end
       end
-    end
-
-    # Used in HasStatus
-    def self.status_sql
-      builds = all.select('count(*)').to_sql
-      created = all.created.select('count(*)').to_sql
-      success = all.success.select('count(*)').to_sql
-      pending = all.pending.select('count(*)').to_sql
-      running = all.running.select('count(*)').to_sql
-      skipped = all.skipped.select('count(*)').to_sql
-      canceled = all.canceled.select('count(*)').to_sql
-
-      "(CASE
-        WHEN (#{builds})=(#{success}) THEN 'success'
-        WHEN (#{builds})=(#{created}) THEN 'created'
-        WHEN (#{builds})=(#{success})+(#{skipped}) THEN 'skipped'
-        WHEN (#{builds})=(#{success})+(#{skipped})+(#{canceled}) THEN 'canceled'
-        WHEN (#{builds})=(#{created})+(#{skipped})+(#{pending}) THEN 'pending'
-        WHEN (#{running})+(#{pending})+(#{created})>0 THEN 'running'
-        ELSE 'failed'
-      END)"
-    end
-
-    def self.available_statuses
-      super << 'success_with_warnings'
-    end
-
-    def self.completed_statuses
-      super << 'success_with_warnings'
     end
 
     # ref can't be HEAD or SHA, can only be branch/tag name

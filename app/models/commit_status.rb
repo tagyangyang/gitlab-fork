@@ -44,7 +44,40 @@ class CommitStatus < ActiveRecord::Base
   scope :latest_ci_stages, -> { latest.ordered.includes(project: :namespace) }
   scope :retried_ci_stages, -> { retried.ordered.includes(project: :namespace) }
 
+  # Used in HasStatus
+  def self.status_sql
+    builds = exclude_ignored.select('count(*)').to_sql
+    created = exclude_ignored.created.select('count(*)').to_sql
+    success = exclude_ignored.success.select('count(*)').to_sql
+    pending = exclude_ignored.pending.select('count(*)').to_sql
+    running = exclude_ignored.running.select('count(*)').to_sql
+    skipped = exclude_ignored.skipped.select('count(*)').to_sql
+    canceled = exclude_ignored.canceled.select('count(*)').to_sql
+    warnings = failed_but_allowed.select('count(*)').to_sql
+
+    "(CASE
+      WHEN (#{builds})=(#{success}) AND (#{warnings})>0 THEN 'success_with_warnings'
+      WHEN (#{builds})=(#{success}) THEN 'success'
+      WHEN (#{builds})=(#{created}) THEN 'created'
+      WHEN (#{builds})=(#{success})+(#{skipped}) THEN 'skipped'
+      WHEN (#{builds})=(#{success})+(#{skipped})+(#{canceled}) THEN 'canceled'
+      WHEN (#{builds})=(#{created})+(#{skipped})+(#{pending}) THEN 'pending'
+      WHEN (#{running})+(#{pending})+(#{created})>0 THEN 'running'
+      ELSE 'failed'
+    END)"
+  end
+
+  def self.ordered_statuses
+    %w[failed pending running canceled success skipped]
+  end
+
+  statuses = available_statuses # local binding for state_machine
+  validates :status, inclusion: { in: statuses }
   state_machine :status do
+    statuses.each do |status|
+      state status.to_sym, value: status
+    end
+
     event :enqueue do
       transition [:created, :skipped] => :pending
     end
@@ -115,33 +148,6 @@ class CommitStatus < ActiveRecord::Base
 
   def group_name
     name.gsub(/\d+[\s:\/\\]+\d+\s*/, '').strip
-  end
-
-  # Used in HasStatus
-  def self.status_sql
-    builds = exclude_ignored.select('count(*)').to_sql
-    created = exclude_ignored.created.select('count(*)').to_sql
-    success = exclude_ignored.success.select('count(*)').to_sql
-    pending = exclude_ignored.pending.select('count(*)').to_sql
-    running = exclude_ignored.running.select('count(*)').to_sql
-    skipped = exclude_ignored.skipped.select('count(*)').to_sql
-    canceled = exclude_ignored.canceled.select('count(*)').to_sql
-    warnings = failed_but_allowed.select('count(*)').to_sql
-
-    "(CASE
-      WHEN (#{builds})=(#{success}) AND (#{warnings})>0 THEN 'success_with_warnings'
-      WHEN (#{builds})=(#{success}) THEN 'success'
-      WHEN (#{builds})=(#{created}) THEN 'created'
-      WHEN (#{builds})=(#{success})+(#{skipped}) THEN 'skipped'
-      WHEN (#{builds})=(#{success})+(#{skipped})+(#{canceled}) THEN 'canceled'
-      WHEN (#{builds})=(#{created})+(#{skipped})+(#{pending}) THEN 'pending'
-      WHEN (#{running})+(#{pending})+(#{created})>0 THEN 'running'
-      ELSE 'failed'
-    END)"
-  end
-
-  def self.ordered_statuses
-    %w[failed pending running canceled success skipped]
   end
 
   def self.stages

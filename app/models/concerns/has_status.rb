@@ -36,18 +36,6 @@ module HasStatus
   end
 
   included do
-    validates :status, inclusion: { in: available_statuses }
-
-    state_machine :status, initial: :created do
-      state :created, value: 'created'
-      state :pending, value: 'pending'
-      state :running, value: 'running'
-      state :failed, value: 'failed'
-      state :success, value: 'success'
-      state :canceled, value: 'canceled'
-      state :skipped, value: 'skipped'
-    end
-
     scope :created, -> { where(status: 'created') }
     scope :relevant, -> { where.not(status: 'created') }
     scope :running, -> { where(status: 'running') }
