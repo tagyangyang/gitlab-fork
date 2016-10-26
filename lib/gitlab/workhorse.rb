@@ -126,7 +126,7 @@ module Gitlab
       end
 
       def secret_path
-        Rails.root.join('.gitlab_workhorse_secret')
+        ENV['GITLAB_WORKHORSE_SECRET'] || File.join(Rails.root, '.gitlab_workhorse_secret')
       end
 
       protected
