@@ -310,6 +310,95 @@ describe Ci::Pipeline, models: true do
     end
   end
 
+  describe '.status' do
+    subject { described_class.status }
+
+    context 'without pipelines' do
+      it 'is nil' do
+        is_expected.to eq(nil)
+      end
+    end
+
+    described_class.available_statuses.each do |status|
+      context "with a #{status} pipeline" do
+        before do
+          create_pipelines(status)
+        end
+
+        it "is #{status}" do
+          is_expected.to eq(status)
+        end
+      end
+    end
+
+    context 'with success and success_with_warnings pipelines' do
+      before do
+        create_pipelines('success', 'success_with_warnings')
+      end
+
+      it 'is success_with_warnings' do
+        is_expected.to eq('success_with_warnings')
+      end
+    end
+
+    context 'with success and success_with_warnings and skipped pipelines' do
+      before do
+        create_pipelines('success', 'success_with_warnings', 'skipped')
+      end
+
+      it 'is skipped' do
+        is_expected.to eq('skipped')
+      end
+    end
+
+    context 'with success, success_with_warnings, skipped, canceled pipelines' do
+      before do
+        create_pipelines(
+          'success', 'success_with_warnings', 'skipped', 'canceled')
+      end
+
+      it 'is skipped' do
+        is_expected.to eq('canceled')
+      end
+    end
+
+    context 'with created, skipped, pending pipelines' do
+      before do
+        create_pipelines('created', 'skipped', 'pending')
+      end
+
+      it 'is skipped' do
+        is_expected.to eq('pending')
+      end
+    end
+
+    context 'with running, pending, created pipelines' do
+      before do
+        create_pipelines('running', 'pending', 'created')
+      end
+
+      it 'is skipped' do
+        is_expected.to eq('running')
+      end
+    end
+
+    context 'with success, failed, skipped' do
+      before do
+        create_pipelines('success', 'failed', 'skipped')
+      end
+
+      it 'is skipped' do
+        is_expected.to eq('failed')
+      end
+    end
+
+    def create_pipelines(*statuses)
+      statuses.each do |status|
+        create(:ci_empty_pipeline, status: status)
+      end
+    end
+  end
+
   describe '#status' do
     let!(:build) { create(:ci_build, :created, pipeline: pipeline, name: 'test') }
 

@@ -25,20 +25,22 @@ module Ci
 
     # Used in HasStatus
     def self.status_sql
-      builds = all.select('count(*)').to_sql
+      total = all.select('count(*)').to_sql
       created = all.created.select('count(*)').to_sql
       success = all.success.select('count(*)').to_sql
       pending = all.pending.select('count(*)').to_sql
       running = all.running.select('count(*)').to_sql
       skipped = all.skipped.select('count(*)').to_sql
       canceled = all.canceled.select('count(*)').to_sql
+      warnings = all.success_with_warnings.select('count(*)').to_sql
 
       "(CASE
-        WHEN (#{builds})=(#{success}) THEN 'success'
-        WHEN (#{builds})=(#{created}) THEN 'created'
-        WHEN (#{builds})=(#{success})+(#{skipped}) THEN 'skipped'
-        WHEN (#{builds})=(#{success})+(#{skipped})+(#{canceled}) THEN 'canceled'
-        WHEN (#{builds})=(#{created})+(#{skipped})+(#{pending}) THEN 'pending'
+        WHEN (#{total})=(#{success}) THEN 'success'
+        WHEN (#{total})=(#{success})+(#{warnings}) THEN 'success_with_warnings'
+        WHEN (#{total})=(#{created}) THEN 'created'
+        WHEN (#{total})=(#{success})+(#{skipped})+(#{warnings}) THEN 'skipped'
+        WHEN (#{total})=(#{success})+(#{skipped})+(#{warnings})+(#{canceled}) THEN 'canceled'
+        WHEN (#{total})=(#{created})+(#{skipped})+(#{pending}) THEN 'pending'
         WHEN (#{running})+(#{pending})+(#{created})>0 THEN 'running'
         ELSE 'failed'
       END)"
@@ -50,6 +52,10 @@ module Ci
 
     def self.completed_statuses
       super << 'success_with_warnings'
+    end
+
+    scope :success_with_warnings, -> do
+      where(status: 'success_with_warnings')
     end
 
     validates :status, inclusion: { in: available_statuses }
