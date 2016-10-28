@@ -122,29 +122,27 @@ describe Import::BitbucketController do
       end
 
       context "when a namespace with the Bitbucket user's username already exists" do
-        let!(:existing_namespace) { create(:namespace, name: other_username, owner: user) }
+        let!(:existing_namespace) { create(:group, name: other_username) }
 
         context "when the namespace is owned by the GitLab user" do
+          before { existing_namespace.add_owner(user) }
+
           it "takes the existing namespace" do
             expect(Gitlab::BitbucketImport::ProjectCreator).
               to receive(:new).with(bitbucket_repo, bitbucket_repo.name, existing_namespace, user, access_params).
               and_return(double(execute: true))
 
-            post :create, format: :js
+            post :create, target_namespace: existing_namespace.name, format: :js
           end
         end
 
         context "when the namespace is not owned by the GitLab user" do
-          before do
-            existing_namespace.owner = create(:user)
-            existing_namespace.save
-          end
-
-          it "doesn't create a project" do
+          it "creates a project using user's namespace" do
             expect(Gitlab::BitbucketImport::ProjectCreator).
-              not_to receive(:new)
+              to receive(:new).with(bitbucket_repo, bitbucket_repo.name, user.namespace, user, access_params).
+              and_return(double(execute: true))
 
-            post :create, format: :js
+            post :create, target_namespace: existing_namespace.name, format: :js
           end
         end
       end
@@ -155,7 +153,7 @@ describe Import::BitbucketController do
             expect(Gitlab::BitbucketImport::ProjectCreator).
               to receive(:new).and_return(double(execute: true))
 
-            expect { post :create, format: :js }.to change(Namespace, :count).by(1)
+            expect { post :create, target_namespace: bitbucket_repo.slug, format: :js }.to change(Namespace, :count).by(1)
           end
 
           it "takes the new namespace" do
@@ -163,7 +161,7 @@ describe Import::BitbucketController do
               to receive(:new).with(bitbucket_repo, bitbucket_repo.name, an_instance_of(Group), user, access_params).
               and_return(double(execute: true))
 
-            post :create, format: :js
+            post :create, target_namespace: bitbucket_repo.slug, format: :js
           end
         end
 

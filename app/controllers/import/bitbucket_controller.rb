@@ -42,17 +42,13 @@ class Import::BitbucketController < Import::BaseController
     repo = bitbucket_client.repo(name)
     @project_name = params[:new_name].presence || repo.name
 
-    repo_owner = repo.owner
-    repo_owner = current_user.username if repo_owner == bitbucket_client.user.username
-    @target_namespace = params[:new_namespace].presence || repo_owner
+    @target_namespace = find_or_create_namespace
 
-    namespace = find_or_create_namespace(@target_namespace, current_user)
-
-    if current_user.can?(:create_projects, namespace)
+    if current_user.can?(:create_projects, @target_namespace)
       # The token in a session can be expired, we need to get most recent one because
       # Bitbucket::Connection class refreshes it.
       session[:bitbucket_token] = bitbucket_client.connection.token
-      @project = Gitlab::BitbucketImport::ProjectCreator.new(repo, @project_name, namespace, current_user, credentials).execute
+      @project = Gitlab::BitbucketImport::ProjectCreator.new(repo, @project_name, @target_namespace, current_user, credentials).execute
     else
       render 'unauthorized'
     end
