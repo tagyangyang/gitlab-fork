@@ -24,6 +24,7 @@ module Banzai
 
           node.replace(html)
         end
+
         doc
       end
 
@@ -33,10 +34,21 @@ module Banzai
       #
       # Returns a String with :emoji: replaced with images.
       def emoji_name_image_filter(text)
-        text.gsub(emoji_pattern) do |match|
+        with_emoji = text.dup
+
+        with_emoji.gsub!(emoji_pattern) do |match|
           name = $1
           emoji_image_tag(name, emoji_url(name))
         end
+
+        if custom_emoji_pattern
+          with_emoji.gsub!(custom_emoji_pattern) do
+            name = $1
+            custom_emoji_image_tag(name)
+          end
+        end
+
+        with_emoji
       end
 
       # Replace unicode emoji with corresponding images if they exist.
@@ -54,14 +66,30 @@ module Banzai
         "<img class='emoji' title=':#{emoji_name}:' alt=':#{emoji_name}:' src='#{emoji_url}' height='20' width='20' align='absmiddle' />"
       end
 
+      def custom_emoji_image_tag(name)
+        emoji_url = project.custom_emoji.find_by(name: name).emoji_url
+
+        emoji_image_tag(name, emoji_url)
+      end
+
+      def custom_emoji_pattern
+        return nil unless project
+
+        @custom_emoji_pattern ||= self.class.emoji_detect_regex(project.custom_emoji.map(&:name))
+      end
+
       # Build a regexp that matches all valid :emoji: names.
       def self.emoji_pattern
-        @emoji_pattern ||= /:(#{Gitlab::Emoji.emojis_names.map { |name| Regexp.escape(name) }.join('|')}):/
+        @emoji_pattern ||= emoji_detect_regex(Gitlab::Emoji.emojis_names)
       end
 
       # Build a regexp that matches all valid unicode emojis names.
       def self.emoji_unicode_pattern
         @emoji_unicode_pattern ||= /(#{Gitlab::Emoji.emojis_unicodes.map { |moji| Regexp.escape(moji) }.join('|')})/
+      end
+
+      def self.emoji_detect_regex(names)
+        /:(#{names.map { |name| Regexp.escape(name) }.join('|')}):/
       end
 
       private
@@ -91,6 +119,10 @@ module Banzai
         else
           url_to_image(emoji_unicode_path)
         end
+      end
+
+      def project
+        context[:project]
       end
 
       def url_to_image(image)
