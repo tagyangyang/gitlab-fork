@@ -151,8 +151,8 @@ entry.
 - Fix and improve `Sortable.highest_label_priority`. !7165
 - Fixed sticky merge request tabs when sidebar is pinned. !7167
 - Only remove right connector of first build of last stage. !7179
+  - Sorting functionality for Group member list (!6956)
   - Backups do not fail anymore when using tar on annex and custom_hooks only. !5814
-  - Sorting functionality for Project members list (!7032)
   - Adds user project membership expired event to clarify why user was removed (Callum Dryden)
   - Trim leading and trailing whitespace on project_path (Linus Thiel)
   - Prevent award emoji via notes for issues/MRs authored by user (barthc)
@@ -242,8 +242,6 @@ entry.
   - Reduce overhead of `LabelFinder` by avoiding `#presence` call. !7094
   - Fix unauthorized users dragging on issue boards. !7096
   - Only schedule `ProjectCacheWorker` jobs when needed. !7099
-  - Simpler arguments passed to named_route on toggle_award_url helper method
-  - Sorting functionality for Group member list (!6956)
 
 ## 8.13.0 (2016-10-22)
 
