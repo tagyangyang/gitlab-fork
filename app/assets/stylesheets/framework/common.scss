@@ -392,3 +392,8 @@ table {
     z-index: 1;
   }
 }
+
+.bordered-box {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-default;
+}

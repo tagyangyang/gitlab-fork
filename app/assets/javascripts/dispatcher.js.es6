@@ -156,6 +156,9 @@
           new gl.Members();
           new UsersSelect();
           break;
+        case 'explore:groups:index':
+          new gl.ExploreGroupsLanding();
+          break;
         case 'groups:new':
         case 'groups:edit':
         case 'admin:groups:edit':
