@@ -151,51 +151,6 @@ entry.
 - Fix and improve `Sortable.highest_label_priority`. !7165
 - Fixed sticky merge request tabs when sidebar is pinned. !7167
 - Only remove right connector of first build of last stage. !7179
-  - Sorting functionality for Group member list (!6956)
-  - Backups do not fail anymore when using tar on annex and custom_hooks only. !5814
-  - Adds user project membership expired event to clarify why user was removed (Callum Dryden)
-  - Trim leading and trailing whitespace on project_path (Linus Thiel)
-  - Prevent award emoji via notes for issues/MRs authored by user (barthc)
-  - Adds an optional path parameter to the Commits API to filter commits by path (Luis HGO)
-  - Fix extra space on Build sidebar on Firefox !7060
-  - Fix mobile layout issues in admin user overview page !7087
-  - Fix HipChat notifications rendering (airatshigapov, eisnerd)
-  - Refactor Jira service to use jira-ruby gem
-  - Add hover to trash icon in notes !7008 (blackst0ne)
-  - Only show one error message for an invalid email !5905 (lycoperdon)
-  - Fix sidekiq stats in admin area (blackst0ne)
-  - Created cycle analytics bundle JavaScript file
-  - API: Fix booleans not recognized as such when using the `to_boolean` helper
-  - Removed delete branch tooltip !6954
-  - Stop unauthorized users dragging on milestone page (blackst0ne)
-  - Restore issue boards welcome message when a project is created !6899
-  - Escape ref and path for relative links !6050 (winniehell)
-  - Fixed link typo on /help/ui to Alerts section. !6915 (Sam Rose)
-  - Fix filtering of milestones with quotes in title (airatshigapov)
-  - Refactor less readable existance checking code from CoffeeScript !6289 (jlogandavison)
-  - Update mail_room and enable sentinel support to Reply By Email (!7101)
-  - Add task completion status in Issues and Merge Requests tabs: "X of Y tasks completed" (!6527, @gmesalazar)
-  - Simpler arguments passed to named_route on toggle_award_url helper method
-  - Fix typo in framework css class. !7086 (Daniel Voogsgerd)
-  - New issue board list dropdown stays open after adding a new list
-  - Fix: Backup restore doesn't clear cache
-  - API: Fix project deploy keys 400 and 500 errors when adding an existing key. !6784 (Joshua Welsh)
-  - Replace jquery.cookie plugin with js.cookie !7085
-  - Use MergeRequestsClosingIssues cache data on Issue#closed_by_merge_requests method
-  - Fix Sign in page 'Forgot your password?' link overlaps on medium-large screens
-  - Show full status link on MR & commit pipelines
-  - Fix documents and comments on Build API `scope`
-  - Refactor email, use setter method instead AR callbacks for email attribute (Semyon Pupkov)
-  - Shortened merge request modal to let clipboard button not overlap
-  - In all filterable drop downs, put input field in focus only after load is complete (Ido @leibo)
-
-## 8.13.2
-  - Fix builds dropdown overlapping bug !7124
-  - Fix applying labels for GitHub-imported MRs !7139
-  - Fix importing MR comments from GitHub !7139
-  - Modify GitHub importer to be retryable !7003
-  - Fix and improve `Sortable.highest_label_priority`
-  - Fixed sticky merge request tabs when sidebar is pinned
 
 ## 8.13.1 (2016-10-25)
 
@@ -221,27 +176,6 @@ entry.
 - Reduce overhead of `LabelFinder` by avoiding `#presence` call. !7094
 - Fix unauthorized users dragging on issue boards. !7096
 - Only schedule `ProjectCacheWorker` jobs when needed. !7099
-  - Fix branch protection API. !6215
-  - Fix hidden pipeline graph on commit and MR page. !6895
-  - Fix Cycle analytics not showing correct data when filtering by date. !6906
-  - Ensure custom provider tab labels don't break layout. !6993
-  - Fix issue boards user link when in subdirectory. !7018
-  - Refactor and add new environment functionality to CI yaml reference. !7026
-  - Fix typo in project settings that prevents users from enabling container registry. !7037
-  - Fix events order in `users/:id/events` endpoint. !7039
-  - Remove extra line for empty issue description. !7045
-  - Don't append issue/MR templates to any existing text. !7050
-  - Fix error in generating labels. !7055
-  - Stop clearing the database cache on `rake cache:clear`. !7056
-  - Only show register tab if signup enabled. !7058
-  - Expire and build repository cache after project import. !7064
-  - Fix bug where labels would be assigned to issues that were moved. !7065
-  - Fix reply-by-email not working due to queue name mismatch. !7068
-  - Fix 404 for group pages when GitLab setup uses relative url. !7071
-  - Fix `User#to_reference`. !7088
-  - Reduce overhead of `LabelFinder` by avoiding `#presence` call. !7094
-  - Fix unauthorized users dragging on issue boards. !7096
-  - Only schedule `ProjectCacheWorker` jobs when needed. !7099
 
 ## 8.13.0 (2016-10-22)
 
