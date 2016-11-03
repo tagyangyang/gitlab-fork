@@ -60,9 +60,8 @@ module Ci
 
     validates :status, inclusion: { in: available_statuses }
 
-    statuses = available_statuses # local for state_machine
     state_machine :status, initial: :created do
-      statuses.each do |status|
+      Ci::Pipeline.available_statuses.each do |status|
         state status.to_sym, value: status
       end
 
