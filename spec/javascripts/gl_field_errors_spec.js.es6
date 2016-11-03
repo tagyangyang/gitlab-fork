@@ -1,3 +1,4 @@
+/* eslint-disable */
 //= require jquery
 //= require gl_field_errors
 
@@ -7,7 +8,7 @@
   describe('GL Style Field Errors', function() {
     beforeEach(function() {
       fixture.load('gl_field_errors.html');
-      const $form = this.$form = $('form.show-gl-field-errors');
+      const $form = this.$form = $('form.gl-show-field-errors');
       this.fieldErrors = new global.GlFieldErrors($form);
     });
 
@@ -20,7 +21,7 @@
     });
 
     it('should ignore elements with custom error handling', function() {
-      const customErrorFlag = 'no-gl-field-errors';
+      const customErrorFlag = 'gl-field-error-ignore';
       const customErrorElem = $(`.${customErrorFlag}`);
 
       expect(customErrorElem.length).toBe(1);

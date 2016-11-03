@@ -1,3 +1,4 @@
+/* eslint-disable */
 (function() {
   var Dispatcher;
 
@@ -298,7 +299,7 @@
     };
 
     Dispatcher.prototype.initFieldErrors = function() {
-      $('.show-gl-field-errors').each((i, form) => {
+      $('.gl-show-field-errors').each((i, form) => {
         new gl.GlFieldErrors(form);
       });
     };
