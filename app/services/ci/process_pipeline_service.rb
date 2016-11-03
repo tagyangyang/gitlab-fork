@@ -29,10 +29,10 @@ module Ci
     def process_stage(index)
       current_status = status_for_prior_stages(index)
 
-      created_builds_in_stage(index).select do |build|
-        if Ci::Pipeline.completed_statuses.include?(current_status)
+      if Ci::Pipeline.completed_statuses.include?(current_status)
+        created_builds_in_stage(index).select do |build|
           Gitlab::OptimisticLocking.retry_lock(build) do |subject|
-            process_build(build, current_status)
+            process_build(subject, current_status)
           end
         end
       end
