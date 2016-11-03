@@ -1,0 +1,4 @@
+---
+title: Show warning icon for stages/pipelines that are allowed to fail
+merge_request: 6801
+author: Filipa Lacerda and Lin Jen-Shin
