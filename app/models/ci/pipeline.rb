@@ -87,7 +87,7 @@ module Ci
       end
 
       event :succeed_with_warnings do
-        transition any => :success_with_warnings
+        transition any - [:success_with_warnings] => :success_with_warnings
       end
 
       event :cancel do
