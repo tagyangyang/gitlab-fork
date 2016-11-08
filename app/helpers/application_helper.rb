@@ -32,14 +32,7 @@ module ApplicationHelper
     args.any? { |v| v.to_s.downcase == action_name }
   end
 
-  def project_icon(project_id, options = {})
-    project =
-      if project_id.is_a?(Project)
-        project_id
-      else
-        Project.find_with_namespace(project_id)
-      end
-
+  def project_icon(project, options = {})
     if project.avatar_url
       image_tag project.avatar_url, options
     else # generated icon

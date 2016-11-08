@@ -292,8 +292,11 @@ class ProjectsController < Projects::ApplicationController
   # pages list order: repository readme, wiki home, issues list, customize workflow
   def render_landing_page
     if @project.feature_available?(:repository, current_user)
-      return render 'projects/no_repo' unless @project.repository_exists?
-      render 'projects/empty' if @project.empty_repo?
+      if !@project.repository_exists?
+        present_and_render 'projects/no_repo'
+      elsif @project.empty_repo?
+        present_and_render 'projects/empty'
+      end
     else
       if @project.wiki_enabled?
         @project_wiki = @project.wiki
@@ -302,9 +305,13 @@ class ProjectsController < Projects::ApplicationController
         @issues = issues_collection
         @issues = @issues.page(params[:page])
       end
-
-      render :show
     end
+    present_and_render :show
+  end
+
+  def present_and_render(view)
+    @project = ProjectPresenter.new(@project, current_user)
+    render view
   end
 
   def determine_layout

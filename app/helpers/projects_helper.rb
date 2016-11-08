@@ -111,9 +111,9 @@ module ProjectsHelper
   end
 
   def license_short_name(project)
-    return 'LICENSE' if project.repository.license_key.nil?
+    return 'LICENSE' if project.license_key.nil?
 
-    license = Licensee::License.new(project.repository.license_key)
+    license = Licensee::License.new(project.license_key)
 
     license.nickname || license.name
   end
@@ -254,7 +254,7 @@ module ProjectsHelper
     number_to_human_size(size_in_bytes, delimiter: ',', precision: 2)
   end
 
-  def default_url_to_repo(project = @project)
+  def default_url_to_repo(project)
     case default_clone_protocol
     when 'ssh'
       project.ssh_url_to_repo
@@ -265,7 +265,7 @@ module ProjectsHelper
 
   def default_clone_protocol
     if allowed_protocols_present?
-      enabled_protocol
+      enabled_git_access_protocol
     else
       if !current_user || current_user.require_ssh_key?
         gitlab_config.protocol

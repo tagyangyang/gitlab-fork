@@ -1,11 +1,11 @@
-- project = project || @project
+- project = local_assigns.fetch(:project)
 
 .git-clone-holder.input-group
   .input-group-btn
     -if allowed_protocols_present?
       .clone-dropdown-btn.btn.btn-static
         %span
-          = enabled_project_button(project, enabled_protocol)
+          = clone_button(project)
     - else
       %a#clone-dropdown.clone-dropdown-btn.btn{href: '#', data: { toggle: 'dropdown' }}
         %span

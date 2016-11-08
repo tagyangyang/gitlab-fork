@@ -97,17 +97,15 @@ describe ProjectsHelper do
   end
 
   describe '#license_short_name' do
-    let(:project) { create(:project) }
-
     context 'when project.repository has a license_key' do
       it 'returns the nickname of the license if present' do
-        allow(project.repository).to receive(:license_key).and_return('agpl-3.0')
+        project = double(:project, license_key: 'agpl-3.0')
 
         expect(helper.license_short_name(project)).to eq('GNU AGPLv3')
       end
 
       it 'returns the name of the license if nickname is not present' do
-        allow(project.repository).to receive(:license_key).and_return('mit')
+        project = double(:project, license_key: 'mit')
 
         expect(helper.license_short_name(project)).to eq('MIT License')
       end
@@ -115,7 +113,7 @@ describe ProjectsHelper do
 
     context 'when project.repository has no license_key but a license_blob' do
       it 'returns LICENSE' do
-        allow(project.repository).to receive(:license_key).and_return(nil)
+        project = double(:project, license_key: nil)
 
         expect(helper.license_short_name(project)).to eq('LICENSE')
       end

@@ -1,16 +1,16 @@
 - @no_container = true
 
 = content_for :flash_message do
-  - if current_user && can?(current_user, :download_code, @project)
+  - if @project.download_code_possible?
     = render 'shared/no_ssh'
     = render 'shared/no_password'
 
-= render "home_panel"
+= render "home_panel", project: @project
 
 .row-content-block.second-block.center
   %h3.page-title
     The repository for this project is empty
-  - if can?(current_user, :push_code, @project)
+  - if @project.push_code_possible?
     %p
       If you already have files you can push them using command line instructions below.
     %p
@@ -26,7 +26,7 @@
     %p
       You will need to be owner or have the master permission level for the initial push, as the master branch is automatically protected.
 
-- if can?(current_user, :push_code, @project)
+- if @project.push_code_possible?
   %div{ class: container_class }
     .prepend-top-20
     .empty_wrapper
@@ -44,7 +44,7 @@
           %h5 Create a new repository
           %pre.light-well
             :preserve
-              git clone #{ content_tag(:span, default_url_to_repo, class: 'clone')}
+              git clone #{content_tag(:span, default_url_to_repo(@project), class: 'clone')}
               cd #{h @project.path}
               touch README.md
               git add README.md
@@ -57,11 +57,13 @@
             :preserve
               cd existing_folder
               git init
-              git remote add origin #{ content_tag(:span, default_url_to_repo, class: 'clone')}
+              git remote add origin #{content_tag(:span, default_url_to_repo(@project), class: 'clone')}
               git add .
               git commit
               git push -u origin master
 
-          - if can? current_user, :remove_project, @project
+          - if @project.remove_possible?
             .prepend-top-20
-              = link_to 'Remove project', [@project.namespace.becomes(Namespace), @project], data: { confirm: remove_project_message(@project)}, method: :delete, class: "btn btn-remove pull-right"
+              = link_to 'Remove project', project_url(@project),
+                data: { confirm: remove_project_message(@project)},
+                method: :delete, class: "btn btn-remove pull-right"

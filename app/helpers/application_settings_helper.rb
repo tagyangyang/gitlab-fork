@@ -27,21 +27,12 @@ module ApplicationSettingsHelper
     current_application_settings.enabled_git_access_protocol.present?
   end
 
-  def enabled_protocol
+  def enabled_git_access_protocol
     case current_application_settings.enabled_git_access_protocol
     when 'http'
       gitlab_config.protocol
     when 'ssh'
       'ssh'
-    end
-  end
-
-  def enabled_project_button(project, protocol)
-    case protocol
-    when 'ssh'
-      ssh_clone_button(project, 'bottom', append_link: false)
-    else
-      http_clone_button(project, 'bottom', append_link: false)
     end
   end
 

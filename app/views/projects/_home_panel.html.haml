@@ -1,28 +1,29 @@
-- empty_repo = @project.empty_repo?
-.project-home-panel.text-center{ class: ("empty-project" if empty_repo) }
+- project = local_assigns.fetch(:project)
+
+.project-home-panel.text-center{ class: ("empty-project" if project.empty_repo?) }
   %div{ class: container_class }
     .avatar-container.s70.project-avatar
-      = project_icon(@project, alt: @project.name, class: 'avatar s70 avatar-tile')
+      = project_icon(project, alt: project.name, class: 'avatar s70 avatar-tile')
     %h1.project-title
       = @project.name
-      %span.visibility-icon.has-tooltip{data: { container: 'body' }, title: visibility_icon_description(@project)}
-        = visibility_level_icon(@project.visibility_level, fw: false)
+      %span.visibility-icon.has-tooltip{data: { container: 'body' }, title: visibility_icon_description(project)}
+        = visibility_level_icon(project.visibility_level, fw: false)
 
     .project-home-desc
-      - if @project.description.present?
-        = markdown_field(@project, :description)
+      - if project.description.present?
+        = markdown_field(project.object, :description)
 
-      - if forked_from_project = @project.forked_from_project
+      - if project.forked_from_project?
         %p
           Forked from
-          = link_to project_path(forked_from_project) do
-            = forked_from_project.namespace.try(:name)
+          = link_to project_path(project.forked_from_project) do
+            = project.forked_from_project.namespace.try(:name)
 
     .project-repo-buttons.project-action-buttons
       .count-buttons
-        = render 'projects/buttons/star'
-        = render 'projects/buttons/fork'
+        = render 'projects/buttons/star', project: @project
+        = render 'projects/buttons/fork', project: @project
 
-      - if @project.feature_available?(:repository, current_user)
+      - if project.feature_available?(:repository)
         .project-clone-holder
-          = render "shared/clone_panel"
+          = render 'shared/clone_panel', project: @project

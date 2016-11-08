@@ -26,6 +26,15 @@ module ButtonHelper
       title: title
   end
 
+  def clone_button(project)
+    case enabled_git_access_protocol
+    when 'ssh'
+      ssh_clone_button(project, 'bottom', append_link: false)
+    else
+      http_clone_button(project, 'bottom', append_link: false)
+    end
+  end
+
   def http_clone_button(project, placement = 'right', append_link: true)
     klass = 'http-selector'
     klass << ' has-tooltip' if current_user.try(:require_password?)

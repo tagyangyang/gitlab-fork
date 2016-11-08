@@ -10,7 +10,7 @@
     = render 'shared/no_password'
 
 = render 'projects/last_push'
-= render "home_panel"
+= render 'home_panel', project: @project
 
 - if current_user && can?(current_user, :download_code, @project)
   %nav.project-stats{ class: container_class }

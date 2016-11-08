@@ -102,6 +102,8 @@ class ApplicationController < ActionController::Base
   end
 
   def can?(object, action, subject)
+    subject = subject.object if subject.try(:presenter?)
+
     Ability.allowed?(object, action, subject)
   end
 
