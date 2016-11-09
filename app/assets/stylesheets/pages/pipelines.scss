@@ -370,8 +370,10 @@
     position: relative;
     padding: 7px 10px 8px;
     border-radius: 30px;
-    width: 186px;
     margin-bottom: 10px;
+    width: 18vw;
+    min-width: 186px;
+    max-width: 250px;
 
     &:hover {
       background-color: $gray-lighter;
@@ -414,7 +416,6 @@
       }
 
       .ci-status-text {
-        width: 135px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -422,6 +423,9 @@
         display: inline-block;
         position: relative;
         top: -1px;
+        width: 14vw;
+        min-width: 135px;
+        max-width: 195px;
       }
 
       a {
