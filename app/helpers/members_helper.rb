@@ -40,7 +40,7 @@ module MembersHelper
   def filter_group_project_member_path(options = {})
     exist_opts = {
       search: params[:search],
-      sort: params[:sort],
+      sort: params[:sort]
     }
 
     options = exist_opts.merge(options)
