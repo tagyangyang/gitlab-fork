@@ -23,12 +23,13 @@
     },
     // Return groups list. Filtered by query
     groups: function(query, options, callback) {
+      options.per_page = options.per_page || 20;
       var url = Api.buildUrl(Api.groupsPath);
       return $.ajax({
         url: url,
         data: $.extend({
                 search: query,
-                per_page: 20
+                per_page: options.per_page
               }, options),
         dataType: "json"
       }).done(function(groups) {

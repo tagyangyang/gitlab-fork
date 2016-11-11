@@ -14,7 +14,11 @@
             multiple: $(select).hasClass('multiselect'),
             minimumInputLength: 0,
             query: function(query) {
-              options = { all_available: all_available, skip_groups: skip_groups };
+              options = {
+                all_available: all_available,
+                skip_groups: skip_groups,
+                per_page: 100
+              };
               return Api.groups(query.term, options, function(groups) {
                 var data;
                 data = {
