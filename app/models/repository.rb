@@ -333,6 +333,8 @@ class Repository
   end
 
   def build_cache
+    return if empty?
+
     (cache_keys + cache_keys_for_branches_and_tags).each do |key|
       unless cache.exist?(key)
         send(key)

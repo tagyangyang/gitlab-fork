@@ -1491,6 +1491,13 @@ describe Repository, models: true do
 
       repository.build_cache
     end
+
+    it 'does not build cache for an empty repo' do
+      empty_project = create(:project_empty_repo)
+      expect(empty_project.repository.send(:cache)).not_to receive(:exist?)
+
+      empty_project.repository.build_cache
+    end
   end
 
   describe "#keep_around" do
