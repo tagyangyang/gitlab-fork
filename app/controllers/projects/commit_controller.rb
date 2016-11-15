@@ -11,10 +11,9 @@ class Projects::CommitController < Projects::ApplicationController
   before_action :authorize_download_code!, except: [:cancel_builds, :retry_builds]
   before_action :authorize_update_build!, only: [:cancel_builds, :retry_builds]
   before_action :authorize_read_pipeline!, only: [:pipelines]
-  before_action :authorize_read_commit_status!, only: [:builds]
   before_action :commit
-  before_action :define_commit_vars, only: [:show, :diff_for_path, :builds, :pipelines]
-  before_action :define_status_vars, only: [:show, :builds, :pipelines]
+  before_action :define_commit_vars, only: [:show, :diff_for_path, :pipelines]
+  before_action :define_status_vars, only: [:show, :pipelines]
   before_action :define_note_vars, only: [:show, :diff_for_path]
   before_action :authorize_edit_tree!, only: [:revert, :cherry_pick]
 
@@ -33,9 +32,6 @@ class Projects::CommitController < Projects::ApplicationController
   end
 
   def pipelines
-  end
-
-  def builds
   end
 
   def cancel_builds
