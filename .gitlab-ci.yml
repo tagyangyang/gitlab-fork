@@ -20,8 +20,7 @@ before_script:
   - source ./scripts/prepare_build.sh
   - cp config/gitlab.yml.example config/gitlab.yml
   - bundle --version
-  - '[ "$USE_BUNDLE_INSTALL" != "true" ] || retry bundle install --without postgres production --jobs $(nproc) $FLAGS'
-  - retry gem install knapsack
+  - '[ "$USE_BUNDLE_INSTALL" != "true" ] || retry bundle install --without postgres production --jobs 4 $FLAGS'
   - '[ "$SETUP_DB" != "true" ] || bundle exec rake db:drop db:create db:schema:load db:migrate add_limits_mysql'
 
 stages:
@@ -32,6 +31,7 @@ stages:
 
 # Prepare and merge knapsack tests
 .knapsack-state: &knapsack-state
+  image: "dev.gitlab.org:5005/gitlab/gitlab-build-images:ruby-2.3-static-analyses"
   services: []
   variables:
     SETUP_DB: "false"
@@ -207,10 +207,13 @@ spinach 9 10 ruby21: *spinach-knapsack-ruby21
 # Other generic tests
 
 .ruby-static-analysis: &ruby-static-analysis
+  image: "dev.gitlab.org:5005/gitlab/gitlab-build-images:ruby-2.3-static-analyses"
   variables:
     SIMPLECOV: "false"
     SETUP_DB: "false"
     USE_BUNDLE_INSTALL: "true"
+  cache:
+    key: 'ruby-static-2-3'
 
 .exec: &exec
   <<: *ruby-static-analysis
@@ -328,7 +331,7 @@ migration paths:
     - git checkout -f FETCH_HEAD
     - cp config/resque.yml.example config/resque.yml
     - sed -i 's/localhost/redis/g' config/resque.yml
-    - bundle install --without postgres production --jobs $(nproc) $FLAGS --retry=3
+    - bundle install --without postgres production --jobs 4 $FLAGS --retry=3
     - rake db:drop db:create db:schema:load db:seed_fu
     - git checkout $CI_BUILD_REF
     - source scripts/prepare_build.sh
