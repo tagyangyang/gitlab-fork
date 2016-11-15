@@ -54,14 +54,14 @@ feature 'Merge request created from fork' do
 
     scenario 'user visits a pipelines page', js: true do
       visit_merge_request(merge_request)
-      page.within('.merge-request-tabs') { click_link 'Builds' }
+      page.within('.merge-request-tabs') { click_link 'Pipelines' }
 
       page.within('table.ci-table') do
-        expect(page).to have_content 'rspec'
-        expect(page).to have_content 'spinach'
+        expect(page).to have_content '#1 by API'
+        expect(page).to have_content 'latest'
       end
 
-      expect(find_link('Cancel running')[:href])
+      expect(find_link('Cancel')[:href])
         .to include fork_project.path_with_namespace
     end
   end

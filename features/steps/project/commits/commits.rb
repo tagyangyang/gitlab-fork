@@ -167,12 +167,11 @@ class Spinach::Features::ProjectCommits < Spinach::FeatureSteps
   end
 
   step 'I click status link' do
-    find('.commit-ci-menu').click_link "Builds"
+    find('.commit-ci-menu').click_link "Pipelines"
   end
 
-  step 'I see builds list' do
-    expect(page).to have_content "Pipeline #1 for 570e7b2a pending"
-    expect(page).to have_content "1 build"
+  step 'I see the pipeline for commit' do
+    expect(page).to have_content "#1 by API"
   end
 
   step 'I search "submodules" commits' do

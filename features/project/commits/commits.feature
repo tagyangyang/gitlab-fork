@@ -48,7 +48,7 @@ Feature: Project Commits
     When I click on commit link
     Then I see commit ci info
     And I click status link
-    Then I see builds list
+    Then I see the pipeline for commit
 
   Scenario: I browse commit with side-by-side diff view
     Given I click on commit link
