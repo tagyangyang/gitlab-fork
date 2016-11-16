@@ -9,24 +9,31 @@ module SlashCommands
     def execute(content, issuable)
       @issuable = issuable
       @updates = {}
-
       opts = {
-        issuable:     issuable,
+        issuable:     @issuable,
         current_user: current_user,
         project:      project,
         params:       params
       }
 
       content, commands = extractor.extract_commands(content, opts)
-
-      commands.each do |name, arg|
-        definition = self.class.command_definitions_by_name[name.to_sym]
-        next unless definition
-
-        definition.execute(self, opts, arg)
-      end
-
+      extract_updates(commands, opts)
       [content, @updates]
+    end
+
+    # Takes a text and interprets the commands that are extracted from it.
+    # Returns the content without commands, and array of changes humanized.
+    def explain(content, issuable)
+      @issuable = issuable
+      opts = {
+        issuable:     @issuable,
+        current_user: current_user,
+        project:      project
+      }
+
+      content, commands = extractor.extract_commands(content, opts)
+      commands = humanize_commands(commands, opts)
+      [content, commands]
     end
 
     private
@@ -37,6 +44,9 @@ module SlashCommands
 
     desc do
       "Close this #{issuable.to_ability_name.humanize(capitalize: false)}"
+    end
+    humanized do
+      "Closes this #{issuable.to_ability_name.humanize(capitalize: false)}."
     end
     condition do
       issuable.persisted? &&
@@ -50,6 +60,9 @@ module SlashCommands
     desc do
       "Reopen this #{issuable.to_ability_name.humanize(capitalize: false)}"
     end
+    humanized do
+      "Reopens this #{issuable.to_ability_name.humanize(capitalize: false)}."
+    end
     condition do
       issuable.persisted? &&
         issuable.closed? &&
@@ -60,6 +73,9 @@ module SlashCommands
     end
 
     desc 'Merge (when the pipeline succeeds)'
+    humanized do
+      'Merges this merge request when the pipeline succeeds.'
+    end
     condition do
       last_diff_sha = params && params[:merge_request_diff_head_sha]
       issuable.is_a?(MergeRequest) &&
@@ -71,6 +87,9 @@ module SlashCommands
     end
 
     desc 'Change title'
+    humanized do |title_param|
+      "Changes the title to **#{title_param}**."
+    end
     params '<New title>'
     condition do
       issuable.persisted? &&
@@ -81,6 +100,9 @@ module SlashCommands
     end
 
     desc 'Assign'
+    humanized do |assignee_param|
+      "Assigns user #{assignee_param}."
+    end
     params '@user'
     condition do
       current_user.can?(:"admin_#{issuable.to_ability_name}", project)
@@ -93,6 +115,9 @@ module SlashCommands
     end
 
     desc 'Remove assignee'
+    humanized do
+      "Removes assignee #{issuable.assignee.to_reference}."
+    end
     condition do
       issuable.persisted? &&
         issuable.assignee_id? &&
@@ -103,6 +128,10 @@ module SlashCommands
     end
 
     desc 'Set milestone'
+    humanized do |milestone_param|
+      milestone = extract_references(milestone_param, :milestone).first
+      "Sets the milestone to #{milestone.to_reference}."
+    end
     params '%"milestone"'
     condition do
       current_user.can?(:"admin_#{issuable.to_ability_name}", project) &&
@@ -116,6 +145,9 @@ module SlashCommands
     end
 
     desc 'Remove milestone'
+    humanized do
+      "Removes #{issuable.milestone.to_reference} milestone."
+    end
     condition do
       issuable.persisted? &&
         issuable.milestone_id? &&
@@ -126,6 +158,11 @@ module SlashCommands
     end
 
     desc 'Add label(s)'
+    humanized do |labels_param|
+      labels = find_label_references(labels_param)
+
+      "Adds #{labels.join(' ')} #{'label'.pluralize(labels.count)}."
+    end
     params '~label1 ~"label 2"'
     condition do
       available_labels = LabelsFinder.new(current_user, project_id: project.id).execute
@@ -145,6 +182,16 @@ module SlashCommands
     end
 
     desc 'Remove all or specific label(s)'
+    humanized do |labels_param = nil|
+      if labels_param.present?
+        labels = find_label_references(labels_param)
+        label_count = labels.count
+      else
+        labels = 'all'
+        label_count = 2
+      end
+      "Removes #{labels.join(' ')} #{'label'.pluralize(label_count)}."
+    end
     params '~label1 ~"label 2"'
     condition do
       issuable.persisted? &&
@@ -167,6 +214,10 @@ module SlashCommands
     end
 
     desc 'Replace all label(s)'
+    humanized do |labels_param|
+      labels = find_label_references(labels_param)
+      "Replaces all labels with #{labels.join(' ')} #{'label'.pluralize(labels.count)}."
+    end
     params '~label1 ~"label 2"'
     condition do
       issuable.persisted? &&
@@ -185,6 +236,7 @@ module SlashCommands
     end
 
     desc 'Add a todo'
+    humanized 'Adds a todo event.'
     condition do
       issuable.persisted? &&
         !TodoService.new.todo_exist?(issuable, current_user)
@@ -194,6 +246,7 @@ module SlashCommands
     end
 
     desc 'Mark todo as done'
+    humanized 'Marks todo as done.'
     condition do
       issuable.persisted? &&
         TodoService.new.todo_exist?(issuable, current_user)
@@ -203,6 +256,9 @@ module SlashCommands
     end
 
     desc 'Subscribe'
+    humanized do
+      "Subscribes to this #{issuable.to_ability_name.humanize(capitalize: false)}."
+    end
     condition do
       issuable.persisted? &&
         !issuable.subscribed?(current_user, project)
@@ -212,6 +268,9 @@ module SlashCommands
     end
 
     desc 'Unsubscribe'
+    humanized do
+      "Unsubscribes from this #{issuable.to_ability_name.humanize(capitalize: false)}."
+    end
     condition do
       issuable.persisted? &&
         issuable.subscribed?(current_user, project)
@@ -221,6 +280,10 @@ module SlashCommands
     end
 
     desc 'Set due date'
+    humanized do |due_date_param|
+      due_date = Chronic.parse(due_date_param).try(:to_date)
+      "Sets the due date to #{due_date}." if due_date
+    end
     params '<in 2 days | this Friday | December 31st>'
     condition do
       issuable.respond_to?(:due_date) &&
@@ -233,6 +296,7 @@ module SlashCommands
     end
 
     desc 'Remove due date'
+    humanized 'Removes the due date.'
     condition do
       issuable.persisted? &&
         issuable.respond_to?(:due_date) &&
@@ -243,9 +307,8 @@ module SlashCommands
       @updates[:due_date] = nil
     end
 
-    desc do
-      "Toggle the Work In Progress status"
-    end
+    desc 'Toggle the Work In Progress status'
+    humanized 'Toggles the Work In Progress status.'
     condition do
       issuable.persisted? &&
         issuable.respond_to?(:work_in_progress?) &&
@@ -255,7 +318,8 @@ module SlashCommands
       @updates[:wip_event] = issuable.work_in_progress? ? 'unwip' : 'wip'
     end
 
-    desc 'Toggle emoji reward'
+    desc 'Toggle emoji award'
+    humanized 'Toggles XXXXX emoji award.'
     params ':emoji:'
     condition do
       issuable.persisted?
@@ -268,6 +332,7 @@ module SlashCommands
     end
 
     desc 'Set time estimate'
+    humanized 'Sets time estimate.'
     params '<1w 3d 2h 14m>'
     condition do
       current_user.can?(:"admin_#{issuable.to_ability_name}", project)
@@ -281,6 +346,7 @@ module SlashCommands
     end
 
     desc 'Add or substract spent time'
+    humanized 'Adds / substracts XXXXX time.'
     params '<1h 30m | -1h 30m>'
     condition do
       current_user.can?(:"admin_#{issuable.to_ability_name}", issuable)
@@ -294,6 +360,7 @@ module SlashCommands
     end
 
     desc 'Remove time estimate'
+    humanized 'Removes time estimate.'
     condition do
       issuable.persisted? &&
         current_user.can?(:"admin_#{issuable.to_ability_name}", project)
@@ -303,6 +370,7 @@ module SlashCommands
     end
 
     desc 'Remove spent time'
+    humanized 'Removes spent time.'
     condition do
       issuable.persisted? &&
         current_user.can?(:"admin_#{issuable.to_ability_name}", project)
@@ -316,7 +384,8 @@ module SlashCommands
     params '@user'
     command :cc
 
-    desc 'Defines target branch for MR'
+    desc 'Define target branch for MR'
+    humanized 'Sets target branch to XXXXX'
     params '<Local branch name>'
     condition do
       issuable.respond_to?(:target_branch) &&
@@ -328,11 +397,34 @@ module SlashCommands
       @updates[:target_branch] = branch_name if project.repository.branch_names.include?(branch_name)
     end
 
-    def find_label_ids(labels_param)
-      label_ids_by_reference = extract_references(labels_param, :label).map(&:id)
-      labels_ids_by_name = LabelsFinder.new(current_user, project_id: project.id, name: labels_param.split).execute.select(:id)
+    def find_labels(labels_param)
+      extract_references(labels_param, :label)
+    end
 
-      label_ids_by_reference | labels_ids_by_name
+    def find_label_references(labels_param)
+      find_labels(labels_param).map(&:to_reference)
+    end
+
+    def find_label_ids(labels_param)
+      find_labels(labels_param).map(&:id)
+    end
+
+    def humanize_commands(commands, opts)
+      commands.map do |name, arg|
+        definition = self.class.command_definitions_by_name[name.to_sym]
+        next unless definition
+
+        definition.humanize(self, opts, arg)
+      end.compact
+    end
+
+    def extract_updates(commands, opts)
+      commands.each do |name, arg|
+        definition = self.class.command_definitions_by_name[name.to_sym]
+        next unless definition
+
+        definition.execute(self, opts, arg)
+      end
     end
 
     def extract_references(arg, type)

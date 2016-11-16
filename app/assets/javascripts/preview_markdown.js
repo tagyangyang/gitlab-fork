@@ -37,6 +37,7 @@
           preview.removeClass('md-preview-loading').html(response.body);
           preview.renderGFM();
           this.renderReferencedUsers(response.references.users, $form);
+          this.renderReferencedCommands(response.references.commands, $form);
         }).bind(this));
       }
     };
@@ -83,6 +84,28 @@
       }
     };
 
+    MarkdownPreview.prototype.hideReferencedCommands = function($form) {
+      var referencedCommands;
+      referencedCommands = $form.find('.referenced-commands');
+      referencedCommands.hide();
+    };
+
+    MarkdownPreview.prototype.showReferencedCommands = function($form) {
+      var referencedCommands;
+      referencedCommands = $form.find('.referenced-commands');
+      referencedCommands.show();
+    };
+
+    MarkdownPreview.prototype.renderReferencedCommands = function(commands, $form) {
+      var referencedCommands;
+      referencedCommands = $form.find('.referenced-commands');
+      if (commands.length > 0) {
+        referencedCommands.html(commands);
+      } else {
+        referencedCommands.html('');
+      }
+    };
+
     return MarkdownPreview;
   }());
 
@@ -117,6 +140,7 @@
     $form.find('.md-write-holder').hide();
     $form.find('.md-preview-holder').show();
     markdownPreview.showPreview($form);
+    markdownPreview.showReferencedCommands($form);
   });
 
   $(document).on('markdown-preview:hide', function (e, $form) {
@@ -137,6 +161,7 @@
     $form.find('.md-write-holder').show();
     $form.find('textarea.markdown-area').focus();
     $form.find('.md-preview-holder').hide();
+    markdownPreview.hideReferencedCommands($form);
   });
 
   $(document).on('markdown-preview:toggle', function (e, keyboardEvent) {

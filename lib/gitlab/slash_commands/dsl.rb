@@ -44,6 +44,20 @@ module Gitlab
           @params = params
         end
 
+        # Allows to give an explanation of what the next slash command does.
+        #
+        # Example:
+        #
+        #   humanized do |arguments|
+        #     "Adds label(s) #{arguments.join(' ')}"
+        #   end
+        #   command :command_key do |arguments|
+        #     # Awesome code block
+        #   end
+        def humanized(text = '', &block)
+          @humanized = block_given? ? block : text
+        end
+
         # Allows to define conditions that must be met in order for the command
         # to be returned by `.command_names` & `.command_definitions`.
         # It accepts a block that will be evaluated with the context given to
@@ -77,6 +91,7 @@ module Gitlab
             name,
             aliases:          aliases,
             description:      @description,
+            humanized:        @humanized,
             params:           @params,
             condition_block:  @condition_block,
             action_block:     block
@@ -89,6 +104,7 @@ module Gitlab
           end
 
           @description = nil
+          @humanized = nil
           @params = nil
           @condition_block = nil
         end

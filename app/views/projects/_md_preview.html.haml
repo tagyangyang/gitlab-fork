@@ -29,6 +29,8 @@
   .md-write-holder
     = yield
   .md.md-preview-holder.js-md-preview.hide{ class: (preview_class if defined?(preview_class)) }
+  - if defined?(referenced_commands) && referenced_commands
+    %div.referenced-commands.hide
 
   - if defined?(referenced_users) && referenced_users
     .referenced-users.hide

@@ -26,6 +26,13 @@ module Notes
         execute(note.note, note.noteable)
     end
 
+    def explain_commands(note)
+      return [note.note, []] unless supported?(note)
+
+      SlashCommands::InterpretService.new(project, current_user).
+        explain(note.note, note.noteable)
+    end
+
     def execute(command_params, note)
       return if command_params.empty?
       return unless supported?(note)

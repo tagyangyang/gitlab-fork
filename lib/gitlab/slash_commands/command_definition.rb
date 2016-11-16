@@ -1,13 +1,14 @@
 module Gitlab
   module SlashCommands
     class CommandDefinition
-      attr_accessor :name, :aliases, :description, :params, :condition_block, :action_block
+      attr_accessor :name, :aliases, :description, :humanized, :params, :condition_block, :action_block
 
       def initialize(name, attributes = {})
         @name = name
 
         @aliases         = attributes[:aliases] || []
         @description     = attributes[:description] || ''
+        @humanized       = attributes[:humanized]
         @params          = attributes[:params] || []
         @condition_block = attributes[:condition_block]
         @action_block    = attributes[:action_block]
@@ -28,13 +29,25 @@ module Gitlab
         context.instance_exec(&condition_block)
       end
 
+      def humanize(context, opts, arg)
+        return if !available?(opts)
+        if humanized.respond_to?(:call)
+          execute_block(humanized, context, opts, arg)
+        else
+          humanized
+        end
+      end
+
       def execute(context, opts, arg)
         return if noop? || !available?(opts)
+        execute_block(action_block, context, opts, arg)
+      end
 
+      def execute_block(block, context, opts, arg)
         if arg.present?
-          context.instance_exec(arg, &action_block)
-        elsif action_block.arity == 0
-          context.instance_exec(&action_block)
+          context.instance_exec(arg, &block)
+        elsif block.arity == 0
+          context.instance_exec(&block)
         end
       end
 

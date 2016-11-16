@@ -218,6 +218,21 @@ class ProjectsController < Projects::ApplicationController
 
   def preview_markdown
     text = params[:text]
+    commands = []
+
+    # Process slash commands
+    if params[:noteable_type]
+      noteable_association = params[:noteable_type].tableize
+      noteables = @project.public_send(noteable_association)
+      noteable = params[:noteable_id] ? noteables.find(params[:noteable_id]) : noteables.new(author: current_user)
+
+      note = noteable.notes.new(note: text, author: current_user)
+      slash_commands_service = Notes::SlashCommandsService.new(project, current_user)
+
+      if slash_commands_service.supported?(note)
+        text, commands = slash_commands_service.explain_commands(note)
+      end
+    end
 
     ext = Gitlab::ReferenceExtractor.new(@project, current_user)
     ext.analyze(text, author: current_user)
@@ -225,7 +240,8 @@ class ProjectsController < Projects::ApplicationController
     render json: {
       body:       view_context.markdown(text),
       references: {
-        users: ext.users.map(&:username)
+        users: ext.users.map(&:username),
+        commands: view_context.markdown(commands.join(' '))
       }
     }
   end
