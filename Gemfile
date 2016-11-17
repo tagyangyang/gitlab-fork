@@ -49,9 +49,7 @@ gem 'u2f', '~> 0.2.1'
 # Browser detection
 gem 'browser', '~> 2.2'
 
-# Extracting information from a git repository
-# Provide access to Gitlab::Git library
-gem 'gitlab_git', '~> 10.7.0'
+gem 'rugged', '~> 0.24.0'
 
 # LDAP Auth
 # GitLab fork with several improvements to original library. For full list of changes
@@ -278,6 +276,10 @@ group :development, :test do
   gem 'rspec-retry',        '~> 0.4.5'
   gem 'spinach-rails',      '~> 0.2.1'
   gem 'spinach-rerun-reporter', '~> 0.0.2'
+
+  # gitlab_git
+  gem 'rspec-mocks'
+  gem 'rspec-its'
 
   # Prevent occasions where minitest is not bundled in packaged versions of ruby (see #3826)
   gem 'minitest', '~> 5.7.0'

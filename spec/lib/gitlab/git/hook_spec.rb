@@ -1,4 +1,4 @@
-require 'spec_helper'
+require "gitlab_git_spec_helper"
 require 'fileutils'
 
 describe Gitlab::Git::Hook, lib: true do
