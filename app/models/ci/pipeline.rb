@@ -201,6 +201,10 @@ module Ci
       !tag?
     end
 
+    def success?
+      status == 'success' || status == 'success_with_warnings'
+    end
+
     def manual_actions
       builds.latest.manual_actions
     end

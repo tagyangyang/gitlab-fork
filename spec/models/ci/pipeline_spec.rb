@@ -250,6 +250,28 @@ describe Ci::Pipeline, models: true do
     end
   end
 
+  describe '#success?' do
+    subject { pipeline.success? }
+
+    %w[success success_with_warnings].each do |status|
+      context "when status is #{status}" do
+        before do
+          pipeline.status = status
+        end
+
+        it { is_expected.to be_truthy }
+      end
+    end
+
+    context 'when status is created' do
+      before do
+        pipeline.status = 'created'
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   context 'with non-empty project' do
     let(:project) { create(:project) }
 
