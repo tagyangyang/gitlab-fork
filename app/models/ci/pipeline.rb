@@ -1,7 +1,6 @@
 module Ci
   class Pipeline < ActiveRecord::Base
     extend Ci::Model
-    include HasStatus
     include Importable
     include AfterCommitQueue
 
@@ -23,7 +22,10 @@ module Ci
 
     delegate :stages, to: :statuses
 
-    # Used in HasStatus
+    def self.status
+      all.pluck(status_sql).first
+    end
+
     def self.status_sql
       total = all.select('count(*)').to_sql
       created = all.created.select('count(*)').to_sql
@@ -47,15 +49,13 @@ module Ci
     end
 
     def self.available_statuses
-      super << 'success_with_warnings'
+      %w[created pending running
+         success success_with_warnings
+         failed canceled skipped]
     end
 
     def self.completed_statuses
-      super << 'success_with_warnings'
-    end
-
-    scope :success_with_warnings, -> do
-      where(status: 'success_with_warnings')
+      %w[success success_with_warnings failed canceled]
     end
 
     validates :status, inclusion: { in: available_statuses }
@@ -134,6 +134,28 @@ module Ci
       end
     end
 
+    scope :created, -> { where(status: 'created') }
+    scope :relevant, -> { where.not(status: 'created') }
+    scope :running, -> { where(status: 'running') }
+    scope :pending, -> { where(status: 'pending') }
+    scope :success, -> { where(status: 'success') }
+    scope :failed, -> { where(status: 'failed')  }
+    scope :canceled, -> { where(status: 'canceled') }
+    scope :skipped, -> { where(status: 'skipped') }
+    scope :running_or_pending, -> { where(status: [:running, :pending]) }
+    scope :finished, -> { where(status: [:success, :failed, :canceled]) }
+    scope :success_with_warnings, -> do
+      where(status: 'success_with_warnings')
+    end
+
+    def active?
+      %w[pending running].include?(status)
+    end
+
+    def success?
+      %w[success success_with_warnings].include?(status)
+    end
+
     # ref can't be HEAD or SHA, can only be branch/tag name
     def self.latest_successful_for(ref)
       where(ref: ref).order(id: :desc).success.first
@@ -199,10 +221,6 @@ module Ci
 
     def branch?
       !tag?
-    end
-
-    def success?
-      status == 'success' || status == 'success_with_warnings'
     end
 
     def manual_actions

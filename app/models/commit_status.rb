@@ -1,5 +1,4 @@
 class CommitStatus < ActiveRecord::Base
-  include HasStatus
   include Importable
   include AfterCommitQueue
 
@@ -44,7 +43,14 @@ class CommitStatus < ActiveRecord::Base
   scope :latest_ci_stages, -> { latest.ordered.includes(project: :namespace) }
   scope :retried_ci_stages, -> { retried.ordered.includes(project: :namespace) }
 
-  # Used in HasStatus
+  def self.all_state_names
+    state_machines.values.flat_map(&:states).flat_map { |s| s.map(&:name) }
+  end
+
+  def self.status
+    all.pluck(status_sql).first
+  end
+
   def self.status_sql
     total = exclude_ignored.select('count(*)').to_sql
     created = exclude_ignored.created.select('count(*)').to_sql
@@ -65,6 +71,14 @@ class CommitStatus < ActiveRecord::Base
       WHEN (#{running})+(#{pending})+(#{created})>0 THEN 'running'
       ELSE 'failed'
     END)"
+  end
+
+  def self.available_statuses
+    %w[created pending running success failed canceled skipped]
+  end
+
+  def self.ordered_statuses
+    %w[failed pending running canceled success skipped]
   end
 
   validates :status, inclusion: { in: available_statuses }
@@ -136,6 +150,25 @@ class CommitStatus < ActiveRecord::Base
     end
   end
 
+  scope :created, -> { where(status: 'created') }
+  scope :relevant, -> { where.not(status: 'created') }
+  scope :running, -> { where(status: 'running') }
+  scope :pending, -> { where(status: 'pending') }
+  scope :success, -> { where(status: 'success') }
+  scope :failed, -> { where(status: 'failed')  }
+  scope :canceled, -> { where(status: 'canceled') }
+  scope :skipped, -> { where(status: 'skipped') }
+  scope :running_or_pending, -> { where(status: [:running, :pending]) }
+  scope :finished, -> { where(status: [:success, :failed, :canceled]) }
+
+  def active?
+    %w[pending running].include?(status)
+  end
+
+  def complete?
+    %w[success failed canceled].include?(status)
+  end
+
   delegate :sha, :short_sha, to: :pipeline
 
   def before_sha
@@ -169,7 +202,11 @@ class CommitStatus < ActiveRecord::Base
   end
 
   def duration
-    calculate_duration
+    if started_at && finished_at
+      finished_at - started_at
+    elsif started_at
+      Time.now - started_at
+    end
   end
 
   def stuck?
