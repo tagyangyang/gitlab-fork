@@ -1,6 +1,6 @@
-/* eslint-disable */
+/* eslint-disable space-before-function-paren, quotes, comma-dangle, dot-notation, indent, quote-props, no-var, padded-blocks, max-len */
 /*= require merge_request_widget */
-/*= require jquery.timeago.js */
+/*= require lib/utils/timeago.js */
 
 (function() {
   describe('MergeRequestWidget', function() {
