@@ -26,8 +26,8 @@ module Gitlab
       def execute
         import_labels
         import_milestones
-        import_issues
         import_pull_requests
+        import_issues
         import_comments(:issues)
         import_comments(:pull_requests)
         import_wiki
