@@ -53,6 +53,9 @@ class JiraService < IssueTrackerService
   end
 
   def jira_project
+    # we validate presence of project_key now but old records may not
+    # have this value
+    return nil if project_key.blank?
     @jira_project ||= jira_request { client.Project.find(project_key) }
   end
 

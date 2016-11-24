@@ -1,0 +1,4 @@
+---
+title: Do not call JIRA API if project_key is not set
+merge_request: 7745
+author:
