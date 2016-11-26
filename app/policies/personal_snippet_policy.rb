@@ -8,8 +8,8 @@ class PersonalSnippetPolicy < BasePolicy
       can! :update_personal_snippet
       can! :admin_personal_snippet
     end
-
-    if @subject.internal? && !@user.external?
+    # TODO: Backend check
+    if @subject.internal? && !@user.external? || @user.audit?
       can! :read_personal_snippet
     end
   end

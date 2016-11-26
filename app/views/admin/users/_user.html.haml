@@ -10,6 +10,8 @@
       %span.label.label-success Admin
     - if user.external?
       %span.label.label-default External
+    - if user.audit?
+      %span.label.label-default Audit
     - if user == current_user
       %span It's you!
     .user-email

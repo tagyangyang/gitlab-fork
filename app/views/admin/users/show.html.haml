@@ -52,6 +52,10 @@
           %strong
             = @user.external? ? "Yes" : "No"
         %li
+          %span.light Audit User:
+          %strong
+            = @user.audit? ? "Yes" : "No"
+        %li
           %span.light Can create groups:
           %strong
             = @user.can_create_group ? "Yes" : "No"

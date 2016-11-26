@@ -17,6 +17,7 @@ class User < ActiveRecord::Base
 
   default_value_for :admin, false
   default_value_for(:external) { current_application_settings.user_default_external }
+  default_value_for(:audit) { current_application_settings.user_default_audit }
   default_value_for :can_create_group, gitlab_config.default_can_create_group
   default_value_for :can_create_team, false
   default_value_for :hide_no_ssh_key, false
@@ -124,7 +125,7 @@ class User < ActiveRecord::Base
 
   after_update :update_emails_with_primary_email, if: ->(user) { user.email_changed? }
   before_save :ensure_authentication_token, :ensure_incoming_email_token
-  before_save :ensure_external_user_rights
+  before_save :ensure_external_user_rights, :ensure_audit_user_rights
   after_save :ensure_namespace_correct
   after_initialize :set_projects_limit
   before_create :check_confirmation_email
@@ -174,6 +175,7 @@ class User < ActiveRecord::Base
   scope :admins, -> { where(admin: true) }
   scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
   scope :external, -> { where(external: true) }
+  scope :audit, -> { where(audit: true) }
   scope :active, -> { with_state(:active) }
   scope :not_in_project, ->(project) { project.users.present? ? where("id not in (:ids)", ids: project.users.map(&:id) ) : all }
   scope :without_projects, -> { where('id NOT IN (SELECT DISTINCT(user_id) FROM members WHERE user_id IS NOT NULL AND requested_at IS NULL)') }
@@ -240,6 +242,8 @@ class User < ActiveRecord::Base
         without_projects
       when 'external'
         external
+      when 'audit'
+        audit
       else
         active
       end
@@ -955,6 +959,14 @@ class User < ActiveRecord::Base
 
   def ensure_external_user_rights
     return unless external?
+
+    self.can_create_group   = false
+    self.projects_limit     = 0
+  end
+
+  # TODO: Update with audit-specific logic
+  def ensure_audit_user_rights
+    return unless audit?
 
     self.can_create_group   = false
     self.projects_limit     = 0

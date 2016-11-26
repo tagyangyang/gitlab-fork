@@ -8,8 +8,8 @@ class ProjectSnippetPolicy < BasePolicy
       can! :update_project_snippet
       can! :admin_project_snippet
     end
-
-    if @subject.internal? && !@user.external?
+    # TODO: Backend check
+    if @subject.internal? && !@user.external? || @user.audit?
       can! :read_project_snippet
     end
 

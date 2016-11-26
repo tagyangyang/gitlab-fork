@@ -35,6 +35,8 @@ module Gitlab
           end
         end
 
+        # TODO: Backend check
+
         @user
       end
 

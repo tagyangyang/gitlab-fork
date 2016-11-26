@@ -59,6 +59,11 @@
           .col-sm-10= f.check_box :admin
 
       .form-group
+        = f.label :audit, class: 'control-label'
+        .col-sm-10= f.check_box :audit
+        -# .col-sm-10 TODO: Add description on audit user
+
+      .form-group
         = f.label :external, class: 'control-label'
         .col-sm-10= f.check_box :external
         .col-sm-10 External users cannot see internal or private projects unless access is explicitly granted. Also, external users cannot create projects or groups.

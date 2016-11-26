@@ -295,8 +295,10 @@ class Issue < ActiveRecord::Base
         assignee == user ||
         project.team.member?(user, Gitlab::Access::REPORTER)
     else
+      # TODO: Backend check
       project.public? ||
         project.internal? && !user.external? ||
+        user.audit? ||
         project.team.member?(user)
     end
   end

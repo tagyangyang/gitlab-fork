@@ -92,6 +92,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       :admin_notification_email,
       :user_oauth_applications,
       :user_default_external,
+      :user_default_audit,
       :shared_runners_enabled,
       :shared_runners_text,
       :max_artifacts_size,

@@ -7,8 +7,8 @@ class ProjectPolicy < BasePolicy
 
     owner_access! if user.admin? || owner
     team_member_owner_access! if owner
-
-    if project.public? || (project.internal? && !user.external?)
+    # TODO: Backend check
+    if project.public? || (project.internal? && !user.external?) || user.audit?
       guest_access!
       public_access!
 

@@ -11,6 +11,9 @@ class Ability
             true
           elsif project.internal? && !user.external?
             true
+          # TODO: Backend check
+          elsif user.audit?
+            true
           elsif project.owner == user
             true
           elsif project.team.members.include?(user)

@@ -43,6 +43,8 @@ describe 'Internal Group access', feature: true do
     it { is_expected.to be_allowed_for project_guest }
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_denied_for :external }
+    # TODO: Backend check
+    it { is_expected.to be_denied_for :audit }
     it { is_expected.to be_denied_for :visitor }
   end
 
@@ -58,6 +60,8 @@ describe 'Internal Group access', feature: true do
     it { is_expected.to be_allowed_for project_guest }
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_denied_for :external }
+    # TODO: Backend check
+    it { is_expected.to be_denied_for :audit }
     it { is_expected.to be_denied_for :visitor }
   end
 
@@ -73,6 +77,8 @@ describe 'Internal Group access', feature: true do
     it { is_expected.to be_allowed_for project_guest }
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_denied_for :external }
+    # TODO: Backend check
+    it { is_expected.to be_denied_for :audit }
     it { is_expected.to be_denied_for :visitor }
   end
 
@@ -87,6 +93,8 @@ describe 'Internal Group access', feature: true do
     it { is_expected.to be_allowed_for guest }
     it { is_expected.to be_allowed_for project_guest }
     it { is_expected.to be_allowed_for :user }
+    # TODO: Backend check
+    it { is_expected.to be_denied_for :audit }
     it { is_expected.to be_denied_for :external }
     it { is_expected.to be_denied_for :visitor }
   end
@@ -103,6 +111,8 @@ describe 'Internal Group access', feature: true do
     it { is_expected.to be_denied_for project_guest }
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :visitor }
+    # TODO: Backend check
+    it { is_expected.to be_denied_for :audit }
     it { is_expected.to be_denied_for :external }
   end
 end

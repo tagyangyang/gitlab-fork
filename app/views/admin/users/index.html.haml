@@ -58,6 +58,11 @@
           = link_to admin_users_path(filter: 'external') do
             External
             %small.badge= number_with_delimiter(User.external.count)
+        = nav_link(html_options: { class: ('active' if params[:filter] == 'audit') }) do
+          = link_to admin_users_path(filter: "audit") do
+            Audit
+            -# TODO: User.audit.count
+            %small.badge= number_with_delimiter(User.audit.count)
         = nav_link(html_options: { class: ('active' if params[:filter] == 'blocked') }) do
           = link_to admin_users_path(filter: "blocked") do
             Blocked

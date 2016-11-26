@@ -20,6 +20,7 @@ module API
           optional :can_create_group, type: Boolean, desc: 'Flag indicating the user can create groups'
           optional :confirm, type: Boolean, desc: 'Flag indicating the account needs to be confirmed'
           optional :external, type: Boolean, desc: 'Flag indicating the user is an external user'
+          optional :audit, type: Boolean, desc: 'Flag indicating the user is an audit user'
           all_or_none_of :extern_uid, :provider
         end
       end
@@ -32,6 +33,7 @@ module API
         optional :search, type: String, desc: 'Search for a username'
         optional :active, type: Boolean, default: false, desc: 'Filters only active users'
         optional :external, type: Boolean, default: false, desc: 'Filters only external users'
+        optional :audit, type: Boolean, default: false, desc: 'Filters only audit users'
         optional :blocked, type: Boolean, default: false, desc: 'Filters only blocked users'
       end
       get do
@@ -47,6 +49,7 @@ module API
           users = users.search(params[:search]) if params[:search].present?
           users = users.blocked if params[:blocked]
           users = users.external if params[:external] && current_user.is_admin?
+          users = users.audit if params[:audit] && current_user.is_admin?
         end
 
         entity = current_user.is_admin? ? Entities::UserFull : Entities::UserBasic
@@ -124,7 +127,7 @@ module API
         at_least_one_of :email, :password, :name, :username, :skype, :linkedin,
                         :twitter, :website_url, :organization, :projects_limit,
                         :extern_uid, :provider, :bio, :location, :admin,
-                        :can_create_group, :confirm, :external
+                        :can_create_group, :confirm, :external, :audit
       end
       put ":id" do
         authenticated_as_admin!

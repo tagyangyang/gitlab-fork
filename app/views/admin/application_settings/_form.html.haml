@@ -82,6 +82,13 @@
           = f.label :user_default_external do
             = f.check_box :user_default_external
             Newly registered users will by default be external
+    .form-group
+      = f.label :user_default_audit, 'New users set to audit', class: 'control-label col-sm-2'
+      .col-sm-10
+        .checkbox
+          = f.label :user_default_audit do
+            = f.check_box :user_default_audit
+            Newly registered users will by default be audit users
 
   %fieldset
     %legend Sign-up Restrictions

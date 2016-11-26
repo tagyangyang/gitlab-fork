@@ -106,6 +106,18 @@ will find the option to flag the user as external.
 By default new users are not set as external users. This behavior can be changed
 by an administrator under **Admin > Application Settings**.
 
+## Audit Users
+
+<!-- TODO: Add description of audit users -->
+
+An administrator can flag a user as audit [through the API](../api/users.md)
+or by checking the checkbox on the admin panel. As an administrator, navigate
+to **Admin > Users** to create a new user or edit an existing one. There, you
+will find the option to flag the user as audit.
+
+By default new users are not set as audit users. This behavior can be changed
+by an administrator under **Admin > Application Settings**.
+
 ## Project features
 
 Project features like wiki and issues can be hidden from users depending on

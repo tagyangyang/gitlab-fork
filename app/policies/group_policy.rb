@@ -2,8 +2,8 @@ class GroupPolicy < BasePolicy
   def rules
     can! :read_group if @subject.public?
     return unless @user
-
-    globally_viewable = @subject.public? || (@subject.internal? && !@user.external?)
+    # TODO: Backend check
+    globally_viewable = @subject.public? || (@subject.internal? && !@user.external?) || @user.audit?
     member = @subject.users.include?(@user)
     owner = @user.admin? || @subject.has_owner?(@user)
     master = owner || @subject.has_master?(@user)
@@ -39,6 +39,7 @@ class GroupPolicy < BasePolicy
     return true if @subject.public?
     return true if @user.admin?
     return true if @subject.internal? && !@user.external?
+    return true if @user.audit?
     return true if @subject.users.include?(@user)
 
     GroupProjectsFinder.new(@subject).execute(@user).any?

@@ -88,6 +88,7 @@ ActiveRecord::Schema.define(version: 20161118183841) do
     t.integer "container_registry_token_expire_delay", default: 5
     t.text "after_sign_up_text"
     t.boolean "user_default_external", default: false, null: false
+    t.boolean "user_default_audit", default: false, null: false
     t.string "repository_storages", default: "default"
     t.string "enabled_git_access_protocol"
     t.boolean "domain_blacklist_enabled", default: false
@@ -1213,6 +1214,7 @@ ActiveRecord::Schema.define(version: 20161118183841) do
     t.datetime "otp_grace_period_started_at"
     t.boolean "ldap_email", default: false, null: false
     t.boolean "external", default: false
+    t.boolean "audit", default: false
     t.string "organization"
     t.string "incoming_email_token"
     t.boolean "authorized_projects_populated"

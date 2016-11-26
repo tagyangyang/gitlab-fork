@@ -90,6 +90,16 @@ describe API::API, api: true  do
         expect(json_response).to be_an Array
         expect(json_response).to all(include('external' => true))
       end
+
+      it "returns an array of audit users" do
+        create(:user, audit: true)
+
+        get api("/users?audit=true", admin)
+
+        expect(response).to have_http_status(200)
+        expect(json_response).to be_an Array
+        expect(json_response).to all(include('audit' => true))
+      end
     end
   end
 

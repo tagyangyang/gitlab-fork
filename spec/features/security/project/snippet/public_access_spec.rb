@@ -32,6 +32,8 @@ describe "Public Project Snippets Access", feature: true  do
     it { is_expected.to be_allowed_for guest }
     it { is_expected.to be_allowed_for :user }
     it { is_expected.to be_allowed_for :external }
+    # TODO: Backend check
+    it { is_expected.to be_allowed_for :audit }
     it { is_expected.to be_allowed_for :visitor }
   end
 
@@ -46,6 +48,8 @@ describe "Public Project Snippets Access", feature: true  do
     it { is_expected.to be_denied_for guest }
     it { is_expected.to be_denied_for :user }
     it { is_expected.to be_denied_for :external }
+    # TODO: Backend check
+    it { is_expected.to be_denied_for :audit }
     it { is_expected.to be_denied_for :visitor }
   end
 
@@ -61,6 +65,8 @@ describe "Public Project Snippets Access", feature: true  do
       it { is_expected.to be_allowed_for guest }
       it { is_expected.to be_allowed_for :user }
       it { is_expected.to be_allowed_for :external }
+      # TODO: Backend check
+      it { is_expected.to be_allowed_for :audit }
       it { is_expected.to be_allowed_for :visitor }
     end
 
@@ -75,6 +81,8 @@ describe "Public Project Snippets Access", feature: true  do
       it { is_expected.to be_allowed_for guest }
       it { is_expected.to be_allowed_for :user }
       it { is_expected.to be_denied_for :external }
+      # TODO: Backend check
+      it { is_expected.to be_denied_for :audit }
       it { is_expected.to be_denied_for :visitor }
     end
 
@@ -89,6 +97,8 @@ describe "Public Project Snippets Access", feature: true  do
       it { is_expected.to be_allowed_for guest }
       it { is_expected.to be_denied_for :user }
       it { is_expected.to be_denied_for :external }
+      # TODO: Backend check
+      it { is_expected.to be_denied_for :audit }
       it { is_expected.to be_denied_for :visitor }
     end
   end
@@ -105,6 +115,8 @@ describe "Public Project Snippets Access", feature: true  do
       it { is_expected.to be_allowed_for guest }
       it { is_expected.to be_allowed_for :user }
       it { is_expected.to be_allowed_for :external }
+      # TODO: Backend check
+      it { is_expected.to be_allowed_for :audit }
       it { is_expected.to be_allowed_for :visitor }
     end
 
@@ -119,6 +131,8 @@ describe "Public Project Snippets Access", feature: true  do
       it { is_expected.to be_allowed_for guest }
       it { is_expected.to be_allowed_for :user }
       it { is_expected.to be_denied_for :external }
+      # TODO: Backend check
+      it { is_expected.to be_denied_for :audit }
       it { is_expected.to be_denied_for :visitor }
     end
 
@@ -133,6 +147,8 @@ describe "Public Project Snippets Access", feature: true  do
       it { is_expected.to be_allowed_for guest }
       it { is_expected.to be_denied_for :user }
       it { is_expected.to be_denied_for :external }
+      # TODO: Backend check
+      it { is_expected.to be_denied_for :audit }
       it { is_expected.to be_denied_for :visitor }
     end
   end

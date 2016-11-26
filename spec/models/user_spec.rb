@@ -278,6 +278,7 @@ describe User, models: true do
     it { is_expected.to respond_to(:name) }
     it { is_expected.to respond_to(:private_token) }
     it { is_expected.to respond_to(:external?) }
+    it { is_expected.to respond_to(:audit?) }
   end
 
   describe 'before save hook' do
@@ -533,6 +534,7 @@ describe User, models: true do
       it { expect(user.can_create_project?).to be_truthy }
       it { expect(user.first_name).to eq('John') }
       it { expect(user.external).to be_falsey }
+      it { expect(user.audit).to be_falsey }
     end
 
     describe 'with defaults' do
@@ -543,6 +545,7 @@ describe User, models: true do
         expect(user.can_create_group).to eq(Gitlab.config.gitlab.default_can_create_group)
         expect(user.theme_id).to eq(Gitlab.config.gitlab.default_theme)
         expect(user.external).to be_falsey
+        expect(user.audit).to be_falsey
       end
     end
 
@@ -572,6 +575,26 @@ describe User, models: true do
           user = build(:user, external: false)
 
           expect(user.external).to be_falsey
+        end
+      end
+    end
+
+    context 'when current_application_settings.user_default_audit is true' do
+      before do
+        stub_application_setting(user_default_audit: true)
+      end
+
+      it "creates audit user by default" do
+        user = build(:user)
+
+        expect(user.audit).to be_truthy
+      end
+
+      describe 'with default overrides' do
+        it "creates a non-audit user" do
+          user = build(:user, audit: false)
+
+          expect(user.audit).to be_falsey
         end
       end
     end

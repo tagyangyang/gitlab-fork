@@ -84,7 +84,8 @@ GET /users
     "can_create_group": true,
     "can_create_project": true,
     "two_factor_enabled": true,
-    "external": false
+    "external": false,
+    "audit": false
   },
   {
     "id": 2,
@@ -113,7 +114,8 @@ GET /users
     "can_create_group": true,
     "can_create_project": true,
     "two_factor_enabled": true,
-    "external": false
+    "external": false,
+    "audit": false
   }
 ]
 ```
@@ -242,6 +244,7 @@ Parameters:
 - `can_create_group` (optional) - User can create groups - true or false
 - `confirm` (optional)          - Require confirmation - true (default) or false
 - `external` (optional)         - Flags the user as external - true or false(default)
+- `audit` (optional)            - Flags the user as audit - true or false(default)
 
 ## User modification
 
@@ -270,6 +273,7 @@ Parameters:
 - `admin` (optional)            - User is admin - true or false (default)
 - `can_create_group` (optional) - User can create groups - true or false
 - `external` (optional)         - Flags the user as external - true or false(default)
+- `audit` (optional)            - Flags the user as audit - true or false(default)
 
 Note, at the moment this method does only return a 404 error,
 even in cases where a 409 (Conflict) would be more appropriate,
@@ -331,7 +335,8 @@ GET /user
   "can_create_group": true,
   "can_create_project": true,
   "two_factor_enabled": true,
-  "external": false
+  "external": false,
+  "audit": false
 }
 ```
 

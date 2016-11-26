@@ -32,6 +32,7 @@ module API
       expose :can_create_project?, as: :can_create_project
       expose :two_factor_enabled?, as: :two_factor_enabled
       expose :external
+      expose :audit
     end
 
     class UserLogin < UserFull
