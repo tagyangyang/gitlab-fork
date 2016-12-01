@@ -72,6 +72,8 @@ stages:
     paths:
     - knapsack/
     - coverage/
+    - tmp/passed*.txt
+    - tmp/failed*.txt
 
 .spinach-knapsack: &spinach-knapsack
   stage: test
@@ -128,6 +130,17 @@ update-knapsack:
     - master@gitlab-org/gitlab-ee
     - master@gitlab/gitlabhq
     - master@gitlab/gitlab-ee
+
+merge-spec-listener:
+  <<: *knapsack-state
+  stage: post-test
+  script:
+    - cat tmp/passed-*.txt >> tmp/passed.txt
+    - cat tmp/failed-*.txt >> tmp/failed.txt
+  artifacts:
+    paths:
+      - tmp/passed.txt
+      - tmp/failed.txt
 
 rspec 0 20: *rspec-knapsack
 rspec 1 20: *rspec-knapsack
