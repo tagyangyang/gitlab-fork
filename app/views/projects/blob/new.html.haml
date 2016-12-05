@@ -2,6 +2,7 @@
 - content_for :page_specific_javascripts do
   = page_specific_javascript_tag('lib/ace.js')
   = page_specific_javascript_tag('blob_edit/blob_edit_bundle.js')
+= render "projects/commits/head"
 
 %h3.page-title
   New File
