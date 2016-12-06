@@ -1,22 +1,21 @@
 - page_title "New File", @path.presence, @ref
 - content_for :page_specific_javascripts do
   = page_specific_javascript_tag('lib/ace.js')
-  = page_specific_javascript_tag('blob_edit/blob_edit_bundle.js')
+  = page_specific_javascript_tag('blob_new/blob_new_file_bundle.js')
 = render "projects/commits/head"
 
 %h3.page-title
   New File
 
 .file-editor
-  %ul.nav-links.no-bottom.js-edit-mode
+  %ul.nav-links.no-bottom.js-new-file-mode
     %li.active
       = link_to '#editor' do
         Write
-
     %li
       = link_to '#preview', 'data-preview-url' => namespace_project_preview_blob_path(@project.namespace, @project, @id) do
         Preview
-  = form_tag(namespace_project_create_blob_path(@project.namespace, @project, @id), method: :post, class: 'form-horizontal js-edit-blob-form js-new-blob-form js-quick-submit js-requires-input', data: blob_editor_paths) do
+  = form_tag(namespace_project_create_blob_path(@project.namespace, @project, @id), method: :post, class: 'form-horizontal js-new-file-blob-form js-new-file-blob-form js-quick-submit js-requires-input', data: blob_editor_paths) do
     = render 'projects/blob/editor', ref: @ref
     = render 'shared/new_commit_form', placeholder: "Add new file"
 
