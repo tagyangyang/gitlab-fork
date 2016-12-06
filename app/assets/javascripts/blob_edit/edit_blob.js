@@ -53,6 +53,7 @@
       currentPane.fadeIn(200);
       if (paneId === "#preview") {
         this.$toggleButton.hide();
+
         return $.post(currentLink.data("preview-url"), {
           content: this.editor.getValue()
         }, function(response) {

@@ -33,6 +33,11 @@
 
   .file-editor.code
     %pre.js-edit-mode-pane#editor #{params[:content] || local_assigns[:blob_data]}
+    .comment-toolbar.clearfix.hide
+      .toolbar-text
+        Styling with
+        = link_to 'Markdown', help_page_path('user/markdown'), target: '_blank', tabindex: -1
+        is supported
     - if local_assigns[:path]
       .js-edit-mode-pane#preview.hide
         .center
