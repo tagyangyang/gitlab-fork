@@ -287,10 +287,10 @@
           beforeSave: function(merges) {
             var sanitizeLabelTitle;
             sanitizeLabelTitle = function(title) {
-              if (/[\w\?&]+\s+[\w\?&]+/g.test(title)) {
-                return "\"" + (sanitize(title)) + "\"";
-              } else {
+              if (/^[A-Za-z0-9_\-\?\.&]+$/.test(title)) {
                 return sanitize(title);
+              } else {
+                return "\"" + (sanitize(title)) + "\"";
               }
             };
             return $.map(merges, function(m) {
