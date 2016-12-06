@@ -4,12 +4,15 @@
     var base;
     w.gl || (w.gl = {});
     (base = w.gl).utils || (base.utils = {});
+
     w.gl.utils.isInGroupsPage = function() {
       return gl.utils.getPagePath() === 'groups';
     };
+
     w.gl.utils.isInProjectPage = function() {
       return gl.utils.getPagePath() === 'projects';
     };
+
     w.gl.utils.getProjectSlug = function() {
       if (this.isInProjectPage()) {
         return $('body').data('project');
@@ -17,6 +20,7 @@
         return null;
       }
     };
+
     w.gl.utils.getGroupSlug = function() {
       if (this.isInGroupsPage()) {
         return $('body').data('group');
@@ -112,6 +116,10 @@
 
     gl.utils.isMetaKey = function(e) {
       return e.metaKey || e.ctrlKey || e.altKey || e.shiftKey;
+    };
+
+    gl.utils.getFileExtension = function (filename) {
+      return (filename && filename.slice((Math.max(0, filename.lastIndexOf(".")) || Infinity) + 1)) || '';
     };
 
   })(window);

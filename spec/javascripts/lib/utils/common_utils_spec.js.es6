@@ -28,5 +28,32 @@
         expect(gl.utils.parseUrlPathname('some/relative/url')).toEqual('/some/relative/url');
       });
     });
+
+    // getFileExtension test
+    describe('gl.utils.getFileExtension', () => {
+      it('should return empty when filename is null', () => {
+        expect(gl.utils.getFileExtension(null)).toEqual('');
+      });
+
+      it('should return empty when filename is undefined', () => {
+        expect(gl.utils.getFileExtension(undefined)).toEqual('');
+      });
+
+      it('should return empty when filename is empty', () => {
+        expect(gl.utils.getFileExtension('')).toEqual('');
+      });
+
+      it('should return extension when filename has with extension', () => {
+        expect(gl.utils.getFileExtension('filename.ext')).toEqual('ext');
+      });
+
+      it('should return extension when filename has multiple dots', () => {
+        expect(gl.utils.getFileExtension('filename.with.multiple.dots')).toEqual('dots');
+      });
+
+      it('should return empty when filename is for hidden file', () => {
+        expect(gl.utils.getFileExtension('.iamhidden')).toEqual('');
+      });
+    });
   });
 })();
