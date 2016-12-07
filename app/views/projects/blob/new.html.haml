@@ -13,12 +13,12 @@
       = link_to '#editor' do
         Write
     %li
-      = link_to '#preview', 'data-preview-url' => namespace_project_preview_blob_path(@project.namespace, @project, @id) do
+      = link_to '#preview' do
         Preview
   = form_tag(namespace_project_create_blob_path(@project.namespace, @project, @id), method: :post, class: 'form-horizontal js-new-file-blob-form js-new-file-blob-form js-quick-submit js-requires-input', data: blob_editor_paths) do
     = render 'projects/blob/editor', ref: @ref
     = render 'shared/new_commit_form', placeholder: "Add new file"
 
     = hidden_field_tag 'content', '', id: 'file-content'
-    = render 'projects/commit_button', ref: @ref,
+    = render 'projects/commit_button', ref: @ref, id: @id,
               cancel_path: namespace_project_tree_path(@project.namespace, @project, @id)
