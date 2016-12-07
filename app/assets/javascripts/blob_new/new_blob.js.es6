@@ -1,4 +1,4 @@
-/* eslint-disable func-names, space-before-function-paren, no-param-reassign, no-new, no-bitwise */
+/* eslint-disable func-names, space-before-function-paren, no-param-reassign, no-new, no-bitwise*/
 /* global ace BlobGitignoreSelectors */
 ((window, $) => {
   const bind = function(fn, me) {
@@ -57,8 +57,16 @@
       new gl.BlobCiYamlSelectors({ editor: this.editor });
     }
 
+    setSyntaxHighlight(filename) {
+      const modeList = ace.require('ace/ext/modelist');
+      const mode = modeList.getModeForPath(filename).mode;
+      this.editor.getSession().setMode(mode);
+    }
+
     toggleFileModeTabbar(filename) {
       const extension = gl.utils.getFileExtension(filename);
+      this.setSyntaxHighlight(filename);
+
       if (this.isPreviewable(extension)) {
         this.$newFileModeTabbar.show(300);
         this.$commentToolbar.show();
