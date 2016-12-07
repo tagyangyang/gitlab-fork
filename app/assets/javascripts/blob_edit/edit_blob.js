@@ -3,6 +3,8 @@
   var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   this.EditBlob = (function() {
+    const previewableFileExtension = ['md', 'markdown', 'mdown'];
+
     function EditBlob(assets_path, ace_mode) {
       if (ace_mode == null) {
         ace_mode = null;
@@ -15,6 +17,7 @@
       if (ace_mode) {
         this.editor.getSession().setMode("ace/mode/" + ace_mode);
       }
+
       $('form').submit((function(_this) {
         return function() {
           return $("#file-content").val(_this.editor.getValue());
@@ -22,8 +25,14 @@
       // Before a form submission, move the content from the Ace editor into the
       // submitted textarea
       })(this));
+
+      this.$filenameTextbox = $('.new-file-path');
+      this.$commentToolbar = $('.comment-toolbar');
+
       this.initModePanesAndLinks();
       this.initSoftWrap();
+      this.toggleMarkdownCommentToolbar(this.$filenameTextbox.val());
+
       new gl.BlobLicenseSelectors({
         editor: this.editor
       });
@@ -34,6 +43,18 @@
         editor: this.editor
       });
     }
+    EditBlob.prototype.toggleMarkdownCommentToolbar = function(filename) {
+      const extension = gl.utils.getFileExtension(filename);
+      if (this.isPreviewable(extension)) {
+        this.$commentToolbar.fadeIn();
+      } else {
+        this.$commentToolbar.fadeOut();
+      }
+    };
+
+    EditBlob.prototype.isPreviewable = function(extension) {
+      return ~previewableFileExtension.lastIndexOf(extension);
+    };
 
     EditBlob.prototype.initModePanesAndLinks = function() {
       this.$editModePanes = $(".js-edit-mode-pane");
@@ -53,6 +74,7 @@
       currentPane.fadeIn(200);
       if (paneId === "#preview") {
         this.$toggleButton.hide();
+        this.$commentToolbar.hide();
 
         return $.post(currentLink.data("preview-url"), {
           content: this.editor.getValue()
@@ -62,6 +84,7 @@
         });
       } else {
         this.$toggleButton.show();
+        this.toggleMarkdownCommentToolbar(this.$filenameTextbox.val());
         return this.editor.focus();
       }
     };
