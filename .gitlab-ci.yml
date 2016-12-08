@@ -28,7 +28,7 @@ stages:
 - prepare
 - test
 - post-test
-- pages
+# - pages
 
 # Predefined scopes
 .dedicated-runner: &dedicated-runner
@@ -163,16 +163,16 @@ rspec 17 20: *rspec-knapsack
 rspec 18 20: *rspec-knapsack
 rspec 19 20: *rspec-knapsack
 
-spinach 0 10: *spinach-knapsack
-spinach 1 10: *spinach-knapsack
-spinach 2 10: *spinach-knapsack
-spinach 3 10: *spinach-knapsack
-spinach 4 10: *spinach-knapsack
-spinach 5 10: *spinach-knapsack
-spinach 6 10: *spinach-knapsack
-spinach 7 10: *spinach-knapsack
-spinach 8 10: *spinach-knapsack
-spinach 9 10: *spinach-knapsack
+# spinach 0 10: *spinach-knapsack
+# spinach 1 10: *spinach-knapsack
+# spinach 2 10: *spinach-knapsack
+# spinach 3 10: *spinach-knapsack
+# spinach 4 10: *spinach-knapsack
+# spinach 5 10: *spinach-knapsack
+# spinach 6 10: *spinach-knapsack
+# spinach 7 10: *spinach-knapsack
+# spinach 8 10: *spinach-knapsack
+# spinach 9 10: *spinach-knapsack
 
 # Execute all testing suites against Ruby 2.1
 .ruby-21: &ruby-21
@@ -245,13 +245,13 @@ spinach 9 10 ruby21: *spinach-knapsack-ruby21
   script:
     - bundle exec $CI_BUILD_NAME
 
-rubocop: *exec
-rake haml_lint: *exec
-rake scss_lint: *exec
-rake brakeman: *exec
-rake flay: *exec
-license_finder: *exec
-rake downtime_check: *exec
+# rubocop: *exec
+# rake haml_lint: *exec
+# rake scss_lint: *exec
+# rake brakeman: *exec
+# rake flay: *exec
+# license_finder: *exec
+# rake downtime_check: *exec
 rake ee_compat_check:
   <<: *exec
   only:
@@ -298,23 +298,23 @@ rake db:seed_fu:
     paths:
       - log/development.log
 
-teaspoon:
-  cache:
-    paths:
-      - vendor/ruby
-      - node_modules/
-  stage: test
-  <<: *use-db
-  <<: *dedicated-runner
-  script:
-    - npm install
-    - npm link istanbul
-    - rake teaspoon
-  artifacts:
-    name: coverage-javascript
-    expire_in: 31d
-    paths:
-    - coverage-javascript/default/
+# teaspoon:
+#   cache:
+#     paths:
+#       - vendor/ruby
+#       - node_modules/
+#   stage: test
+#   <<: *use-db
+#   <<: *dedicated-runner
+#   script:
+#     - npm install
+#     - npm link istanbul
+#     - rake teaspoon
+#   artifacts:
+#     name: coverage-javascript
+#     expire_in: 31d
+#     paths:
+#     - coverage-javascript/default/
 
 lint-doc:
   stage: test
@@ -445,25 +445,25 @@ notify:slack:
     - master@gitlab-org/gitlab-ee
     - tags@gitlab-org/gitlab-ee
 
-pages:
-  before_script: []
-  stage: pages
-  <<: *dedicated-runner
-  dependencies:
-    - coverage
-    - teaspoon
-    - lint:javascript:report
-  script:
-    - mv public/ .public/
-    - mkdir public/
-    - mv coverage public/coverage-ruby
-    - mv coverage-javascript/default/ public/coverage-javascript/
-    - mv eslint-report.html public/
-  artifacts:
-    paths:
-      - public
-  only:
-    - master@gitlab-org/gitlab-ce
+# pages:
+#   before_script: []
+#   stage: pages
+#   <<: *dedicated-runner
+#   dependencies:
+#     - coverage
+#     - teaspoon
+#     - lint:javascript:report
+#   script:
+#     - mv public/ .public/
+#     - mkdir public/
+#     - mv coverage public/coverage-ruby
+#     - mv coverage-javascript/default/ public/coverage-javascript/
+#     - mv eslint-report.html public/
+#   artifacts:
+#     paths:
+#       - public
+#   only:
+#     - master@gitlab-org/gitlab-ce
 
 # Insurance in case a gem needed by one of our releases gets yanked from
 # rubygems.org in the future.
