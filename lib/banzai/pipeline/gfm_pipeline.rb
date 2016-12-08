@@ -9,7 +9,6 @@ module Banzai
           Filter::UploadLinkFilter,
           Filter::VideoLinkFilter,
           Filter::ImageLinkFilter,
-          Filter::EmojiFilter,
           Filter::TableOfContentsFilter,
           Filter::AutolinkFilter,
           Filter::ExternalLinkFilter,
@@ -23,6 +22,10 @@ module Banzai
           Filter::CommitReferenceFilter,
           Filter::LabelReferenceFilter,
           Filter::MilestoneReferenceFilter,
+
+          # This filter is replacing UTF8 emoji with actual <img>, preventing
+          # LabelReferenceFilter from detecting a label with emoji in it
+          Filter::EmojiFilter,
 
           Filter::TaskListFilter,
           Filter::InlineDiffFilter,
