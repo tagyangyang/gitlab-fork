@@ -35,7 +35,7 @@ The following table depicts the various user permission levels in a project.
 | Create new environments               |         |            | ✓           | ✓        | ✓      |
 | Stop environments                     |         |            | ✓           | ✓        | ✓      |
 | See a list of merge requests          |         | ✓          | ✓           | ✓        | ✓      |
-| Manage/Accept merge requests          |         |            | ✓           | ✓        | ✓      |
+| Manage/merge merge requests           |         |            | ✓           | ✓        | ✓      |
 | Create new merge request              |         |            | ✓           | ✓        | ✓      |
 | Create new branches                   |         |            | ✓           | ✓        | ✓      |
 | Push to non-protected branches        |         |            | ✓           | ✓        | ✓      |
