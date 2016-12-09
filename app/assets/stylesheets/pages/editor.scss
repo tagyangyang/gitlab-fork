@@ -7,17 +7,9 @@
   }
 
   .comment-toolbar {
-    padding: 0 0 0 40px;
+    padding: 10px;
     color: $note-toolbar-color;
-    border-top: 1px solid $table-border-color;
-    background: $table-border-color;
-
-    .toolbar-text {
-      background: $white-light;
-      width: 100%;
-      padding: 10px;
-    }
-
+    border-top: 1px solid $note_form-border-color;
   }
 
   #editor {
