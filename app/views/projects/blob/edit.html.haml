@@ -19,8 +19,7 @@
     %ul.nav-links.no-bottom.js-edit-mode
       %li.active
         = link_to '#editor' do
-          Edit File
-
+          Write
       %li
         = link_to '#preview', 'data-preview-url' => namespace_project_preview_blob_path(@project.namespace, @project, @id) do
           = editing_preview_title(@blob.name)
