@@ -8,7 +8,7 @@ class MattermostSlashCommandsService < ChatService
   end
 
   def title
-    'Mattermost Command'
+    'Mattermost Slash Commands'
   end
 
   def description
@@ -34,10 +34,14 @@ class MattermostSlashCommandsService < ChatService
       return Gitlab::ChatCommands::Presenters::Access.new(url).authorize
     end
 
-    Gitlab::ChatCommands::Command.new(project, user, params).execute
+    Gitlab::ChatCommands::Command.new(project, user, params).execute(presenter_strategy)
   end
 
   private
+
+  def presenter_strategy
+    Gitlab::ChatCommands::Presenters::Mattermost
+  end
 
   def find_chat_user(params)
     ChatNames::FindUserService.new(self, params).execute

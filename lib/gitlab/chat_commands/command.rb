@@ -8,14 +8,14 @@ module Gitlab
         Gitlab::ChatCommands::Deploy,
       ].freeze
 
-      def execute
+      def execute(presenter)
         command, match = match_command
 
         if command
           if command.allowed?(project, current_user)
-            command.new(project, current_user, params).execute(match)
+            command.new(project, current_user, params).execute(presenter_module, match)
           else
-            Gitlab::ChatCommands::Presenters::Access.new(match).access_denied
+            presenter::Access.new(match).access_denied
           end
         else
           Gitlab::ChatCommands::Help.new(project, current_user, params).execute(available_commands)

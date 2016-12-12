@@ -15,12 +15,12 @@ module Gitlab
         can?(user, :create_issue, project)
       end
 
-      def execute(match)
+      def execute(presenter, match)
         title = match[:title]
         description = match[:description].to_s.rstrip
 
         issue = create_issue(title: title, description: description)
-        Gitlab::ChatCommands::Presenters::NewIssue.new(issue).present
+        persenter::NewIssue.new(issue).present
       end
 
       def create_issue(title:, description:)
