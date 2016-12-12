@@ -31,6 +31,7 @@
       this.toggleSoftWrap = bind(this.toggleSoftWrap, this);
       this.submitForm = bind(this.submitForm, this);
 
+      // initialization
       this.bindEvents();
       this.initEditor();
       this.initHelpers();
@@ -68,12 +69,10 @@
       this.setSyntaxHighlight(filename);
 
       if (this.isPreviewable(extension)) {
-        this.$newFileModeTabbar.show(300);
         this.$commentToolbar.show();
         return;
       }
 
-      this.$newFileModeTabbar.hide(100);
       this.$commentToolbar.hide();
       if (this.$newFileModeLinks.filter('[href="#preview"]').parent().hasClass('active hover')) {
         this.$newFileModeLinks.filter('[href="#editor"]').trigger('click');
