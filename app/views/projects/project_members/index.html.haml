@@ -1,18 +1,25 @@
 - page_title "Members"
 = render "projects/settings/head"
 
-.project-members-page.prepend-top-default
-  %h4.project-members-title.clearfix
-    Members
-    = link_to "Import", import_namespace_project_project_members_path(@project.namespace, @project), class: "btn btn-default pull-right hidden-xs", title: "Import members from another project"
-  - if can?(current_user, :admin_project_member, @project)
-    .project-members-new.append-bottom-default
-      %p.clearfix
+.row.prepend-top-default.append-bottom-default
+  .col-lg-3
+    %h4.prepend-top-0
+      Members
+    - if can?(current_user, :admin_project_member, @project)
+      %p
         Add new user to
         %strong= @project.name
-      = render "new_project_member"
+  .col-lg-9
+    .light.prepend-top-default
+      - if can?(current_user, :admin_project_member, @project)
+        = render "new_project_member"
 
-      = render 'shared/members/requests', membership_source: @project, requesters: @requesters
+        = render 'shared/members/requests', membership_source: @project, requesters: @requesters
+        .append-bottom-default.clearfix
+          %h5.member.existing-title
+            Existing users and groups
+        - if @group_links.any?
+          = render 'groups', group_links: @group_links
 
   .append-bottom-default.clearfix
     %h5.member.existing-title

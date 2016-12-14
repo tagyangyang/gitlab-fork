@@ -99,6 +99,7 @@
 
     @media (min-width: $screen-sm-min) {
       width: 350px;
+      margin-bottom: 2px;
     }
 
     &.input-short {
@@ -115,8 +116,8 @@
 
 .member-search-btn {
   position: absolute;
-  right: 4px;
-  top: 0;
+  right: 4px; //right:0;
+  top: -2px;
   height: 35px;
   padding-left: 10px;
   padding-right: 10px;
@@ -127,5 +128,14 @@
 
   @media (min-width: $screen-sm-min) {
     right: 160px;
+  }
+}
+
+
+@media (min-width: $screen-sm-min) {
+  .member-search-form {
+    .form-group {
+      display: block;
+    }
   }
 }
