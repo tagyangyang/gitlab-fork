@@ -131,6 +131,13 @@
   }
 }
 
+.gl-pagination{
+  border-top: none;
+}
+
+hr{
+  border-top-color: $gray-darkest;
+}
 
 @media (min-width: $screen-sm-min) {
   .member-search-form {
