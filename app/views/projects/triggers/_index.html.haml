@@ -28,7 +28,7 @@
           %p.settings-message.text-center.append-bottom-default
             No triggers have been created yet. Add one using the button below.
 
-        = form_for @trigger, url: url_for(controller: 'projects/triggers', action: 'create') do |f|
+        = form_for @trigger, url: url_for(controller: '/projects/triggers', action: 'create') do |f|
           = f.submit "Add trigger", class: 'btn btn-success'
 
       .panel-footer

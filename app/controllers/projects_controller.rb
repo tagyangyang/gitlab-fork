@@ -23,7 +23,7 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def edit
-    render 'edit'
+    redirect_to project_settings_general_path(@project)
   end
 
   def create
@@ -52,7 +52,7 @@ class ProjectsController < Projects::ApplicationController
         flash[:notice] = "Project '#{@project.name}' was successfully updated."
         format.html do
           redirect_to(
-            edit_project_path(@project),
+            project_settings_general_path(@project),
             notice: "Project '#{@project.name}' was successfully updated."
           )
         end
@@ -124,7 +124,7 @@ class ProjectsController < Projects::ApplicationController
 
     redirect_to dashboard_projects_path
   rescue Projects::DestroyService::DestroyError => ex
-    redirect_to edit_project_path(@project), alert: ex.message
+    redirect_to project_settings_general_path(@project), alert: ex.message
   end
 
   def new_issue_address
@@ -163,7 +163,7 @@ class ProjectsController < Projects::ApplicationController
     )
   rescue ::Projects::HousekeepingService::LeaseTaken => ex
     redirect_to(
-      edit_project_path(@project),
+      project_settings_general_path(@project),
       alert: ex.to_s
     )
   end
@@ -172,7 +172,7 @@ class ProjectsController < Projects::ApplicationController
     @project.add_export_job(current_user: current_user)
 
     redirect_to(
-      edit_project_path(@project),
+      project_settings_general_path(@project),
       notice: "Project export started. A download link will be sent by email."
     )
   end
@@ -184,7 +184,7 @@ class ProjectsController < Projects::ApplicationController
       send_file export_project_path, disposition: 'attachment'
     else
       redirect_to(
-        edit_project_path(@project),
+        project_settings_general_path(@project),
         alert: "Project export link has expired. Please generate a new export from your project settings."
       )
     end
@@ -196,7 +196,7 @@ class ProjectsController < Projects::ApplicationController
     else
       flash[:alert] = "Project export could not be deleted."
     end
-    redirect_to(edit_project_path(@project))
+    redirect_to(project_settings_general_path(@project))
   end
 
   def generate_new_export
@@ -204,7 +204,7 @@ class ProjectsController < Projects::ApplicationController
       export
     else
       redirect_to(
-        edit_project_path(@project),
+        project_settings_general_path(@project),
         alert: "Project export could not be deleted."
       )
     end
