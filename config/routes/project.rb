@@ -275,6 +275,14 @@ constraints(ProjectUrlConstrainer.new) do
         end
       end
 
+      namespace :settings do
+        resource :general, controller: :general, only: [:show]
+        resource :members, only: [:show]
+        resource :integrations, only: [:show]
+        resource :repository, controller: :repository, only: [:show]
+        resource :automations, only: [:show]
+      end
+
       resources :todos, only: [:create]
 
       resources :uploads, only: [:create] do

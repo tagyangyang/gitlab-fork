@@ -5,24 +5,39 @@
       %ul{ class: (container_class) }
         - can_edit = can?(current_user, :admin_project, @project)
         -if can_edit
-          = nav_link(path: 'projects#edit') do
-            = link_to edit_project_path(@project), title: 'General' do
+          = nav_link(controller: :general) do
+            = link_to namespace_project_settings_general_path, title: 'General' do
               %span
                 General
-        = nav_link(path: 'project_members#index') do
-          = link_to namespace_project_project_members_path(@project.namespace, @project), title: 'Community' do
+            -#= link_to namespace_project_settings_general(@project), title: 'General' do
+              %span
+                General
+        = nav_link(controller: :members) do
+          = link_to namespace_project_settings_members_path, title: 'Members' do
+            %span
+              Members
+          -#= link_to namespace_project_settings_members(@project.namespace, @project), title: 'Members' do
             %span
               Members
         -if can_edit
-          = nav_link(path: 'hooks#index') do
-            = link_to namespace_project_hooks_path(@project.namespace, @project), title: 'Connections' do
+          = nav_link(controller: :integrations) do
+            = link_to namespace_project_settings_integrations_path, title: 'Integrations' do
               %span
                 Integrations
-          = nav_link(path: 'deploy_keys#index') do
-            = link_to namespace_project_deploy_keys_path(@project.namespace, @project), title: 'Permissions' do
+            -#= link_to namespace_project_settings_integrations(@project.namespace, @project), title: 'Integrations' do
+              %span
+                Integrations
+          = nav_link(controller: :repository) do
+            = link_to namespace_project_settings_repository_path, title: 'Repository' do
               %span
                 Repository
-          = nav_link(path: 'runners#index') do
-            = link_to namespace_project_runners_path(@project.namespace, @project), title: 'Automation' do
+            -#= link_to namespace_project_settings_repository(@project.namespace, @project), title: 'Repository' do
+              %span
+                Repository
+          -#= nav_link(controller: :automations) do
+            = link_to namespace_project_settings_automations, title: 'Automations / CI' do
+              %span
+                Automation / CI
+            -#= link_to namespace_project_settings_automations(@project.namespace, @project), title: 'Automations / CI' do
               %span
                 Automation / CI
