@@ -70,17 +70,11 @@
     - if project_nav_tab? :settings
       = nav_link(controller: [:general, :members, :integrations, :repository, :automations]) do
         - if can_edit
-          = link_to namespace_project_settings_general_path, title: 'Settings', class: 'shortcuts-tree' do
-            %span
-              Settings
-          -#= link_to namespace_project_settings_general(@project), title: 'Settings', class: 'shortcuts-tree' do
+          = link_to project_settings_general_path(@project), title: 'Settings', class: 'shortcuts-tree' do
             %span
               Settings
         - else
-          = link_to namespace_project_settings_members, title: 'Settings', class: 'shortcuts-tree' do
-            %span
-              Settings
-          -#= link_to namespace_project_settings_members(@project.namespace, @project), title: 'Settings', class: 'shortcuts-tree' do
+          = link_to project_settings_members_path(@path), title: 'Settings', class: 'shortcuts-tree' do
             %span
               Settings
 

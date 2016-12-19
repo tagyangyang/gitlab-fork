@@ -1,4 +1,3 @@
-= render "projects/settings/head"
 = render 'shared/web_hooks/form', hook: @hook, hooks: @hooks, url_components: [@project.namespace.becomes(Namespace), @project]
 
 %hr

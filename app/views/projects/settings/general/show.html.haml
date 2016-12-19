@@ -1,5 +1,6 @@
 - page_title "General"
 = render "projects/settings/head"
 
-%h1
-  General Settings
+= render "projects/edit"
+
+= render 'shared/confirm_modal', phrase: @project.path
