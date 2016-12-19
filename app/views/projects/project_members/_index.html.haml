@@ -1,5 +1,5 @@
-.row.prepend-top-default.append-bottom-default
-  .col-lg-3
+.row.prepend-top-default
+  .col-lg-3.settings-sidebar
     %h4.prepend-top-0
       Members
       = link_to "Import", import_namespace_project_project_members_path(@project.namespace, @project), class: "btn btn-default hidden-xs visible-sm pull-right", title: "Import members from another project"
@@ -19,20 +19,12 @@
         - if @group_links.any?
           = render 'groups', group_links: @group_links
 
-  .append-bottom-default.clearfix
-    %h5.member.existing-title
-      Existing users and groups
-    = form_tag namespace_project_project_members_path(@project.namespace, @project), method: :get, class: 'form-inline member-search-form'  do
-      .form-group
-        = search_field_tag :search, params[:search], { placeholder: 'Find existing members by name', class: 'form-control', spellcheck: false }
-        %button.member-search-btn{ type: "submit", "aria-label" => "Submit search" }
-          = icon("search")
-        = render 'shared/members/sort_dropdown'
-  - if @group_links.any?
-    = render 'groups', group_links: @group_links
+    .append-bottom-default.clearfix
+    - if @group_links.any?
+      = render 'groups', group_links: @group_links
 
-  = render 'projects/project_members/team', members: @project_members
-  = paginate @project_members, theme: "gitlab"
+    = render 'projects/project_members/team', members: @project_members
+    = paginate @project_members, theme: "gitlab"
 
 - if can?(current_user, :admin_project, @project)
   %hr
