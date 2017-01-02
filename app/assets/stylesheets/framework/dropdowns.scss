@@ -154,12 +154,12 @@
   li {
     text-align: left;
     list-style: none;
-    padding: 0 8px;
+    padding: 0 10px;
   }
 
   .divider {
     height: 1px;
-    margin: 8px;
+    margin: 6px 10px;
     padding: 0;
     background-color: $dropdown-divider-color;
   }
@@ -176,7 +176,7 @@
     display: block;
     position: relative;
     padding: 5px 8px;
-    color: $dropdown-link-color;
+    color: $gl-text-color;
     line-height: initial;
     text-overflow: ellipsis;
     border-radius: 2px;
@@ -211,8 +211,9 @@
   .dropdown-header {
     color: $gl-text-color-secondary;
     font-size: 13px;
+    font-weight: 600;
     line-height: 22px;
-    padding: 0 10px;
+    padding: 0 16px;
   }
 
   .separator + .dropdown-header {
@@ -269,17 +270,37 @@
     height: 30px;
     margin: 0 10px 0 0;
   }
-}
 
-.dropdown-menu-user-link {
-  padding-top: 10px;
-  padding-bottom: 7px;
+  .dropdown-menu-user-link {
+    padding-top: 6px;
+    padding-bottom: 5px;
+
+    &.is-indeterminate,
+    &.is-active {
+      font-weight: 600;
+      color: $gl-text-color;
+
+      &::before {
+        top: 13px;
+      }
+
+      .dropdown-menu-user-full-name,
+      .dropdown-menu-user-username {
+        font-weight: 600;
+      }
+
+      .dropdown-menu-user-username {
+        color: $gl-gray-light;
+      }
+    }
+  }
 }
 
 .dropdown-menu-user-full-name {
   display: block;
-  font-weight: 500;
+  font-weight: normal;
   line-height: 16px;
+  color: $gl-text-color;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -288,6 +309,7 @@
 .dropdown-menu-user-username {
   display: block;
   line-height: 16px;
+  color: $gl-gray-light;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -304,14 +326,17 @@
 
 .dropdown-menu-selectable {
   a {
-    padding-left: 25px;
+    padding-left: 26px;
 
     &.is-indeterminate,
     &.is-active {
+      font-weight: 600;
+      color: $gl-text-color;
+
       &::before {
         position: absolute;
-        left: 5px;
-        top: 8px;
+        left: 6px;
+        top: 6px;
         font: normal normal normal 14px/1 FontAwesome;
         font-size: inherit;
         text-rendering: auto;
@@ -333,7 +358,7 @@
 
 .dropdown-title {
   position: relative;
-  padding: 0 25px 10px;
+  padding: 2px 25px 10px;
   margin: 0 10px 10px;
   font-weight: 600;
   line-height: 1;
@@ -363,7 +388,7 @@
   right: 5px;
   width: 20px;
   height: 20px;
-  top: -3px;
+  top: -1px;
 }
 
 .dropdown-menu-back {
