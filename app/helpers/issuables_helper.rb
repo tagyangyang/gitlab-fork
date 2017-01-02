@@ -7,17 +7,19 @@ module IssuablesHelper
     "right-sidebar-#{sidebar_gutter_collapsed? ? 'collapsed' : 'expanded'}"
   end
 
-  def multi_label_name(current_labels, default_label)
-    if current_labels && current_labels.any?
+  def multi_label_name(current_labels, hasNoLabel, default_label)
+    if hasNoLabel
+      return Label::None.title
+    end
+
+    if !hasNoLabel && current_labels && current_labels.any?
       title = current_labels.first.try(:title)
       if current_labels.size > 1
-        "#{title} +#{current_labels.size - 1} more"
-      else
-        title
+        title = "#{title} +#{current_labels.size - 1} more"
       end
-    else
-      default_label
     end
+
+    title.presence || default_label
   end
 
   def issuable_json_path(issuable)
@@ -33,18 +35,18 @@ module IssuablesHelper
   def template_dropdown_tag(issuable, &block)
     title = selected_template(issuable) || "Choose a template"
     options = {
-      toggle_class: 'js-issuable-selector',
-      title: title,
-      filter: true,
-      placeholder: 'Filter',
-      footer_content: true,
-      data: {
-        data: issuable_templates(issuable),
-        field_name: 'issuable_template',
-        selected: selected_template(issuable),
-        project_path: ref_project.path,
-        namespace_path: ref_project.namespace.path
-      }
+        toggle_class: 'js-issuable-selector',
+        title: title,
+        filter: true,
+        placeholder: 'Filter',
+        footer_content: true,
+        data: {
+            data: issuable_templates(issuable),
+            field_name: 'issuable_template',
+            selected: selected_template(issuable),
+            project_path: ref_project.path,
+            namespace_path: ref_project.namespace.path
+        }
     }
 
     dropdown_tag(title, options: options) do
@@ -110,7 +112,7 @@ module IssuablesHelper
   end
 
   def issuable_labels_tooltip(labels, limit: 5)
-    first, last = labels.partition.with_index{ |_, i| i < limit  }
+    first, last = labels.partition.with_index { |_, i| i < limit }
 
     label_names = first.collect(&:name)
     label_names << "and #{last.size} more" unless last.empty?
@@ -120,15 +122,15 @@ module IssuablesHelper
 
   def issuables_state_counter_text(issuable_type, state)
     titles = {
-      opened: "Open"
+        opened: "Open"
     }
 
     state_title = titles[state] || state.to_s.humanize
 
     count =
-      Rails.cache.fetch(issuables_state_counter_cache_key(issuable_type, state), expires_in: 2.minutes) do
-        issuables_count_for_state(issuable_type, state)
-      end
+        Rails.cache.fetch(issuables_state_counter_cache_key(issuable_type, state), expires_in: 2.minutes) do
+          issuables_count_for_state(issuable_type, state)
+        end
 
     html = content_tag(:span, state_title)
     html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge')
@@ -145,11 +147,11 @@ module IssuablesHelper
 
   def issuable_filter_params
     [
-      :search,
-      :author_id,
-      :assignee_id,
-      :milestone_title,
-      :label_name
+        :search,
+        :author_id,
+        :assignee_id,
+        :milestone_title,
+        :label_name
     ]
   end
 
@@ -199,14 +201,14 @@ module IssuablesHelper
 
   def issuable_templates(issuable)
     @issuable_templates ||=
-      case issuable
-      when Issue
-        issue_template_names
-      when MergeRequest
-        merge_request_template_names
-      else
-        raise 'Unknown issuable type!'
-      end
+        case issuable
+          when Issue
+            issue_template_names
+          when MergeRequest
+            merge_request_template_names
+          else
+            raise 'Unknown issuable type!'
+        end
   end
 
   def merge_request_template_names
