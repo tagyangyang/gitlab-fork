@@ -127,10 +127,9 @@ module IssuablesHelper
 
     state_title = titles[state] || state.to_s.humanize
 
-    count =
-        Rails.cache.fetch(issuables_state_counter_cache_key(issuable_type, state), expires_in: 2.minutes) do
-          issuables_count_for_state(issuable_type, state)
-        end
+    count = Rails.cache.fetch(issuables_state_counter_cache_key(issuable_type, state), expires_in: 2.minutes) do
+      issuables_count_for_state(issuable_type, state)
+    end
 
     html = content_tag(:span, state_title)
     html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge')
@@ -200,15 +199,14 @@ module IssuablesHelper
   end
 
   def issuable_templates(issuable)
-    @issuable_templates ||=
-        case issuable
-          when Issue
-            issue_template_names
-          when MergeRequest
-            merge_request_template_names
-          else
-            raise 'Unknown issuable type!'
-        end
+    @issuable_templates ||= case issuable
+                            when Issue
+                              issue_template_names
+                            when MergeRequest
+                              merge_request_template_names
+                            else
+                              raise 'Unknown issuable type!'
+                            end
   end
 
   def merge_request_template_names
