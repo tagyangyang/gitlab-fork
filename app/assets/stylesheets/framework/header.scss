@@ -177,10 +177,7 @@ header {
 
       a {
         color: $gl-text-color;
-
-        &:hover {
-          text-decoration: underline;
-        }
+        @include gl-link-hover-focus-state;
       }
 
       .dropdown-toggle-caret {

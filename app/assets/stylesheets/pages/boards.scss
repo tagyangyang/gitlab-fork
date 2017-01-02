@@ -227,6 +227,7 @@
   a {
     color: inherit;
     word-wrap: break-word;
+    @include gl-link-hover-focus-state;
   }
 }
 

@@ -104,10 +104,7 @@
 
     .edit-link {
       color: $gl-text-color;
-
-      &:hover {
-        color: $md-link-color;
-      }
+      @include gl-link-hover-focus-state;
     }
   }
 
@@ -280,10 +277,7 @@
   }
 
   a {
-    &:hover {
-      color: $md-link-color;
-      text-decoration: none;
-    }
+    @include gl-link-hover-focus-state;
   }
 
   .dropdown-content {
