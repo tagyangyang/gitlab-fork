@@ -35,18 +35,18 @@ module IssuablesHelper
   def template_dropdown_tag(issuable, &block)
     title = selected_template(issuable) || "Choose a template"
     options = {
-        toggle_class: 'js-issuable-selector',
-        title: title,
-        filter: true,
-        placeholder: 'Filter',
-        footer_content: true,
-        data: {
-            data: issuable_templates(issuable),
-            field_name: 'issuable_template',
-            selected: selected_template(issuable),
-            project_path: ref_project.path,
-            namespace_path: ref_project.namespace.path
-        }
+      toggle_class: 'js-issuable-selector',
+      title: title,
+      filter: true,
+      placeholder: 'Filter',
+      footer_content: true,
+      data: {
+        data: issuable_templates(issuable),
+        field_name: 'issuable_template',
+        selected: selected_template(issuable),
+        project_path: ref_project.path,
+        namespace_path: ref_project.namespace.path
+      }
     }
 
     dropdown_tag(title, options: options) do
@@ -122,7 +122,7 @@ module IssuablesHelper
 
   def issuables_state_counter_text(issuable_type, state)
     titles = {
-        opened: "Open"
+      opened: "Open"
     }
 
     state_title = titles[state] || state.to_s.humanize
@@ -146,11 +146,11 @@ module IssuablesHelper
 
   def issuable_filter_params
     [
-        :search,
-        :author_id,
-        :assignee_id,
-        :milestone_title,
-        :label_name
+      :search,
+      :author_id,
+      :assignee_id,
+      :milestone_title,
+      :label_name
     ]
   end
 
