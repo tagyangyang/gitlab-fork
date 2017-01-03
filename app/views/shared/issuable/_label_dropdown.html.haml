@@ -7,8 +7,8 @@
 - data_options = local_assigns.fetch(:data_options, {})
 - classes = local_assigns.fetch(:classes, [])
 - selected = local_assigns.fetch(:selected, nil)
-- hasNoLabel = params[:label_name] && params[:label_name].include?('No Label')
 - selected_toggle = local_assigns.fetch(:selected_toggle, nil)
+- hasNoLabel = selected_toggle && selected_toggle.include?('No Label')
 - dropdown_title = local_assigns.fetch(:dropdown_title, "Filter by label")
 - dropdown_data = {toggle: 'dropdown', field_name: "label_name[]", show_no: "true", show_any: "true", namespace_path: @project.try(:namespace).try(:path), project_path: @project.try(:path), labels: labels_filter_path, default_label: "Labels"}
 - dropdown_data.merge!(data_options)

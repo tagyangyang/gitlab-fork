@@ -12,7 +12,7 @@ module IssuablesHelper
       return Label::None.title
     end
 
-    if !hasNoLabel && current_labels && current_labels.any?
+    if current_labels && current_labels.any?
       title = current_labels.first.try(:title)
       if current_labels.size > 1
         title = "#{title} +#{current_labels.size - 1} more"
