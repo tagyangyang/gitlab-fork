@@ -7,7 +7,6 @@
 //= require bootstrap
 //= require gl_dropdown
 //= require select2
-//= require jquery.nicescroll
 //= require api
 //= require create_label
 //= require issuable_context

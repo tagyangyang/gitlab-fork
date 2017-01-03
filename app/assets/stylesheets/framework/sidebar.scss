@@ -24,11 +24,6 @@
 .sidebar-wrapper {
   z-index: 1000;
   background: $gray-light;
-
-  .nicescroll-rails-hr {
-    // TODO: Figure out why nicescroll doesn't hide horizontal bar
-    display: none!important;
-  }
 }
 
 .content-wrapper {

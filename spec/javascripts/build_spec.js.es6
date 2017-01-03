@@ -5,7 +5,6 @@
 //= require lib/utils/datetime_utility
 //= require build
 //= require breakpoints
-//= require jquery.nicescroll
 //= require turbolinks
 
 describe('Build', () => {

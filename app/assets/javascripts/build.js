@@ -74,7 +74,6 @@
       this.$sidebar.css({
         top: this.sidebarTranslationLimits.max
       });
-      this.$sidebar.niceScroll();
       this.$document.off('click', '.js-sidebar-build-toggle').on('click', '.js-sidebar-build-toggle', this.toggleSidebar);
       this.$document.off('scroll.translateSidebar').on('scroll.translateSidebar', this.translateSidebar.bind(this));
     };

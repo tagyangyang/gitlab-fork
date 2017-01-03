@@ -49,7 +49,6 @@
 /*= require shortcuts_dashboard_navigation */
 /*= require shortcuts_issuable */
 /*= require shortcuts_network */
-/*= require jquery.nicescroll */
 /*= require date.format */
 /*= require_directory ./behaviors */
 /*= require_directory ./blob */
@@ -106,11 +105,6 @@
       }
     });
 
-    $('.nav-sidebar').niceScroll({
-      cursoropacitymax: '0.4',
-      cursorcolor: '#FFF',
-      cursorborder: '1px solid #FFF'
-    });
     $('.js-select-on-focus').on('focusin', function () {
       return $(this).select().one('mouseup', function (e) {
         return e.preventDefault();

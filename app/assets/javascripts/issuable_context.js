@@ -37,7 +37,6 @@
           }, 0);
         }
       });
-      $(".right-sidebar").niceScroll();
     }
 
     IssuableContext.prototype.initParticipants = function() {

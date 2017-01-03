@@ -10,7 +10,6 @@
   const pageSelector = '.page-with-sidebar';
   const navbarSelector = '.navbar-fixed-top';
   const sidebarWrapperSelector = '.sidebar-wrapper';
-  const sidebarContentSelector = '.nav-sidebar';
 
   const pinnedToggleSelector = '.js-nav-pin';
   const sidebarToggleSelector = '.toggle-nav-collapse, .side-nav-toggle';
@@ -86,10 +85,6 @@
       const tooltipText = this.isPinned ? 'Unpin navigation' : 'Pin navigation';
       const tooltipState = $pinnedToggle.attr('aria-describedby') && this.isExpanded ? 'show' : 'hide';
       $pinnedToggle.attr('title', tooltipText).tooltip('fixTitle').tooltip(tooltipState);
-
-      if (this.isExpanded) {
-        setTimeout(() => $(sidebarContentSelector).niceScroll().updateScrollBar(), 200);
-      }
     }
   }
 
