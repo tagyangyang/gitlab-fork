@@ -16,6 +16,7 @@
 #     label_name: string
 #     sort: string
 #     non_archived: boolean
+#     iid: Array[Integer]
 #
 class IssuableFinder
   NONE = '0'
@@ -40,6 +41,7 @@ class IssuableFinder
     items = by_label(items)
     items = by_due_date(items)
     items = by_non_archived(items)
+    items = by_iid(items)
     sort(items)
   end
 
@@ -362,6 +364,10 @@ class IssuableFinder
     end
 
     items
+  end
+
+  def by_iid(items)
+    params[:iid].present? ? items.where(iid: params[:iid]) : items
   end
 
   def filter_by_no_due_date?
