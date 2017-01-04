@@ -19,6 +19,31 @@
   .dropdown-menu-nav {
     display: block;
 
+    @include include-keyframes(fade-in) {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @include include-keyframes(slide-in) {
+      0% {
+        margin-top: -10px;
+      }
+
+      100% {
+        margin-top: 0;
+      }
+    }
+
+    animation-duration: 200ms, 400ms;
+    animation-fill-mode: forwards;
+    animation-timing-function: linear, cubic-bezier(0.23, 1, 0.32, 1);
+    animation-delay: 200ms, 0;
+
     @media (max-width: $screen-xs-max) {
       width: 100%;
       min-width: 240px;
@@ -176,12 +201,6 @@
   border: 1px solid $dropdown-border-color;
   border-radius: $border-radius-base;
   box-shadow: 0 2px 4px $dropdown-shadow-color;
-
-  animation-name: fade, slide;
-  animation-duration: 200ms, 400ms;
-  animation-fill-mode: forwards;
-  animation-timing-function: linear, cubic-bezier(0.23, 1, 0.32, 1);
-  animation-delay: 200ms, 0;
 
   .filtered-search-input-container & {
     max-width: 280px;
@@ -558,45 +577,5 @@
 .dropdown-toggle-text {
   &.is-default {
     color: $gl-text-color-secondary;
-  }
-}
-
-@keyframes fade {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes slide {
-  0% {
-    margin-top: -10px;
-  }
-
-  100% {
-    margin-top: 0;
-  }
-}
-
-@keyframes fade_reverse {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes slide_reverse {
-  0% {
-    margin-top: 0;
-  }
-
-  100% {
-    margin-top: -10px;
   }
 }
