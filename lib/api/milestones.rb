@@ -5,14 +5,6 @@ module API
     before { authenticate! }
 
     helpers do
-      def filter_milestones_state(milestones, state)
-        case state
-        when 'active' then milestones.active
-        when 'closed' then milestones.closed
-        else milestones
-        end
-      end
-
       params :optional_params do
         optional :description, type: String, desc: 'The description of the milestone'
         optional :due_date, type: String, desc: 'The due date of the milestone. The ISO 8601 date format (%Y-%m-%d)'
@@ -36,9 +28,7 @@ module API
       get ":id/milestones" do
         authorize! :read_milestone, user_project
 
-        milestones = user_project.milestones
-        milestones = filter_milestones_state(milestones, params[:state])
-        milestones = filter_by_iid(milestones, params[:iid]) if params[:iid].present?
+        milestones = MilestonesFinder.new.execute(user_project, declared_params(include_missing: false))
 
         present paginate(milestones), with: Entities::Milestone
       end
@@ -119,6 +109,29 @@ module API
 
         issues = IssuesFinder.new(current_user, finder_params).execute
         present paginate(issues), with: Entities::Issue, current_user: current_user, project: user_project
+      end
+
+      desc 'Get all merge requests for a single project milestone' do
+        success Entities::MergeRequest
+        detail 'This feature was introduced in GitLab 8.16.'
+      end
+      params do
+        requires :milestone_id, type: Integer, desc: 'The ID of a project milestone'
+        use :pagination
+      end
+      get ":id/milestones/:milestone_id/merge_requests" do
+        authorize! :read_milestone, user_project
+
+        milestone = user_project.milestones.find_by(id: params[:milestone_id])
+        not_found!('Milestone') unless milestone
+
+        finder_params = {
+          project_id: user_project.id,
+          milestone_title: milestone.title
+        }
+
+        merge_requests = MergeRequestsFinder.new(current_user, finder_params).execute
+        present paginate(merge_requests), with: Entities::MergeRequest, current_user: current_user, project: user_project
       end
     end
   end

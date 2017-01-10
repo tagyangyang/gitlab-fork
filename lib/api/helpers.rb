@@ -170,10 +170,6 @@ module API
       end
     end
 
-    def filter_by_iid(items, iid)
-      items.where(iid: iid)
-    end
-
     # error helpers
 
     def forbidden!(reason = nil)
