@@ -14,6 +14,10 @@ describe API::MergeRequests, api: true  do
   let!(:merge_request_merged) { create(:merge_request, state: "merged", author: user, assignee: user, source_project: project, target_project: project, title: "Merged test", created_at: base_time + 2.seconds, merge_commit_sha: '9999999999999999999999999999999999999999') }
   let!(:note)       { create(:note_on_merge_request, author: user, project: project, noteable: merge_request, note: "a comment on a MR") }
   let!(:note2)      { create(:note_on_merge_request, author: user, project: project, noteable: merge_request, note: "another comment on a MR") }
+  let!(:label) do
+    create(:label, title: 'label', color: '#FFAABB', project: project)
+  end
+  let!(:label_link) { create(:label_link, label: label, target: merge_request) }
 
   before do
     project.team << [user, :reporter]
@@ -108,6 +112,31 @@ describe API::MergeRequests, api: true  do
         expect(json_response).to be_an Array
         expect(json_response.length).to eq(1)
         expect(json_response.first['id']).to eq(merge_request_closed.id)
+      end
+
+      it 'returns an array of labeled merge requests' do
+        get api("/projects/#{project.id}/merge_requests?labels=#{label.title}", user)
+
+        expect(response).to have_http_status(200)
+        expect(json_response).to be_an Array
+        expect(json_response.length).to eq(1)
+        expect(json_response.first['labels']).to eq([label.title])
+      end
+
+      it 'returns an array of labeled merge requests where all labels match' do
+        get api("/projects/#{project.id}/merge_requests?labels=#{label.title},foo,bar", user)
+
+        expect(response).to have_http_status(200)
+        expect(json_response).to be_an Array
+        expect(json_response.length).to eq(0)
+      end
+
+      it 'returns an empty array if no merge request matches labels' do
+        get api("/projects/#{project.id}/merge_requests?labels=foo,bar", user)
+
+        expect(response).to have_http_status(200)
+        expect(json_response).to be_an Array
+        expect(json_response.length).to eq(0)
       end
 
       context "with ordering" do
