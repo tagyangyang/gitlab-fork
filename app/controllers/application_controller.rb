@@ -114,7 +114,7 @@ class ApplicationController < ActionController::Base
   end
 
   def access_denied!
-    render "errors/access_denied", layout: "errors", status: 404
+    render "errors/access_denied", layout: "errors", status: 403
   end
 
   def git_not_found!
