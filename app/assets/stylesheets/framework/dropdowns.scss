@@ -290,7 +290,7 @@
       }
 
       .dropdown-menu-user-username {
-        color: $gl-gray-light;
+        color: $gl-text-color-secondary;
       }
     }
   }
@@ -309,7 +309,7 @@
 .dropdown-menu-user-username {
   display: block;
   line-height: 16px;
-  color: $gl-gray-light;
+  color: $gl-text-color-secondary;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
