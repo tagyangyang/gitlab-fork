@@ -7,8 +7,8 @@ module IssuablesHelper
     "right-sidebar-#{sidebar_gutter_collapsed? ? 'collapsed' : 'expanded'}"
   end
 
-  def multi_label_name(current_labels, default_label, hasNoLabel = false)
-    if hasNoLabel
+  def multi_label_name(current_labels, default_label, has_no_label = false)
+    if has_no_label
       return Label::None.title
     end
 
