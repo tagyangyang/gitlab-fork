@@ -124,7 +124,11 @@ input[type="checkbox"]:hover {
 
     // Custom dropdown positioning
     .dropdown-menu {
-      top: 37px;
+      transition-property: top;
+      transition-duration: 100ms;
+      transition-delay: 100ms;
+      transition-timing-function:  cubic-bezier(0.23, 1, 0.32, 1);
+      top: 30px;
       left: -5px;
       padding: 0;
 
@@ -155,6 +159,9 @@ input[type="checkbox"]:hover {
       i {
         color: $layout-link-gray;
       }
+    }
+    .dropdown-menu {
+      top: 37px;
     }
   }
 
