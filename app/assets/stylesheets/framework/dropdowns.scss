@@ -1,6 +1,19 @@
 .dropdown {
   position: relative;
 
+  .dropdown-menu,
+  .dropdown-menu-nav {
+    transition-property: opacity, margin-top, visibility;
+    transition-duration: 100ms, 200ms, 150ms;
+    transition-timing-function: linear, cubic-bezier(0.23, 1, 0.32, 1), linear;
+    transition-delay: 100ms, 0ms, 120ms;
+    display: block;
+    margin-top: -5px;
+    opacity: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+
   .btn-link {
     &:hover {
       cursor: pointer;
@@ -18,31 +31,12 @@
   .dropdown-menu,
   .dropdown-menu-nav {
     display: block;
-
-    @include include-keyframes(fade-in) {
-      0% {
-        opacity: 0;
-      }
-
-      100% {
-        opacity: 1;
-      }
-    }
-
-    @include include-keyframes(slide-in) {
-      0% {
-        margin-top: -10px;
-      }
-
-      100% {
-        margin-top: 0;
-      }
-    }
-
-    animation-duration: 200ms, 400ms;
-    animation-fill-mode: forwards;
-    animation-timing-function: linear, cubic-bezier(0.23, 1, 0.32, 1);
-    animation-delay: 200ms, 0;
+    margin-top: 2px;
+    visibility: visible;
+    opacity: 1;
+    transition-property: opacity, margin-top, visibility;
+    transition-duration: 200ms, 400ms, 150ms;
+    transition-delay: 200ms, 300ms, 220ms;
 
     @media (max-width: $screen-xs-max) {
       width: 100%;
