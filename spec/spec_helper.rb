@@ -89,13 +89,3 @@ FactoryGirl::SyntaxRunner.class_eval do
 end
 
 ActiveRecord::Migration.maintain_test_schema!
-
-Capybara.register_driver :poltergeist do |app|
-  opts = {
-      extensions: ["#{Rails.root}/features/support/phantomjs/disable_animations.js"] # or wherever
-  }
-
-  Capybara::Poltergeist::Driver.new(app, opts)
-end
-
-Capybara.javascript_driver = :poltergeist

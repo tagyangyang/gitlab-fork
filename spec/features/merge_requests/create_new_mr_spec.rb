@@ -46,8 +46,8 @@ feature 'Create New Merge Request', feature: true, js: true do
     expect(page).to have_content('Source branch')
     expect(page).to have_content('Target branch')
 
-    first('.js-source-branch').click
-    first('.dropdown-source-branch .dropdown-content a', text: 'orphaned-branch').click
+    find('.js-source-branch', match: :first).click
+    find('.dropdown-source-branch .dropdown-content a', text: 'orphaned-branch', match: :first).click
 
     click_button "Compare branches"
     click_link "Changes"
