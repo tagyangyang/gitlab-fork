@@ -2,8 +2,9 @@
 (function() {
   this.GroupAvatar = (function() {
     function GroupAvatar() {
-      $('.js-choose-group-avatar-button').bind("click", function() {
+      $('.js-choose-group-avatar-button').bind("click", function(e) {
         var form;
+        e.preventDefault();
         form = $(this).closest("form");
         return form.find(".js-group-avatar-input").click();
       });
