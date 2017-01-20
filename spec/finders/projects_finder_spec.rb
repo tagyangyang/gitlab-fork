@@ -33,7 +33,9 @@ describe ProjectsFinder do
       subject { finder.execute(user) }
 
       describe 'without private projects' do
-        it { is_expected.to eq([public_project, internal_project]) }
+        it { is_expected.to include(public_project) }
+        it { is_expected.to include(internal_project) }
+        it { expect(subject.count).to eq(2) }
       end
 
       describe 'with private projects' do
@@ -42,7 +44,10 @@ describe ProjectsFinder do
         end
 
         it do
-          is_expected.to eq([public_project, internal_project, private_project])
+          it { is_expected.to include(public_project) }
+          it { is_expected.to include(internal_project) }
+          it { is_expected.to include(private_project) }
+          it { expect(subject.count).to eq(3) }
         end
       end
     end
