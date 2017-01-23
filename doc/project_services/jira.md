@@ -6,7 +6,7 @@ user name and password. Connecting to a JIRA server via CAS is not possible.
 Each project can be configured to connect to a different JIRA instance, see the
 [configuration](#configuration) section. If you have one JIRA instance you can
 pre-fill the settings page with a default template. To configure the template
-see the [Services Templates][services-templates] document.
+see the [Services Templates][services_templates] document.
 
 Once the project is connected to JIRA, you can reference and close the issues
 in JIRA directly from GitLab.
@@ -204,5 +204,5 @@ JIRA issue references and update comments will not work if the GitLab issue trac
 Make sure the `Transition ID` you set within the JIRA settings matches the one
 your project needs to close a ticket.
 
-[services-templates]: ../project_services/services_templates.md
+[services_templates]: ../project_services/services_templates.md
 [jira-repo-docs]: https://gitlab.com/gitlab-org/gitlab-ce/blob/8-13-stable/doc/project_services/jira.md
