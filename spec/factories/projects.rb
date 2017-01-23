@@ -6,8 +6,8 @@ FactoryGirl.define do
   factory :empty_project, class: 'Project' do
     sequence(:name) { |n| "project#{n}" }
     path { name.downcase.gsub(/\s/, '_') }
-    namespace
-    creator
+    namespace { creator.namespace }
+    association :creator, factory: :user
 
     # Behaves differently to nil due to cache_has_external_issue_tracker
     has_external_issue_tracker false

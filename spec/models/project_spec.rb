@@ -275,7 +275,7 @@ describe Project, models: true do
   end
 
   describe '#name_with_namespace' do
-    let(:project) { build_stubbed(:empty_project) }
+    let(:project) { build(:empty_project) }
 
     it { expect(project.name_with_namespace).to eq "#{project.namespace.human_name} / #{project.name}" }
     it { expect(project.human_name).to eq project.name_with_namespace }
