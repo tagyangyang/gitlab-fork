@@ -351,3 +351,6 @@ gem 'health_check', '~> 2.2.0'
 # System information
 gem 'vmstat', '~> 2.3.0'
 gem 'sys-filesystem', '~> 1.1.6'
+
+# Secure headers for Content Security Policy
+gem 'secure_headers', '~> 3.6'
