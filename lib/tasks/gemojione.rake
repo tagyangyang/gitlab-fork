@@ -4,30 +4,49 @@ namespace :gemojione do
     require 'digest/sha2'
     require 'json'
 
+    emoji_aliases = JSON.parse(File.read(File.join(Rails.root, 'fixtures', 'emojis', 'aliases.json')))
     dir = Gemojione.images_path
-    digests = []
-    aliases = Hash.new { |hash, key| hash[key] = [] }
-    aliases_path = File.join(Rails.root, 'fixtures', 'emojis', 'aliases.json')
+    resultant_emoji_map = {}
 
-    JSON.parse(File.read(aliases_path)).each do |alias_name, real_name|
-      aliases[real_name] << alias_name
-    end
+    # Construct the full asset path ourselves because
+    # ActionView::Helpers::AssetUrlHelper.asset_url is slow for hundreds
+    # of entries since it has to do a lot of extra work (e.g. regexps).
+    prefix = Gitlab::Application.config.assets.prefix
+    digest = Gitlab::Application.config.assets.digest
+    base =
+      if defined?(Gitlab::Application.config.relative_url_root) && Gitlab::Application.config.relative_url_root
+        Gitlab::Application.config.relative_url_root
+      else
+        ''
+      end
 
-    Gitlab::AwardEmoji.emojis.map do |name, emoji_hash|
-      fpath = File.join(dir, "#{emoji_hash['unicode']}.png")
-      digest = Digest::SHA256.file(fpath).hexdigest
+    Gitlab::Emoji.emojis.map do |name, emoji_hash|
+      # Ignore aliases
+      unless emoji_aliases.key?(name)
+        fpath = File.join(dir, "#{emoji_hash['unicode']}.png")
+        hash_digest = Digest::SHA256.file(fpath).hexdigest
 
-      digests << { name: name, unicode: emoji_hash['unicode'], digest: digest }
+        fname = if digest
+                  "#{emoji_hash['unicode']}-#{hash_digest}"
+                else
+                  emoji_hash['unicode']
+                end
 
-      aliases[name].each do |alias_name|
-        digests << { name: alias_name, unicode: emoji_hash['unicode'], digest: digest }
+        entry = {
+          category: emoji_hash['category'],
+          moji: emoji_hash['moji'],
+          unicodeVersion: Gitlab::Emoji.emoji_unicode_version(name),
+          fallbackImageSrc: File.join(base, prefix, "#{fname}.png"),
+        }
+
+        resultant_emoji_map[name] = entry
       end
     end
 
     out = File.join(Rails.root, 'fixtures', 'emojis', 'digests.json')
 
     File.open(out, 'w') do |handle|
-      handle.write(JSON.pretty_generate(digests))
+      handle.write(JSON.pretty_generate(resultant_emoji_map))
     end
   end
 
@@ -55,17 +74,30 @@ namespace :gemojione do
     SPRITESHEET_WIDTH = 860
     SPRITESHEET_HEIGHT = 840
 
+    emoji_aliases = JSON.parse(File.read(File.join(Rails.root, 'fixtures', 'emojis', 'aliases.json')))
+
+    # Setup a map to rename image files
+    emoji_uncicode_string_to_name_map = {}
+    Gitlab::Emoji.emojis.map do |name, emoji_hash|
+      # Ignore aliases
+      unless emoji_aliases.key?(name)
+        emoji_uncicode_string_to_name_map[emoji_hash['unicode']] = name
+      end
+    end
+
+    EMOJI_IMAGE_PATH_RE = /(.*?)(([0-9a-f]-?)+)\.png$/i
     Dir.mktmpdir do |tmpdir|
       # Copy the Gemojione assets to the temporary folder for resizing
       FileUtils.cp_r(Gemojione.images_path, tmpdir)
 
       Dir.chdir(tmpdir) do
         Dir["**/*.png"].each do |png|
-          resize!(File.join(tmpdir, png), SIZE)
+          tmp_image_path = File.join(tmpdir, png)
+          transform_to_named_emoji_image!(emoji_uncicode_string_to_name_map, tmp_image_path, SIZE)
         end
       end
 
-      style_path = Rails.root.join(*%w(app assets stylesheets pages emojis.scss))
+      style_path = Rails.root.join(*%w(app assets stylesheets framework emoji-sprites.scss))
 
       # Combine the resized assets into a packed sprite and re-generate the SCSS
       SpriteFactory.cssurl = "image-url('$IMAGE')"
@@ -92,6 +124,8 @@ namespace :gemojione do
         .emoji-icon {
           background-image: image-url('emoji.png');
           background-repeat: no-repeat;
+          color: transparent;
+          text-indent: -99em;
           height: #{SIZE}px;
           width: #{SIZE}px;
 
@@ -116,7 +150,8 @@ namespace :gemojione do
 
       Dir.chdir(tmpdir) do
         Dir["**/*.png"].each do |png|
-          resize!(File.join(tmpdir, png), RETINA)
+          tmp_image_path = File.join(tmpdir, png)
+          transform_to_named_emoji_image!(emoji_uncicode_string_to_name_map, tmp_image_path, RETINA)
         end
       end
 
@@ -154,5 +189,16 @@ namespace :gemojione do
     image.resize!(size, size)
     image.write(image_path) { self.quality = 100 }
     image.destroy!
+  end
+
+  def transform_to_named_emoji_image!(emoji_uncicode_string_to_name_map, tmp_image_path, size)
+    # Rename file from unicode to emoji name
+    matches = EMOJI_IMAGE_PATH_RE.match(tmp_image_path)
+    preceding_path = matches[1]
+    unicode_string = matches[2]
+    new_png_path = File.join(preceding_path, "#{emoji_uncicode_string_to_name_map[unicode_string]}.png")
+    FileUtils.mv(tmp_image_path, new_png_path)
+
+    resize!(new_png_path, size)
   end
 end

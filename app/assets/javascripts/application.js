@@ -3,7 +3,6 @@
 /* global Cookies */
 /* global Flash */
 /* global ConfirmDangerModal */
-/* global AwardsHandler */
 /* global Aside */
 
 window.$ = window.jQuery = require('jquery');
@@ -14,6 +13,16 @@ require('vendor/jquery.waitforimages');
 require('vendor/jquery.caret');
 require('vendor/jquery.atwho');
 require('vendor/jquery.scrollTo');
+
+// extensions
+require('./extensions/string');
+require('./extensions/array');
+require('./extensions/custom_event');
+require('./extensions/element');
+require('./extensions/jquery');
+require('./extensions/object');
+require('es6-promise').polyfill();
+
 window.Cookies = require('js-cookie');
 require('./autosave');
 require('bootstrap/js/affix');
@@ -67,13 +76,6 @@ require('./templates/issuable_template_selectors');
 require('./commit/file.js');
 require('./commit/image_file.js');
 
-// extensions
-require('./extensions/array');
-require('./extensions/custom_event');
-require('./extensions/element');
-require('./extensions/jquery');
-require('./extensions/object');
-
 // lib/utils
 require('./lib/utils/animate');
 require('./lib/utils/bootstrap_linked_tabs');
@@ -105,7 +107,7 @@ require('./ajax_loading_spinner');
 require('./api');
 require('./aside');
 require('./autosave');
-require('./awards_handler');
+const AwardsHandler = require('./awards_handler');
 require('./breakpoints');
 require('./broadcast_message');
 require('./build');
@@ -211,7 +213,6 @@ require('./wikis');
 require('./zen_mode');
 
 require('vendor/fuzzaldrin-plus');
-require('es6-promise').polyfill();
 
 (function () {
   document.addEventListener('beforeunload', function () {
