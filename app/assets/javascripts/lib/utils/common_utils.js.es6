@@ -241,5 +241,29 @@
       acc[element] = DOMStringMapObject[element];
       return acc;
     }, {});
+
+    w.gl.utils.setFavicon = (iconName) => {
+      const link = document.getElementById('favicon');
+      link.setAttribute('href', `/assets/${iconName}.ico?${Date.now()}`);
+    };
+
+    w.gl.utils.resetFavicon = () => {
+      const link = document.getElementById('favicon');
+      link.setAttribute('href', `/favicon.ico`);
+    };
+
+    w.gl.utils.setCIStatusFavicon = (status) => {
+      const FAVICON_PREFIX = 'ci_favicons/build_status_';
+      const supportedFavicons = ['pending', 'running', 'success', 'failed', 'skipped', 'canceled', 'created', 'manual', 'warning', 'not_found'];
+      if (supportedFavicons.indexOf(status) > -1) {
+        let faviconName = FAVICON_PREFIX + status;
+        if (status === 'success_with_warnings') {
+          faviconName = FAVICON_PREFIX + 'warning';
+        }
+        gl.utils.setFavicon(faviconName);
+      } else {
+        gl.utils.resetFavicon();
+      }
+    };
   })(window);
 }).call(this);
