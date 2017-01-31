@@ -20,12 +20,26 @@ module Banzai
           puts "html #{html}"
           #html = emoji_name_image_filter(content)
           #html = emoji_unicode_image_filter(html)
+          html = emoji_name_unicode_filter(content)
 
           next if html == content
 
           node.replace(html)
         end
         doc
+      end
+
+      # Replace :emoji: with corresponding unicode.
+      #
+      # text - String text to replace :emoji: in.
+      #
+      # Returns a String with :emoji: replaced with unicode.
+      def emoji_name_unicode_filter(text)
+        text.gsub(emoji_pattern) do |match|
+          name = $1
+          emoji_info = Gitlab::Emoji.emojis[name]
+          emoji_unicode_tag(name, emoji_url(name), emoji_info["moji"])
+        end
       end
 
       # Replace :emoji: with corresponding images.
@@ -54,6 +68,11 @@ module Banzai
       def emoji_image_tag(emoji_name, emoji_url)
         puts "emoji_image_tag #{emoji_name} #{emoji_url}"
         "<img class='emoji' title=':#{emoji_name}:' alt=':#{emoji_name}:' src='#{emoji_url}' height='20' width='20' align='absmiddle' />"
+      end
+
+      def emoji_unicode_tag(emoji_name, emoji_url, emoji_moji)
+        puts "emoji_unicode_tag #{emoji_name} #{emoji_url}"
+        "<gl-emoji data-name='#{emoji_name}' data-fallback-src='#{emoji_url}'>#{emoji_moji}</gl-emoji>"
       end
 
       # Build a regexp that matches all valid :emoji: names.

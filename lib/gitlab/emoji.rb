@@ -1,7 +1,7 @@
 module Gitlab
   module Emoji
     extend self
-    
+
     def emojis
       Gemojione.index.instance_variable_get(:@emoji_by_name)
     end
