@@ -2,8 +2,6 @@
 /* global Turbolinks */
 
 (function() {
-  Turbolinks.enableProgressBar();
-
   $(document).on('page:fetch', function() {
     $('.tanuki-logo').addClass('animate');
   });
