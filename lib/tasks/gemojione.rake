@@ -17,7 +17,7 @@ namespace :gemojione do
       fpath = File.join(dir, "#{emoji_hash['unicode']}.png")
       digest = Digest::SHA256.file(fpath).hexdigest
 
-      digests << { name: name, unicode: emoji_hash['unicode'], digest: digest }
+      digests << { name: name, moji: emoji_hash['moji'], unicode: emoji_hash['unicode'], unicode_version: emoji_hash['unicode_version'], digest: digest }
 
       aliases[name].each do |alias_name|
         digests << { name: alias_name, unicode: emoji_hash['unicode'], digest: digest }

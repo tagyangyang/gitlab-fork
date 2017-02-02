@@ -26,7 +26,7 @@
     },
     // Emoji
     Emoji: {
-      template: '<li>${name} <img alt="${name}" height="20" src="${path}" width="20" /></li>'
+      template: '<li>${name} <gl-emoji data-name="${name}" data-fallback-src="${path}" data-unicode-version="${unicode_version}">${moji}</gl-emoji></li>'
     },
     // Team Members
     Members: {

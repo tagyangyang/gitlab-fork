@@ -75,7 +75,7 @@ module Gitlab
                       fname = hash['unicode']
                     end
 
-                    { name: hash['name'], path: File.join(base, prefix, "#{fname}.png") }
+                    { name: hash['name'], path: File.join(base, prefix, "#{fname}.png"), moji: hash['moji'], unicode_version: hash['unicode_version'] }
                   end
                 end
     end
