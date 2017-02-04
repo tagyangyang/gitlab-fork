@@ -30,10 +30,12 @@ var emojiAliases = require('emoji-aliases');
       });
       $(document).off('click', '.js-emoji-btn').on('click', '.js-emoji-btn', (function(_this) {
         return function(e) {
-          var $target, emoji;
+          var $target, emoji, $glEmojiElement, $spriteIconElement;
           e.preventDefault();
           $target = $(e.currentTarget);
-          emoji = $target.find('.icon').data('emoji');
+          $glEmojiElement = $target.find('gl-emoji');
+          $spriteIconElement = $target.find('.icon');
+          emoji = ($glEmojiElement.length ? $glEmojiElement : $spriteIconElement).data('name');
           $target.closest('.js-awards-block').addClass('current');
           return _this.addAward(_this.getVotesBlock(), _this.getAwardUrl(), emoji);
         };
@@ -166,7 +168,7 @@ var emojiAliases = require('emoji-aliases');
       awardUrl = this.getAwardUrl();
       if (emoji === 'thumbsup' || emoji === 'thumbsdown') {
         mutualVote = emoji === 'thumbsup' ? 'thumbsdown' : 'thumbsup';
-        $emojiButton = votesBlock.find("[data-emoji=" + mutualVote + "]").parent();
+        $emojiButton = votesBlock.find("[data-name=" + mutualVote + "]").parent();
         isAlreadyVoted = $emojiButton.hasClass('active');
         if (isAlreadyVoted) {
           this.addAward(votesBlock, awardUrl, mutualVote, false);
@@ -250,12 +252,14 @@ var emojiAliases = require('emoji-aliases');
         .tooltip('fixTitle');
     };
 
-    AwardsHandler.prototype.createEmoji_ = function(votesBlock, emoji) {
-      var $emojiButton, buttonHtml, emojiCssClass;
-      emojiCssClass = this.resolveNameToCssClass(emoji);
-      buttonHtml = "<button class='btn award-control js-emoji-btn has-tooltip active' title='You' data-placement='bottom'> <div class='icon emoji-icon " + emojiCssClass + "' data-emoji='" + emoji + "'></div> <span class='award-control-text js-counter'>1</span> </button>";
+    AwardsHandler.prototype.createEmoji_ = function(votesBlock, emojiName) {
+      var $emojiButton, buttonHtml, emojiCssClass, emojiData, emojiMarkup;
+      emojiCssClass = this.resolveNameToCssClass(emojiName);
+      emojiData = this.resolveNameToEmojiMenuData(emojiName);
+      emojiMarkup = '<gl-emoji data-name="' + emojiName + '" data-fallback-src="' + emojiData.fallbackSrc + '" data-unicode-version="' + emojiData.unicodeVersion + '">' + String.fromCodePoint(parseInt(emojiData.unicodeName, 16)) + '</gl-emoji>';
+      buttonHtml = '<button class="btn award-control js-emoji-btn has-tooltip active" title="You" data-placement="bottom">' + emojiMarkup + ' <span class="award-control-text js-counter">1</span></button>';
       $emojiButton = $(buttonHtml);
-      $emojiButton.insertBefore(votesBlock.find('.js-award-holder')).find('.emoji-icon').data('emoji', emoji);
+      $emojiButton.insertBefore(votesBlock.find('.js-award-holder')).find('.emoji-icon').data('name', emojiName);
       this.animateEmoji($emojiButton);
       $('.award-control').tooltip();
       return votesBlock.removeClass('current');
@@ -285,9 +289,14 @@ var emojiAliases = require('emoji-aliases');
       return gon.award_menu_url;
     };
 
+    AwardsHandler.prototype.resolveNameToEmojiMenuData = function(emoji) {
+      var emojiIcon = document.querySelector('.emoji-menu-content [data-name="' + emoji + '"]');
+      return emojiIcon.dataset;
+    };
+
     AwardsHandler.prototype.resolveNameToCssClass = function(emoji) {
       var emojiIcon, unicodeName;
-      emojiIcon = $(".emoji-menu-content [data-emoji='" + emoji + "']");
+      emojiIcon = $(".emoji-menu-content [data-name='" + emoji + "']");
       if (emojiIcon.length > 0) {
         unicodeName = emojiIcon.data('unicode-name');
       } else {
@@ -308,7 +317,7 @@ var emojiAliases = require('emoji-aliases');
     };
 
     AwardsHandler.prototype.findEmojiIcon = function(votesBlock, emoji) {
-      return votesBlock.find(".js-emoji-btn [data-emoji='" + emoji + "']");
+      return votesBlock.find(".js-emoji-btn [data-name='" + emoji + "']");
     };
 
     AwardsHandler.prototype.scrollToAwards = function() {
@@ -343,7 +352,7 @@ var emojiAliases = require('emoji-aliases');
         ul = $("<ul class='clearfix emoji-menu-list frequent-emojis'>");
         for (i = 0, len = frequentlyUsedEmojis.length; i < len; i += 1) {
           emoji = frequentlyUsedEmojis[i];
-          $(".emoji-menu-content [data-emoji='" + emoji + "']").closest('li').clone().appendTo(ul);
+          $(".emoji-menu-content [data-name='" + emoji + "']").closest('li').clone().appendTo(ul);
         }
         $('.emoji-menu-content').prepend(ul).prepend($('<h5>').text('Frequently used'));
       }
@@ -372,7 +381,7 @@ var emojiAliases = require('emoji-aliases');
     };
 
     AwardsHandler.prototype.searchEmojis = function(term) {
-      return $(".emoji-menu-list:not(.frequent-emojis) [data-emoji*='" + term + "']").closest('li').clone();
+      return $(".emoji-menu-list:not(.frequent-emojis) [data-name*='" + term + "']").closest('li').clone();
     };
 
     return AwardsHandler;

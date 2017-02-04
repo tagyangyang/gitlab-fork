@@ -88,12 +88,15 @@ module IssuesHelper
   end
 
   def emoji_icon(name, unicode = nil, aliases = [], sprite: true)
-    unicode ||= Gitlab::Emoji.emoji_filename(name) rescue ""
+    emoji_info = Gitlab::Emoji.emojis[name]
+    unicode ||= emoji_info['unicode'] rescue ""
 
     data = {
+      name: name,
       aliases: aliases.join(" "),
-      emoji: name,
-      unicode_name: unicode
+      unicode_name: emoji_info['unicode'],
+      unicode_version: emoji_info['unicode_version'],
+      fallback_src: url_to_image("#{unicode}.png")
     }
 
     if sprite
@@ -105,12 +108,7 @@ module IssuesHelper
     else
       # Emoji icons displayed separately, used for the awards already given
       # to an issue or merge request.
-      content_tag :img, "",
-        class: "icon emoji",
-        title: name,
-        height: "20px",
-        width: "20px",
-        src: url_to_image("#{unicode}.png"),
+      content_tag 'gl-emoji', emoji_info['moji'],
         data: data
     end
   end

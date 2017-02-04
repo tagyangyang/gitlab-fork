@@ -1,5 +1,4 @@
 
-
 const unicodeSupportTestMap = {
   // man, student (emojione does not have any of these yet), http://emojipedia.org/emoji-zwj-sequences/
   // occupationZwj: '\u{1F468}\u{200D}\u{1F393}',
@@ -137,11 +136,12 @@ class GlEmojiElement extends HTMLElement {
   connectedCallback() {
     const emojiUnicode = this.textContent;
     const unicodeVersion = this.dataset.unicodeVersion;
+    const emojiSrc = this.dataset.fallbackSrc;
     const isEmojiUnicode = this.childNodes.length === 1 && this.childNodes[0].nodeType === 3;
+    const hasFallback = emojiSrc && emojiSrc.length > 0;
 
-    if (isEmojiUnicode && !isEmojiUnicodeSupported(emojiUnicode, unicodeVersion)) {
+    if (isEmojiUnicode && hasFallback && !isEmojiUnicodeSupported(emojiUnicode, unicodeVersion)) {
       const emojiName = this.dataset.name;
-      const emojiSrc = this.dataset.fallbackSrc;
       this.innerHTML = `<img class="emoji" title=":${emojiName}:" alt=":${emojiName}:" src="${emojiSrc}" width="20" height="20" align="absmiddle" />`;
     }
   }
