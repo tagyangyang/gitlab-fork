@@ -244,7 +244,9 @@
 
     w.gl.utils.setFavicon = (iconName) => {
       const link = document.getElementById('favicon');
-      link.setAttribute('href', `/assets/${iconName}.ico?${Date.now()}`);
+      if (link && iconName) {
+        link.setAttribute('href', `/assets/${iconName}.ico?${Date.now()}`);
+      }
     };
 
     w.gl.utils.resetFavicon = () => {
