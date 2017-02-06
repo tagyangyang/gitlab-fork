@@ -112,6 +112,7 @@
 
             if (log.state) {
               _this.state = log.state;
+              gl.utils.setCIStatusFavicon(log.status);
             }
             if (log.status === "running") {
               if (log.append) {

@@ -151,7 +151,7 @@ require('./smart_interval');
       return $.getJSON(this.opts.ci_status_url, (function(_this) {
         return function(data) {
           var message, status, title;
-          if (data.status === '') {
+          if (!data.status) {
             return;
           }
           if (data.environments && data.environments.length) _this.renderEnvironments(data.environments);
@@ -232,6 +232,7 @@ require('./smart_interval');
       allowed_states = ["failed", "canceled", "running", "pending", "success", "success_with_warnings", "skipped", "not_found"];
       if (indexOf.call(allowed_states, state) >= 0) {
         $('.ci_widget.ci-' + state).show();
+        gl.utils.setCIStatusFavicon(state);
         switch (state) {
           case "failed":
           case "canceled":
@@ -245,6 +246,7 @@ require('./smart_interval');
         }
       } else {
         $('.ci_widget.ci-error').show();
+        gl.utils.setCIStatusFavicon(state);
         return this.setMergeButtonClass('btn-danger');
       }
     };
