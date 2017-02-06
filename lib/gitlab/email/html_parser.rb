@@ -17,6 +17,12 @@ module Gitlab
       def filter_replies!
         document.xpath('//blockquote').each(&:remove)
         document.xpath('//table').each(&:remove)
+
+        # these bogus links are added by outlook, and can
+        # result in extra square brackets being added to the text
+        document.xpath('//a[@name="_MailEndCompose"]').each do |link|
+          link.replace(link.children)
+        end
       end
 
       def filtered_html
