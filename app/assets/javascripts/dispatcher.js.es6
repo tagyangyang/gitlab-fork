@@ -48,6 +48,7 @@
       this.initSearch();
       this.initFieldErrors();
       this.initPageScripts();
+      this.initCIStatusFavicon();
     }
 
     Dispatcher.prototype.initPageScripts = function() {
@@ -366,6 +367,27 @@
       $('.gl-show-field-errors').each((i, form) => {
         new gl.GlFieldErrors(form);
       });
+    };
+
+    Dispatcher.prototype.initCIStatusFavicon = function() {
+      var page = $('body').attr('data-page');
+
+      // Pages that need to have status favicon
+      const pagesWithCI = [
+        'projects:pipelines:show',
+        'projects:merge_requests:show',
+        'projects:builds:show',
+      ];
+
+      if (pagesWithCI.indexOf(page) > -1) { // Check if page is eligible for status favicon
+        const ciStatusEl = document.querySelector('.js-ci-status-code');
+        if (ciStatusEl) { // Check if page has status badge
+          const { status } = ciStatusEl.dataset;
+          gl.utils.setCIStatusFavicon(status); // set initial status.
+        }
+      } else {
+        gl.utils.setCIStatusFavicon(null);
+      }
     };
 
     return Dispatcher;
