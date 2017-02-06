@@ -73,5 +73,49 @@ require('~/lib/utils/common_utils');
         expect(normalized[NGINX].nginx).toBe('ok');
       });
     });
+
+    describe('gl.utils.setFavicon', () => {
+      it('should set page favicon to provided favicon', () => {
+        const faviconName = 'custom_favicon';
+        const fakeLink = {
+          setAttribute() {},
+        };
+
+        spyOn(window.document, 'getElementById').and.callFake(() => fakeLink);
+        spyOn(fakeLink, 'setAttribute').and.callFake((attr, val) => {
+          expect(attr).toEqual('href');
+          expect(val.indexOf('/assets/custom_favicon.ico?') > -1).toBe(true);
+        });
+        gl.utils.setFavicon(faviconName);
+      });
+    });
+
+    describe('gl.utils.resetFavicon', () => {
+      it('should reset page favicon to tanuki', () => {
+        const fakeLink = {
+          setAttribute() {},
+        };
+
+        spyOn(window.document, 'getElementById').and.callFake(() => fakeLink);
+        spyOn(fakeLink, 'setAttribute').and.callFake((attr, val) => {
+          expect(attr).toEqual('href');
+          expect(val).toEqual('/favicon.ico');
+        });
+        gl.utils.resetFavicon();
+      });
+    });
+
+    describe('gl.utils.setCIStatusFavicon', () => {
+      it('should set page favicon to CI status favicon based on provided status', () => {
+        const FAVICON_PREFIX = 'ci_favicons/build_status_';
+
+        spyOn(gl.utils, 'setFavicon').and.callFake((faviconUrl) => {
+          expect(faviconUrl.indexOf(FAVICON_PREFIX) > -1).toBe(true);
+        });
+
+        gl.utils.setCIStatusFavicon('success');
+        expect(gl.utils.setFavicon).toHaveBeenCalled();
+      });
+    });
   });
 })();
