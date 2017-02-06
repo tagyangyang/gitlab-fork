@@ -255,6 +255,7 @@
     w.gl.utils.setCIStatusFavicon = (status) => {
       const FAVICON_PREFIX = 'ci_favicons/build_status_';
       const supportedFavicons = ['pending', 'running', 'success', 'failed', 'skipped', 'canceled', 'created', 'manual', 'warning', 'not_found'];
+
       if (supportedFavicons.indexOf(status) > -1) {
         let faviconName = FAVICON_PREFIX + status;
         if (status === 'success_with_warnings') {
