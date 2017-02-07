@@ -52,7 +52,6 @@ function testUnicodeSupportMap(testMap) {
   const testMapKeys = Object.keys(testMap);
 
   const canvas = document.createElement('canvas');
-  window.canvasElement = canvas;
   canvas.width = 2 * fontSize;
   canvas.height = testMapKeys.length * fontSize;
   const ctx = canvas.getContext('2d');
