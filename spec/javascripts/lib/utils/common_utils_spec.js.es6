@@ -84,7 +84,7 @@ require('~/lib/utils/common_utils');
         spyOn(window.document, 'getElementById').and.callFake(() => fakeLink);
         spyOn(fakeLink, 'setAttribute').and.callFake((attr, val) => {
           expect(attr).toEqual('href');
-          expect(val.indexOf('/assets/custom_favicon.ico?') > -1).toBe(true);
+          expect(val.indexOf('/assets/custom_favicon.ico') > -1).toBe(true);
         });
         gl.utils.setFavicon(faviconName);
       });
