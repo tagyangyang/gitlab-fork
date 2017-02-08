@@ -157,13 +157,20 @@ class GlEmojiElement extends HTMLElement {
   connectedCallback() {
     const emojiUnicode = this.textContent.trim();
     const unicodeVersion = this.dataset.unicodeVersion;
-    const emojiSrc = this.dataset.fallbackSrc;
+    const fallbackSrc = this.dataset.fallbackSrc;
+    const fallbackCssClass = this.dataset.fallbackCssClass;
     const isEmojiUnicode = this.childNodes.length === 1 && this.childNodes[0].nodeType === 3;
-    const hasFallback = emojiSrc && emojiSrc.length > 0;
+    const hasImageFallback = fallbackSrc && fallbackSrc.length > 0;
+    const hasCssSpriteFalback = fallbackCssClass && fallbackCssClass.length > 0;
 
-    if (isEmojiUnicode && hasFallback && !isEmojiUnicodeSupported(emojiUnicode, unicodeVersion)) {
-      const emojiName = this.dataset.name;
-      this.innerHTML = emojiImageTag(emojiName, emojiSrc);
+    if (isEmojiUnicode && !isEmojiUnicodeSupported(emojiUnicode, unicodeVersion)) {
+      // CSS sprite fallback takes precedence over image fallback
+      if (hasCssSpriteFalback) {
+        this.classList.add('emoji-icon', fallbackCssClass);
+      } else if (hasImageFallback) {
+        const emojiName = this.dataset.name;
+        this.innerHTML = emojiImageTag(emojiName, fallbackSrc);
+      }
     }
   }
 }

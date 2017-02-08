@@ -122,6 +122,7 @@ namespace :gemojione do
         .emoji-icon {
           background-image: image-url('emoji.png');
           background-repeat: no-repeat;
+          color: transparent;
           height: #{SIZE}px;
           width: #{SIZE}px;
 

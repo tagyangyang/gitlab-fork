@@ -37,10 +37,12 @@ module Gitlab
       "<img class='emoji' title=':#{name}:' alt=':#{name}:' src='#{src}' height='20' width='20' align='absmiddle' />"
     end
 
+    # CSS sprite fallback takes precedence over image fallback
     def gl_emoji_tag(name, sprite: false, force_fallback: false)
       emoji_info = emojis[name]
       emoji_fallback_image_source = ActionController::Base.helpers.url_to_image("#{emoji_info['unicode']}.png")
-      "<gl-emoji data-name='#{name}' data-fallback-src='#{emoji_fallback_image_source}' #{sprite ? "data-fallback-css-class='emoji-#{emoji_info['unicode']}'" : ""} data-unicode-version='#{emoji_unicode_version(name)}'>#{force_fallback ? emoji_image_tag(name, emoji_fallback_image_source) : emoji_info['moji']}</gl-emoji>"
+      emoji_fallback_css_class = "emoji-#{emoji_info['unicode']}"
+      "<gl-emoji #{force_fallback && sprite ? "class='emoji-icon #{emoji_fallback_css_class}'" : ""} data-name='#{name}' data-fallback-src='#{emoji_fallback_image_source}' #{sprite ? "data-fallback-css-class='#{emoji_fallback_css_class}'" : ""} data-unicode-version='#{emoji_unicode_version(name)}'>#{force_fallback && sprite === false ? emoji_image_tag(name, emoji_fallback_image_source) : emoji_info['moji']}</gl-emoji>"
     end
   end
 end
