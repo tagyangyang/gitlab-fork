@@ -5,9 +5,22 @@ namespace :gemojione do
     require 'json'
 
     dir = Gemojione.images_path
-    digests = []
+    resultantEmojiMap = {}
     aliases = Hash.new { |hash, key| hash[key] = [] }
     aliases_path = File.join(Rails.root, 'fixtures', 'emojis', 'aliases.json')
+
+    # Construct the full asset path ourselves because
+    # ActionView::Helpers::AssetUrlHelper.asset_url is slow for hundreds
+    # of entries since it has to do a lot of extra work (e.g. regexps).
+    prefix = Gitlab::Application.config.assets.prefix
+    digest = Gitlab::Application.config.assets.digest
+    base =
+      if defined?(Gitlab::Application.config.relative_url_root) && Gitlab::Application.config.relative_url_root
+        Gitlab::Application.config.relative_url_root
+      else
+        ''
+      end
+
 
     JSON.parse(File.read(aliases_path)).each do |alias_name, real_name|
       aliases[real_name] << alias_name
@@ -15,19 +28,36 @@ namespace :gemojione do
 
     Gitlab::AwardEmoji.emojis.map do |name, emoji_hash|
       fpath = File.join(dir, "#{emoji_hash['unicode']}.png")
-      digest = Digest::SHA256.file(fpath).hexdigest
+      hash_digest = Digest::SHA256.file(fpath).hexdigest
 
-      digests << { name: name, moji: emoji_hash['moji'], unicode: emoji_hash['unicode'], unicode_version: emoji_hash['unicode_version'], digest: digest }
+      if digest
+        fname = "#{emoji_hash['unicode']}-#{hash_digest}"
+      else
+        fname = emoji_hash['unicode']
+      end
+
+
+      entry = {
+        category: emoji_hash['category'],
+        moji: emoji_hash['moji'],
+        unicode: emoji_hash['unicode'],
+        unicodeVersion: Gitlab::Emoji.emoji_unicode_version(name),
+        fallbackImageSrc: File.join(base, prefix, "#{fname}.png")
+      }
+
+      resultantEmojiMap[name] = entry
 
       aliases[name].each do |alias_name|
-        digests << { name: alias_name, unicode: emoji_hash['unicode'], digest: digest }
+        resultantEmojiMap[alias_name] = entry.merge({
+          name: alias_name
+        })
       end
     end
 
     out = File.join(Rails.root, 'fixtures', 'emojis', 'digests.json')
 
     File.open(out, 'w') do |handle|
-      handle.write(JSON.pretty_generate(digests))
+      handle.write(JSON.pretty_generate(resultantEmojiMap))
     end
   end
 

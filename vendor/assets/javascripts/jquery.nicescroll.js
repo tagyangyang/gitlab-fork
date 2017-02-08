@@ -159,7 +159,7 @@
     d.isandroid = (/android/i.test(_agent));
 
     d.haseventlistener = ("addEventListener" in _el);
-    
+
     d.trstyle = false;
     d.hastransform = false;
     d.hastranslate3d = false;
@@ -168,7 +168,7 @@
     d.transitionend = false;
 
     var a;
-    var check = ['transform', 'msTransform', 'webkitTransform', 'MozTransform', 'OTransform'];    
+    var check = ['transform', 'msTransform', 'webkitTransform', 'MozTransform', 'OTransform'];
     for (a = 0; a < check.length; a++) {
       if (typeof _style[check[a]] != "undefined") {
         d.trstyle = check[a];
@@ -269,7 +269,7 @@
 
     this.canshowonmouseevent = (self.opt.autohidemode != "scroll");
 
-    // Events jump table    
+    // Events jump table
     this.onmousedown = false;
     this.onmouseup = false;
     this.onmousemove = false;
@@ -286,7 +286,7 @@
     this.onzoomin = false;
     this.onzoomout = false;
 
-    // Let's start!  
+    // Let's start!
     this.view = false;
     this.page = false;
 
@@ -303,7 +303,7 @@
 
     this.isrtlmode = (this.opt.rtlmode == "auto") ? ((this.win[0] == window ? this.body : this.win).css("direction") == "rtl") : (this.opt.rtlmode === true);
     //    this.checkrtlmode = false;
-    
+
     this.scrollrunning = false;
 
     this.scrollmom = false;
@@ -359,7 +359,7 @@
     this.ishwscroll = (this.canhwscroll && self.haswrapper);
 
     this.hasreversehr = (this.isrtlmode&&!cap.iswebkit);  //RTL mode with reverse horizontal axis
-    
+
     this.istouchcapable = false; // desktop devices with touch screen support
 
     //## Check WebKit-based desktop with touch support
@@ -378,7 +378,7 @@
 /* deprecated
     this.delayed = function(name, fn, tm, lazy) {
     };
-*/    
+*/
 
     this.debounced = function(name, fn, tm) {
       var dd = self.delaylist[name];
@@ -435,7 +435,7 @@
 
     // derived by by Dan Pupius www.pupius.net
     var BezierClass = function(st, ed, spd, p1, p2, p3, p4) {
-    
+
       this.st = st;
       this.ed = ed;
       this.spd = spd;
@@ -493,7 +493,7 @@
       };
 
       //this one can help to enable hw accel on ios6 http://indiegamr.com/ios6-html-hardware-acceleration-changes-and-how-to-fix-them/
-      if (cap.hastranslate3d && cap.isios) this.doc.css("-webkit-backface-visibility", "hidden"); // prevent flickering http://stackoverflow.com/questions/3461441/      
+      if (cap.hastranslate3d && cap.isios) this.doc.css("-webkit-backface-visibility", "hidden"); // prevent flickering http://stackoverflow.com/questions/3461441/
 
       this.getScrollTop = function(last) {
         if (!last) {
@@ -618,17 +618,17 @@
       return {top:window.pageYOffset||document.documentElement.scrollTop,
               left:window.pageXOffset||document.documentElement.scrollLeft};
     }
-    
+
     this.getOffset = function() {
       if (self.isfixed) {
         var ofs = self.win.offset();  // fix Chrome auto issue (when right/bottom props only)
         var scrl = self.getDocumentScrollOffset();
         ofs.top-=scrl.top;
         ofs.left-=scrl.left;
-        return ofs;  
+        return ofs;
       }
       var ww = self.win.offset();
-      if (!self.viewport) return ww;      
+      if (!self.viewport) return ww;
       var vp = self.viewport.offset();
       return {
         top: ww.top - vp.top,// + self.viewport.scrollTop(),
@@ -644,7 +644,7 @@
         if (self.railh) self.railh.css({  //**
           width: self.win.innerWidth() - (self.opt.railpadding.left + self.opt.railpadding.right)
         });
-        
+
       } else {
         var wpos = self.getOffset();
         var pos = {
@@ -659,7 +659,7 @@
           if (off.top) pos.top += off.top;
           if (self.rail.align && off.left) pos.left += off.left;
         }
-        
+
         if (!self.railslocked) self.rail.css({
           top: pos.top,
           left: pos.left,
@@ -792,9 +792,9 @@
         });
 
         cursor.hborder = parseFloat(cursor.outerHeight() - cursor.innerHeight());
-        
+
         cursor.addClass('nicescroll-cursors');
-        
+
         self.cursor = cursor;
 
         var rail = $(document.createElement('div'));
@@ -885,11 +885,11 @@
           });
 
           if (cap.isieold) cursor.css({'overflow':'hidden'});  //IE6 horiz scrollbar issue
-          
+
           cursor.wborder = parseFloat(cursor.outerWidth() - cursor.innerWidth());
-          
+
           cursor.addClass('nicescroll-cursors');
-          
+
           self.cursorh = cursor;
 
           railh = $(document.createElement('div'));
@@ -915,7 +915,7 @@
 
         }
 
-        //        
+        //
 
         if (self.ispage) {
           rail.css({
@@ -1122,7 +1122,7 @@
 
             self.ontouchstart = function(e) {
               if (e.pointerType && e.pointerType != 2 && e.pointerType != "touch") return false;
-              
+
               self.hasmoving = false;
 
               if (!self.railslocked) {
@@ -1205,9 +1205,9 @@
                 self.hasmoving = false;
                 self.lastmouseup = false;
                 self.scrollmom.reset(e.clientX, e.clientY);
-                
-                if (!cap.cantouch && !this.istouchcapable && !e.pointerType) {       
-                
+
+                if (!cap.cantouch && !this.istouchcapable && !e.pointerType) {
+
                   var ip = (tg) ? /INPUT|SELECT|TEXTAREA/i.test(tg.nodeName) : false;
                   if (!ip) {
                     if (!self.ispage && cap.hasmousecapture) tg.setCapture();
@@ -1237,8 +1237,8 @@
 
             };
 
-            self.ontouchend = function(e) {              
-              if (!self.rail.drag) return true;              
+            self.ontouchend = function(e) {
+              if (!self.rail.drag) return true;
               if (self.rail.drag.pt == 2) {
                 if (e.pointerType && e.pointerType != 2 && e.pointerType != "touch") return false;
                 self.scrollmom.doMomentum();
@@ -1261,13 +1261,13 @@
             self.ontouchmove = function(e, byiframe) {
 
               if (!self.rail.drag) return false;
-            
+
               if (e.targetTouches && self.opt.preventmultitouchscrolling) {
                 if (e.targetTouches.length > 1) return false; // multitouch
               }
-            
+
               if (e.pointerType && e.pointerType != 2 && e.pointerType != "touch") return false;
-          
+
               if (self.rail.drag.pt == 2) {
                 if (cap.cantouch && (cap.isios) && (typeof e.original == "undefined")) return true; // prevent ios "ghost" events by clickable elements
 
@@ -1439,7 +1439,7 @@
             if (self.rail.drag) {
               if (self.rail.drag.pt != 1) return true;
               if (cap.hasmousecapture) document.releaseCapture();
-              if (self.isiframe && !cap.hasmousecapture) self.doc.css("pointer-events", self.saved.csspointerevents);              
+              if (self.isiframe && !cap.hasmousecapture) self.doc.css("pointer-events", self.saved.csspointerevents);
               self.rail.drag = false;
               //if (!self.rail.active) self.hideCursor();
               if (self.hasmoving) self.triggerScrollEnd(); // TODO - check &&!self.scrollrunning
@@ -1484,7 +1484,7 @@
 
               return self.cancelEvent(e);
             }
-            /*              
+            /*
             else {
               self.checkarea = true;
             }
@@ -1558,19 +1558,19 @@
             }
 
             self.onselectionstart = function(e) {
-/*  More testing - severe chrome issues            
+/*  More testing - severe chrome issues
               if (!self.haswrapper&&(e.which&&e.which==2)) {  // fool browser to manage middle button scrolling
                 self.win.css({'overflow':'auto'});
                 setTimeout(function(){
                   self.win.css({'overflow':''});
-                },10);                
+                },10);
                 return true;
-              }            
-*/              
+              }
+*/
               if (self.ispage) return;
               self.selectiondrag = self.win.offset();
             };
-            
+
             self.onselectionend = function(e) {
               self.selectiondrag = false;
             };
@@ -1617,7 +1617,7 @@
             self.bind(document, "touchmove", self.ontouchmove);
           }
 
-          
+
           if (self.opt.cursordragontouch || (!cap.cantouch && !self.opt.touchbehavior)) {
 
             self.rail.css({
@@ -1697,7 +1697,7 @@
               });
               self.bind(self.cursorh, "mouseup", self.onmouseup);
             }
-            
+
             if (!self.ispage && self.opt.enablescrollonselection) {
               self.bind(self.win[0], "mousedown", self.onselectionstart);
               self.bind(document, "mouseup", self.onselectionend);
@@ -1830,7 +1830,7 @@
                 ret = true;
                 break;
               case 36:
-              case 63273: // safari                
+              case 63273: // safari
                 (self.railh && ctrl) ? self.doScrollPos(0, 0): self.doScrollTo(0);
                 ret = true;
                 break;
@@ -1868,7 +1868,7 @@
         });
         self.bind(window,"blur",function(e){
           self.wheelprevented = false;
-        });        
+        });
 
         self.bind(window, 'resize', self.lazyResize);
         self.bind(window, 'orientationchange', self.lazyResize);
@@ -1897,8 +1897,9 @@
               if (mut.type=="attributes") {
                 return ($("body").hasClass("modal-open")) ? self.hide() : self.show();  // Support for Bootstrap modal
               }
-            });  
-            if (document.body.scrollHeight!=self.page.maxh) return self.lazyResize(30);
+            });
+            // TODO: uncomment, testing
+            //if (document.body.scrollHeight!=self.page.maxh) return self.lazyResize(30);
           });
           self.observerbody.observe(document.body, {
             childList: true,
@@ -1908,7 +1909,7 @@
             attributeFilter: ['class']
           });
         }
-        
+
         if (!self.ispage && !self.haswrapper) {
           // redesigned MutationObserver for Chrome18+/Firefox14+/iOS6+ with support for: remove div, add/remove content
           if (ClsMutationObserver !== false) {
@@ -1954,7 +1955,7 @@
         self.lazyResize(30);
 
       }
-      
+
       if (this.doc[0].nodeName == 'IFRAME') {
         var oniframeload = function() {
           self.iframexd = false;
@@ -1966,10 +1967,10 @@
             self.iframexd = true;
             doc = false
           }
-          
+
           if (self.iframexd) {
             if ("console" in window) console.log('NiceScroll error: policy restriced iframe');
-            return true; //cross-domain - I can't manage this        
+            return true; //cross-domain - I can't manage this
           }
 
           self.forcescreen = true;
@@ -2077,7 +2078,7 @@
         height: self.cursorheight,
         top: self.scroll.y
       });
-      if (self.cursorh) {        
+      if (self.cursorh) {
         var lx = (self.hasreversehr) ? self.scrollvaluemaxw-self.scroll.x : self.scroll.x;
         (!self.rail.align && self.rail.visibility) ? self.cursorh.css({
           width: self.cursorwidth,
@@ -2139,7 +2140,7 @@
       };
 
     this.onResize = function(e, page) {
-    
+
       if (!self || !self.win) return false;
 
       if (!self.haswrapper && !self.ispage) {
@@ -2168,14 +2169,14 @@
 
       self.page.maxh = Math.max(0, self.page.h - self.view.h);
       self.page.maxw = Math.max(0, self.page.w - self.view.w);
-      
+
       if ((self.page.maxh == premaxh) && (self.page.maxw == premaxw) && (self.view.w == preview.w) && (self.view.h == preview.h)) {
-        // test position        
+        // test position
         if (!self.ispage) {
           var pos = self.win.offset();
           if (self.lastposition) {
             var lst = self.lastposition;
-            if ((lst.top == pos.top) && (lst.left == pos.left)) return self; //nothing to do            
+            if ((lst.top == pos.top) && (lst.left == pos.left)) return self; //nothing to do
           }
           self.lastposition = pos;
         } else {
@@ -2369,7 +2370,7 @@
           q: false
         });
         el.addEventListener(name, fn, bubble || false);
-      };    
+      };
       this.cancelEvent = function(e) {
         if (!e) return false;
         var e = (e.original) ? e.original : e;
@@ -2401,7 +2402,7 @@
         } else {
           el["on" + name] = fn;
         }
-      };    
+      };
       // Thanks to http://www.switchonthecode.com !!
       this.cancelEvent = function(e) {
         var e = window.event || false;
@@ -2425,7 +2426,7 @@
         }
       };
     }
-    
+
     this.unbindAll = function() {
       for (var a = 0; a < self.events.length; a++) {
         var r = self.events[a];
@@ -2608,7 +2609,7 @@
 
     function execScrollWheel(e, hr, chkscroll) {
       var px, py;
-      
+
       if (e.deltaMode == 0) { // PIXEL
         px = -Math.floor(e.deltaX * (self.opt.mousescrollstep / (18 * 3)));
         py = -Math.floor(e.deltaY * (self.opt.mousescrollstep / (18 * 3)));
@@ -2617,18 +2618,18 @@
         py = -Math.floor(e.deltaY * self.opt.mousescrollstep);
       }
 
-      if (hr && self.opt.oneaxismousemode && (px == 0) && py) { // classic vertical-only mousewheel + browser with x/y support 
+      if (hr && self.opt.oneaxismousemode && (px == 0) && py) { // classic vertical-only mousewheel + browser with x/y support
         px = py;
         py = 0;
-      
+
         if (chkscroll) {
           var hrend = (px < 0) ? (self.getScrollLeft() >= self.page.maxw) : (self.getScrollLeft() <= 0);
           if (hrend) {  // preserve vertical scrolling
             py = px;
-            px = 0;            
+            px = 0;
           }
         }
-        
+
       }
 
       if (px) {
@@ -2781,7 +2782,7 @@
         var py = self.getScrollTop();
         var px = self.getScrollLeft();
 
-        if (((self.newscrolly - py) * (y - py) < 0) || ((self.newscrollx - px) * (x - px) < 0)) self.cancelScroll(); //inverted movement detection      
+        if (((self.newscrolly - py) * (y - py) < 0) || ((self.newscrollx - px) * (x - px) < 0)) self.cancelScroll(); //inverted movement detection
 
         if (self.opt.bouncescroll == false) {
           if (y < 0) y = 0;
@@ -2902,7 +2903,7 @@
         self.timerscroll = false;
         var py = self.getScrollTop();
         var px = self.getScrollLeft();
-        self.setScrollTop(py); // fire event onscroll        
+        self.setScrollTop(py); // fire event onscroll
         if (self.railh) self.setScrollLeft(px); // fire event onscroll left
 
         self.noticeCursor(false, py, px);
@@ -3269,7 +3270,7 @@
   };
 
   // Inspired by the work of Kin Blas
-  // http://webpro.host.adobe.com/people/jblas/momentum/includes/jquery.momentum.0.7.js  
+  // http://webpro.host.adobe.com/people/jblas/momentum/includes/jquery.momentum.0.7.js
 
 
   var ScrollMomentumClass2D = function(nc) {
@@ -3476,8 +3477,8 @@
     }
   };
 
-  /*  
-  $.fx.step["scrollTop"] = function(fx){    
+  /*
+  $.fx.step["scrollTop"] = function(fx){
     $.cssHooks["scrollTop"].set( fx.elem, fx.now + fx.unit );
   };
 */
@@ -3510,10 +3511,10 @@
     }
   };
 
-  /*  
+  /*
   $.fx.step["scrollLeft"] = function(fx){
     $.cssHooks["scrollLeft"].set( fx.elem, fx.now + fx.unit );
-  };  
+  };
 */
 
   jQuery.fn.scrollLeft = function(value) {

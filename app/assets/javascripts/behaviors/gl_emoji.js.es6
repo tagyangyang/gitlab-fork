@@ -126,6 +126,7 @@ function isEmojiUnicodeSupported(emojiUnicode, unicodeVersion) {
     !(isWindows && isFlagEmoji(emojiUnicode));
 }
 
+/* */
 class GlEmojiElement extends HTMLElement {
   // See https://github.com/WebReflection/document-register-element#v1-caveat
   constructor(argSelf) {
@@ -133,7 +134,7 @@ class GlEmojiElement extends HTMLElement {
     return self;
   }
   connectedCallback() {
-    const emojiUnicode = this.textContent;
+    const emojiUnicode = this.textContent.trim();
     const unicodeVersion = this.dataset.unicodeVersion;
     const emojiSrc = this.dataset.fallbackSrc;
     const isEmojiUnicode = this.childNodes.length === 1 && this.childNodes[0].nodeType === 3;
@@ -147,3 +148,4 @@ class GlEmojiElement extends HTMLElement {
 }
 
 customElements.define('gl-emoji', GlEmojiElement);
+/* */

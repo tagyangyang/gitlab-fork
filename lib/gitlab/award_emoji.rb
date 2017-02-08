@@ -56,26 +56,9 @@ module Gitlab
     def self.urls
       @urls ||= begin
                   path = File.join(Rails.root, 'fixtures', 'emojis', 'digests.json')
-                  # Construct the full asset path ourselves because
-                  # ActionView::Helpers::AssetUrlHelper.asset_url is slow for hundreds
-                  # of entries since it has to do a lot of extra work (e.g. regexps).
-                  prefix = Gitlab::Application.config.assets.prefix
-                  digest = Gitlab::Application.config.assets.digest
-                  base =
-                    if defined?(Gitlab::Application.config.relative_url_root) && Gitlab::Application.config.relative_url_root
-                      Gitlab::Application.config.relative_url_root
-                    else
-                      ''
-                    end
 
                   JSON.parse(File.read(path)).map do |hash|
-                    if digest
-                      fname = "#{hash['unicode']}-#{hash['digest']}"
-                    else
-                      fname = hash['unicode']
-                    end
-
-                    { name: hash['name'], path: File.join(base, prefix, "#{fname}.png"), moji: hash['moji'], unicode_version: hash['unicode_version'] }
+                    { name: hash['name'], path: hash['fallbackImageSrc'], moji: hash['moji'], unicode_version: hash['unicodeVersion'] }
                   end
                 end
     end
