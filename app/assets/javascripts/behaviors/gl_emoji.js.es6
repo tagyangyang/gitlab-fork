@@ -120,7 +120,6 @@ function testUnicodeSupportMap(testMap) {
   return resultMap;
 }
 
-
 const isWindows = /\bWindows\b/.test(navigator.userAgent);
 const chromeMatches = navigator.userAgent.match(/Chrom(?:e|ium)\/([0-9]+)\./);
 const isChrome = chromeMatches && chromeMatches.length > 0;
