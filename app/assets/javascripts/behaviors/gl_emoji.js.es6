@@ -137,7 +137,18 @@ function isKeycapEmoji(emojiUnicode) {
   return emojiUnicode.length === 3 && emojiUnicode[2] === '\u20E3';
 }
 
-const unicodeSupportMap = testUnicodeSupportMap(unicodeSupportTestMap);
+let unicodeSupportMap;
+const userAgentFromCache = window.localStorage.getItem('gl-emoji-user-agent');
+try {
+  unicodeSupportMap = JSON.parse(window.localStorage.getItem('gl-emoji-unicode-support-map'));
+} catch (err) {
+  // swallow
+}
+if (!unicodeSupportMap || userAgentFromCache !== navigator.userAgent) {
+  unicodeSupportMap = testUnicodeSupportMap(unicodeSupportTestMap);
+  window.localStorage.setItem('gl-emoji-user-agent', navigator.userAgent);
+  window.localStorage.setItem('gl-emoji-unicode-support-map', JSON.stringify(unicodeSupportMap));
+}
 console.log('unicodeSupportMap', unicodeSupportMap);
 
 function isEmojiUnicodeSupported(emojiUnicode, unicodeVersion) {
