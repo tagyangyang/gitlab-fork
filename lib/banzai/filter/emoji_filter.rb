@@ -17,9 +17,6 @@ module Banzai
 
           next unless content.include?(':') || node.text.match(emoji_unicode_pattern)
 
-          puts "html #{html}"
-          #html = emoji_name_image_filter(content)
-          #html = emoji_unicode_image_filter(html)
           html = emoji_unicode_element_unicode_filter(content)
           html = emoji_name_element_unicode_filter(html)
 
@@ -38,31 +35,7 @@ module Banzai
       def emoji_name_element_unicode_filter(text)
         text.gsub(emoji_pattern) do |match|
           name = $1
-          emoji_info = Gitlab::Emoji.emojis[name]
-          emoji_unicode_tag(name, emoji_url(name), emoji_info['moji'], emoji_info['unicode_version'])
-        end
-      end
-
-      # Replace :emoji: with corresponding images.
-      #
-      # text - String text to replace :emoji: in.
-      #
-      # Returns a String with :emoji: replaced with images.
-      def emoji_name_image_filter(text)
-        text.gsub(emoji_pattern) do |match|
-          name = $1
-          emoji_image_tag(name, emoji_url(name))
-        end
-      end
-
-      # Replace unicode emoji with corresponding images if they exist.
-      #
-      # text - String text to replace unicode emoji in.
-      #
-      # Returns a String with unicode emoji replaced with images.
-      def emoji_unicode_image_filter(text)
-        text.gsub(emoji_unicode_pattern) do |moji|
-          emoji_image_tag(Gitlab::Emoji.emojis_by_moji[moji]['name'], emoji_unicode_url(moji))
+          Gitlab::Emoji.gl_emoji_tag(name)
         end
       end
 
@@ -74,18 +47,8 @@ module Banzai
       def emoji_unicode_element_unicode_filter(text)
         text.gsub(emoji_unicode_pattern) do |moji|
           emoji_info = Gitlab::Emoji.emojis_by_moji[moji]
-          emoji_unicode_tag(emoji_info['name'], emoji_unicode_url(moji), emoji_info['moji'], emoji_info['unicode_version'])
+          Gitlab::Emoji.gl_emoji_tag(emoji_info['name'])
         end
-      end
-
-      def emoji_image_tag(emoji_name, emoji_url)
-        puts "emoji_image_tag #{emoji_name} #{emoji_url}"
-        "<img class='emoji' title=':#{emoji_name}:' alt=':#{emoji_name}:' src='#{emoji_url}' height='20' width='20' align='absmiddle' />"
-      end
-
-      def emoji_unicode_tag(emoji_name, emoji_url, emoji_moji, emoji_unicode_version)
-        puts "emoji_unicode_tag #{emoji_name} #{emoji_url} #{emoji_unicode_version}"
-        "<gl-emoji data-name='#{emoji_name}' data-fallback-src='#{emoji_url}' data-unicode-version='#{emoji_unicode_version}'>#{emoji_moji}</gl-emoji>"
       end
 
       # Build a regexp that matches all valid :emoji: names.

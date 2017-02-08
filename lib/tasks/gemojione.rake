@@ -40,9 +40,9 @@ namespace :gemojione do
       entry = {
         category: emoji_hash['category'],
         moji: emoji_hash['moji'],
-        unicode: emoji_hash['unicode'],
         unicodeVersion: Gitlab::Emoji.emoji_unicode_version(name),
-        fallbackImageSrc: File.join(base, prefix, "#{fname}.png")
+        fallbackImageSrc: File.join(base, prefix, "#{fname}.png"),
+        fallbackSpriteClass: "emoji-#{emoji_hash['unicode']}",
       }
 
       resultantEmojiMap[name] = entry

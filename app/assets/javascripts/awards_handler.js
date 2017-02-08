@@ -3,6 +3,9 @@
 
 var emojiMap = require('emoji-map');
 var emojiAliases = require('emoji-aliases');
+const glEmoji = require('./behaviors/gl_emoji.js.es6');
+
+const glEmojiTag = glEmoji.glEmojiTag;
 
 var transitionEndEventString = 'transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd';
 var requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.setTimeout;
@@ -50,9 +53,9 @@ function renderCategory(name, emojiList) {
         return `
           <li class="emoji-menu-list-item">
             <button class="emoji-menu-btn text-center js-emoji-btn" type="button">
-              <gl-emoji data-name="${emojiName}" data-unicode-version="${emojiMap[emojiName].unicodeVersion}" data-fallback-src="${emojiMap[emojiName].fallbackImageSrc}">
-                ${emojiMap[emojiName].moji}
-              </gl-emoji>
+              ${glEmojiTag(emojiName, {
+                sprite: true
+              })}
             </button>
           </li>
         `;
@@ -138,8 +141,7 @@ function renderCategory(name, emojiList) {
         }
       } else {
         $addBtn.addClass('is-loading is-active');
-        url = this.getAwardMenuUrl();
-        return this.createEmojiMenu(url, (function(_this) {
+        return this.createEmojiMenu((function(_this) {
           return function() {
             $addBtn.removeClass('is-loading');
             $menu = $('.emoji-menu');
@@ -157,7 +159,7 @@ function renderCategory(name, emojiList) {
       }
     };
 
-    AwardsHandler.prototype.createEmojiMenu = function(awardMenuUrl, callback) {
+    AwardsHandler.prototype.createEmojiMenu = function(callback) {
       var emojiMenuMarkup;
       if (this.isCreatingEmojiMenu) {
         return;
@@ -402,8 +404,7 @@ function renderCategory(name, emojiList) {
     };
 
     AwardsHandler.prototype.createEmoji_ = function(votesBlock, emojiName) {
-      var $emojiButton, buttonHtml, emojiCssClass, emojiData, emojiMarkup;
-      emojiCssClass = this.resolveNameToCssClass(emojiName);
+      var $emojiButton, buttonHtml, emojiData, emojiMarkup;
       emojiData = emojiMap[emojiName];
       emojiMarkup = '<gl-emoji data-name="' + emojiName + '" data-fallback-src="' + emojiData.fallbackImageSrc + '" data-unicode-version="' + emojiData.unicodeVersion + '">' + emojiData.moji + '</gl-emoji>';
       buttonHtml = '<button class="btn award-control js-emoji-btn has-tooltip active" title="You" data-placement="bottom">' + emojiMarkup + ' <span class="award-control-text js-counter">1</span></button>';
@@ -427,27 +428,11 @@ function renderCategory(name, emojiList) {
       if ($('.emoji-menu').length) {
         return this.createEmoji_(votesBlock, emoji);
       }
-      return this.createEmojiMenu(this.getAwardMenuUrl(), (function(_this) {
+      return this.createEmojiMenu((function(_this) {
         return function() {
           return _this.createEmoji_(votesBlock, emoji);
         };
       })(this));
-    };
-
-    AwardsHandler.prototype.getAwardMenuUrl = function() {
-      return gon.award_menu_url;
-    };
-
-    AwardsHandler.prototype.resolveNameToCssClass = function(emoji) {
-      var emojiIcon, unicodeName;
-      emojiIcon = $(".emoji-menu-content [data-name='" + emoji + "']");
-      if (emojiIcon.length > 0) {
-        unicodeName = emojiIcon.data('unicode-name');
-      } else {
-        // Find by alias
-        unicodeName = $(".emoji-menu-content [data-aliases*=':" + emoji + ":']").data('unicode-name');
-      }
-      return "emoji-" + unicodeName;
     };
 
     AwardsHandler.prototype.postEmoji = function(awardUrl, emoji, callback) {

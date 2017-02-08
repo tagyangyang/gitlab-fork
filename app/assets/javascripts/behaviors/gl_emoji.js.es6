@@ -1,3 +1,26 @@
+const emojiMap = require('emoji-map');
+
+function emojiImageTag(name, src) {
+  return `<img class="emoji" title=":${name}:" alt=":${name}:" src="${src}" width="20" height="20" align="absmiddle" />`;
+}
+
+const glEmojiTagDefaults = {
+  sprite: false,
+  forceFallback: false,
+};
+function glEmojiTag(name, options) {
+  const opts = Object.assign({}, glEmojiTagDefaults, options);
+  return `
+  <gl-emoji
+    data-name="${name}"
+    data-fallback-src="${emojiMap[name].fallbackImageSrc}"
+    ${opts.sprite ? `data-fallback-css-class="${emojiMap[name].fallbackSpriteClass}"` : ''}
+    data-unicode-version="${emojiMap[name].unicodeVersion}"
+  >
+    ${opts.forceFallback ? emojiImageTag(name, emojiMap[name].fallbackImageSrc) : emojiMap[name].moji}
+  </gl-emoji>
+  `;
+}
 
 const unicodeSupportTestMap = {
   // man, student (emojione does not have any of these yet), http://emojipedia.org/emoji-zwj-sequences/
@@ -126,7 +149,6 @@ function isEmojiUnicodeSupported(emojiUnicode, unicodeVersion) {
     !(isWindows && isFlagEmoji(emojiUnicode));
 }
 
-/* */
 class GlEmojiElement extends HTMLElement {
   // See https://github.com/WebReflection/document-register-element#v1-caveat
   constructor(argSelf) {
@@ -142,10 +164,15 @@ class GlEmojiElement extends HTMLElement {
 
     if (isEmojiUnicode && hasFallback && !isEmojiUnicodeSupported(emojiUnicode, unicodeVersion)) {
       const emojiName = this.dataset.name;
-      this.innerHTML = `<img class="emoji" title=":${emojiName}:" alt=":${emojiName}:" src="${emojiSrc}" width="20" height="20" align="absmiddle" />`;
+      this.innerHTML = emojiImageTag(emojiName, emojiSrc);
     }
   }
 }
 
 customElements.define('gl-emoji', GlEmojiElement);
-/* */
+
+module.exports = {
+  emojiImageTag,
+  glEmojiTag,
+  GlEmojiElement,
+};

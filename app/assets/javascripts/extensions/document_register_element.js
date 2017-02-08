@@ -1,5 +1,5 @@
 /* eslint-disable */
-// See https://github.com/webcomponents/custom-elements/blob/36451e1dbe4e3b77d98499fc12132573d91d4a8b/src/native-shim.js
+// See https://github.com/WebReflection/document-register-element
 
 /*!
 

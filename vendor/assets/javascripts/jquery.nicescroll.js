@@ -1898,8 +1898,7 @@
                 return ($("body").hasClass("modal-open")) ? self.hide() : self.show();  // Support for Bootstrap modal
               }
             });
-            // TODO: uncomment, testing
-            //if (document.body.scrollHeight!=self.page.maxh) return self.lazyResize(30);
+            if (document.body.scrollHeight!=self.page.maxh) return self.lazyResize(30);
           });
           self.observerbody.observe(document.body, {
             childList: true,
