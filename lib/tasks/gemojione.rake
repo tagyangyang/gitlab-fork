@@ -6,8 +6,6 @@ namespace :gemojione do
 
     dir = Gemojione.images_path
     resultantEmojiMap = {}
-    aliases = Hash.new { |hash, key| hash[key] = [] }
-    aliases_path = File.join(Rails.root, 'fixtures', 'emojis', 'aliases.json')
 
     # Construct the full asset path ourselves because
     # ActionView::Helpers::AssetUrlHelper.asset_url is slow for hundreds
@@ -21,10 +19,6 @@ namespace :gemojione do
         ''
       end
 
-
-    JSON.parse(File.read(aliases_path)).each do |alias_name, real_name|
-      aliases[real_name] << alias_name
-    end
 
     Gitlab::AwardEmoji.emojis.map do |name, emoji_hash|
       fpath = File.join(dir, "#{emoji_hash['unicode']}.png")
@@ -42,16 +36,10 @@ namespace :gemojione do
         moji: emoji_hash['moji'],
         unicodeVersion: Gitlab::Emoji.emoji_unicode_version(name),
         fallbackImageSrc: File.join(base, prefix, "#{fname}.png"),
-        fallbackSpriteClass: "emoji-#{emoji_hash['unicode']}",
+        fallbackSpriteClass: "emoji-#{emoji_hash['unicode']}"
       }
 
       resultantEmojiMap[name] = entry
-
-      aliases[name].each do |alias_name|
-        resultantEmojiMap[alias_name] = entry.merge({
-          name: alias_name
-        })
-      end
     end
 
     out = File.join(Rails.root, 'fixtures', 'emojis', 'digests.json')

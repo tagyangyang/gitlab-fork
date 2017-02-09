@@ -73,9 +73,9 @@ function renderCategory(name, emojiList) {
       $(document).one('mouseenter focus', '.js-add-award', function preBuildEmojiMenu() {
         var $menu = $('.emoji-menu');
         if ($menu.length === 0) {
-          requestAnimationFrame(function() {
+          requestAnimationFrame(() => {
             this.createEmojiMenu();
-          }.bind(this));
+          });
         }
       }.bind(this));
       $(document).on('click', '.js-add-award', function(e) {
@@ -152,7 +152,6 @@ function renderCategory(name, emojiList) {
             return setTimeout(function() {
               $menu.addClass('is-visible');
               $('#emoji_search').focus();
-              return _this.setupSearch();
             }, 200);
           };
         })(this));
@@ -166,9 +165,7 @@ function renderCategory(name, emojiList) {
       }
       this.isCreatingEmojiMenu = true;
 
-      performance.mark('createEmojiMenu-start');
       categoryMap = categoryMap || buildCategoryMap();
-      performance.mark('createEmojiMenu-assembleCategoryMap');
       emojiMenuMarkup = `
         <div class="emoji-menu">
           <input type="text" name="emoji_search" id="emoji_search" value="" class="emoji-search search-input form-control" placeholder="Search emoji" />
@@ -183,31 +180,17 @@ function renderCategory(name, emojiList) {
           </div>
         </div>
       `;
-      performance.mark('createEmojiMenu-assembleMarkup');
 
       document.body.insertAdjacentHTML('beforeend', emojiMenuMarkup);
+      this.setupSearch();
       if (callback) {
         callback();
       }
-      performance.mark('createEmojiMenu-initialAddToDom');
-
-      performance.measure('createEmojiMenu-timing-overallInitial', 'createEmojiMenu-start', 'createEmojiMenu-initialAddToDom');
-      performance.measure('createEmojiMenu-timing-assembleCategoryMap', 'createEmojiMenu-start', 'createEmojiMenu-assembleCategoryMap');
-      performance.measure('createEmojiMenu-timing-assembleMarkup', 'createEmojiMenu-assembleCategoryMap', 'createEmojiMenu-assembleMarkup');
-      performance.measure('createEmojiMenu-timing-initialAddToDom', 'createEmojiMenu-assembleMarkup', 'createEmojiMenu-initialAddToDom');
-
-      /* * /
-      return $.get(awardMenuUrl, function(response) {
-        $('body').append(response);
-        return callback();
-      });
-      /* */
-    }.bind(this);
+    };
 
     AwardsHandler.prototype.addRemainingEmojiMenuCategories = function() {
       var emojiContentElement;
       var remainingCategories;
-      var remainingEmojiCategoryMarkup;
 
       if (this.isAddingRemainingEmojiMenuCategories) {
         return;
@@ -218,22 +201,15 @@ function renderCategory(name, emojiList) {
 
       // Avoid the jank and render the remaining categories separately
       // This will take more time, but makes UI more responsive
-      performance.mark('createEmojiMenu-startAddRemaningCategories');
       emojiContentElement = document.querySelector('.emoji-menu .emoji-menu-content');
       remainingCategories = Object.keys(categoryMap).slice(1);
-      remainingEmojiCategoryMarkup = remainingCategories.reduce(function(promiseChain, categoryNameKey, index) {
+      remainingCategories.reduce(function(promiseChain, categoryNameKey, index) {
         return promiseChain.then(function() {
           return new Promise(function(resolve) {
             requestAnimationFrame(function() {
               var emojisInCategory = categoryMap[categoryNameKey];
               var categoryMarkup = renderCategory(categoryLabelMap[categoryNameKey], emojisInCategory);
               emojiContentElement.insertAdjacentHTML('beforeend', categoryMarkup);
-
-              if (index === remainingCategories.length - 1) {
-                performance.mark('createEmojiMenu-addRemaningCategoriesToDom');
-                performance.measure('createEmojiMenu-timing-overall', 'createEmojiMenu-start', 'createEmojiMenu-addRemaningCategoriesToDom');
-                performance.measure('createEmojiMenu-timing-addRemaningCategoriesToDom', 'createEmojiMenu-startAddRemaningCategories', 'createEmojiMenu-addRemaningCategoriesToDom');
-              }
               resolve();
             });
           });
@@ -263,7 +239,7 @@ function renderCategory(name, emojiList) {
       if (checkMutuality == null) {
         checkMutuality = true;
       }
-      emoji = this.normilizeEmojiName(emoji);
+      emoji = this.normalizeEmojiName(emoji);
       this.postEmoji(awardUrl, emoji, (function(_this) {
         return function() {
           _this.addAwardToEmojiBar(votesBlock, emoji, checkMutuality);
@@ -282,7 +258,7 @@ function renderCategory(name, emojiList) {
         this.checkMutuality(votesBlock, emoji);
       }
       this.addEmojiToFrequentlyUsedList(emoji);
-      emoji = this.normilizeEmojiName(emoji);
+      emoji = this.normalizeEmojiName(emoji);
       $emojiButton = this.findEmojiIcon(votesBlock, emoji).parent();
       if ($emojiButton.length > 0) {
         if (this.isActive($emojiButton)) {
@@ -457,7 +433,7 @@ function renderCategory(name, emojiList) {
       return $('body, html').animate(options, 200);
     };
 
-    AwardsHandler.prototype.normilizeEmojiName = function(emoji) {
+    AwardsHandler.prototype.normalizeEmojiName = function(emoji) {
       return this.aliases[emoji] || emoji;
     };
 
@@ -489,7 +465,7 @@ function renderCategory(name, emojiList) {
     };
 
     AwardsHandler.prototype.setupSearch = function() {
-      return $('input.emoji-search').on('keyup', (function(_this) {
+      return $('input.emoji-search').on('input', (function(_this) {
         return function(ev) {
           var found_emojis, h5, term, ul;
           term = $(ev.target).val();
@@ -510,7 +486,18 @@ function renderCategory(name, emojiList) {
     };
 
     AwardsHandler.prototype.searchEmojis = function(term) {
-      return $(".emoji-menu-list:not(.frequent-emojis) [data-name*='" + term + "']").closest('li').clone();
+      const safeTerm = term.toLowerCase();
+
+      const namesMatchingAlias = [];
+      Object.keys(emojiAliases).forEach((alias) => {
+        if (alias.indexOf(safeTerm) >= 0) {
+          namesMatchingAlias.push(emojiAliases[alias]);
+        }
+      });
+      const $matchingElements = namesMatchingAlias.concat(safeTerm).reduce(($result, searchTerm) => {
+        return $result.add($(".emoji-menu-list:not(.frequent-emojis) [data-name*='" + searchTerm + "']"));
+      }, $([]));
+      return $matchingElements.closest('li').clone();
     };
 
     return AwardsHandler;

@@ -1,6 +1,7 @@
 /* eslint-disable func-names, space-before-function-paren, no-template-curly-in-string, comma-dangle, object-shorthand, quotes, dot-notation, no-else-return, one-var, no-var, no-underscore-dangle, one-var-declaration-per-line, no-param-reassign, no-useless-escape, prefer-template, consistent-return, wrap-iife, prefer-arrow-callback, camelcase, no-unused-vars, no-useless-return, vars-on-top, max-len */
 
 const emojiMap = require('emoji-map');
+const emojiAliases = require('emoji-aliases');
 const glEmoji = require('./behaviors/gl_emoji.js.es6');
 
 const glEmojiTag = glEmoji.glEmojiTag;
@@ -33,7 +34,7 @@ const glEmojiTag = glEmoji.glEmojiTag;
     Emoji: {
       templateFunction: function(name) {
         return `<li>
-          ${name} ${glEmojiTag(name)}
+          ${name} ${glEmojiTag(emojiAliases[name] || name)}
         </li>
         `;
       }
@@ -366,7 +367,7 @@ const glEmojiTag = glEmoji.glEmojiTag;
       if (this.cachedData[at]) {
         this.loadData($input, at, this.cachedData[at]);
       } else if (this.atTypeMap[at] === 'emojis') {
-        this.loadData($input, at, Object.keys(emojiMap));
+        this.loadData($input, at, Object.keys(emojiMap).concat(Object.keys(emojiAliases)));
       } else {
         $.getJSON(this.dataSources[this.atTypeMap[at]], (data) => {
           this.loadData($input, at, data);

@@ -1,4 +1,8 @@
+const installCustomElements = require('document-register-element');
 const emojiMap = require('emoji-map');
+
+// We need to force because Custom Elements V1 needs es6 classes and Babel transpiles ours :/
+installCustomElements(window, 'force');
 
 function emojiImageTag(name, src) {
   return `<img class="emoji" title=":${name}:" alt=":${name}:" src="${src}" width="20" height="20" align="absmiddle" />`;
@@ -29,8 +33,13 @@ const unicodeSupportTestMap = {
   // sexZwj: '\u{1F6B4}\u{200D}\u{2640}',
   // US flag, http://emojipedia.org/flags/
   flag: '\u{1F1FA}\u{1F1F8}',
-  // dark skin tone, spy, http://emojipedia.org/modifiers/
-  skinToneModifier: '\u{1F575}\u{1F3FF}',
+  // http://emojipedia.org/modifiers/
+  skinToneModifier: [
+    // spy_tone5
+    '\u{1F575}\u{1F3FF}',
+    // person_with_ball_tone5
+    '\u{26F9}\u{1F3FF}',
+  ],
   // rofl, http://emojipedia.org/unicode-9.0/
   '9.0': '\u{1F923}',
   // metal, http://emojipedia.org/unicode-8.0/
@@ -75,6 +84,7 @@ function testUnicodeSupportMap(testMap) {
   const testMapKeys = Object.keys(testMap);
 
   const canvas = document.createElement('canvas');
+  window.testEmojiCanvas = canvas;
   canvas.width = 2 * fontSize;
   canvas.height = testMapKeys.length * fontSize;
   const ctx = canvas.getContext('2d');
@@ -82,39 +92,50 @@ function testUnicodeSupportMap(testMap) {
   ctx.textBaseline = 'top';
   ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
   // Write each emoji to the canvas vertically
-  testMapKeys.forEach((testKey, index) => {
-    const emojiUnicode = testMap[testKey];
-    ctx.fillText(emojiUnicode, 0, index * fontSize);
+  let writeIndex = 0;
+  testMapKeys.forEach((testKey) => {
+    const testEntry = testMap[testKey];
+    [].concat(testEntry).forEach((emojiUnicode) => {
+      ctx.fillText(emojiUnicode, 0, writeIndex * fontSize);
+      writeIndex += 1;
+    });
   });
 
   // Read from the canvas
   const resultMap = {};
-  testMapKeys.forEach((testKey, index) => {
-    // Sample along the vertical-middle for a couple of characters
-    const imageData = ctx.getImageData(
-        0,
-        (fontSize / 2) + (index * fontSize),
-        2 * fontSize,
-        1,
-      ).data;
+  let readIndex = 0;
+  testMapKeys.forEach((testKey) => {
+    const testEntry = testMap[testKey];
+    const isTestSatisifed = [].concat(testEntry).every(() => {
+      // Sample along the vertical-middle for a couple of characters
+      const imageData = ctx.getImageData(
+          0,
+          (fontSize / 2) + (readIndex * fontSize),
+          2 * fontSize,
+          1,
+        ).data;
 
-    let isValidEmoji = false;
-    for (let currentPixel = 0; currentPixel < 64; currentPixel += 1) {
-      const isLookingAtFirstChar = currentPixel < fontSize;
-      const isLookingAtSecondChar = currentPixel >= (fontSize + (fontSize / 2));
-      // Check for the emoji somewhere along the row
-      if (isLookingAtFirstChar && checkPixelInImageDataArray(currentPixel, imageData)) {
-        isValidEmoji = true;
+      let isValidEmoji = false;
+      for (let currentPixel = 0; currentPixel < 64; currentPixel += 1) {
+        const isLookingAtFirstChar = currentPixel < fontSize;
+        const isLookingAtSecondChar = currentPixel >= (fontSize + (fontSize / 2));
+        // Check for the emoji somewhere along the row
+        if (isLookingAtFirstChar && checkPixelInImageDataArray(currentPixel, imageData)) {
+          isValidEmoji = true;
 
-      // Check to see that nothing is rendered next to the first character
-      // to ensure that the ZWJ sequence rendered as one piece
-      } else if (isLookingAtSecondChar && checkPixelInImageDataArray(currentPixel, imageData)) {
-        isValidEmoji = false;
-        break;
+        // Check to see that nothing is rendered next to the first character
+        // to ensure that the ZWJ sequence rendered as one piece
+        } else if (isLookingAtSecondChar && checkPixelInImageDataArray(currentPixel, imageData)) {
+          isValidEmoji = false;
+          break;
+        }
       }
-    }
 
-    resultMap[testKey] = isValidEmoji;
+      readIndex += 1;
+      return isValidEmoji;
+    });
+
+    resultMap[testKey] = isTestSatisifed;
   });
 
   return resultMap;
@@ -137,6 +158,15 @@ function isKeycapEmoji(emojiUnicode) {
   return emojiUnicode.length === 3 && emojiUnicode[2] === '\u20E3';
 }
 
+const tone1 = 127995;// parseInt('1F3FB', 16)
+const tone5 = 127999;// parseInt('1F3FF', 16)
+function isSkinToneComboEmoji(emojiUnicode) {
+  return emojiUnicode.length > 3 && [...emojiUnicode].some((char) => {
+    const cp = char.codePointAt(0);
+    return cp >= tone1 && cp <= tone5;
+  });
+}
+
 let unicodeSupportMap;
 const userAgentFromCache = window.localStorage.getItem('gl-emoji-user-agent');
 try {
@@ -144,7 +174,7 @@ try {
 } catch (err) {
   // swallow
 }
-if (!unicodeSupportMap || userAgentFromCache !== navigator.userAgent) {
+if (true || !unicodeSupportMap || userAgentFromCache !== navigator.userAgent) {
   unicodeSupportMap = testUnicodeSupportMap(unicodeSupportTestMap);
   window.localStorage.setItem('gl-emoji-user-agent', navigator.userAgent);
   window.localStorage.setItem('gl-emoji-unicode-support-map', JSON.stringify(unicodeSupportMap));
@@ -156,7 +186,11 @@ function isEmojiUnicodeSupported(emojiUnicode, unicodeVersion) {
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=632294
     // Same issue on Windows also fixed in Chrome 57, http://i.imgur.com/rQF7woO.png
     !(isChrome && chromeVersion < 57 && isKeycapEmoji(emojiUnicode)) &&
-    !(isWindows && isFlagEmoji(emojiUnicode));
+    (!isFlagEmoji(emojiUnicode) || (unicodeSupportMap.flag && isFlagEmoji(emojiUnicode))) &&
+    (
+      !isSkinToneComboEmoji(emojiUnicode) ||
+      (unicodeSupportMap.skinToneModifier && isSkinToneComboEmoji(emojiUnicode))
+    );
 }
 
 class GlEmojiElement extends HTMLElement {
@@ -170,14 +204,19 @@ class GlEmojiElement extends HTMLElement {
     const unicodeVersion = this.dataset.unicodeVersion;
     const fallbackSrc = this.dataset.fallbackSrc;
     const fallbackCssClass = this.dataset.fallbackCssClass;
-    const isEmojiUnicode = this.childNodes.length === 1 && this.childNodes[0].nodeType === 3;
+    const isEmojiUnicode = this.childNodes && Array.prototype.every.call(
+      this.childNodes,
+      childNode => childNode.nodeType === 3,
+    );
     const hasImageFallback = fallbackSrc && fallbackSrc.length > 0;
     const hasCssSpriteFalback = fallbackCssClass && fallbackCssClass.length > 0;
 
     if (isEmojiUnicode && !isEmojiUnicodeSupported(emojiUnicode, unicodeVersion)) {
       // CSS sprite fallback takes precedence over image fallback
       if (hasCssSpriteFalback) {
-        this.classList.add('emoji-icon', fallbackCssClass);
+        // IE 11 doesn't like adding multiple at once :(
+        this.classList.add('emoji-icon');
+        this.classList.add(fallbackCssClass);
       } else if (hasImageFallback) {
         const emojiName = this.dataset.name;
         this.innerHTML = emojiImageTag(emojiName, fallbackSrc);
@@ -186,7 +225,7 @@ class GlEmojiElement extends HTMLElement {
   }
 }
 
-customElements.define('gl-emoji', GlEmojiElement);
+window.customElements.define('gl-emoji', GlEmojiElement);
 
 module.exports = {
   emojiImageTag,
