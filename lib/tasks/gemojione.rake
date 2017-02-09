@@ -111,6 +111,7 @@ namespace :gemojione do
           background-image: image-url('emoji.png');
           background-repeat: no-repeat;
           color: transparent;
+          text-indent: -99em;
           height: #{SIZE}px;
           width: #{SIZE}px;
 

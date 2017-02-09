@@ -30,6 +30,9 @@ const unicodeSupportTestMap = {
   // occupationZwj: '\u{1F468}\u{200D}\u{1F393}',
   // woman, biking (emojione does not have any of these yet), http://emojipedia.org/emoji-zwj-sequences/
   // sexZwj: '\u{1F6B4}\u{200D}\u{2640}',
+  // horse_racing_tone5
+  // Special case that is not supported on macOS 10.12 even though `skinToneModifier` succeeds
+  horseRacing: '\u{1F3C7}\u{1F3FF}',
   // US flag, http://emojipedia.org/flags/
   flag: '\u{1F1FA}\u{1F1F8}',
   // http://emojipedia.org/modifiers/
@@ -83,15 +86,17 @@ function checkPixelInImageDataArray(pixelOffset, imageDataArray) {
 const fontSize = 32;
 function testUnicodeSupportMap(testMap) {
   const testMapKeys = Object.keys(testMap);
+  const numTestEntries = testMapKeys
+    .reduce((list, testKey) => list.concat(testMap[testKey]), []).length;
 
   const canvas = document.createElement('canvas');
   window.testEmojiCanvas = canvas;
   canvas.width = 2 * fontSize;
-  canvas.height = testMapKeys.length * fontSize;
+  canvas.height = numTestEntries * fontSize;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#000000';
   ctx.textBaseline = 'top';
-  ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
+  ctx.font = `${fontSize}px "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
   // Write each emoji to the canvas vertically
   let writeIndex = 0;
   testMapKeys.forEach((testKey) => {
@@ -167,6 +172,11 @@ function isSkinToneComboEmoji(emojiUnicode) {
   });
 }
 
+const horseRacing = 127943;// parseInt('1F3C7', 16)
+function isHorceRacingSkinToneComboEmoji(emojiUnicode) {
+  return [...emojiUnicode][0].codePointAt(0) === horseRacing && isSkinToneComboEmoji(emojiUnicode);
+}
+
 let unicodeSupportMap;
 const userAgentFromCache = window.localStorage.getItem('gl-emoji-user-agent');
 try {
@@ -188,8 +198,12 @@ function isEmojiUnicodeSupported(emojiUnicode, unicodeVersion) {
     !(isChrome && chromeVersion < 57 && isKeycapEmoji(emojiUnicode)) &&
     (!isFlagEmoji(emojiUnicode) || (unicodeSupportMap.flag && isFlagEmoji(emojiUnicode))) &&
     (
-      !isSkinToneComboEmoji(emojiUnicode) ||
-      (unicodeSupportMap.skinToneModifier && isSkinToneComboEmoji(emojiUnicode))
+      (unicodeSupportMap.skinToneModifier && isSkinToneComboEmoji(emojiUnicode)) ||
+      !isSkinToneComboEmoji(emojiUnicode)
+    ) &&
+    (
+      (unicodeSupportMap.horseRacing && isHorceRacingSkinToneComboEmoji(emojiUnicode)) ||
+      !isHorceRacingSkinToneComboEmoji(emojiUnicode)
     );
 }
 
