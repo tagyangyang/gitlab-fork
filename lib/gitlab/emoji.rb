@@ -1,16 +1,14 @@
 module Gitlab
   module Emoji
     extend self
-    @emoji_list = JSON.parse(File.read(File.absolute_path(File.dirname(__FILE__) + '/../../fixtures/emojis/index.json')))
-    @gemojione = Gemojione::Index.new(@emoji_list)
     @emoji_unicode_version = JSON.parse(File.read(File.absolute_path(File.dirname(__FILE__) + '/../../node_modules/emoji-unicode-version/emoji-unicode-version-map.json')))
 
     def emojis
-      @gemojione.instance_variable_get(:@emoji_by_name)
+      Gemojione.index.instance_variable_get(:@emoji_by_name)
     end
 
     def emojis_by_moji
-      @gemojione.instance_variable_get(:@emoji_by_moji)
+      Gemojione.index.instance_variable_get(:@emoji_by_moji)
     end
 
     def emojis_unicodes

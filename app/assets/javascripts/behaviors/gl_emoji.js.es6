@@ -1,8 +1,7 @@
 const installCustomElements = require('document-register-element');
 const emojiMap = require('emoji-map');
 
-// We need to force because Custom Elements V1 needs es6 classes and Babel transpiles ours :/
-installCustomElements(window, 'force');
+installCustomElements(window);
 
 function emojiImageTag(name, src) {
   return `<img class="emoji" title=":${name}:" alt=":${name}:" src="${src}" width="20" height="20" align="absmiddle" />`;
@@ -39,6 +38,8 @@ const unicodeSupportTestMap = {
     '\u{1F575}\u{1F3FF}',
     // person_with_ball_tone5
     '\u{26F9}\u{1F3FF}',
+    // angel_tone5
+    '\u{1F47C}\u{1F3FF}',
   ],
   // rofl, http://emojipedia.org/unicode-9.0/
   '9.0': '\u{1F923}',
@@ -50,8 +51,8 @@ const unicodeSupportTestMap = {
   6.1: '\u{1F611}',
   // japanese_goblin, http://emojipedia.org/unicode-6.0/
   '6.0': '\u{1F47A}',
-  // soccer, http://emojipedia.org/unicode-5.2/
-  5.2: '\u{26BD}',
+  // sailboat, http://emojipedia.org/unicode-5.2/
+  5.2: '\u{26F5}',
   // mahjong, http://emojipedia.org/unicode-5.1/
   5.1: '\u{1F004}',
   // gear, http://emojipedia.org/unicode-4.1/
@@ -141,7 +142,6 @@ function testUnicodeSupportMap(testMap) {
   return resultMap;
 }
 
-const isWindows = /\bWindows\b/.test(navigator.userAgent);
 const chromeMatches = navigator.userAgent.match(/Chrom(?:e|ium)\/([0-9]+)\./);
 const isChrome = chromeMatches && chromeMatches.length > 0;
 const chromeVersion = chromeMatches && chromeMatches[1] && parseInt(chromeMatches[1], 10);
@@ -161,7 +161,7 @@ function isKeycapEmoji(emojiUnicode) {
 const tone1 = 127995;// parseInt('1F3FB', 16)
 const tone5 = 127999;// parseInt('1F3FF', 16)
 function isSkinToneComboEmoji(emojiUnicode) {
-  return emojiUnicode.length > 3 && [...emojiUnicode].some((char) => {
+  return emojiUnicode.length > 2 && [...emojiUnicode].some((char) => {
     const cp = char.codePointAt(0);
     return cp >= tone1 && cp <= tone5;
   });
@@ -193,42 +193,37 @@ function isEmojiUnicodeSupported(emojiUnicode, unicodeVersion) {
     );
 }
 
-class GlEmojiElement extends HTMLElement {
-  // See https://github.com/WebReflection/document-register-element#v1-caveat
-  constructor(argSelf) {
-    const self = super(argSelf);
-    return self;
-  }
-  connectedCallback() {
-    const emojiUnicode = this.textContent.trim();
-    const unicodeVersion = this.dataset.unicodeVersion;
-    const fallbackSrc = this.dataset.fallbackSrc;
-    const fallbackCssClass = this.dataset.fallbackCssClass;
-    const isEmojiUnicode = this.childNodes && Array.prototype.every.call(
-      this.childNodes,
-      childNode => childNode.nodeType === 3,
-    );
-    const hasImageFallback = fallbackSrc && fallbackSrc.length > 0;
-    const hasCssSpriteFalback = fallbackCssClass && fallbackCssClass.length > 0;
+const GlEmojiElementProto = Object.create(HTMLElement.prototype);
+GlEmojiElementProto.createdCallback = function createdCallback() {
+  const emojiUnicode = this.textContent.trim();
+  const unicodeVersion = this.dataset.unicodeVersion;
+  const fallbackSrc = this.dataset.fallbackSrc;
+  const fallbackCssClass = this.dataset.fallbackCssClass;
+  const isEmojiUnicode = this.childNodes && Array.prototype.every.call(
+    this.childNodes,
+    childNode => childNode.nodeType === 3,
+  );
+  const hasImageFallback = fallbackSrc && fallbackSrc.length > 0;
+  const hasCssSpriteFalback = fallbackCssClass && fallbackCssClass.length > 0;
 
-    if (isEmojiUnicode && !isEmojiUnicodeSupported(emojiUnicode, unicodeVersion)) {
-      // CSS sprite fallback takes precedence over image fallback
-      if (hasCssSpriteFalback) {
-        // IE 11 doesn't like adding multiple at once :(
-        this.classList.add('emoji-icon');
-        this.classList.add(fallbackCssClass);
-      } else if (hasImageFallback) {
-        const emojiName = this.dataset.name;
-        this.innerHTML = emojiImageTag(emojiName, fallbackSrc);
-      }
+  if (isEmojiUnicode && !isEmojiUnicodeSupported(emojiUnicode, unicodeVersion)) {
+    // CSS sprite fallback takes precedence over image fallback
+    if (hasCssSpriteFalback) {
+      // IE 11 doesn't like adding multiple at once :(
+      this.classList.add('emoji-icon');
+      this.classList.add(fallbackCssClass);
+    } else if (hasImageFallback) {
+      const emojiName = this.dataset.name;
+      this.innerHTML = emojiImageTag(emojiName, fallbackSrc);
     }
   }
-}
+};
 
-window.customElements.define('gl-emoji', GlEmojiElement);
+document.registerElement('gl-emoji', {
+  prototype: GlEmojiElementProto,
+});
 
 module.exports = {
   emojiImageTag,
   glEmojiTag,
-  GlEmojiElement,
 };
