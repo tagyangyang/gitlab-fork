@@ -20,7 +20,6 @@ require('./fixtures/emoji_menu');
     };
   };
 
-  gon.award_menu_url = '/emojis';
   urlRoot = gon.relative_url_root;
 
   lazyAssert = function(done, assertFn) {
