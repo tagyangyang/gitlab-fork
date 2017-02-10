@@ -237,23 +237,24 @@ GFM will turn that reference into a link so you can navigate between them easily
 
 GFM will recognize the following:
 
-| input                  | references                   |
-|:-----------------------|:---------------------------  |
-| `@user_name`           | specific user                |
-| `@group_name`          | specific group               |
-| `@all`                 | entire team                  |
-| `#123`                 | issue                        |
-| `!123`                 | merge request                |
-| `$123`                 | snippet                      |
-| `~123`                 | label by ID                  |
-| `~bug`                 | one-word label by name       |
-| `~"feature request"`   | multi-word label by name     |
-| `%123`                 | milestone by ID              |
-| `%v1.23`               | one-word milestone by name   |
-| `%"release candidate"` | multi-word milestone by name |
-| `9ba12248`             | specific commit              |
-| `9ba12248...b19a04f5`  | commit range comparison      |
-| `[README](doc/README)` | repository file references   |
+| input                      | references                      |
+|:---------------------------|:--------------------------------|
+| `@user_name`               | specific user                   |
+| `@group_name`              | specific group                  |
+| `@all`                     | entire team                     |
+| `#123`                     | issue                           |
+| `!123`                     | merge request                   |
+| `$123`                     | snippet                         |
+| `~123`                     | label by ID                     |
+| `~bug`                     | one-word label by name          |
+| `~"feature request"`       | multi-word label by name        |
+| `%123`                     | milestone by ID                 |
+| `%v1.23`                   | one-word milestone by name      |
+| `%"release candidate"`     | multi-word milestone by name    |
+| `9ba12248`                 | specific commit                 |
+| `9ba12248...b19a04f5`      | commit range comparison         |
+| `[README](doc/README)`     | repository file references      |
+| `[README](doc/README#L13)` | repository file line references |
 
 GFM also recognizes certain cross-project references:
 
@@ -299,6 +300,20 @@ You can add task lists to issues, merge requests and comments. To create a task 
     - [ ] Sub-task 1
     - [x] Sub-task 2
     - [ ] Sub-task 3
+
+Tasks formatted as ordered lists are supported as well:
+
+```no-highlight
+1. [x] Completed task
+1. [ ] Incomplete task
+    1. [ ] Sub-task 1
+    1. [x] Sub-task 2
+```
+
+1. [x] Completed task
+1. [ ] Incomplete task
+    1. [ ] Sub-task 1
+    1. [x] Sub-task 2
 
 Task lists can only be created in descriptions, not in titles. Task item state can be managed by editing the description's Markdown or by toggling the rendered check boxes.
 
@@ -650,7 +665,7 @@ This line is separated from the one above by two newlines, so it will be a *sepa
 This line is also a separate paragraph, but...
 This line is only separated by a single newline, so it's a separate line in the *same paragraph*.
 
-This line is also a separate paragraph, and...  
+This line is also a separate paragraph, and...
 This line is on its own line, because the previous line ends with two
 spaces.
 ```
@@ -662,7 +677,7 @@ This line is separated from the one above by two newlines, so it will be a *sepa
 This line is also begins a separate paragraph, but...
 This line is only separated by a single newline, so it's a separate line in the *same paragraph*.
 
-This line is also a separate paragraph, and...  
+This line is also a separate paragraph, and...
 This line is on its own line, because the previous line ends with two
 spaces.
 

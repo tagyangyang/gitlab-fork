@@ -8,8 +8,8 @@ describe API::Projects, api: true  do
   let(:user2) { create(:user) }
   let(:user3) { create(:user) }
   let(:admin) { create(:admin) }
-  let(:project) { create(:project, creator_id: user.id, namespace: user.namespace) }
-  let(:project2) { create(:project, path: 'project2', creator_id: user.id, namespace: user.namespace) }
+  let(:project) { create(:empty_project, creator_id: user.id, namespace: user.namespace) }
+  let(:project2) { create(:empty_project, path: 'project2', creator_id: user.id, namespace: user.namespace) }
   let(:snippet) { create(:project_snippet, :public, author: user, project: project, title: 'example') }
   let(:project_member) { create(:project_member, :master, user: user, project: project) }
   let(:project_member2) { create(:project_member, :developer, user: user3, project: project) }
@@ -17,6 +17,7 @@ describe API::Projects, api: true  do
   let(:project3) do
     create(:project,
     :private,
+    :repository,
     name: 'second_project',
     path: 'second_project',
     creator_id: user.id,
@@ -32,7 +33,7 @@ describe API::Projects, api: true  do
     access_level: ProjectMember::MASTER)
   end
   let(:project4) do
-    create(:project,
+    create(:empty_project,
     name: 'third_project',
     path: 'third_project',
     creator_id: user4.id,
@@ -252,7 +253,7 @@ describe API::Projects, api: true  do
       end
     end
 
-    let!(:public_project) { create(:project, :public) }
+    let!(:public_project) { create(:empty_project, :public) }
     before do
       project
       project2
@@ -283,7 +284,7 @@ describe API::Projects, api: true  do
   end
 
   describe 'GET /projects/starred' do
-    let(:public_project) { create(:project, :public) }
+    let(:public_project) { create(:empty_project, :public) }
 
     before do
       project_member2
@@ -358,13 +359,6 @@ describe API::Projects, api: true  do
       expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::PUBLIC)
     end
 
-    it 'sets a project as public using :public' do
-      project = attributes_for(:project, { public: true })
-      post api('/projects', user), project
-      expect(json_response['public']).to be_truthy
-      expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::PUBLIC)
-    end
-
     it 'sets a project as internal' do
       project = attributes_for(:project, :internal)
       post api('/projects', user), project
@@ -372,22 +366,8 @@ describe API::Projects, api: true  do
       expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::INTERNAL)
     end
 
-    it 'sets a project as internal overriding :public' do
-      project = attributes_for(:project, :internal, { public: true })
-      post api('/projects', user), project
-      expect(json_response['public']).to be_falsey
-      expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::INTERNAL)
-    end
-
     it 'sets a project as private' do
       project = attributes_for(:project, :private)
-      post api('/projects', user), project
-      expect(json_response['public']).to be_falsey
-      expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::PRIVATE)
-    end
-
-    it 'sets a project as private using :public' do
-      project = attributes_for(:project, { public: false })
       post api('/projects', user), project
       expect(json_response['public']).to be_falsey
       expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::PRIVATE)
@@ -430,13 +410,14 @@ describe API::Projects, api: true  do
     end
 
     context 'when a visibility level is restricted' do
+      let(:project_param) { attributes_for(:project, :public) }
+
       before do
-        @project = attributes_for(:project, { public: true })
         stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::PUBLIC])
       end
 
       it 'does not allow a non-admin to use a restricted visibility level' do
-        post api('/projects', user), @project
+        post api('/projects', user), project_param
 
         expect(response).to have_http_status(400)
         expect(json_response['message']['visibility_level'].first).to(
@@ -445,7 +426,8 @@ describe API::Projects, api: true  do
       end
 
       it 'allows an admin to override restricted visibility settings' do
-        post api('/projects', admin), @project
+        post api('/projects', admin), project_param
+
         expect(json_response['public']).to be_truthy
         expect(json_response['visibility_level']).to(
           eq(Gitlab::VisibilityLevel::PUBLIC)
@@ -458,7 +440,7 @@ describe API::Projects, api: true  do
     before { project }
     before { admin }
 
-    it 'should create new project without path and return 201' do
+    it 'creates new project without path and return 201' do
       expect { post api("/projects/user/#{user.id}", admin), name: 'foo' }.to change {Project.count}.by(1)
       expect(response).to have_http_status(201)
     end
@@ -498,15 +480,6 @@ describe API::Projects, api: true  do
       expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::PUBLIC)
     end
 
-    it 'sets a project as public using :public' do
-      project = attributes_for(:project, { public: true })
-      post api("/projects/user/#{user.id}", admin), project
-
-      expect(response).to have_http_status(201)
-      expect(json_response['public']).to be_truthy
-      expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::PUBLIC)
-    end
-
     it 'sets a project as internal' do
       project = attributes_for(:project, :internal)
       post api("/projects/user/#{user.id}", admin), project
@@ -516,23 +489,8 @@ describe API::Projects, api: true  do
       expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::INTERNAL)
     end
 
-    it 'sets a project as internal overriding :public' do
-      project = attributes_for(:project, :internal, { public: true })
-      post api("/projects/user/#{user.id}", admin), project
-      expect(response).to have_http_status(201)
-      expect(json_response['public']).to be_falsey
-      expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::INTERNAL)
-    end
-
     it 'sets a project as private' do
       project = attributes_for(:project, :private)
-      post api("/projects/user/#{user.id}", admin), project
-      expect(json_response['public']).to be_falsey
-      expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::PRIVATE)
-    end
-
-    it 'sets a project as private using :public' do
-      project = attributes_for(:project, { public: false })
       post api("/projects/user/#{user.id}", admin), project
       expect(json_response['public']).to be_falsey
       expect(json_response['visibility_level']).to eq(Gitlab::VisibilityLevel::PRIVATE)
@@ -583,7 +541,7 @@ describe API::Projects, api: true  do
   describe 'GET /projects/:id' do
     context 'when unauthenticated' do
       it 'returns the public projects' do
-        public_project = create(:project, :public)
+        public_project = create(:empty_project, :public)
 
         get api("/projects/#{public_project.id}")
 
@@ -665,7 +623,7 @@ describe API::Projects, api: true  do
 
       it 'handles users with dots' do
         dot_user = create(:user, username: 'dot.user')
-        project = create(:project, creator_id: dot_user.id, namespace: dot_user.namespace)
+        project = create(:empty_project, creator_id: dot_user.id, namespace: dot_user.namespace)
 
         get api("/projects/#{dot_user.namespace.name}%2F#{project.path}", dot_user)
         expect(response).to have_http_status(200)
@@ -711,7 +669,7 @@ describe API::Projects, api: true  do
         end
 
         context 'group project' do
-          let(:project2) { create(:project, group: create(:group)) }
+          let(:project2) { create(:empty_project, group: create(:group)) }
 
           before { project2.group.add_owner(user) }
 
@@ -756,7 +714,7 @@ describe API::Projects, api: true  do
 
     context 'when unauthenticated' do
       it_behaves_like 'project events response' do
-        let(:project) { create(:project, :public) }
+        let(:project) { create(:empty_project, :public) }
         let(:current_user) { nil }
       end
     end
@@ -807,7 +765,7 @@ describe API::Projects, api: true  do
 
     context 'when unauthenticated' do
       it_behaves_like 'project users response' do
-        let(:project) { create(:project, :public) }
+        let(:project) { create(:empty_project, :public) }
         let(:current_user) { nil }
       end
     end
@@ -864,7 +822,7 @@ describe API::Projects, api: true  do
     it 'creates a new project snippet' do
       post api("/projects/#{project.id}/snippets", user),
         title: 'api test', file_name: 'sample.rb', code: 'test',
-        visibility_level: '0'
+        visibility_level: Gitlab::VisibilityLevel::PRIVATE
       expect(response).to have_http_status(201)
       expect(json_response['title']).to eq('api test')
     end
@@ -921,11 +879,11 @@ describe API::Projects, api: true  do
   end
 
   describe :fork_admin do
-    let(:project_fork_target) { create(:project) }
-    let(:project_fork_source) { create(:project, :public) }
+    let(:project_fork_target) { create(:empty_project) }
+    let(:project_fork_source) { create(:empty_project, :public) }
 
     describe 'POST /projects/:id/fork/:forked_from_id' do
-      let(:new_project_fork_source) { create(:project, :public) }
+      let(:new_project_fork_source) { create(:empty_project, :public) }
 
       it "is not available for non admin users" do
         post api("/projects/#{project_fork_target.id}/fork/#{project_fork_source.id}", user)
@@ -966,7 +924,7 @@ describe API::Projects, api: true  do
       end
 
       context 'when users belong to project group' do
-        let(:project_fork_target) { create(:project, group: create(:group)) }
+        let(:project_fork_target) { create(:empty_project, group: create(:group)) }
 
         before do
           project_fork_target.group.add_owner user
@@ -1084,53 +1042,6 @@ describe API::Projects, api: true  do
     end
   end
 
-  describe 'GET /projects/search/:query' do
-    let!(:query)            { 'query'}
-    let!(:search)           { create(:empty_project, name: query, creator_id: user.id, namespace: user.namespace) }
-    let!(:pre)              { create(:empty_project, name: "pre_#{query}", creator_id: user.id, namespace: user.namespace) }
-    let!(:post)             { create(:empty_project, name: "#{query}_post", creator_id: user.id, namespace: user.namespace) }
-    let!(:pre_post)         { create(:empty_project, name: "pre_#{query}_post", creator_id: user.id, namespace: user.namespace) }
-    let!(:unfound)          { create(:empty_project, name: 'unfound', creator_id: user.id, namespace: user.namespace) }
-    let!(:internal)         { create(:empty_project, :internal, name: "internal #{query}") }
-    let!(:unfound_internal) { create(:empty_project, :internal, name: 'unfound internal') }
-    let!(:public)           { create(:empty_project, :public, name: "public #{query}") }
-    let!(:unfound_public)   { create(:empty_project, :public, name: 'unfound public') }
-    let!(:one_dot_two)      { create(:empty_project, :public, name: "one.dot.two") }
-
-    shared_examples_for 'project search response' do |args = {}|
-      it 'returns project search responses' do
-        get api("/projects/search/#{args[:query]}", current_user)
-
-        expect(response).to have_http_status(200)
-        expect(json_response).to be_an Array
-        expect(json_response.size).to eq(args[:results])
-        json_response.each { |project| expect(project['name']).to match(args[:match_regex] || /.*#{args[:query]}.*/) }
-      end
-    end
-
-    context 'when unauthenticated' do
-      it_behaves_like 'project search response', query: 'query', results: 1 do
-        let(:current_user) { nil }
-      end
-    end
-
-    context 'when authenticated' do
-      it_behaves_like 'project search response', query: 'query', results: 6 do
-        let(:current_user) { user }
-      end
-      it_behaves_like 'project search response', query: 'one.dot.two', results: 1 do
-        let(:current_user) { user }
-      end
-      
-    end
-
-    context 'when authenticated as a different user' do
-      it_behaves_like 'project search response', query: 'query', results: 2, match_regex: /(internal|public) query/ do
-        let(:current_user) { user2 }
-      end
-    end
-  end
-
   describe 'PUT /projects/:id' do
     before { project }
     before { user }
@@ -1160,7 +1071,7 @@ describe API::Projects, api: true  do
       end
 
       it 'updates visibility_level' do
-        project_param = { visibility_level: 20 }
+        project_param = { visibility_level: Gitlab::VisibilityLevel::PUBLIC }
         put api("/projects/#{project3.id}", user), project_param
         expect(response).to have_http_status(200)
         project_param.each_pair do |k, v|
@@ -1170,7 +1081,7 @@ describe API::Projects, api: true  do
 
       it 'updates visibility_level from public to private' do
         project3.update_attributes({ visibility_level: Gitlab::VisibilityLevel::PUBLIC })
-        project_param = { public: false }
+        project_param = { visibility_level: Gitlab::VisibilityLevel::PRIVATE }
         put api("/projects/#{project3.id}", user), project_param
         expect(response).to have_http_status(200)
         project_param.each_pair do |k, v|
@@ -1243,7 +1154,7 @@ describe API::Projects, api: true  do
       end
 
       it 'does not update visibility_level' do
-        project_param = { visibility_level: 20 }
+        project_param = { visibility_level: Gitlab::VisibilityLevel::PUBLIC }
         put api("/projects/#{project3.id}", user4), project_param
         expect(response).to have_http_status(403)
       end

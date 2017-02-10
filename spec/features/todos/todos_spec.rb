@@ -165,13 +165,13 @@ describe 'Dashboard Todos', feature: true do
       end
 
       it 'shows the todo' do
-        expect(page).to have_content 'The build failed for your merge request'
+        expect(page).to have_content 'The build failed for merge request'
       end
 
       it 'links to the pipelines for the merge request' do
         href = pipelines_namespace_project_merge_request_path(project.namespace, project, todo.target)
 
-        expect(page).to have_link "merge request #{todo.target.to_reference}", href
+        expect(page).to have_link "merge request #{todo.target.to_reference(full: true)}", href
       end
     end
   end

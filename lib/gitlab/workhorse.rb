@@ -15,10 +15,17 @@ module Gitlab
 
     class << self
       def git_http_ok(repository, user)
-        {
+        params = {
           GL_ID: Gitlab::GlId.gl_id(user),
           RepoPath: repository.path_to_repo,
         }
+
+        params.merge!(
+          GitalySocketPath: Gitlab.config.gitaly.socket_path,
+          GitalyResourcePath: "/projects/#{repository.project.id}/git-http/info-refs",
+        ) if Gitlab.config.gitaly.socket_path.present?
+
+        params
       end
 
       def lfs_upload_ok(oid, size)
@@ -100,7 +107,8 @@ module Gitlab
           'Terminal' => {
             'Subprotocols' => terminal[:subprotocols],
             'Url' => terminal[:url],
-            'Header' => terminal[:headers]
+            'Header' => terminal[:headers],
+            'MaxSessionTime' => terminal[:max_session_time],
           }
         }
         details['Terminal']['CAPem'] = terminal[:ca_pem] if terminal.has_key?(:ca_pem)

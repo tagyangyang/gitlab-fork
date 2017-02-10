@@ -86,7 +86,7 @@ used for time of the build. The configuration of this feature is covered in
 ### before_script
 
 `before_script` is used to define the command that should be run before all
-builds, including deploy builds. This can be an array or a multi-line string.
+builds, including deploy builds, but after the restoration of artifacts. This can be an array or a multi-line string.
 
 ### after_script
 
@@ -319,6 +319,7 @@ job_name:
 | before_script | no | Override a set of commands that are executed before build |
 | after_script  | no | Override a set of commands that are executed after build |
 | environment   | no | Defines a name of environment to which deployment is done by this build |
+| coverage      | no | Define code coverage settings for a given job |
 
 ### script
 
@@ -993,6 +994,23 @@ job:
   - execute this after my script
 ```
 
+### coverage
+
+`coverage` allows you to configure how code coverage will be extracted from the
+job output.
+
+Regular expressions are the only valid kind of value expected here. So, using
+surrounding `/` is mandatory in order to consistently and explicitly represent
+a regular expression string. You must escape special characters if you want to
+match them literally.
+
+A simple example:
+
+```yaml
+job1:
+  coverage: /Code coverage: \d+\.\d+/
+```
+
 ## Git Strategy
 
 > Introduced in GitLab 8.9 as an experimental feature.  May change or be removed
@@ -1033,6 +1051,41 @@ rely on files brought into the project workspace from cache or artifacts.
 variables:
   GIT_STRATEGY: none
 ```
+
+## Git Submodule Strategy
+
+> Requires GitLab Runner v1.10+.
+
+The `GIT_SUBMODULE_STRATEGY` variable is used to control if / how Git
+submodules are included when fetching the code before a build. Like
+`GIT_STRATEGY`, it can be set in either the global [`variables`](#variables)
+section or the [`variables`](#job-variables) section for individual jobs.
+
+There are three posible values: `none`, `normal`, and `recursive`:
+
+- `none` means that submodules will not be included when fetching the project
+  code. This is the default, which matches the pre-v1.10 behavior.
+
+- `normal` means that only the top-level submodules will be included. It is
+  equivalent to:
+    ```
+    $ git submodule sync
+    $ git submodule update --init
+    ```
+
+- `recursive` means that all submodules (including submodules of submodules)
+  will be included. It is equivalent to:
+    ```
+    $ git submodule sync --recursive
+    $ git submodule update --init --recursive
+    ```
+
+Note that for this feature to work correctly, the submodules must be configured
+(in `.gitmodules`) with either:
+- the HTTP(S) URL of a publicly-accessible repository, or
+- a relative path to another repository on the same GitLab server. See the
+  [Git submodules](../git_submodules.md) documentation.
+
 
 ## Build stages attempts
 
@@ -1245,6 +1298,35 @@ Triggers can be used to force a rebuild of a specific branch, tag or commit,
 with an API call.
 
 [Read more in the triggers documentation.](../triggers/README.md)
+
+### pages
+
+`pages` is a special job that is used to upload static content to GitLab that
+can be used to serve your website. It has a special syntax, so the two
+requirements below must be met:
+
+1. Any static content must be placed under a `public/` directory
+1. `artifacts` with a path to the `public/` directory must be defined
+
+The example below simply moves all files from the root of the project to the
+`public/` directory. The `.public` workaround is so `cp` doesn't also copy
+`public/` to itself in an infinite loop:
+
+```
+pages:
+  stage: deploy
+  script:
+  - mkdir .public
+  - cp -r * .public
+  - mv .public public
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
+```
+
+Read more on [GitLab Pages user documentation](../../pages/README.md).
 
 ## Validate the .gitlab-ci.yml
 

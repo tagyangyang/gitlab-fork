@@ -1,11 +1,11 @@
-/* eslint-disable func-names, space-before-function-paren, wrap-iife, no-var, one-var, camelcase, one-var-declaration-per-line, quotes, no-param-reassign, quote-props, comma-dangle, prefer-template, max-len, no-return-assign, padded-blocks */
+/* eslint-disable func-names, space-before-function-paren, wrap-iife, no-var, one-var, camelcase, one-var-declaration-per-line, quotes, no-param-reassign, quote-props, comma-dangle, prefer-template, max-len, no-return-assign */
 /* global ContributorsGraph */
 /* global ContributorsAuthorGraph */
 /* global ContributorsMasterGraph */
 /* global ContributorsStatGraphUtil */
 /* global d3 */
 
-/*= require d3 */
+window.d3 = require('d3');
 
 (function() {
   this.ContributorsStatGraph = (function() {
@@ -112,7 +112,5 @@
     };
 
     return ContributorsStatGraph;
-
   })();
-
 }).call(this);

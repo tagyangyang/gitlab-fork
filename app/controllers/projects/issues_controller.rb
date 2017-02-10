@@ -33,6 +33,18 @@ class Projects::IssuesController < Projects::ApplicationController
       @labels = LabelsFinder.new(current_user, project_id: @project.id, title: params[:label_name]).execute
     end
 
+    @users = []
+
+    if params[:assignee_id].present?
+      assignee = User.find_by_id(params[:assignee_id])
+      @users.push(assignee) if assignee
+    end
+
+    if params[:author_id].present?
+      author = User.find_by_id(params[:author_id])
+      @users.push(author) if author
+    end
+
     respond_to do |format|
       format.html
       format.atom { render layout: false }
@@ -81,15 +93,13 @@ class Projects::IssuesController < Projects::ApplicationController
   def create
     extra_params = { request: request,
                      merge_request_for_resolving_discussions: merge_request_for_resolving_discussions }
+    extra_params.merge!(recaptcha_params)
+
     @issue = Issues::CreateService.new(project, current_user, issue_params.merge(extra_params)).execute
 
     respond_to do |format|
       format.html do
-        if @issue.valid?
-          redirect_to issue_path(@issue)
-        else
-          render :new
-        end
+        html_response_create
       end
       format.js do
         @link = @issue.attachment.url.to_js
@@ -165,6 +175,20 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   protected
+
+  def html_response_create
+    if @issue.valid?
+      redirect_to issue_path(@issue)
+    elsif render_recaptcha?
+      if params[:recaptcha_verification]
+        flash[:alert] = 'There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.'
+      end
+
+      render :verify
+    else
+      render :new
+    end
+  end
 
   def issue
     # The Sortable default scope causes performance issues when used with find_by

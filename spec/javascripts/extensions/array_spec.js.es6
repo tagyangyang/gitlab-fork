@@ -1,6 +1,6 @@
-/* eslint-disable space-before-function-paren, no-var, padded-blocks */
+/* eslint-disable space-before-function-paren, no-var */
 
-/*= require extensions/array */
+require('~/extensions/array');
 
 (function() {
   describe('Array extensions', function() {
@@ -42,5 +42,4 @@
       });
     });
   });
-
 }).call(this);

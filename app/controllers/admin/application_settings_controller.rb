@@ -5,7 +5,11 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
   end
 
   def update
-    if @application_setting.update_attributes(application_setting_params)
+    successful = ApplicationSettings::UpdateService
+      .new(@application_setting, current_user, application_setting_params)
+      .execute
+
+    if successful
       redirect_to admin_application_settings_path,
         notice: 'Application settings saved successfully'
     else
@@ -105,6 +109,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       :plantuml_url,
       :max_artifacts_size,
       :max_attachment_size,
+      :max_pages_size,
       :metrics_enabled,
       :metrics_host,
       :metrics_method_call_threshold,
@@ -133,6 +138,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       :user_default_external,
       :user_oauth_applications,
       :version_check_enabled,
+      :terminal_max_session_time,
 
       disabled_oauth_sign_in_sources: [],
       import_sources: [],

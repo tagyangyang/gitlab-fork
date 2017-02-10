@@ -137,6 +137,8 @@ module API
       expose :avatar_url
       expose :web_url
       expose :request_access_enabled
+      expose :full_name, :full_path
+      expose :parent_id
 
       expose :statistics, if: :statistics do
         with_options format_with: -> (value) { value.to_i } do
@@ -212,9 +214,6 @@ module API
       expose :author, using: Entities::UserBasic
       expose :updated_at, :created_at
 
-      # TODO (rspeicher): Deprecated; remove in 9.0
-      expose(:expires_at) { |snippet| nil }
-
       expose :web_url do |snippet, options|
         Gitlab::UrlBuilder.build(snippet)
       end
@@ -266,6 +265,13 @@ module API
       expose :web_url do |issue, options|
         Gitlab::UrlBuilder.build(issue)
       end
+    end
+
+    class IssuableTimeStats < Grape::Entity
+      expose :time_estimate
+      expose :total_time_spent
+      expose :human_time_estimate
+      expose :human_total_time_spent
     end
 
     class ExternalIssue < Grape::Entity
@@ -567,6 +573,7 @@ module API
       expose :koding_url
       expose :plantuml_enabled
       expose :plantuml_url
+      expose :terminal_max_session_time
     end
 
     class Release < Grape::Entity

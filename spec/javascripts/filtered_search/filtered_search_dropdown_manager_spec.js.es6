@@ -1,6 +1,6 @@
-//= require extensions/array
-//= require filtered_search/filtered_search_tokenizer
-//= require filtered_search/filtered_search_dropdown_manager
+require('~/extensions/array');
+require('~/filtered_search/filtered_search_tokenizer');
+require('~/filtered_search/filtered_search_dropdown_manager');
 
 (() => {
   describe('Filtered Search Dropdown Manager', () => {
@@ -31,7 +31,7 @@
 
         it('should add tokenName and tokenValue', () => {
           gl.FilteredSearchDropdownManager.addWordToInput('label', 'none');
-          expect(getInputValue()).toBe('label:none');
+          expect(getInputValue()).toBe('label:none ');
         });
       });
 
@@ -45,13 +45,13 @@
         it('should replace tokenValue', () => {
           setInputValue('author:roo');
           gl.FilteredSearchDropdownManager.addWordToInput('author', '@root');
-          expect(getInputValue()).toBe('author:@root');
+          expect(getInputValue()).toBe('author:@root ');
         });
 
         it('should add tokenValues containing spaces', () => {
           setInputValue('label:~"test');
           gl.FilteredSearchDropdownManager.addWordToInput('label', '~\'"test me"\'');
-          expect(getInputValue()).toBe('label:~\'"test me"\'');
+          expect(getInputValue()).toBe('label:~\'"test me"\' ');
         });
       });
     });

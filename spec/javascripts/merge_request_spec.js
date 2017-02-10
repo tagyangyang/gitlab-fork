@@ -1,7 +1,7 @@
-/* eslint-disable space-before-function-paren, no-return-assign, padded-blocks */
+/* eslint-disable space-before-function-paren, no-return-assign */
 /* global MergeRequest */
 
-/*= require merge_request */
+require('~/merge_request');
 
 (function() {
   describe('MergeRequest', function() {
@@ -26,5 +26,4 @@
       });
     });
   });
-
 }).call(this);

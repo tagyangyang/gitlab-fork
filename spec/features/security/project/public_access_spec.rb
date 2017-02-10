@@ -96,6 +96,20 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for(:external) }
   end
 
+  describe "GET /:project_path/settings/ci_cd" do
+    subject { namespace_project_settings_ci_cd_path(project.namespace, project) }
+
+    it { is_expected.to be_allowed_for(:admin) }
+    it { is_expected.to be_allowed_for(:owner).of(project) }
+    it { is_expected.to be_allowed_for(:master).of(project) }
+    it { is_expected.to be_denied_for(:developer).of(project) }
+    it { is_expected.to be_denied_for(:reporter).of(project) }
+    it { is_expected.to be_denied_for(:guest).of(project) }
+    it { is_expected.to be_denied_for(:user) }
+    it { is_expected.to be_denied_for(:visitor) }
+    it { is_expected.to be_denied_for(:external) }
+  end
+
   describe "GET /:project_path/pipelines" do
     subject { namespace_project_pipelines_path(project.namespace, project) }
 
@@ -400,8 +414,8 @@ describe "Public Project Access", feature: true  do
     it { is_expected.to be_allowed_for(:visitor) }
   end
 
-  describe "GET /:project_path/hooks" do
-    subject { namespace_project_hooks_path(project.namespace, project) }
+  describe "GET /:project_path/settings/integrations" do
+    subject { namespace_project_settings_integrations_path(project.namespace, project) }
 
     it { is_expected.to be_allowed_for(:admin) }
     it { is_expected.to be_allowed_for(:owner).of(project) }

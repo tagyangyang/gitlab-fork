@@ -255,10 +255,66 @@ module SlashCommands
       @updates[:wip_event] = issuable.work_in_progress? ? 'unwip' : 'wip'
     end
 
+    desc 'Set time estimate'
+    params '<1w 3d 2h 14m>'
+    condition do
+      current_user.can?(:"admin_#{issuable.to_ability_name}", project)
+    end
+    command :estimate do |raw_duration|
+      time_estimate = Gitlab::TimeTrackingFormatter.parse(raw_duration)
+
+      if time_estimate
+        @updates[:time_estimate] = time_estimate
+      end
+    end
+
+    desc 'Add or substract spent time'
+    params '<1h 30m | -1h 30m>'
+    condition do
+      current_user.can?(:"admin_#{issuable.to_ability_name}", issuable)
+    end
+    command :spend do |raw_duration|
+      time_spent = Gitlab::TimeTrackingFormatter.parse(raw_duration)
+
+      if time_spent
+        @updates[:spend_time] = { duration: time_spent, user: current_user }
+      end
+    end
+
+    desc 'Remove time estimate'
+    condition do
+      issuable.persisted? &&
+        current_user.can?(:"admin_#{issuable.to_ability_name}", project)
+    end
+    command :remove_estimate do
+      @updates[:time_estimate] = 0
+    end
+
+    desc 'Remove spent time'
+    condition do
+      issuable.persisted? &&
+        current_user.can?(:"admin_#{issuable.to_ability_name}", project)
+    end
+    command :remove_time_spent do
+      @updates[:spend_time] = { duration: :reset, user: current_user }
+    end
+
     # This is a dummy command, so that it appears in the autocomplete commands
     desc 'CC'
     params '@user'
     command :cc
+
+    desc 'Defines target branch for MR'
+    params '<Local branch name>'
+    condition do
+      issuable.respond_to?(:target_branch) &&
+        (current_user.can?(:"update_#{issuable.to_ability_name}", issuable) ||
+          issuable.new_record?)
+    end
+    command :target_branch do |target_branch_param|
+      branch_name = target_branch_param.strip
+      @updates[:target_branch] = branch_name if project.repository.branch_names.include?(branch_name)
+    end
 
     def find_label_ids(labels_param)
       label_ids_by_reference = extract_references(labels_param, :label).map(&:id)

@@ -1,4 +1,4 @@
-/* eslint-disable func-names, space-before-function-paren, no-var, prefer-arrow-callback, wrap-iife, no-shadow, consistent-return, one-var, one-var-declaration-per-line, camelcase, default-case, no-new, quotes, no-duplicate-case, no-case-declarations, no-fallthrough, max-len, padded-blocks */
+/* eslint-disable func-names, space-before-function-paren, no-var, prefer-arrow-callback, wrap-iife, no-shadow, consistent-return, one-var, one-var-declaration-per-line, camelcase, default-case, no-new, quotes, no-duplicate-case, no-case-declarations, no-fallthrough, max-len */
 /* global UsernameValidator */
 /* global ActiveTabMemoizer */
 /* global ShortcutsNavigation */
@@ -8,7 +8,6 @@
 /* global ShortcutsIssuable */
 /* global ZenMode */
 /* global Milestone */
-/* global GLForm */
 /* global IssuableForm */
 /* global LabelsSelect */
 /* global MilestoneSelect */
@@ -20,7 +19,6 @@
 /* global UsersSelect */
 /* global GroupAvatar */
 /* global LineHighlighter */
-/* global ShortcutsBlob */
 /* global ProjectFork */
 /* global BuildArtifacts */
 /* global GroupsSelect */
@@ -36,6 +34,8 @@
 /* global ProjectShow */
 /* global Labels */
 /* global Shortcuts */
+
+const ShortcutsBlob = require('./shortcuts_blob');
 
 (function() {
   var Dispatcher;
@@ -63,17 +63,6 @@
         case 'sessions:new':
           new UsernameValidator();
           new ActiveTabMemoizer();
-          break;
-        case 'sessions:create':
-          if (!gon.u2f) break;
-          window.gl.u2fAuthenticate = new gl.U2FAuthenticate(
-            $("#js-authenticate-u2f"),
-            '#js-login-u2f-form',
-            gon.u2f,
-            document.querySelector('#js-login-2fa-device'),
-            document.querySelector('.js-2fa-form'),
-          );
-          window.gl.u2fAuthenticate.start();
           break;
         case 'projects:boards:show':
         case 'projects:boards:index':
@@ -108,9 +97,10 @@
           break;
         case 'projects:milestones:new':
         case 'projects:milestones:edit':
+        case 'projects:milestones:update':
           new ZenMode();
           new gl.DueDateSelectors();
-          new GLForm($('.milestone-form'));
+          new gl.GLForm($('.milestone-form'));
           break;
         case 'groups:milestones:new':
           new ZenMode();
@@ -121,7 +111,7 @@
         case 'projects:issues:new':
         case 'projects:issues:edit':
           shortcut_handler = new ShortcutsNavigation();
-          new GLForm($('.issue-form'));
+          new gl.GLForm($('.issue-form'));
           new IssuableForm($('.issue-form'));
           new LabelsSelect();
           new MilestoneSelect();
@@ -131,7 +121,7 @@
         case 'projects:merge_requests:edit':
           new gl.Diff();
           shortcut_handler = new ShortcutsNavigation();
-          new GLForm($('.merge-request-form'));
+          new gl.GLForm($('.merge-request-form'));
           new IssuableForm($('.merge-request-form'));
           new LabelsSelect();
           new MilestoneSelect();
@@ -139,11 +129,11 @@
           break;
         case 'projects:tags:new':
           new ZenMode();
-          new GLForm($('.tag-form'));
+          new gl.GLForm($('.tag-form'));
           break;
         case 'projects:releases:edit':
           new ZenMode();
-          new GLForm($('.release-form'));
+          new gl.GLForm($('.release-form'));
           break;
         case 'projects:merge_requests:show':
           new gl.Diff();
@@ -174,7 +164,7 @@
         case 'projects:commit:pipelines':
           new gl.MiniPipelineGraph({
             container: '.js-pipeline-table',
-          });
+          }).bindEvents();
           break;
         case 'projects:commits:show':
         case 'projects:activity':
@@ -237,7 +227,12 @@
         case 'projects:blame:show':
           new LineHighlighter();
           shortcut_handler = new ShortcutsNavigation();
-          new ShortcutsBlob(true);
+          const fileBlobPermalinkUrlElement = document.querySelector('.js-data-file-blob-permalink-url');
+          const fileBlobPermalinkUrl = fileBlobPermalinkUrlElement && fileBlobPermalinkUrlElement.getAttribute('href');
+          new ShortcutsBlob({
+            skipResetBindings: true,
+            fileBlobPermalinkUrl,
+          });
           break;
         case 'groups:labels:new':
         case 'groups:labels:edit':
@@ -261,6 +256,9 @@
         case 'projects:artifacts:browse':
           new BuildArtifacts();
           break;
+        case 'help:index':
+          gl.VersionCheckImage.bindErrorEvent($('img.js-version-status-badge'));
+          break;
         case 'search:show':
           new Search();
           break;
@@ -268,7 +266,7 @@
           new gl.ProtectedBranchCreate();
           new gl.ProtectedBranchEditList();
           break;
-        case 'projects:variables:index':
+        case 'projects:ci_cd:show':
           new gl.ProjectVariables();
           break;
         case 'ci:lints:create':
@@ -277,6 +275,17 @@
           break;
       }
       switch (path.first()) {
+        case 'sessions':
+        case 'omniauth_callbacks':
+          if (!gon.u2f) break;
+          gl.u2fAuthenticate = new gl.U2FAuthenticate(
+            $('#js-authenticate-u2f'),
+            '#js-login-u2f-form',
+            gon.u2f,
+            document.querySelector('#js-login-2fa-device'),
+            document.querySelector('.js-2fa-form'),
+          );
+          gl.u2fAuthenticate.start();
         case 'admin':
           new Admin();
           switch (path[1]) {
@@ -329,7 +338,7 @@
               new gl.Wikis();
               shortcut_handler = new ShortcutsNavigation();
               new ZenMode();
-              new GLForm($('.wiki-form'));
+              new gl.GLForm($('.wiki-form'));
               break;
             case 'snippets':
               shortcut_handler = new ShortcutsNavigation();
@@ -354,7 +363,7 @@
       }
       // If we haven't installed a custom shortcut handler, install the default one
       if (!shortcut_handler) {
-        return new Shortcuts();
+        new Shortcuts();
       }
     };
 
@@ -372,7 +381,5 @@
     };
 
     return Dispatcher;
-
   })();
-
 }).call(this);

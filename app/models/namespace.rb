@@ -4,7 +4,13 @@ class Namespace < ActiveRecord::Base
   include CacheMarkdownField
   include Sortable
   include Gitlab::ShellAdapter
+  include Gitlab::CurrentSettings
   include Routable
+
+  # Prevent users from creating unreasonably deep level of nesting.
+  # The number 20 was taken based on maximum nesting level of
+  # Android repo (15) + some extra backup.
+  NUMBER_OF_ANCESTORS_ALLOWED = 20
 
   cache_markdown_field :description, pipeline: :description
 
@@ -27,6 +33,8 @@ class Namespace < ActiveRecord::Base
     presence: true,
     length: { maximum: 255 },
     namespace: true
+
+  validate :nesting_level_allowed
 
   delegate :name, to: :owner, allow_nil: true, prefix: true
 
@@ -129,6 +137,9 @@ class Namespace < ActiveRecord::Base
     end
 
     Gitlab::UploadsTransfer.new.rename_namespace(path_was, path)
+    Gitlab::PagesTransfer.new.rename_namespace(path_was, path)
+
+    remove_exports!
 
     # If repositories moved successfully we need to
     # send update instructions to users.
@@ -166,25 +177,38 @@ class Namespace < ActiveRecord::Base
     Gitlab.config.lfs.enabled
   end
 
-  def full_path
-    if parent
-      parent.full_path + '/' + path
+  def shared_runners_enabled?
+    projects.with_shared_runners.any?
+  end
+
+  # Scopes the model on ancestors of the record
+  def ancestors
+    if parent_id
+      path = route ? route.path : full_path
+      paths = []
+
+      until path.blank?
+        path = path.rpartition('/').first
+        paths << path
+      end
+
+      self.class.joins(:route).where('routes.path IN (?)', paths).reorder('routes.path ASC')
     else
-      path
+      self.class.none
     end
   end
 
-  def full_name
-    @full_name ||=
-      if parent
-        parent.full_name + ' / ' + name
-      else
-        name
-      end
+  # Scopes the model on direct and indirect children of the record
+  def descendants
+    self.class.joins(:route).where('routes.path LIKE ?', "#{route.path}/%").reorder('routes.path ASC')
   end
 
-  def parents
-    @parents ||= parent ? parent.parents + [parent] : []
+  def user_ids_for_project_authorizations
+    [owner_id]
+  end
+
+  def parent_changed?
+    parent_id_changed?
   end
 
   private
@@ -214,6 +238,8 @@ class Namespace < ActiveRecord::Base
         GitlabShellWorker.perform_in(5.minutes, :rm_namespace, repository_storage_path, new_path)
       end
     end
+
+    remove_exports!
   end
 
   def refresh_access_of_projects_invited_groups
@@ -223,7 +249,25 @@ class Namespace < ActiveRecord::Base
       find_each(&:refresh_members_authorized_projects)
   end
 
-  def full_path_changed?
-    path_changed? || parent_id_changed?
+  def remove_exports!
+    Gitlab::Popen.popen(%W(find #{export_path} -not -path #{export_path} -delete))
+  end
+
+  def export_path
+    File.join(Gitlab::ImportExport.storage_path, full_path_was)
+  end
+
+  def full_path_was
+    if parent
+      parent.full_path + '/' + path_was
+    else
+      path_was
+    end
+  end
+
+  def nesting_level_allowed
+    if ancestors.count > Group::NUMBER_OF_ANCESTORS_ALLOWED
+      errors.add(:parent_id, "has too deep level of nesting")
+    end
   end
 end

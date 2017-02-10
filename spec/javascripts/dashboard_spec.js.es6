@@ -1,9 +1,7 @@
-/* eslint-disable no-new, padded-blocks */
+/* eslint-disable no-new */
 
-/*= require sidebar */
-/*= require jquery */
-/*= require js.cookie */
-/*= require lib/utils/text_utility */
+require('~/sidebar');
+require('~/lib/utils/text_utility');
 
 ((global) => {
   describe('Dashboard', () => {
@@ -36,5 +34,4 @@
       expect(todosCountText()).toEqual('1,000,000');
     });
   });
-
 })(window.gl);

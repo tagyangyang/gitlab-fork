@@ -1,7 +1,7 @@
-/* eslint-disable func-names, prefer-arrow-callback, space-before-function-paren, no-var, space-before-blocks, prefer-rest-params, wrap-iife, one-var, one-var-declaration-per-line, consistent-return, no-param-reassign, padded-blocks, max-len */
+/* eslint-disable func-names, prefer-arrow-callback, space-before-function-paren, no-var, prefer-rest-params, wrap-iife, one-var, one-var-declaration-per-line, consistent-return, no-param-reassign, max-len */
 
 (function() {
-  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var bind = function(fn, me) { return function() { return fn.apply(me, arguments); }; };
 
   window.SingleFileDiff = (function() {
     var COLLAPSED_HTML, ERROR_HTML, LOADING_HTML, WRAPPER;
@@ -33,13 +33,13 @@
         this.$toggleIcon.addClass('fa-caret-down');
       }
 
-      $('.file-title, .click-to-expand', this.file).on('click', (function (e) {
+      $('.js-file-title, .click-to-expand', this.file).on('click', (function (e) {
         this.toggleDiff($(e.target));
       }).bind(this));
     }
 
     SingleFileDiff.prototype.toggleDiff = function($target, cb) {
-      if (!$target.hasClass('file-title') && !$target.hasClass('click-to-expand') && !$target.hasClass('diff-toggle-caret')) return;
+      if (!$target.hasClass('js-file-title') && !$target.hasClass('click-to-expand') && !$target.hasClass('diff-toggle-caret')) return;
       this.isOpen = !this.isOpen;
       if (!this.isOpen && !this.hasError) {
         this.content.hide();
@@ -86,7 +86,6 @@
     };
 
     return SingleFileDiff;
-
   })();
 
   $.fn.singleFileDiff = function() {
@@ -96,5 +95,4 @@
       }
     });
   };
-
 }).call(this);

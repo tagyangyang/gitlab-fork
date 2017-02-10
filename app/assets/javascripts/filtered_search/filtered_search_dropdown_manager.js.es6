@@ -2,14 +2,15 @@
 
 (() => {
   class FilteredSearchDropdownManager {
-    constructor() {
+    constructor(baseEndpoint = '') {
+      this.baseEndpoint = baseEndpoint.replace(/\/$/, '');
       this.tokenizer = gl.FilteredSearchTokenizer;
       this.filteredSearchInput = document.querySelector('.filtered-search');
 
       this.setupMapping();
 
       this.cleanupWrapper = this.cleanup.bind(this);
-      document.addEventListener('page:fetch', this.cleanupWrapper);
+      document.addEventListener('beforeunload', this.cleanupWrapper);
     }
 
     cleanup() {
@@ -20,7 +21,7 @@
 
       this.setupMapping();
 
-      document.removeEventListener('page:fetch', this.cleanupWrapper);
+      document.removeEventListener('beforeunload', this.cleanupWrapper);
     }
 
     setupMapping() {
@@ -38,13 +39,13 @@
         milestone: {
           reference: null,
           gl: 'DropdownNonUser',
-          extraArguments: ['milestones.json', '%'],
+          extraArguments: [`${this.baseEndpoint}/milestones.json`, '%'],
           element: document.querySelector('#js-dropdown-milestone'),
         },
         label: {
           reference: null,
           gl: 'DropdownNonUser',
-          extraArguments: ['labels.json', '~'],
+          extraArguments: [`${this.baseEndpoint}/labels.json`, '~'],
           element: document.querySelector('#js-dropdown-label'),
         },
         hint: {
@@ -57,28 +58,33 @@
 
     static addWordToInput(tokenName, tokenValue = '') {
       const input = document.querySelector('.filtered-search');
+      const inputValue = input.value;
       const word = `${tokenName}:${tokenValue}`;
 
-      const { lastToken, searchToken } = gl.FilteredSearchTokenizer.processTokens(input.value);
-      const lastSearchToken = searchToken.split(' ').last();
-      const lastInputCharacter = input.value[input.value.length - 1];
-      const lastInputTrimmedCharacter = input.value.trim()[input.value.trim().length - 1];
+      // Get the string to replace
+      let newCaretPosition = input.selectionStart;
+      const { left, right } = gl.DropdownUtils.getInputSelectionPosition(input);
 
-      // Remove the typed tokenName
-      if (word.indexOf(lastSearchToken) === 0 && searchToken !== '') {
-        // Remove spaces after the colon
-        if (lastInputCharacter === ' ' && lastInputTrimmedCharacter === ':') {
-          input.value = input.value.trim();
-        }
+      input.value = `${inputValue.substr(0, left)}${word}${inputValue.substr(right)}`;
 
-        input.value = input.value.slice(0, -1 * lastSearchToken.length);
-      } else if (lastInputCharacter !== ' ' || (lastToken && lastToken.value[lastToken.value.length - 1] === ' ')) {
-        // Remove the existing tokenValue
-        const lastTokenString = `${lastToken.key}:${lastToken.symbol}${lastToken.value}`;
-        input.value = input.value.slice(0, -1 * lastTokenString.length);
+      // If we have added a tokenValue at the end of the input,
+      // add a space and set selection to the end
+      if (right >= inputValue.length && tokenValue !== '') {
+        input.value += ' ';
+        newCaretPosition = input.value.length;
       }
 
-      input.value += word;
+      gl.FilteredSearchDropdownManager.updateInputCaretPosition(newCaretPosition, input);
+    }
+
+    static updateInputCaretPosition(selectionStart, input) {
+      // Reset the position
+      // Sometimes can end up at end of input
+      input.setSelectionRange(selectionStart, selectionStart);
+
+      const { right } = gl.DropdownUtils.getInputSelectionPosition(input);
+
+      input.setSelectionRange(right, right);
     }
 
     updateCurrentDropdownOffset() {
@@ -90,9 +96,18 @@
         this.font = window.getComputedStyle(this.filteredSearchInput).font;
       }
 
+      const input = this.filteredSearchInput;
+      const inputText = input.value.slice(0, input.selectionStart);
       const filterIconPadding = 27;
-      const offset = gl.text
-        .getTextWidth(this.filteredSearchInput.value, this.font) + filterIconPadding;
+      let offset = gl.text.getTextWidth(inputText, this.font) + filterIconPadding;
+
+      const currentDropdownWidth = this.mapping[key].element.clientWidth === 0 ? 200 :
+      this.mapping[key].element.clientWidth;
+      const offsetMaxWidth = this.filteredSearchInput.clientWidth - currentDropdownWidth;
+
+      if (offsetMaxWidth < offset) {
+        offset = offsetMaxWidth;
+      }
 
       this.mapping[key].reference.setOffset(offset);
     }
@@ -148,9 +163,9 @@
 
     setDropdown() {
       const { lastToken, searchToken } = this.tokenizer
-        .processTokens(this.filteredSearchInput.value);
+        .processTokens(gl.DropdownUtils.getSearchInput(this.filteredSearchInput));
 
-      if (this.filteredSearchInput.value.split('').last() === ' ') {
+      if (this.currentDropdown) {
         this.updateCurrentDropdownOffset();
       }
 

@@ -1,6 +1,6 @@
-/* eslint-disable space-before-function-paren, no-var, padded-blocks */
+/* eslint-disable space-before-function-paren, no-var */
 
-/*= require extensions/jquery */
+require('~/extensions/jquery');
 
 (function() {
   describe('jQuery extensions', function() {
@@ -39,5 +39,4 @@
       });
     });
   });
-
 }).call(this);

@@ -1,9 +1,9 @@
-/* eslint-disable comma-dangle, space-before-function-paren, max-len, no-plusplus */
+/* eslint-disable comma-dangle, space-before-function-paren, max-len */
 /* global Vue */
 /* global Sortable */
 
-//= require ./board_card
-//= require ./board_new_issue
+require('./board_card');
+require('./board_new_issue');
 
 (() => {
   const Store = gl.issueBoards.BoardsStore;
@@ -23,6 +23,7 @@
       issues: Array,
       loading: Boolean,
       issueLinkBase: String,
+      rootPath: String,
     },
     data () {
       return {
@@ -43,7 +44,7 @@
       issues () {
         this.$nextTick(() => {
           if (this.scrollHeight() <= this.listHeight() && this.list.issuesSize > this.list.issues.length) {
-            this.list.page++;
+            this.list.page += 1;
             this.list.getIssues(false);
           }
 

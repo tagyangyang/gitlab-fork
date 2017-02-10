@@ -45,7 +45,7 @@ module API
       if id =~ /^\d+$/
         Project.find_by(id: id)
       else
-        Project.find_with_namespace(id)
+        Project.find_by_full_path(id)
       end
     end
 
@@ -84,6 +84,16 @@ module API
 
     def find_project_issue(id)
       IssuesFinder.new(current_user, project_id: user_project.id).find(id)
+    end
+
+    def find_project_merge_request(id)
+      MergeRequestsFinder.new(current_user, project_id: user_project.id).find(id)
+    end
+
+    def find_merge_request_with_access(id, access_level = :read_merge_request)
+      merge_request = user_project.merge_requests.find(id)
+      authorize! access_level, merge_request
+      merge_request
     end
 
     def authenticate!
@@ -222,7 +232,7 @@ module API
     end
 
     def render_api_error!(message, status)
-      error!({ 'message' => message }, status)
+      error!({ 'message' => message }, status, header)
     end
 
     def handle_api_exception(exception)
@@ -294,7 +304,7 @@ module API
         header['X-Sendfile'] = path
         body
       else
-        path
+        file path
       end
     end
 

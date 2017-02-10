@@ -6,13 +6,15 @@ class Todo < ActiveRecord::Base
   BUILD_FAILED      = 3
   MARKED            = 4
   APPROVAL_REQUIRED = 5 # This is an EE-only feature
+  UNMERGEABLE       = 6
 
   ACTION_NAMES = {
     ASSIGNED => :assigned,
     MENTIONED => :mentioned,
     BUILD_FAILED => :build_failed,
     MARKED => :marked,
-    APPROVAL_REQUIRED => :approval_required
+    APPROVAL_REQUIRED => :approval_required,
+    UNMERGEABLE => :unmergeable
   }
 
   belongs_to :author, class_name: "User"
@@ -66,6 +68,10 @@ class Todo < ActiveRecord::Base
     end
   end
 
+  def unmergeable?
+    action == UNMERGEABLE
+  end
+
   def build_failed?
     action == BUILD_FAILED
   end
@@ -97,9 +103,9 @@ class Todo < ActiveRecord::Base
 
   def target_reference
     if for_commit?
-      target.short_id
+      target.reference_link_text(full: true)
     else
-      target.to_reference
+      target.to_reference(full: true)
     end
   end
 

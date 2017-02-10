@@ -15,8 +15,6 @@ module API
         labels = args.delete(:labels)
         args[:label_name] = labels if match_all_labels
 
-        args[:search] = "#{Issue.reference_prefix}#{args.delete(:iid)}" if args.key?(:iid)
-
         issues = IssuesFinder.new(current_user, args).execute.inc_notes_with_associations
 
         # TODO: Remove in 9.0  pass `label_name: args.delete(:labels)` to IssuesFinder
@@ -89,13 +87,14 @@ module API
       requires :id, type: String, desc: 'The ID of a project'
     end
     resource :projects do
+      include TimeTrackingEndpoints
+
       desc 'Get a list of project issues' do
         success Entities::Issue
       end
       params do
         optional :state, type: String, values: %w[opened closed all], default: 'all',
                          desc: 'Return opened, closed, or all issues'
-        optional :iid, type: Integer, desc: 'Return the issue having the given `iid`'
         use :issues_params
       end
       get ":id/issues" do

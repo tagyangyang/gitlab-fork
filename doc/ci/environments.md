@@ -1,7 +1,6 @@
 # Introduction to environments and deployments
 
->**Note:**
-Introduced in GitLab 8.9.
+> Introduced in GitLab 8.9.
 
 During the development of software, there can be many stages until it's ready
 for public consumption. You sure want to first test your code and then deploy it
@@ -242,7 +241,7 @@ Web terminals were added in GitLab 8.15 and are only available to project
 masters and owners.
 
 If you deploy to your environments with the help of a deployment service (e.g.,
-the [Kubernetes](../project_services/kubernetes.md) service), GitLab can open
+the [Kubernetes service][kubernetes-service], GitLab can open
 a terminal session to your environment! This is a very powerful feature that
 allows you to debug issues without leaving the comfort of your web browser. To
 enable it, just follow the instructions given in the service documentation.
@@ -297,7 +296,7 @@ deploy_review:
     - echo "Deploy a review app"
   environment:
     name: review/$CI_BUILD_REF_NAME
-    url: https://$CI_BUILD_REF_SLUG.review.example.com
+    url: https://$CI_ENVIRONMENT_SLUG.example.com
   only:
     - branches
   except:
@@ -318,15 +317,15 @@ also contain `/`, or other characters that would be invalid in a domain name or
 URL, we use `$CI_ENVIRONMENT_SLUG` in the `environment:url` so that the
 environment can get a specific and distinct URL for each branch. In this case,
 given a `$CI_BUILD_REF_NAME` of `100-Do-The-Thing`, the URL will be something
-like `https://review-100-do-the-4f99a2.example.com`. Again, the way you set up
+like `https://100-do-the-4f99a2.example.com`. Again, the way you set up
 the web server to serve these requests is based on your setup.
 
 You could also use `$CI_BUILD_REF_SLUG` in `environment:url`, e.g.:
-`https://$CI_BUILD_REF_SLUG.review.example.com`. We use `$CI_ENVIRONMENT_SLUG`
+`https://$CI_BUILD_REF_SLUG.example.com`. We use `$CI_ENVIRONMENT_SLUG`
 here because it is guaranteed to be unique, but if you're using a workflow like
 [GitLab Flow][gitlab-flow], collisions are very unlikely, and you may prefer
 environment names to be more closely based on the branch name - the example
-above would give you an URL like `https://100-do-the-thing.review.example.com`
+above would give you an URL like `https://100-do-the-thing.example.com`
 
 Last but not least, we tell the job to run [`only`][only] on branches
 [`except`][only] master.
@@ -442,6 +441,57 @@ If a merge request is eventually merged to the default branch (in our case
 and/or `production`) you can see this information in the merge request itself.
 
 ![Environment URLs in merge request](img/environments_link_url_mr.png)
+
+### Go directly from source files to public pages on the environment
+
+> Introduced in GitLab 8.17.
+
+To go one step further, we can specify a Route Map to get GitLab to show us "View on [environment URL]" buttons to go directly from a file to that file's representation on the deployed website. It will be exposed in a few places:
+
+| In the diff for a merge request, comparison or commit | In the file view |
+| ------ | ------ |
+| !["View on env" button in merge request diff](img/view_on_env_mr.png) | !["View on env" button in file view](img/view_on_env_blob.png) |
+
+To get this to work, you need to tell GitLab how the paths of files in your repository map to paths of pages on your website, using a Route Map.
+
+A Route Map is a file inside the repository at `.gitlab/route-map.yml`, which contains a YAML array that maps `source` paths (in the repository) to `public` paths (on the website).
+
+This is an example of a route map for [Middleman](https://middlemanapp.com) static websites like [http://about.gitlab.com](https://gitlab.com/gitlab-com/www-gitlab-com):
+
+```yaml
+# Team data
+- source: 'data/team.yml' # data/team.yml
+  public: 'team/' # team/
+
+# Blogposts
+- source: /source\/posts\/([0-9]{4})-([0-9]{2})-([0-9]{2})-(.+?)\..*/ # source/posts/2017-01-30-around-the-world-in-6-releases.html.md.erb
+  public: '\1/\2/\3/\4/' # 2017/01/30/around-the-world-in-6-releases/
+
+# HTML files
+- source: /source\/(.+?\.html).*/ # source/index.html.haml
+  public: '\1' # index.html
+
+# Other files
+- source: /source\/(.*)/ # source/images/blogimages/around-the-world-in-6-releases-cover.png
+  public: '\1' # images/blogimages/around-the-world-in-6-releases-cover.png
+```
+
+Mappings are defined as entries in the root YAML array, and are identified by a `-` prefix. Within an entry, we have a hash map with two keys:
+
+- `source`
+    - a string, starting and ending with `'`, for an exact match
+    - a regular expression, starting and ending with `/`, for a pattern match
+      - The regular expression needs to match the entire source path - `^` and `$` anchors are implied.
+      - Can include capture groups denoted by `()` that can be referred to in the `public` path.
+      - Slashes (`/`) can, but don't have to, be escaped as `\/`.
+      - Literal periods (`.`) should be escaped as `\.`.
+- `public`
+    - a string, starting and ending with `'`.
+      - Can include `\N` expressions to refer to capture groups in the `source` regular expression in order of their occurence, starting with `\1`.
+
+The public path for a source path is determined by finding the first `source` expression that matches it, and returning the corresponding `public` path, replacing the `\N` expressions with the values of the `()` capture groups if appropriate.
+
+In the example above, the fact that mappings are evaluated in order of their definition is used to ensure that `source/index.html.haml` will match `/source\/(.+?\.html).*/` instead of `/source\/(.*)/`, and will result in a public path of `index.html`, instead of `index.html.haml`.
 
 ---
 
@@ -566,7 +616,7 @@ Below are some links you may find interesting:
 [Pipelines]: pipelines.md
 [jobs]: yaml/README.md#jobs
 [yaml]: yaml/README.md
-[kubernetes-service]: ../project_services/kubernetes.md]
+[kubernetes-service]: ../user/project/integrations/kubernetes.md
 [environments]: #environments
 [deployments]: #deployments
 [permissions]: ../user/permissions.md

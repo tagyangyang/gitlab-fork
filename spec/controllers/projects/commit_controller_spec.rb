@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe Projects::CommitController do
-  let(:project) { create(:project) }
-  let(:user)    { create(:user) }
-  let(:commit)  { project.commit("master") }
+  let(:project)  { create(:project, :repository) }
+  let(:user)     { create(:user) }
+  let(:commit)   { project.commit("master") }
   let(:master_pickable_sha) { '7d3b0f7cff5f37573aea97cebfd5692ea1689924' }
   let(:master_pickable_commit)  { project.commit(master_pickable_sha) }
 
@@ -303,6 +303,52 @@ describe Projects::CommitController do
 
     context 'when the commit does not exist' do
       before { diff_for_path(id: commit.id.succ, old_path: existing_path, new_path: existing_path) }
+
+      it 'returns a 404' do
+        expect(response).to have_http_status(404)
+      end
+    end
+  end
+
+  describe 'GET pipelines' do
+    def get_pipelines(extra_params = {})
+      params = {
+        namespace_id: project.namespace.to_param,
+        project_id: project.to_param
+      }
+
+      get :pipelines, params.merge(extra_params)
+    end
+
+    context 'when the commit exists' do
+      context 'when the commit has pipelines' do
+        before do
+          create(:ci_pipeline, project: project, sha: commit.id)
+        end
+
+        context 'when rendering a HTML format' do
+          it 'shows pipelines' do
+            get_pipelines(id: commit.id)
+
+            expect(response).to be_ok
+          end
+        end
+
+        context 'when rendering a JSON format' do
+          it 'responds with serialized pipelines' do
+            get_pipelines(id: commit.id, format: :json)
+
+            expect(response).to be_ok
+            expect(JSON.parse(response.body)).not_to be_empty
+          end
+        end
+      end
+    end
+
+    context 'when the commit does not exist' do
+      before do
+        get_pipelines(id: 'e7a412c8da9f6d0081a633a4a402dde1c4694ebd')
+      end
 
       it 'returns a 404' do
         expect(response).to have_http_status(404)

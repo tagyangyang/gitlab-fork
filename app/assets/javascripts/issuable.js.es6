@@ -1,6 +1,5 @@
-/* eslint-disable no-param-reassign, func-names, no-var, camelcase, no-unused-vars, object-shorthand, space-before-function-paren, no-return-assign, comma-dangle, consistent-return, one-var, one-var-declaration-per-line, quotes, prefer-template, prefer-arrow-callback, prefer-const, padded-blocks, wrap-iife, max-len */
+/* eslint-disable no-param-reassign, func-names, no-var, camelcase, no-unused-vars, object-shorthand, space-before-function-paren, no-return-assign, comma-dangle, consistent-return, one-var, one-var-declaration-per-line, quotes, prefer-template, prefer-arrow-callback, wrap-iife, max-len */
 /* global Issuable */
-/* global Turbolinks */
 
 ((global) => {
   var issuable_created;
@@ -34,7 +33,6 @@
         e.preventDefault();
         debouncedExecSearch(e);
       });
-
     },
     initSearchState: function($searchInput) {
       const currentSearchVal = $searchInput.val();
@@ -120,7 +118,7 @@
         issuesUrl = formAction;
         issuesUrl += "" + (formAction.indexOf('?') < 0 ? '?' : '&');
         issuesUrl += formData;
-        return Turbolinks.visit(issuesUrl);
+        return gl.utils.visitUrl(issuesUrl);
       };
     })(this),
     initResetFilters: function() {
@@ -131,7 +129,7 @@
         const baseIssuesUrl = target.href;
 
         $form.attr('action', baseIssuesUrl);
-        Turbolinks.visit(baseIssuesUrl);
+        gl.utils.visitUrl(baseIssuesUrl);
       });
     },
     initChecks: function() {
@@ -152,7 +150,7 @@
       this.issuableBulkActions.setOriginalDropdownData();
 
       if ($checkedIssues.length > 0) {
-        let ids = $.map($checkedIssues, function(value) {
+        const ids = $.map($checkedIssues, function(value) {
           return $(value).data('id');
         });
         $updateIssuesIds.val(ids);
@@ -187,5 +185,4 @@
       });
     }
   };
-
 })(window);

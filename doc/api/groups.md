@@ -25,7 +25,15 @@ GET /groups
     "id": 1,
     "name": "Foobar Group",
     "path": "foo-bar",
-    "description": "An interesting group"
+    "description": "An interesting group",
+    "visibility_level": 20,
+    "lfs_enabled": true,
+    "avatar_url": "http://localhost:3000/uploads/group/avatar/1/foo.jpg",
+    "web_url": "http://localhost:3000/groups/foo-bar",
+    "request_access_enabled": false,
+    "full_name": "Foobar Group",
+    "full_path": "foo-bar",
+    "parent_id": null
   }
 ]
 ```
@@ -98,15 +106,7 @@ Example response:
       "id": 5,
       "name": "Experimental",
       "path": "h5bp",
-      "owner_id": null,
-      "created_at": "2016-04-05T21:40:49.152Z",
-      "updated_at": "2016-04-07T08:07:48.466Z",
-      "description": "foo",
-      "avatar": {
-        "url": null
-      },
-      "share_with_group_lock": false,
-      "visibility_level": 10
+      "kind": "group"
     },
     "avatar_url": null,
     "star_count": 1,
@@ -149,6 +149,9 @@ Example response:
   "avatar_url": null,
   "web_url": "https://gitlab.example.com/groups/twitter",
   "request_access_enabled": false,
+  "full_name": "Twitter",
+  "full_path": "twitter",
+  "parent_id": null,
   "projects": [
     {
       "id": 7,
@@ -179,15 +182,7 @@ Example response:
         "id": 4,
         "name": "Twitter",
         "path": "twitter",
-        "owner_id": null,
-        "created_at": "2016-06-17T07:47:24.216Z",
-        "updated_at": "2016-06-17T07:47:24.216Z",
-        "description": "Aliquid qui quis dignissimos distinctio ut commodi voluptas est.",
-        "avatar": {
-          "url": null
-        },
-        "share_with_group_lock": false,
-        "visibility_level": 20
+        "kind": "group"
       },
       "avatar_url": null,
       "star_count": 0,
@@ -226,15 +221,7 @@ Example response:
         "id": 4,
         "name": "Twitter",
         "path": "twitter",
-        "owner_id": null,
-        "created_at": "2016-06-17T07:47:24.216Z",
-        "updated_at": "2016-06-17T07:47:24.216Z",
-        "description": "Aliquid qui quis dignissimos distinctio ut commodi voluptas est.",
-        "avatar": {
-          "url": null
-        },
-        "share_with_group_lock": false,
-        "visibility_level": 20
+        "kind": "group"
       },
       "avatar_url": null,
       "star_count": 0,
@@ -275,15 +262,7 @@ Example response:
         "id": 5,
         "name": "H5bp",
         "path": "h5bp",
-        "owner_id": null,
-        "created_at": "2016-06-17T07:47:26.621Z",
-        "updated_at": "2016-06-17T07:47:26.621Z",
-        "description": "Id consequatur rem vel qui doloremque saepe.",
-        "avatar": {
-          "url": null
-        },
-        "share_with_group_lock": false,
-        "visibility_level": 20
+        "kind": "group"
       },
       "avatar_url": null,
       "star_count": 0,
@@ -323,6 +302,7 @@ Parameters:
 - `visibility_level` (optional) - The group's visibility. 0 for private, 10 for internal, 20 for public.
 - `lfs_enabled` (optional)      - Enable/disable Large File Storage (LFS) for the projects in this group
 - `request_access_enabled` (optional) - Allow users to request member access.
+- `parent_id` (optional) - The parent group id for creating nested group.
 
 ## Transfer project to group
 
@@ -372,6 +352,9 @@ Example response:
   "avatar_url": null,
   "web_url": "http://gitlab.example.com/groups/h5bp",
   "request_access_enabled": false,
+  "full_name": "Foobar Group",
+  "full_path": "foo-bar",
+  "parent_id": null,
   "projects": [
     {
       "id": 9,
@@ -401,15 +384,7 @@ Example response:
         "id": 5,
         "name": "Experimental",
         "path": "h5bp",
-        "owner_id": null,
-        "created_at": "2016-04-05T21:40:49.152Z",
-        "updated_at": "2016-04-07T08:07:48.466Z",
-        "description": "foo",
-        "avatar": {
-          "url": null
-        },
-        "share_with_group_lock": false,
-        "visibility_level": 10
+        "kind": "group"
       },
       "avatar_url": null,
       "star_count": 1,

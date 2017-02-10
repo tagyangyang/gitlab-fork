@@ -1,11 +1,12 @@
-/* eslint-disable max-len, no-var, func-names, space-before-function-paren, vars-on-top, no-plusplus, comma-dangle, no-return-assign, consistent-return, no-param-reassign, one-var, one-var-declaration-per-line, quotes, prefer-template, no-else-return, prefer-arrow-callback, no-unused-vars, no-underscore-dangle, no-shadow, no-mixed-operators, template-curly-spacing, camelcase, default-case, wrap-iife, semi, padded-blocks */
+/* eslint-disable max-len, no-var, func-names, space-before-function-paren, vars-on-top, comma-dangle, no-return-assign, consistent-return, no-param-reassign, one-var, one-var-declaration-per-line, quotes, prefer-template, no-else-return, prefer-arrow-callback, no-unused-vars, no-underscore-dangle, no-shadow, no-mixed-operators, camelcase, default-case, wrap-iife */
 /* global notify */
 /* global notifyPermissions */
 /* global merge_request_widget */
-/* global Turbolinks */
+
+require('./smart_interval');
 
 ((global) => {
-  var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i += 1) { if (i in this && this[i] === item) return i; } return -1; };
 
   const DEPLOYMENT_TEMPLATE = `<div class="mr-widget-heading" id="<%- id %>">
        <div class="ci_widget ci-success">
@@ -50,6 +51,8 @@
       this.getCIStatus(false);
       this.retrieveSuccessIcon();
 
+      this.initMiniPipelineGraph();
+
       this.ciStatusInterval = new global.SmartInterval({
         callback: this.getCIStatus.bind(this, true),
         startingInterval: 10000,
@@ -65,17 +68,18 @@
         incrementByFactorOf: 15000,
         immediateExecution: true,
       });
+
       notifyPermissions();
     }
 
     MergeRequestWidget.prototype.clearEventListeners = function() {
-      return $(document).off('page:change.merge_request');
+      return $(document).off('DOMContentLoaded');
     };
 
     MergeRequestWidget.prototype.addEventListeners = function() {
       var allowedPages;
       allowedPages = ['show', 'commits', 'pipelines', 'changes'];
-      $(document).on('page:change.merge_request', (function(_this) {
+      $(document).on('DOMContentLoaded', (function(_this) {
         return function() {
           var page;
           page = $('body').data('page').split(':').last();
@@ -90,7 +94,7 @@
       const $ciSuccessIcon = $('.js-success-icon');
       this.$ciSuccessIcon = $ciSuccessIcon.html();
       $ciSuccessIcon.remove();
-    }
+    };
 
     MergeRequestWidget.prototype.mergeInProgress = function(deleteSourceBranch) {
       if (deleteSourceBranch == null) {
@@ -126,7 +130,9 @@
 
     MergeRequestWidget.prototype.getMergeStatus = function() {
       return $.get(this.opts.merge_check_url, function(data) {
-        return $('.mr-state-widget').replaceWith(data);
+        var $html = $(data);
+        $('.mr-widget-body').replaceWith($html.find('.mr-widget-body'));
+        $('.mr-widget-footer').replaceWith($html.find('.mr-widget-footer'));
       });
     };
 
@@ -148,15 +154,25 @@
       return $.getJSON(this.opts.ci_status_url, (function(_this) {
         return function(data) {
           var message, status, title;
-          if (data.status === '') {
+          if (!data.status) {
             return;
           }
           if (data.environments && data.environments.length) _this.renderEnvironments(data.environments);
-          if (data.status !== _this.opts.ci_status && (data.status != null)) {
+          if (data.status !== _this.opts.ci_status ||
+              data.sha !== _this.opts.ci_sha ||
+              data.pipeline !== _this.opts.ci_pipeline) {
             _this.opts.ci_status = data.status;
             _this.showCIStatus(data.status);
             if (data.coverage) {
               _this.showCICoverage(data.coverage);
+            }
+            if (data.pipeline) {
+              _this.opts.ci_pipeline = data.pipeline;
+              _this.updatePipelineUrls(data.pipeline);
+            }
+            if (data.sha) {
+              _this.opts.ci_sha = data.sha;
+              _this.updateCommitUrls(data.sha);
             }
             if (showNotification) {
               status = _this.ciLabelForStatus(data.status);
@@ -187,9 +203,9 @@
     };
 
     MergeRequestWidget.prototype.renderEnvironments = function(environments) {
-      for (let i = 0; i < environments.length; i++) {
+      for (let i = 0; i < environments.length; i += 1) {
         const environment = environments[i];
-        if ($(`.mr-state-widget #${ environment.id }`).length) return;
+        if ($(`.mr-state-widget #${environment.id}`).length) return;
         const $template = $(DEPLOYMENT_TEMPLATE);
         if (!environment.external_url || !environment.external_url_formatted) $('.js-environment-link', $template).remove();
 
@@ -205,7 +221,7 @@
         }
         environment.ci_success_icon = this.$ciSuccessIcon;
         const templateString = _.unescape($template[0].outerHTML);
-        const template = _.template(templateString)(environment)
+        const template = _.template(templateString)(environment);
         this.$widgetBody.before(template);
       }
     };
@@ -223,17 +239,20 @@
           case "failed":
           case "canceled":
           case "not_found":
-            return this.setMergeButtonClass('btn-danger');
+            this.setMergeButtonClass('btn-danger');
+            break;
           case "running":
-            return this.setMergeButtonClass('btn-info');
+            this.setMergeButtonClass('btn-info');
+            break;
           case "success":
           case "success_with_warnings":
-            return this.setMergeButtonClass('btn-create');
+            this.setMergeButtonClass('btn-create');
         }
       } else {
         $('.ci_widget.ci-error').show();
-        return this.setMergeButtonClass('btn-danger');
+        this.setMergeButtonClass('btn-danger');
       }
+      this.initMiniPipelineGraph();
     };
 
     MergeRequestWidget.prototype.showCICoverage = function(coverage) {
@@ -246,8 +265,22 @@
       return $('.js-merge-button,.accept-action .dropdown-toggle').removeClass('btn-danger btn-info btn-create').addClass(css_class);
     };
 
+    MergeRequestWidget.prototype.updatePipelineUrls = function(id) {
+      const pipelineUrl = this.opts.pipeline_path;
+      $('.pipeline').text(`#${id}`).attr('href', [pipelineUrl, id].join('/'));
+    };
+
+    MergeRequestWidget.prototype.updateCommitUrls = function(id) {
+      const commitsUrl = this.opts.commits_path;
+      $('.js-commit-link').text(`#${id}`).attr('href', [commitsUrl, id].join('/'));
+    };
+
+    MergeRequestWidget.prototype.initMiniPipelineGraph = function() {
+      new gl.MiniPipelineGraph({
+        container: '.js-pipeline-inline-mr-widget-graph:visible',
+      }).bindEvents();
+    };
+
     return MergeRequestWidget;
-
   })();
-
 })(window.gl || (window.gl = {}));

@@ -7,7 +7,6 @@ gem 'rails-deprecated_sanitizer', '~> 1.0.3'
 gem 'responders', '~> 2.0'
 
 gem 'sprockets', '~> 3.7.0'
-gem 'sprockets-es6', '~> 0.9.2'
 
 # Default values for AR models
 gem 'default_value_for', '~> 3.0.0'
@@ -21,7 +20,7 @@ gem 'rugged', '~> 0.24.0'
 # Authentication libraries
 gem 'devise',                 '~> 4.2'
 gem 'doorkeeper',             '~> 4.2.0'
-gem 'omniauth',               '~> 1.3.1'
+gem 'omniauth',               '~> 1.3.2'
 gem 'omniauth-auth0',         '~> 1.4.1'
 gem 'omniauth-azure-oauth2',  '~> 0.0.6'
 gem 'omniauth-cas3',          '~> 1.1.2'
@@ -36,7 +35,7 @@ gem 'omniauth-twitter',       '~> 1.2.0'
 gem 'omniauth_crowd',         '~> 2.2.0'
 gem 'omniauth-authentiq',     '~> 0.2.0'
 gem 'rack-oauth2',            '~> 1.2.1'
-gem 'jwt'
+gem 'jwt',                    '~> 1.5.6'
 
 # Spam and anti-bot protection
 gem 'recaptcha', '~> 3.0', require: 'recaptcha/rails'
@@ -47,6 +46,9 @@ gem 'devise-two-factor', '~> 3.0.0'
 gem 'rqrcode-rails3', '~> 0.1.7'
 gem 'attr_encrypted', '~> 3.0.0'
 gem 'u2f', '~> 0.2.1'
+
+# GitLab Pages
+gem 'validates_hostname', '~> 1.0.6'
 
 # Browser detection
 gem 'browser', '~> 2.2'
@@ -109,7 +111,7 @@ gem 'org-ruby',             '~> 0.9.12'
 gem 'creole',               '~> 0.5.0'
 gem 'wikicloth',            '0.8.1'
 gem 'asciidoctor',          '~> 1.5.2'
-gem 'asciidoctor-plantuml', '0.0.6'
+gem 'asciidoctor-plantuml', '0.0.7'
 gem 'rouge',                '~> 2.0'
 gem 'truncato',             '~> 0.7.8'
 
@@ -219,10 +221,12 @@ gem 'oj', '~> 2.17.4'
 gem 'chronic', '~> 0.10.2'
 gem 'chronic_duration', '~> 0.10.6'
 
-gem 'sassc-rails', '~> 1.3.0'
+gem 'webpack-rails', '~> 0.9.9'
+gem 'rack-proxy', '~> 0.6.0'
+
+gem 'sass-rails', '~> 5.0.6'
 gem 'coffee-rails', '~> 4.1.0'
 gem 'uglifier', '~> 2.7.2'
-gem 'gitlab-turbolinks-classic', '~> 2.5', '>= 2.5.6'
 
 gem 'addressable',        '~> 2.3.8'
 gem 'bootstrap-sass',     '~> 3.3.0'
@@ -252,7 +256,7 @@ end
 
 group :development do
   gem 'foreman', '~> 0.78.0'
-  gem 'brakeman', '~> 3.3.0', require: false
+  gem 'brakeman', '~> 3.4.0', require: false
 
   gem 'letter_opener_web', '~> 1.3.0'
   gem 'bullet', '~> 5.2.0', require: false
@@ -280,6 +284,7 @@ group :development, :test do
   gem 'rspec-retry',        '~> 0.4.5'
   gem 'spinach-rails',      '~> 0.2.1'
   gem 'spinach-rerun-reporter', '~> 0.0.2'
+  gem 'rspec_profiling',    '~> 0.0.5'
 
   # Prevent occasions where minitest is not bundled in packaged versions of ruby (see #3826)
   gem 'minitest', '~> 5.7.0'
@@ -291,13 +296,9 @@ group :development, :test do
   gem 'capybara-screenshot', '~> 1.0.0'
   gem 'poltergeist',         '~> 1.9.0'
 
-  gem 'teaspoon', '~> 1.1.0'
-  gem 'teaspoon-jasmine', '~> 2.2.0'
-
   gem 'spring',                   '~> 1.7.0'
   gem 'spring-commands-rspec',    '~> 1.0.4'
   gem 'spring-commands-spinach',  '~> 1.1.0'
-  gem 'spring-commands-teaspoon', '~> 0.0.2'
 
   gem 'rubocop', '~> 0.46.0', require: false
   gem 'rubocop-rspec', '~> 1.9.1', require: false
@@ -322,7 +323,7 @@ group :test do
   gem 'email_spec', '~> 1.6.0'
   gem 'json-schema', '~> 2.6.2'
   gem 'webmock', '~> 1.21.0'
-  gem 'test_after_commit', '~> 0.4.2'
+  gem 'test_after_commit', '~> 1.1'
   gem 'sham_rack', '~> 1.3.6'
   gem 'timecop', '~> 0.8.0'
 end

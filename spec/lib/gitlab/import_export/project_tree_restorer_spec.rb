@@ -6,7 +6,7 @@ describe Gitlab::ImportExport::ProjectTreeRestorer, services: true do
     let(:user) { create(:user) }
     let(:namespace) { create(:namespace, owner: user) }
     let(:shared) { Gitlab::ImportExport::Shared.new(relative_path: "", project_path: 'path') }
-    let!(:project) { create(:empty_project, name: 'project', path: 'project', builds_access_level: ProjectFeature::DISABLED, issues_access_level: ProjectFeature::DISABLED) }
+    let!(:project) { create(:empty_project, :builds_disabled, :issues_disabled, name: 'project', path: 'project') }
     let(:project_tree_restorer) { described_class.new(user: user, shared: shared, project: project) }
     let(:restored_project_json) { project_tree_restorer.restore }
 
@@ -121,13 +121,13 @@ describe Gitlab::ImportExport::ProjectTreeRestorer, services: true do
       end
 
       context 'with group' do
-        let!(:project) do 
+        let!(:project) do
           create(:empty_project,
-                                name: 'project',
-                                path: 'project',
-                                builds_access_level: ProjectFeature::DISABLED,
-                                issues_access_level: ProjectFeature::DISABLED,
-                                group: create(:group)) 
+                 :builds_disabled,
+                 :issues_disabled,
+                 name: 'project',
+                 path: 'project',
+                 group: create(:group))
         end
 
         it 'has group labels' do
@@ -195,6 +195,20 @@ describe Gitlab::ImportExport::ProjectTreeRestorer, services: true do
           create(:ci_build, token: 'abcd')
 
           expect(restored_project_json).to be true
+        end
+      end
+
+      context 'tokens are regenerated' do
+        before do
+          restored_project_json
+        end
+
+        it 'has a new CI trigger token' do
+          expect(Ci::Trigger.where(token: 'cdbfasdf44a5958c83654733449e585')).to be_empty
+        end
+
+        it 'has a new CI build token' do
+          expect(Ci::Build.where(token: 'abcd')).to be_empty
         end
       end
     end

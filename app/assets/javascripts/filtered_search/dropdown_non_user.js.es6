@@ -1,4 +1,4 @@
-/*= require filtered_search/filtered_search_dropdown */
+require('./filtered_search_dropdown');
 
 /* global droplabAjax */
 /* global droplabFilter */
@@ -15,7 +15,7 @@
           loadingTemplate: this.loadingTemplate,
         },
         droplabFilter: {
-          filterFunction: gl.DropdownUtils.filterWithSymbol.bind(null, this.symbol),
+          filterFunction: gl.DropdownUtils.filterWithSymbol.bind(null, this.symbol, input),
         },
       };
     }

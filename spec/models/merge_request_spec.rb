@@ -65,7 +65,7 @@ describe MergeRequest, models: true do
   end
 
   describe '#target_branch_sha' do
-    let(:project) { create(:project) }
+    let(:project) { create(:project, :repository) }
 
     subject { create(:merge_request, source_project: project, target_project: project) }
 
@@ -97,7 +97,7 @@ describe MergeRequest, models: true do
       commit = double('commit1', safe_message: "Fixes #{issue.to_reference}")
       allow(subject).to receive(:commits).and_return([commit])
 
-      expect { subject.cache_merge_request_closes_issues! }.to change(subject.merge_requests_closing_issues, :count).by(1)
+      expect { subject.cache_merge_request_closes_issues!(subject.author) }.to change(subject.merge_requests_closing_issues, :count).by(1)
     end
 
     it 'does not cache issues from external trackers' do
@@ -106,7 +106,7 @@ describe MergeRequest, models: true do
       commit = double('commit1', safe_message: "Fixes #{issue.to_reference}")
       allow(subject).to receive(:commits).and_return([commit])
 
-      expect { subject.cache_merge_request_closes_issues! }.not_to change(subject.merge_requests_closing_issues, :count)
+      expect { subject.cache_merge_request_closes_issues!(subject.author) }.not_to change(subject.merge_requests_closing_issues, :count)
     end
   end
 
@@ -150,7 +150,7 @@ describe MergeRequest, models: true do
     end
 
     it 'supports a cross-project reference' do
-      another_project = build(:project, name: 'another-project', namespace: project.namespace)
+      another_project = build(:empty_project, name: 'another-project', namespace: project.namespace)
       expect(merge_request.to_reference(another_project)).to eq "sample-project!1"
     end
 
@@ -245,8 +245,8 @@ describe MergeRequest, models: true do
 
   describe '#for_fork?' do
     it 'returns true if the merge request is for a fork' do
-      subject.source_project = create(:project, namespace: create(:group))
-      subject.target_project = create(:project, namespace: create(:group))
+      subject.source_project = build_stubbed(:empty_project, namespace: create(:group))
+      subject.target_project = build_stubbed(:empty_project, namespace: create(:group))
 
       expect(subject.for_fork?).to be_truthy
     end
@@ -300,7 +300,7 @@ describe MergeRequest, models: true do
       allow(subject.project).to receive(:default_branch).
         and_return(subject.target_branch)
 
-      expect(subject.issues_mentioned_but_not_closing).to match_array([mentioned_issue])
+      expect(subject.issues_mentioned_but_not_closing(subject.author)).to match_array([mentioned_issue])
     end
   end
 
@@ -501,8 +501,8 @@ describe MergeRequest, models: true do
   end
 
   describe '#diverged_commits_count' do
-    let(:project)      { create(:project) }
-    let(:fork_project) { create(:project, forked_from_project: project) }
+    let(:project)      { create(:project, :repository) }
+    let(:fork_project) { create(:project, :repository, forked_from_project: project) }
 
     context 'when the target branch does not exist anymore' do
       subject { create(:merge_request, source_project: project, target_project: project) }
@@ -727,7 +727,7 @@ describe MergeRequest, models: true do
   end
 
   describe '#participants' do
-    let(:project) { create(:project, :public) }
+    let(:project) { create(:empty_project, :public) }
 
     let(:mr) do
       create(:merge_request, source_project: project, target_project: project)
@@ -768,15 +768,17 @@ describe MergeRequest, models: true do
   end
 
   describe '#check_if_can_be_merged' do
-    let(:project) { create(:project, only_allow_merge_if_build_succeeds: true) }
+    let(:project) { create(:empty_project, only_allow_merge_if_build_succeeds: true) }
 
     subject { create(:merge_request, source_project: project, merge_status: :unchecked) }
 
     context 'when it is not broken and has no conflicts' do
-      it 'is marked as mergeable' do
+      before do
         allow(subject).to receive(:broken?) { false }
         allow(project.repository).to receive(:can_be_merged?).and_return(true)
+      end
 
+      it 'is marked as mergeable' do
         expect { subject.check_if_can_be_merged }.to change { subject.merge_status }.to('can_be_merged')
       end
     end
@@ -786,6 +788,12 @@ describe MergeRequest, models: true do
 
       it 'becomes unmergeable' do
         expect { subject.check_if_can_be_merged }.to change { subject.merge_status }.to('cannot_be_merged')
+      end
+
+      it 'creates Todo on unmergeability' do
+        expect_any_instance_of(TodoService).to receive(:merge_request_became_unmergeable).with(subject)
+
+        subject.check_if_can_be_merged
       end
     end
 
@@ -802,7 +810,7 @@ describe MergeRequest, models: true do
   end
 
   describe '#mergeable?' do
-    let(:project) { create(:project) }
+    let(:project) { create(:empty_project) }
 
     subject { create(:merge_request, source_project: project) }
 
@@ -822,7 +830,7 @@ describe MergeRequest, models: true do
   end
 
   describe '#mergeable_state?' do
-    let(:project) { create(:project) }
+    let(:project) { create(:project, :repository) }
 
     subject { create(:merge_request, source_project: project) }
 
@@ -949,7 +957,7 @@ describe MergeRequest, models: true do
     let(:merge_request) { create(:merge_request_with_diff_notes, source_project: project) }
 
     context 'when project.only_allow_merge_if_all_discussions_are_resolved == true' do
-      let(:project) { create(:project, only_allow_merge_if_all_discussions_are_resolved: true) }
+      let(:project) { create(:project, :repository, only_allow_merge_if_all_discussions_are_resolved: true) }
 
       context 'with all discussions resolved' do
         before do
@@ -983,7 +991,7 @@ describe MergeRequest, models: true do
     end
 
     context 'when project.only_allow_merge_if_all_discussions_are_resolved == false' do
-      let(:project) { create(:project, only_allow_merge_if_all_discussions_are_resolved: false) }
+      let(:project) { create(:project, :repository, only_allow_merge_if_all_discussions_are_resolved: false) }
 
       context 'with unresolved discussions' do
         before do
@@ -997,9 +1005,15 @@ describe MergeRequest, models: true do
     end
   end
 
-  describe "#environments" do
-    let(:project)       { create(:project) }
+  describe "#environments_for" do
+    let(:project)       { create(:project, :repository) }
+    let(:user)          { project.creator }
     let(:merge_request) { create(:merge_request, source_project: project) }
+
+    before do
+      merge_request.source_project.add_master(user)
+      merge_request.target_project.add_master(user)
+    end
 
     context 'with multiple environments' do
       let(:environments) { create_list(:environment, 3, project: project) }
@@ -1010,13 +1024,13 @@ describe MergeRequest, models: true do
       end
 
       it 'selects deployed environments' do
-        expect(merge_request.environments).to contain_exactly(environments.first)
+        expect(merge_request.environments_for(user)).to contain_exactly(environments.first)
       end
     end
 
     context 'with environments on source project' do
       let(:source_project) do
-        create(:project) do |fork_project|
+        create(:project, :repository) do |fork_project|
           fork_project.create_forked_project_link(forked_to_project_id: fork_project.id, forked_from_project_id: project.id)
         end
       end
@@ -1034,7 +1048,7 @@ describe MergeRequest, models: true do
       end
 
       it 'selects deployed environments' do
-        expect(merge_request.environments).to contain_exactly(source_environment)
+        expect(merge_request.environments_for(user)).to contain_exactly(source_environment)
       end
 
       context 'with environments on target project' do
@@ -1045,7 +1059,7 @@ describe MergeRequest, models: true do
         end
 
         it 'selects deployed environments' do
-          expect(merge_request.environments).to contain_exactly(source_environment, target_environment)
+          expect(merge_request.environments_for(user)).to contain_exactly(source_environment, target_environment)
         end
       end
     end
@@ -1056,7 +1070,7 @@ describe MergeRequest, models: true do
       end
 
       it 'returns an empty array' do
-        expect(merge_request.environments).to be_empty
+        expect(merge_request.environments_for(user)).to be_empty
       end
     end
   end
@@ -1393,8 +1407,8 @@ describe MergeRequest, models: true do
   end
 
   describe "#source_project_missing?" do
-    let(:project)      { create(:project) }
-    let(:fork_project) { create(:project, forked_from_project: project) }
+    let(:project)      { create(:empty_project) }
+    let(:fork_project) { create(:empty_project, forked_from_project: project) }
     let(:user)         { create(:user) }
     let(:unlink_project) { Projects::UnlinkForkService.new(fork_project, user) }
 
@@ -1431,8 +1445,8 @@ describe MergeRequest, models: true do
   end
 
   describe "#closed_without_fork?" do
-    let(:project)      { create(:project) }
-    let(:fork_project) { create(:project, forked_from_project: project) }
+    let(:project)      { create(:empty_project) }
+    let(:fork_project) { create(:empty_project, forked_from_project: project) }
     let(:user)         { create(:user) }
     let(:unlink_project) { Projects::UnlinkForkService.new(fork_project, user) }
 
@@ -1477,9 +1491,9 @@ describe MergeRequest, models: true do
       end
 
       context 'forked project' do
-        let(:project)      { create(:project) }
+        let(:project)      { create(:empty_project) }
         let(:user)         { create(:user) }
-        let(:fork_project) { create(:project, forked_from_project: project, namespace: user.namespace) }
+        let(:fork_project) { create(:empty_project, forked_from_project: project, namespace: user.namespace) }
 
         let!(:merge_request) do
           create(:closed_merge_request,
@@ -1523,7 +1537,7 @@ describe MergeRequest, models: true do
         status:  status)
     end
 
-    let(:project)       { create(:project, :public, only_allow_merge_if_build_succeeds: true) }
+    let(:project)       { create(:project, :public, :repository, only_allow_merge_if_build_succeeds: true) }
     let(:developer)     { create(:user) }
     let(:user)          { create(:user) }
     let(:merge_request) { create(:merge_request, source_project: project) }
