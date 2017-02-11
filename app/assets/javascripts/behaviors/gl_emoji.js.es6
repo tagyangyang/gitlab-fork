@@ -30,6 +30,9 @@ const unicodeSupportTestMap = {
   // occupationZwj: '\u{1F468}\u{200D}\u{1F393}',
   // woman, biking (emojione does not have any of these yet), http://emojipedia.org/emoji-zwj-sequences/
   // sexZwj: '\u{1F6B4}\u{200D}\u{2640}',
+  // family_mwgb
+  // Windows 8.1, Firefox 51.0.1 does not support `family_`, `kiss_`, `couple_`
+  personZwj: '\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}\u{200D}\u{1F466}',
   // horse_racing_tone5
   // Special case that is not supported on macOS 10.12 even though `skinToneModifier` succeeds
   horseRacing: '\u{1F3C7}\u{1F3FF}',
@@ -172,9 +175,27 @@ function isSkinToneComboEmoji(emojiUnicode) {
   });
 }
 
-const horseRacing = 127943;// parseInt('1F3C7', 16)
+const horseRacingCodePoint = 127943;// parseInt('1F3C7', 16)
 function isHorceRacingSkinToneComboEmoji(emojiUnicode) {
-  return [...emojiUnicode][0].codePointAt(0) === horseRacing && isSkinToneComboEmoji(emojiUnicode);
+  return [...emojiUnicode][0].codePointAt(0) === horseRacingCodePoint && isSkinToneComboEmoji(emojiUnicode);
+}
+
+const zwj = 8205; // parseInt('200D', 16)
+const personStartCodePoint = 128102; // parseInt('1F466', 16)
+const personEndCodePoint = 128105; // parseInt('1F469', 16)
+function isPersonZwjEmoji(emojiUnicode) {
+  let hasPersonEmoji = false;
+  let hasZwj = false;
+  [...emojiUnicode].forEach((character) => {
+    const cp = character.codePointAt(0);
+    if (cp === zwj) {
+      hasZwj = true;
+    } else if (cp >= personStartCodePoint && cp <= personEndCodePoint) {
+      hasPersonEmoji = true;
+    }
+  });
+
+  return hasPersonEmoji && hasZwj;
 }
 
 let unicodeSupportMap;
@@ -204,6 +225,10 @@ function isEmojiUnicodeSupported(emojiUnicode, unicodeVersion) {
     (
       (unicodeSupportMap.horseRacing && isHorceRacingSkinToneComboEmoji(emojiUnicode)) ||
       !isHorceRacingSkinToneComboEmoji(emojiUnicode)
+    ) &&
+    (
+      (unicodeSupportMap.personZwj && isPersonZwjEmoji(emojiUnicode)) ||
+      !isPersonZwjEmoji(emojiUnicode)
     );
 }
 
