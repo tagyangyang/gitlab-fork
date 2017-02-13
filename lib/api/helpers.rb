@@ -337,6 +337,8 @@ module API
         @initial_current_user = nil
       end
 
+      Gitlab::AppLogger.info("API Authentication for username: #{initial_current_user.username} email: #{initial_current_user.email} from #{initial_current_user.current_sign_in_ip} admin:#{initial_current_user.admin?}")
+
       @initial_current_user
     end
 
@@ -345,6 +347,7 @@ module API
       return unless initial_current_user
 
       unless initial_current_user.is_admin?
+        Gitlab::AppLogger.info("API Failed_Sudo for username: #{initial_current_user.username} email: #{initial_current_user.email} from #{initial_current_user.current_sign_in_ip} admin: #{initial_current_user.admin?}")
         forbidden!('Must be admin to use sudo')
       end
 
@@ -356,8 +359,10 @@ module API
       sudoed_user = find_user(sudo_identifier)
 
       if sudoed_user
+        Gitlab::AppLogger.info("API Sudo for username: #{initial_current_user.username} email: #{initial_current_user.email} from #{initial_current_user.current_sign_in_ip} admin: #{initial_current_user.admin?} to: #{sudoed_user.username}")
         @current_user = sudoed_user
       else
+        Gitlab::AppLogger.info("API Attempted_Sudo for username: #{initial_current_user.username} email: #{initial_current_user.email} from #{initial_current_user.current_sign_in_ip} admin: #{initial_current_user.admin?} to: #{sudo_identifier}")
         not_found!("No user id or username for: #{sudo_identifier}")
       end
     end
