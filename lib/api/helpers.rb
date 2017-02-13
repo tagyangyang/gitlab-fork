@@ -337,7 +337,7 @@ module API
         @initial_current_user = nil
       end
 
-      Gitlab::AppLogger.info("API Authentication for username: #{initial_current_user.username} email: #{initial_current_user.email} from #{initial_current_user.current_sign_in_ip} admin:#{initial_current_user.admin?}")
+      Gitlab::AppLogger.info("API Authentication for username: #{@initial_current_user.username} email: #{@initial_current_user.email} from #{@initial_current_user.current_sign_in_ip} admin:#{@initial_current_user.admin?}") unless @initial_current_user.nil?
 
       @initial_current_user
     end
