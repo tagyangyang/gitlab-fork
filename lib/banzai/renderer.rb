@@ -1,6 +1,7 @@
 module Banzai
   module Renderer
     module_function
+
     CACHE_ENABLED = false
 
     # Convert a Markdown String into an HTML-safe String of HTML
@@ -28,7 +29,6 @@ module Banzai
           end
         end
       else
-        puts "render #{text}"
         cacheless_render(text, context)
       end
     end

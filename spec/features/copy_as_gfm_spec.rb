@@ -23,7 +23,7 @@ describe 'Copy as GFM', feature: true, js: true do
     verify(
       'nesting',
 
-      '> 1. [x] **[$`2 + 2`$ {-=-}{+=+} 2^2 ~~:thumbsup:~~](http://google.com)**'
+      '> 1. [x] **[$`2 + 2`$ {-=-}{+=+} 2^2 ~~👍~~](http://google.com)**'
     )
 
     verify(
@@ -252,7 +252,7 @@ describe 'Copy as GFM', feature: true, js: true do
 
       <<-GFM.strip_heredoc
       <a name="named-anchor"></a>
-      
+
       <sub>sub</sub>
 
       <dl>
