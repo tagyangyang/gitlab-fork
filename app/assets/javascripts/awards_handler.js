@@ -495,7 +495,7 @@ function renderCategory(name, emojiList) {
           namesMatchingAlias.push(emojiAliases[alias]);
         }
       });
-      const $matchingElements = namesMatchingAlias.concat(safeTerm).reduce(($result, searchTerm) => {
+      const $matchingElements = namesMatchingAlias.concat(safeTerm).reduce(function($result, searchTerm) {
         return $result.add($(".emoji-menu-list:not(.frequent-emojis) [data-name*='" + searchTerm + "']"));
       }, $([]));
       return $matchingElements.closest('li').clone();

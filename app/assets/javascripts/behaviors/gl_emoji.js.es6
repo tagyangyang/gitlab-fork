@@ -177,7 +177,8 @@ function isSkinToneComboEmoji(emojiUnicode) {
 
 const horseRacingCodePoint = 127943;// parseInt('1F3C7', 16)
 function isHorceRacingSkinToneComboEmoji(emojiUnicode) {
-  return [...emojiUnicode][0].codePointAt(0) === horseRacingCodePoint && isSkinToneComboEmoji(emojiUnicode);
+  return [...emojiUnicode][0].codePointAt(0) === horseRacingCodePoint &&
+    isSkinToneComboEmoji(emojiUnicode);
 }
 
 const zwj = 8205; // parseInt('200D', 16)
@@ -205,12 +206,11 @@ try {
 } catch (err) {
   // swallow
 }
-if (true || !unicodeSupportMap || userAgentFromCache !== navigator.userAgent) {
+if (!unicodeSupportMap || userAgentFromCache !== navigator.userAgent) {
   unicodeSupportMap = testUnicodeSupportMap(unicodeSupportTestMap);
   window.localStorage.setItem('gl-emoji-user-agent', navigator.userAgent);
   window.localStorage.setItem('gl-emoji-unicode-support-map', JSON.stringify(unicodeSupportMap));
 }
-console.log('unicodeSupportMap', unicodeSupportMap);
 
 function isEmojiUnicodeSupported(emojiUnicode, unicodeVersion) {
   return unicodeSupportMap[unicodeVersion] &&
