@@ -5,6 +5,8 @@
   var bind = function(fn, me) { return function() { return fn.apply(me, arguments); }; };
   var AUTO_SCROLL_OFFSET = 75;
   var DOWN_BUILD_TRACE = '#down-build-trace';
+  var doAutoScroll = true;
+  var userHasScrolled = false;
 
   this.Build = (function() {
     Build.interval = null;
@@ -44,7 +46,10 @@
 
       this.$document.off('click', '.js-sidebar-build-toggle').on('click', '.js-sidebar-build-toggle', this.sidebarOnClick.bind(this));
       this.$document.off('click', '.stage-item').on('click', '.stage-item', this.updateDropdown);
-      this.$document.on('scroll', this.initScrollMonitor.bind(this));
+      this.$document.on('scroll', function() {
+        userHasScrolled = true;
+        this.initScrollMonitor();
+      }.bind(this));
       $(window).off('resize.build').on('resize.build', this.sidebarOnResize.bind(this));
       $('a', this.$buildScroll).off('click.stepTrace').on('click.stepTrace', this.stepTrace);
       this.updateArtifactRemoveDate();
@@ -77,20 +82,21 @@
 
     Build.prototype.getInitialBuildTrace = function() {
       var removeRefreshStatuses = ['success', 'failed', 'canceled', 'skipped'];
+      var self = this;
 
       return $.ajax({
         url: this.buildUrl,
         dataType: 'json',
         success: function(buildData) {
           $('.js-build-output').html(buildData.trace_html);
-          if (window.location.hash === DOWN_BUILD_TRACE) {
-            $("html,body").scrollTop(this.$buildTrace.height());
+          if (doAutoScroll || window.location.hash === DOWN_BUILD_TRACE) {
+            $('html, body').scrollTop(self.$buildTrace.height());
           }
           if (removeRefreshStatuses.indexOf(buildData.status) >= 0) {
-            this.$buildRefreshAnimation.remove();
-            return this.initScrollMonitor();
+            self.$buildRefreshAnimation.remove();
+            self.initScrollMonitor();
           }
-        }.bind(this)
+        }
       });
     };
 
@@ -110,6 +116,13 @@
                 $('.js-build-output').append(log.html);
               } else {
                 $('.js-build-output').html(log.html);
+              }
+
+              if (doAutoScroll && !userHasScrolled) {
+                $('html, body').scrollTop(_this.$buildTrace.height());
+                if ($('body').height() > $(window).height()) {
+                  doAutoScroll = false;
+                }
               }
               return _this.checkAutoscroll();
             } else if (log.status !== _this.buildStatus) {
