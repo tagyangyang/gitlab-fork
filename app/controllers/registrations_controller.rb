@@ -41,10 +41,12 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def after_sign_up_path_for(user)
+    Gitlab::AppLogger.info("Authentication: NewUserNoConfirmation username:#{user.username} email:#{user.email} ip:#{user.current_sign_in_ip}")
     user.confirmed? ? dashboard_projects_path : users_almost_there_path
   end
 
   def after_inactive_sign_up_path_for(_resource)
+    Gitlab::AppLogger.info("Authentication: NewUserWithConfirmation username:#{_resource.username} email:#{_resource.email} ip:#{request.remote_ip}")
     users_almost_there_path
   end
 

@@ -87,7 +87,7 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
-    Gitlab::AppLogger.info("Login for username: #{resource.username} email: #{resource.email} from #{resource.current_sign_in_ip} admin:#{resource.admin?}")
+    Gitlab::AppLogger.info("Authentication: Login username:#{resource.username} email:#{resource.email} ip:#{resource.current_sign_in_ip} admin:#{resource.admin?}")
     stored_location_for(:redirect) || stored_location_for(resource) || root_path
   end
 

@@ -38,6 +38,7 @@ class SessionsController < Devise::SessionsController
   end
 
   def destroy
+    Gitlab::AppLogger.info("Authentication: Logout username:#{current_user.username} email:#{current_user.email} ip:#{current_user.current_sign_in_ip} admin:#{current_user.admin?}")
     super
     # hide the signed_out notice
     flash[:notice] = nil
