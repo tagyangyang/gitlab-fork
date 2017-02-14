@@ -19,7 +19,7 @@
               Contributors
 
         = nav_link(path: 'projects#contribution-graph') do
-          = link_to project_path(@project), title: 'Contribution Graph', class: 'shortcuts-project-contribution-graph' do
+          = link_to namespace_project_network_path(@project.namespace, @project, current_ref), title: 'Contribution Graph', class: 'shortcuts-project-contribution-graph' do
             %span
               Contribution Graph
 
@@ -28,7 +28,8 @@
             %span
               Time Tracking
 
-        = nav_link(path: 'projects#cycle-analytics') do
-          = link_to project_path(@project), title: 'Cycle Analytics', class: 'shortcuts-project-cycle-analytics' do
-            %span
-              Cycle Analytics
+        - if can?(current_user, :read_cycle_analytics, @project)
+          = nav_link(path: 'projects#cycle-analytics') do
+            = link_to project_cycle_analytics_path(@project), title: 'Cycle Analytics', class: 'shortcuts-project-cycle-analytics' do
+              %span
+                Cycle Analytics
