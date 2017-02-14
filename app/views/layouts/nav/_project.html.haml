@@ -71,11 +71,10 @@
           %span
             Snippets
 
-    -# Global shortcut to network page for compatibility
-    - if project_nav_tab? :network
-      %li.hidden
-        = link_to namespace_project_network_path(@project.namespace, @project, current_ref), title: 'Network', class: 'shortcuts-network' do
-          Network
+    - # Global shortcut to network page for compatibility
+    %li.hidden
+      = link_to namespace_project_network_path(@project.namespace, @project, current_ref), title: 'Contribution Graph', class: 'shortcuts-network' do
+        Contribution Graph
 
     -# Shortcut to create a new issue
     %li.hidden
