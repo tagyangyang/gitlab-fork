@@ -1,9 +1,9 @@
-- page_title "Network", @ref
+- page_title "Contribution Graph", "Project"
 - content_for :page_specific_javascripts do
   = page_specific_javascript_tag('lib/raphael.js')
   = page_specific_javascript_bundle_tag('network')
-= render "projects/commits/head"
-= render "head"
+= render "projects/head"
+
 %div{ class: container_class }
   .project-network
     .controls
