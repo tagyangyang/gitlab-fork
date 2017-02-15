@@ -2,7 +2,7 @@
 
 const emojiMap = require('emoji-map');
 const emojiAliases = require('emoji-aliases');
-const glEmoji = require('./behaviors/gl_emoji.js.es6');
+const glEmoji = require('./behaviors/gl_emoji');
 
 const glEmojiTag = glEmoji.glEmojiTag;
 
