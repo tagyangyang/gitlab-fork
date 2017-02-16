@@ -14,14 +14,12 @@ describe Banzai::Filter::EmojiFilter, lib: true do
 
   it 'replaces supported name emoji' do
     doc = filter('<p>:heart:</p>')
-    expect(doc.css('gl-emoji').first.textContent).to eq '❤'
-    expect(doc.css('gl-emoji').first.attr('data-fallback-src')).to eq 'https://foo.com/assets/2764.png'
+    expect(doc.css('gl-emoji').first.text).to eq '❤'
   end
 
   it 'replaces supported unicode emoji' do
     doc = filter('<p>❤️</p>')
-    expect(doc.css('gl-emoji').first.textContent).to eq '❤'
-    expect(doc.css('gl-emoji').first.attr('data-fallback-src')).to eq 'https://foo.com/assets/2764.png'
+    expect(doc.css('gl-emoji').first.text).to eq '❤'
   end
 
   it 'ignores unsupported emoji' do
@@ -32,14 +30,12 @@ describe Banzai::Filter::EmojiFilter, lib: true do
 
   it 'correctly encodes the URL' do
     doc = filter('<p>:+1:</p>')
-    expect(doc.css('gl-emoji').first.textContent).to eq '👍'
-    expect(doc.css('gl-emoji').first.attr('data-fallback-src')).to eq 'https://foo.com/assets/1F44D.png'
+    expect(doc.css('gl-emoji').first.text).to eq '👍'
   end
 
   it 'correctly encodes unicode to the URL' do
     doc = filter('<p>👍</p>')
-    expect(doc.css('gl-emoji').first.textContent).to eq '👍'
-    expect(doc.css('gl-emoji').first.attr('data-fallback-src')).to eq 'https://foo.com/assets/1F44D.png'
+    expect(doc.css('gl-emoji').first.text).to eq '👍'
   end
 
   it 'matches at the start of a string' do
@@ -87,14 +83,19 @@ describe Banzai::Filter::EmojiFilter, lib: true do
     expect(doc.css('gl-emoji').size).to eq 6
   end
 
-  it 'has a title attribute' do
+  it 'has a data-name attribute' do
     doc = filter(':-1:')
-    expect(doc.css('gl-emoji').first.attr('title')).to eq ':-1:'
+    expect(doc.css('gl-emoji').first.attr('data-name')).to eq '-1'
   end
 
-  it 'unicode has a title attribute' do
-    doc = filter("'👎'")
-    expect(doc.css('gl-emoji').first.attr('title')).to eq ':thumbsdown:'
+  it 'has a data-fallback-src attribute' do
+    doc = filter(':-1:')
+    expect(doc.css('gl-emoji').first.attr('data-fallback-src')).to end_with '.png'
+  end
+
+  it 'has a data-unicode-version attribute' do
+    doc = filter(':-1:')
+    expect(doc.css('gl-emoji').first.attr('data-unicode-version')).to eq '6.0'
   end
 
   it 'keeps whitespace intact' do
