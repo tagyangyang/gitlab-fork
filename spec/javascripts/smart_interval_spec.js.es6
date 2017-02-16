@@ -103,7 +103,7 @@
     describe('DOM Events', function () {
       beforeEach(function () {
         // This ensures DOM and DOM events are initialized for these specs.
-        setFixtures('<div></div>');
+        fixture.set('<div></div>');
 
         this.smartInterval = createDefaultSmartInterval();
       });
