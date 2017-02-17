@@ -8,7 +8,7 @@ module Files
       repository.multi_action(
         user: current_user,
         message: @commit_message,
-        branch_name: @target_branch,
+        branch_name: @branch_name,
         actions: params[:actions],
         author_email: @author_email,
         author_name: @author_name,
@@ -19,46 +19,48 @@ module Files
 
     private
 
-    def validate
+    def validate!
       super
 
       params[:actions].each_with_index do |action, index|
         if ACTIONS.include?(action[:action].to_s)
           action[:action] = action[:action].to_sym
         else
-          raise_error("Unknown action type `#{action[:action]}`.")
+          raise ValidationError, "Unknown action type `#{action[:action]}`."
         end
 
         unless action[:file_path].present?
-          raise_error("You must specify a file_path.")
+          raise ValidationError, "You must specify a file_path."
         end
 
         action[:file_path].slice!(0) if action[:file_path] && action[:file_path].start_with?('/')
         action[:previous_path].slice!(0) if action[:previous_path] && action[:previous_path].start_with?('/')
 
-        regex_check(action[:file_path])
-        regex_check(action[:previous_path]) if action[:previous_path]
+        validate_path!(action[:file_path])
+        validate_path!(action[:previous_path]) if action[:previous_path]
 
         if project.empty_repo? && action[:action] != :create
-          raise_error("No files to #{action[:action]}.")
+          raise ValidationError, "No files to #{action[:action]}."
         end
 
-        validate_file_exists(action)
+        validate_file_exists!(action)
 
         case action[:action]
         when :create
-          validate_create(action)
+          validate_create!(action)
         when :update
-          validate_update(action)
+          validate_update!(action)
         when :delete
-          validate_delete(action)
+          validate_delete!(action)
         when :move
-          validate_move(action, index)
+          validate_move!(action, index)
+        else
+          raise ValidationError, "Unknown action type `#{action[:action]}`."
         end
       end
     end
 
-    def validate_file_exists(action)
+    def validate_file_exists!(action)
       return if action[:action] == :create
 
       file_path = action[:file_path]
@@ -67,7 +69,7 @@ module Files
       blob = repository.blob_at_branch(params[:branch], file_path)
 
       unless blob
-        raise_error("File to be #{action[:action]}d `#{file_path}` does not exist.")
+        raise ValidationError, "File to be #{action[:action]}d `#{file_path}` does not exist."
       end
     end
 
@@ -75,41 +77,39 @@ module Files
       Gitlab::Git::Commit.last_for_path(repository, @start_branch, @file_path)
     end
 
-    def regex_check(file)
+    def validate_path!(file)
       if file =~ Gitlab::Regex.directory_traversal_regex
-        raise_error(
+        raise ValidationError,
           'Your changes could not be committed, because the file name, `' +
           file +
           '` ' +
           Gitlab::Regex.directory_traversal_regex_message
-        )
       end
 
       unless file =~ Gitlab::Regex.file_path_regex
-        raise_error(
+        raise ValidationError,
           'Your changes could not be committed, because the file name, `' +
           file +
           '` ' +
           Gitlab::Regex.file_path_regex_message
-        )
       end
     end
 
-    def validate_create(action)
+    def validate_create!(action)
       return if project.empty_repo?
 
       if repository.blob_at_branch(params[:branch], action[:file_path])
-        raise_error("Your changes could not be committed because a file with the name `#{action[:file_path]}` already exists.")
+        raise ValidationError, "Your changes could not be committed because a file with the name `#{action[:file_path]}` already exists."
       end
 
       if action[:content].nil?
-        raise_error("You must provide content.")
+        raise ValidationError, "You must provide content."
       end
     end
 
     def validate_update(action)
       if action[:content].nil?
-        raise_error("You must provide content.")
+        raise ValidationError, "You must provide content."
       end
 
       if file_has_changed?
@@ -117,24 +117,30 @@ module Files
       end
     end
 
-    def validate_delete(action)
+    def validate_delete!(action)
     end
 
-    def validate_move(action, index)
+    def validate_move!(action, index)
       if action[:previous_path].nil?
-        raise_error("You must supply the original file path when moving file `#{action[:file_path]}`.")
+        raise ValidationError, "You must supply the original file path when moving file `#{action[:file_path]}`."
       end
 
       blob = repository.blob_at_branch(params[:branch], action[:file_path])
 
       if blob
-        raise_error("Move destination `#{action[:file_path]}` already exists.")
+        raise ValidationError, "Move destination `#{action[:file_path]}` already exists."
       end
 
       if action[:content].nil?
         blob = repository.blob_at_branch(params[:branch], action[:previous_path])
         blob.load_all_data!(repository) if blob.truncated?
         params[:actions][index][:content] = blob.data
+      end
+    end
+
+    def validate_update!(action)
+      if file_has_changed?
+        raise FileChangedError.new("You are attempting to update a file `#{action[:file_path]}` that has changed since you started editing it.")
       end
     end
   end

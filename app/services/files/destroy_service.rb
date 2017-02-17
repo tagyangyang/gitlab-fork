@@ -5,7 +5,7 @@ module Files
         current_user,
         @file_path,
         message: @commit_message,
-        branch_name: @target_branch,
+        branch_name: @branch_name,
         author_email: @author_email,
         author_name: @author_name,
         start_project: @start_project,

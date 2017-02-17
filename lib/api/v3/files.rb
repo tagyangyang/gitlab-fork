@@ -6,7 +6,7 @@ module API
           {
             file_path: attrs[:file_path],
             start_branch: attrs[:branch],
-            target_branch: attrs[:branch],
+            branch_name: attrs[:branch],
             commit_message: attrs[:commit_message],
             file_content: attrs[:content],
             file_content_encoding: attrs[:encoding],

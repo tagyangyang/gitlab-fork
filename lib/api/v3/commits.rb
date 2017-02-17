@@ -53,7 +53,7 @@ module API
 
           attrs = declared_params.dup
           branch = attrs.delete(:branch_name)
-          attrs.merge!(branch: branch, start_branch: branch, target_branch: branch)
+          attrs.merge!(start_branch: branch, branch_name: branch)
 
           result = ::Files::MultiService.new(user_project, current_user, attrs).execute
 
@@ -133,7 +133,7 @@ module API
             create_merge_request: false,
             source_project: user_project,
             source_branch: commit.cherry_pick_branch_name,
-            target_branch: params[:branch]
+            branch_name: params[:branch]
           }
 
           result = ::Commits::CherryPickService.new(user_project, current_user, commit_params).execute

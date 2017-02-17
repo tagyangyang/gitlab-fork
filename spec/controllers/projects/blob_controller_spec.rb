@@ -43,7 +43,7 @@ describe Projects::BlobController do
         namespace_id: project.namespace,
         project_id: project,
         id: 'master/CHANGELOG',
-        target_branch: 'master',
+        branch_name: 'master',
         content: 'Added changes',
         commit_message: 'Update CHANGELOG'
       }

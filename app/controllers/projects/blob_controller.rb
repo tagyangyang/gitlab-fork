@@ -24,7 +24,7 @@ class Projects::BlobController < Projects::ApplicationController
 
   def create
     create_commit(Files::CreateService, success_notice: "The file has been successfully created.",
-                                        success_path: namespace_project_blob_path(@project.namespace, @project, File.join(@target_branch, @file_path)),
+                                        success_path: -> { namespace_project_blob_path(@project.namespace, @project, File.join(@branch_name, @file_path)) },
                                         failure_view: :new,
                                         failure_path: namespace_project_new_blob_path(@project.namespace, @project, @ref))
   end
@@ -40,7 +40,7 @@ class Projects::BlobController < Projects::ApplicationController
 
   def update
     @path = params[:file_path] if params[:file_path].present?
-    create_commit(Files::UpdateService, success_path: after_edit_path,
+    create_commit(Files::UpdateService, success_path: -> { after_edit_path },
                                         failure_view: :edit,
                                         failure_path: namespace_project_blob_path(@project.namespace, @project, @id))
 
@@ -62,7 +62,7 @@ class Projects::BlobController < Projects::ApplicationController
 
   def destroy
     create_commit(Files::DestroyService, success_notice: "The file has been successfully deleted.",
-                                         success_path: namespace_project_tree_path(@project.namespace, @project, @target_branch),
+                                         success_path: -> { namespace_project_tree_path(@project.namespace, @project, @branch_name) },
                                          failure_view: :show,
                                          failure_path: namespace_project_blob_path(@project.namespace, @project, @id))
   end
@@ -119,16 +119,16 @@ class Projects::BlobController < Projects::ApplicationController
 
   def after_edit_path
     from_merge_request = MergeRequestsFinder.new(current_user, project_id: @project.id).execute.find_by(iid: params[:from_merge_request_iid])
-    if from_merge_request && @target_branch == @ref
+    if from_merge_request && @branch_name == @ref
       diffs_namespace_project_merge_request_path(from_merge_request.target_project.namespace, from_merge_request.target_project, from_merge_request) +
         "##{hexdigest(@path)}"
     else
-      namespace_project_blob_path(@project.namespace, @project, File.join(@target_branch, @path))
+      namespace_project_blob_path(@project.namespace, @project, File.join(@branch_name, @path))
     end
   end
 
   def editor_variables
-    @target_branch = params[:target_branch]
+    @branch_name = params[:branch_name]
 
     @file_path =
       if action_name.to_s == 'create'
