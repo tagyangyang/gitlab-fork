@@ -584,5 +584,9 @@ ul.notes {
   .notes_content .note-header .note-headline-light {
     display: inline-block;
     position: relative;
+
+    @media (max-width: $screen-md-min) {
+      display: block;
+    }
   }
 }
