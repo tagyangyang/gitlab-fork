@@ -229,10 +229,6 @@ module Ci
       end
     end
 
-    def project_id
-      gl_project_id
-    end
-
     def project_name
       project.name
     end
