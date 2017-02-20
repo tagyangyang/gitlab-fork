@@ -15,7 +15,7 @@ module Ci
     def persisted_environment
       @persisted_environment ||= Environment.find_by(
         name: expanded_environment_name,
-        project_id: gl_project_id
+        project_id: project_id
       )
     end
 
@@ -538,7 +538,7 @@ module Ci
     end
 
     def unscoped_project
-      @unscoped_project ||= Project.unscoped.find_by(id: gl_project_id)
+      @unscoped_project ||= Project.unscoped.find_by(id: project_id)
     end
 
     def predefined_variables
