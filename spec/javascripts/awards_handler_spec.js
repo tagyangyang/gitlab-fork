@@ -1,8 +1,7 @@
 /* eslint-disable space-before-function-paren, no-var, one-var, one-var-declaration-per-line, no-unused-expressions, comma-dangle, new-parens, no-unused-vars, quotes, jasmine/no-spec-dupes, prefer-template, max-len */
 /* global AwardsHandler */
 
-// PhantomJS doesn't have `codePointAt`
-require('~/extensions/string');
+require('string.prototype.codepointat');
 require('es6-promise').polyfill();
 
 require('~/awards_handler');
