@@ -1,4 +1,4 @@
-/* eslint-disable no-extend-native, func-names, space-before-function-paren, space-infix-ops, strict, max-len, prefer-rest-params, no-void */
+/* eslint-disable no-extend-native, func-names, space-before-function-paren, space-infix-ops, strict, max-len */
 
 'use strict';
 
