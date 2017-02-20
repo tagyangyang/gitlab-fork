@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe ApplicationHelper do
+  include UploadHelpers
+
   describe 'current_controller?' do
     it 'returns true when controller matches argument' do
       stub_controller_name('foo')
@@ -52,10 +54,8 @@ describe ApplicationHelper do
   end
 
   describe 'project_icon' do
-    let(:avatar_file_path) { File.join(Rails.root, 'spec', 'fixtures', 'banana_sample.gif') }
-
     it 'returns an url for the avatar' do
-      project = create(:project, avatar: File.open(avatar_file_path))
+      project = create(:empty_project, avatar: File.open(uploaded_image_temp_path))
 
       avatar_url = "http://#{Gitlab.config.gitlab.host}/uploads/project/avatar/#{project.id}/banana_sample.gif"
       expect(helper.project_icon("#{project.namespace.to_param}/#{project.to_param}").to_s).
@@ -63,7 +63,7 @@ describe ApplicationHelper do
     end
 
     it 'gives uploaded icon when present' do
-      project = create(:project)
+      project = create(:empty_project)
 
       allow_any_instance_of(Project).to receive(:avatar_in_git).and_return(true)
 
@@ -74,10 +74,8 @@ describe ApplicationHelper do
   end
 
   describe 'avatar_icon' do
-    let(:avatar_file_path) { File.join(Rails.root, 'spec', 'fixtures', 'banana_sample.gif') }
-
     it 'returns an url for the avatar' do
-      user = create(:user, avatar: File.open(avatar_file_path))
+      user = create(:user, avatar: File.open(uploaded_image_temp_path))
 
       expect(helper.avatar_icon(user.email).to_s).
         to match("/uploads/user/avatar/#{user.id}/banana_sample.gif")
@@ -88,7 +86,7 @@ describe ApplicationHelper do
       # Must be stubbed after the stub above, and separately
       stub_config_setting(url: Settings.send(:build_gitlab_url))
 
-      user = create(:user, avatar: File.open(avatar_file_path))
+      user = create(:user, avatar: File.open(uploaded_image_temp_path))
 
       expect(helper.avatar_icon(user.email).to_s).
         to match("/gitlab/uploads/user/avatar/#{user.id}/banana_sample.gif")
@@ -102,7 +100,7 @@ describe ApplicationHelper do
 
     describe 'using a User' do
       it 'returns an URL for the avatar' do
-        user = create(:user, avatar: File.open(avatar_file_path))
+        user = create(:user, avatar: File.open(uploaded_image_temp_path))
 
         expect(helper.avatar_icon(user).to_s).
           to match("/uploads/user/avatar/#{user.id}/banana_sample.gif")
@@ -266,5 +264,10 @@ describe ApplicationHelper do
 
       expect(helper.render_markup('foo.adoc', content)).to eq('NOEL')
     end
+  end
+
+  describe '#active_when' do
+    it { expect(helper.active_when(true)).to eq('active') }
+    it { expect(helper.active_when(false)).to eq(nil) }
   end
 end

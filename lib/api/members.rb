@@ -1,5 +1,7 @@
 module API
   class Members < Grape::API
+    include PaginationParams
+
     before { authenticate! }
 
     helpers ::API::Helpers::MembersHelpers
@@ -14,15 +16,15 @@ module API
         end
         params do
           optional :query, type: String, desc: 'A query string to search for members'
+          use :pagination
         end
         get ":id/members" do
           source = find_source(source_type, params[:id])
 
           users = source.users
           users = users.merge(User.search(params[:query])) if params[:query]
-          users = paginate(users)
 
-          present users, with: Entities::Member, source: source
+          present paginate(users), with: Entities::Member, source: source
         end
 
         desc 'Gets a member of a group or project.' do
@@ -54,16 +56,9 @@ module API
 
           member = source.members.find_by(user_id: params[:user_id])
 
-          # We need this explicit check because `source.add_user` doesn't
-          # currently return the member created so it would return 201 even if
-          # the member already existed...
-          # The `source_type == 'group'` check is to ensure back-compatibility
-          # but 409 behavior should be used for both project and group members in 9.0!
-          conflict!('Member already exists') if source_type == 'group' && member
+          conflict!('Member already exists') if member
 
-          unless member
-            member = source.add_user(params[:user_id], params[:access_level], current_user: current_user, expires_at: params[:expires_at])
-          end
+          member = source.add_user(params[:user_id], params[:access_level], current_user: current_user, expires_at: params[:expires_at])
 
           if member.persisted? && member.valid?
             present member.user, with: Entities::Member, member: member

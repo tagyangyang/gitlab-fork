@@ -22,11 +22,11 @@ module API
       expose :provider, :extern_uid
     end
 
-    class UserFull < User
+    class UserPublic < User
       expose :last_sign_in_at
       expose :confirmed_at
       expose :email
-      expose :theme_id, :color_scheme_id, :projects_limit, :current_sign_in_at
+      expose :color_scheme_id, :projects_limit, :current_sign_in_at
       expose :identities, using: Entities::Identity
       expose :can_create_group?, as: :can_create_group
       expose :can_create_project?, as: :can_create_project
@@ -34,7 +34,7 @@ module API
       expose :external
     end
 
-    class UserLogin < UserFull
+    class UserWithPrivateToken < UserPublic
       expose :private_token
     end
 
@@ -78,21 +78,21 @@ module API
       expose :container_registry_enabled
 
       # Expose old field names with the new permissions methods to keep API compatible
-      expose(:issues_enabled) { |project, options| project.feature_available?(:issues, options[:user]) }
-      expose(:merge_requests_enabled) { |project, options| project.feature_available?(:merge_requests, options[:user]) }
-      expose(:wiki_enabled) { |project, options| project.feature_available?(:wiki, options[:user]) }
-      expose(:builds_enabled) { |project, options| project.feature_available?(:builds, options[:user]) }
-      expose(:snippets_enabled) { |project, options| project.feature_available?(:snippets, options[:user]) }
+      expose(:issues_enabled) { |project, options| project.feature_available?(:issues, options[:current_user]) }
+      expose(:merge_requests_enabled) { |project, options| project.feature_available?(:merge_requests, options[:current_user]) }
+      expose(:wiki_enabled) { |project, options| project.feature_available?(:wiki, options[:current_user]) }
+      expose(:builds_enabled) { |project, options| project.feature_available?(:builds, options[:current_user]) }
+      expose(:snippets_enabled) { |project, options| project.feature_available?(:snippets, options[:current_user]) }
 
       expose :created_at, :last_activity_at
       expose :shared_runners_enabled
       expose :lfs_enabled?, as: :lfs_enabled
       expose :creator_id
-      expose :namespace
+      expose :namespace, using: 'API::Entities::Namespace'
       expose :forked_from_project, using: Entities::BasicProjectDetails, if: lambda{ |project, options| project.forked? }
       expose :avatar_url
       expose :star_count, :forks_count
-      expose :open_issues_count, if: lambda { |project, options| project.feature_available?(:issues, options[:user]) && project.default_issues_tracker? }
+      expose :open_issues_count, if: lambda { |project, options| project.feature_available?(:issues, options[:current_user]) && project.default_issues_tracker? }
       expose :runners_token, if: lambda { |_project, options| options[:user_can_admin_project] }
       expose :public_builds
       expose :shared_with_groups do |project, options|
@@ -101,6 +101,16 @@ module API
       expose :only_allow_merge_if_build_succeeds
       expose :request_access_enabled
       expose :only_allow_merge_if_all_discussions_are_resolved
+
+      expose :statistics, using: 'API::Entities::ProjectStatistics', if: :statistics
+    end
+
+    class ProjectStatistics < Grape::Entity
+      expose :commit_count
+      expose :storage_size
+      expose :repository_size
+      expose :lfs_objects_size
+      expose :build_artifacts_size
     end
 
     class Member < UserBasic
@@ -127,6 +137,17 @@ module API
       expose :avatar_url
       expose :web_url
       expose :request_access_enabled
+      expose :full_name, :full_path
+      expose :parent_id
+
+      expose :statistics, if: :statistics do
+        with_options format_with: -> (value) { value.to_i } do
+          expose :storage_size
+          expose :repository_size
+          expose :lfs_objects_size
+          expose :build_artifacts_size
+        end
+      end
     end
 
     class GroupDetail < Group
@@ -134,15 +155,36 @@ module API
       expose :shared_projects, using: Entities::Project
     end
 
+    class RepoCommit < Grape::Entity
+      expose :id, :short_id, :title, :created_at
+      expose :parent_ids
+      expose :safe_message, as: :message
+      expose :author_name, :author_email, :authored_date
+      expose :committer_name, :committer_email, :committed_date
+    end
+
+    class RepoCommitStats < Grape::Entity
+      expose :additions, :deletions, :total
+    end
+
+    class RepoCommitDetail < RepoCommit
+      expose :stats, using: Entities::RepoCommitStats
+      expose :status
+    end
+
     class RepoBranch < Grape::Entity
       expose :name
 
-      expose :commit do |repo_branch, options|
+      expose :commit, using: Entities::RepoCommit do |repo_branch, options|
         options[:project].repository.commit(repo_branch.dereferenced_target)
       end
 
+      expose :merged do |repo_branch, options|
+        options[:project].repository.merged_to_root_ref?(repo_branch.name)
+      end
+
       expose :protected do |repo_branch, options|
-        options[:project].protected_branch? repo_branch.name
+        options[:project].protected_branch?(repo_branch.name)
       end
 
       expose :developers_can_push do |repo_branch, options|
@@ -168,31 +210,26 @@ module API
       end
     end
 
-    class RepoCommit < Grape::Entity
-      expose :id, :short_id, :title, :author_name, :author_email, :created_at
-      expose :safe_message, as: :message
-    end
-
-    class RepoCommitStats < Grape::Entity
-      expose :additions, :deletions, :total
-    end
-
-    class RepoCommitDetail < RepoCommit
-      expose :parent_ids, :committed_date, :authored_date
-      expose :stats, using: Entities::RepoCommitStats
-      expose :status
-    end
-
     class ProjectSnippet < Grape::Entity
       expose :id, :title, :file_name
       expose :author, using: Entities::UserBasic
       expose :updated_at, :created_at
 
-      # TODO (rspeicher): Deprecated; remove in 9.0
-      expose(:expires_at) { |snippet| nil }
-
       expose :web_url do |snippet, options|
         Gitlab::UrlBuilder.build(snippet)
+      end
+    end
+
+    class PersonalSnippet < Grape::Entity
+      expose :id, :title, :file_name
+      expose :author, using: Entities::UserBasic
+      expose :updated_at, :created_at
+
+      expose :web_url do |snippet|
+        Gitlab::UrlBuilder.build(snippet)
+      end
+      expose :raw_url do |snippet|
+        Gitlab::UrlBuilder.build(snippet) + "/raw"
       end
     end
 
@@ -210,6 +247,7 @@ module API
 
     class Milestone < ProjectEntity
       expose :due_date
+      expose :start_date
     end
 
     class Issue < ProjectEntity
@@ -228,6 +266,13 @@ module API
       expose :web_url do |issue, options|
         Gitlab::UrlBuilder.build(issue)
       end
+    end
+
+    class IssuableTimeStats < Grape::Entity
+      expose :time_estimate
+      expose :total_time_spent
+      expose :human_time_estimate
+      expose :human_total_time_spent
     end
 
     class ExternalIssue < Grape::Entity
@@ -279,11 +324,11 @@ module API
     end
 
     class SSHKey < Grape::Entity
-      expose :id, :title, :key, :created_at
+      expose :id, :title, :key, :created_at, :can_push
     end
 
     class SSHKeyWithUser < SSHKey
-      expose :user, using: Entities::UserFull
+      expose :user, using: Entities::UserPublic
     end
 
     class Note < Grape::Entity
@@ -323,7 +368,7 @@ module API
 
     class CommitStatus < Grape::Entity
       expose :id, :sha, :ref, :status, :name, :target_url, :description,
-             :created_at, :started_at, :finished_at, :allow_failure
+             :created_at, :started_at, :finished_at, :allow_failure, :coverage
       expose :author, using: Entities::UserBasic
     end
 
@@ -336,9 +381,7 @@ module API
       expose :author, using: Entities::UserBasic, if: ->(event, options) { event.author }
 
       expose :author_username do |event, options|
-        if event.author
-          event.author.username
-        end
+        event.author&.username
       end
     end
 
@@ -372,7 +415,7 @@ module API
     end
 
     class Namespace < Grape::Entity
-      expose :id, :path, :kind
+      expose :id, :name, :path, :kind, :full_path
     end
 
     class MemberAccess < Grape::Entity
@@ -421,12 +464,12 @@ module API
     class ProjectWithAccess < Project
       expose :permissions do
         expose :project_access, using: Entities::ProjectAccess do |project, options|
-          project.project_members.find_by(user_id: options[:user].id)
+          project.project_members.find_by(user_id: options[:current_user].id)
         end
 
         expose :group_access, using: Entities::GroupAccess do |project, options|
           if project.group
-            project.group.group_members.find_by(user_id: options[:user].id)
+            project.group.group_members.find_by(user_id: options[:current_user].id)
           end
         end
       end
@@ -527,6 +570,9 @@ module API
       expose :repository_storages
       expose :koding_enabled
       expose :koding_url
+      expose :plantuml_enabled
+      expose :plantuml_url
+      expose :terminal_max_session_time
     end
 
     class Release < Grape::Entity
@@ -606,10 +652,11 @@ module API
       expose :user, with: Entities::UserBasic
       expose :created_at, :updated_at, :started_at, :finished_at, :committed_at
       expose :duration
+      expose :coverage
     end
 
     class EnvironmentBasic < Grape::Entity
-      expose :id, :name, :external_url
+      expose :id, :name, :slug, :external_url
     end
 
     class Environment < EnvironmentBasic

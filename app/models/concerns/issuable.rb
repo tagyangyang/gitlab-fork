@@ -13,6 +13,12 @@ module Issuable
   include StripAttribute
   include Awardable
   include Taskable
+  include TimeTrackable
+
+  # This object is used to gather issuable meta data for displaying
+  # upvotes, downvotes and notes count for issues and merge requests
+  # lists avoiding n+1 queries and improving performance.
+  IssuableMeta = Struct.new(:upvotes, :downvotes, :notes_count)
 
   included do
     cache_markdown_field :title, pipeline: :single_line
@@ -41,7 +47,7 @@ module Issuable
     has_one :metrics
 
     validates :author, presence: true
-    validates :title, presence: true, length: { within: 0..255 }
+    validates :title, presence: true, length: { maximum: 255 }
 
     scope :authored, ->(user) { where(author_id: user) }
     scope :assigned_to, ->(u) { where(assignee_id: u.id)}
@@ -92,9 +98,10 @@ module Issuable
     after_save :record_metrics
 
     def update_assignee_cache_counts
-      # make sure we flush the cache for both the old *and* new assignee
-      User.find(assignee_id_was).update_cache_counts if assignee_id_was
-      assignee.update_cache_counts if assignee
+      # make sure we flush the cache for both the old *and* new assignees(if they exist)
+      previous_assignee = User.find_by_id(assignee_id_was) if assignee_id_was
+      previous_assignee&.update_cache_counts
+      assignee&.update_cache_counts
     end
 
     # We want to use optimistic lock for cases when only title or description are involved

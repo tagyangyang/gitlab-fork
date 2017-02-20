@@ -2,12 +2,16 @@ require './spec/simplecov_env'
 SimpleCovEnv.start!
 
 ENV["RAILS_ENV"] ||= 'test'
+ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
 
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 require 'shoulda/matchers'
-require 'sidekiq/testing/inline'
 require 'rspec/retry'
+
+if ENV['RSPEC_PROFILING_POSTGRES_URL'] || ENV['RSPEC_PROFILING']
+  require 'rspec_profiling/rspec'
+end
 
 if ENV['CI'] && !ENV['NO_KNAPSACK']
   require 'knapsack'
@@ -31,8 +35,9 @@ RSpec.configure do |config|
   config.include Warden::Test::Helpers, type: :request
   config.include LoginHelpers, type: :feature
   config.include SearchHelpers, type: :feature
+  config.include WaitForAjax, type: :feature
   config.include StubConfiguration
-  config.include EmailHelpers
+  config.include EmailHelpers, type: :mailer
   config.include TestEnv
   config.include ActiveJob::TestHelper
   config.include ActiveSupport::Testing::TimeHelpers
@@ -55,8 +60,12 @@ RSpec.configure do |config|
 
   config.around(:each, :redis) do |example|
     Gitlab::Redis.with(&:flushall)
+    Sidekiq.redis(&:flushall)
+
     example.run
+
     Gitlab::Redis.with(&:flushall)
+    Sidekiq.redis(&:flushall)
   end
 end
 

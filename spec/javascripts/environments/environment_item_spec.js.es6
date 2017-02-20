@@ -1,10 +1,10 @@
-//= require vue
-//= require environments/components/environment_item
+window.timeago = require('timeago.js');
+const EnvironmentItem = require('~/environments/components/environment_item');
 
 describe('Environment item', () => {
-  fixture.preload('environments/table.html');
+  preloadFixtures('static/environments/table.html.raw');
   beforeEach(() => {
-    fixture.load('environments/table.html');
+    loadFixtures('static/environments/table.html.raw');
   });
 
   describe('When item is folder', () => {
@@ -14,33 +14,16 @@ describe('Environment item', () => {
     beforeEach(() => {
       mockItem = {
         name: 'review',
-        children: [
-          {
-            name: 'review-app',
-            id: 1,
-            state: 'available',
-            external_url: '',
-            last_deployment: {},
-            created_at: '2016-11-07T11:11:16.525Z',
-            updated_at: '2016-11-10T15:55:58.778Z',
-          },
-          {
-            name: 'production',
-            id: 2,
-            state: 'available',
-            external_url: '',
-            last_deployment: {},
-            created_at: '2016-11-07T11:11:16.525Z',
-            updated_at: '2016-11-10T15:55:58.778Z',
-          },
-        ],
+        folderName: 'review',
+        size: 3,
+        isFolder: true,
+        environment_path: 'url',
       };
 
-      component = new window.gl.environmentsList.EnvironmentItem({
+      component = new EnvironmentItem({
         el: document.querySelector('tr#environment-row'),
         propsData: {
           model: mockItem,
-          toggleRow: () => {},
           canCreateDeployment: false,
           canReadEnvironment: true,
         },
@@ -53,7 +36,7 @@ describe('Environment item', () => {
     });
 
     it('Should render the number of children in a badge', () => {
-      expect(component.$el.querySelector('.folder-name .badge').textContent).toContain(mockItem.children.length);
+      expect(component.$el.querySelector('.folder-name .badge').textContent).toContain(mockItem.size);
     });
   });
 
@@ -63,8 +46,8 @@ describe('Environment item', () => {
 
     beforeEach(() => {
       environment = {
-        id: 31,
         name: 'production',
+        size: 1,
         state: 'stopped',
         external_url: 'http://external.com',
         environment_type: null,
@@ -109,6 +92,8 @@ describe('Environment item', () => {
             name: 'deploy',
             build_path: '/root/ci-folders/builds/1279',
             retry_path: '/root/ci-folders/builds/1279/retry',
+            created_at: '2016-11-29T18:11:58.430Z',
+            updated_at: '2016-11-29T18:11:58.430Z',
           },
           manual_actions: [
             {
@@ -117,17 +102,16 @@ describe('Environment item', () => {
             },
           ],
         },
-        'stoppable?': true,
+        'stop_action?': true,
         environment_path: 'root/ci-folders/environments/31',
         created_at: '2016-11-07T11:11:16.525Z',
         updated_at: '2016-11-10T15:55:58.778Z',
       };
 
-      component = new window.gl.environmentsList.EnvironmentItem({
+      component = new EnvironmentItem({
         el: document.querySelector('tr#environment-row'),
         propsData: {
           model: environment,
-          toggleRow: () => {},
           canCreateDeployment: true,
           canReadEnvironment: true,
         },
@@ -135,24 +119,35 @@ describe('Environment item', () => {
     });
 
     it('should render environment name', () => {
-      expect(component.$el.querySelector('.environment-name').textContent).toEqual(environment.name);
+      expect(component.$el.querySelector('.environment-name').textContent).toContain(environment.name);
     });
 
     describe('With deployment', () => {
       it('should render deployment internal id', () => {
         expect(
-          component.$el.querySelector('.deployment-column span').textContent
+          component.$el.querySelector('.deployment-column span').textContent,
         ).toContain(environment.last_deployment.iid);
 
         expect(
-          component.$el.querySelector('.deployment-column span').textContent
+          component.$el.querySelector('.deployment-column span').textContent,
         ).toContain('#');
+      });
+
+      it('should render last deployment date', () => {
+        const timeagoInstance = new timeago(); // eslint-disable-line
+        const formatedDate = timeagoInstance.format(
+          environment.last_deployment.deployable.created_at,
+        );
+
+        expect(
+          component.$el.querySelector('.environment-created-date-timeago').textContent,
+        ).toContain(formatedDate);
       });
 
       describe('With user information', () => {
         it('should render user avatar with link to profile', () => {
           expect(
-            component.$el.querySelector('.js-deploy-user-container').getAttribute('href')
+            component.$el.querySelector('.js-deploy-user-container').getAttribute('href'),
           ).toEqual(environment.last_deployment.user.web_url);
         });
       });
@@ -160,13 +155,13 @@ describe('Environment item', () => {
       describe('With build url', () => {
         it('Should link to build url provided', () => {
           expect(
-            component.$el.querySelector('.build-link').getAttribute('href')
+            component.$el.querySelector('.build-link').getAttribute('href'),
           ).toEqual(environment.last_deployment.deployable.build_path);
         });
 
         it('Should render deployable name and id', () => {
           expect(
-            component.$el.querySelector('.build-link').getAttribute('href')
+            component.$el.querySelector('.build-link').getAttribute('href'),
           ).toEqual(environment.last_deployment.deployable.build_path);
         });
       });
@@ -174,7 +169,7 @@ describe('Environment item', () => {
       describe('With commit information', () => {
         it('should render commit component', () => {
           expect(
-            component.$el.querySelector('.js-commit-component')
+            component.$el.querySelector('.js-commit-component'),
           ).toBeDefined();
         });
       });
@@ -183,7 +178,7 @@ describe('Environment item', () => {
     describe('With manual actions', () => {
       it('Should render actions component', () => {
         expect(
-          component.$el.querySelector('.js-manual-actions-container')
+          component.$el.querySelector('.js-manual-actions-container'),
         ).toBeDefined();
       });
     });
@@ -191,7 +186,7 @@ describe('Environment item', () => {
     describe('With external URL', () => {
       it('should render external url component', () => {
         expect(
-          component.$el.querySelector('.js-external-url-container')
+          component.$el.querySelector('.js-external-url-container'),
         ).toBeDefined();
       });
     });
@@ -199,7 +194,7 @@ describe('Environment item', () => {
     describe('With stop action', () => {
       it('Should render stop action component', () => {
         expect(
-          component.$el.querySelector('.js-stop-component-container')
+          component.$el.querySelector('.js-stop-component-container'),
         ).toBeDefined();
       });
     });
@@ -207,7 +202,7 @@ describe('Environment item', () => {
     describe('With retry action', () => {
       it('Should render rollback component', () => {
         expect(
-          component.$el.querySelector('.js-rollback-component-container')
+          component.$el.querySelector('.js-rollback-component-container'),
         ).toBeDefined();
       });
     });

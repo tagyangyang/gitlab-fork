@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe API::API, 'ProjectHooks', api: true do
+describe API::ProjectHooks, 'ProjectHooks', api: true do
   include ApiHelpers
   let(:user) { create(:user) }
   let(:user3) { create(:user) }
-  let!(:project) { create(:project, creator_id: user.id, namespace: user.namespace) }
+  let!(:project) { create(:empty_project, creator_id: user.id, namespace: user.namespace) }
   let!(:hook) do
     create(:project_hook,
            :all_events_enabled,
@@ -25,6 +25,7 @@ describe API::API, 'ProjectHooks', api: true do
         expect(response).to have_http_status(200)
 
         expect(json_response).to be_an Array
+        expect(response).to include_pagination_headers
         expect(json_response.count).to eq(1)
         expect(json_response.first['url']).to eq("http://example.com")
         expect(json_response.first['issues_events']).to eq(true)
@@ -86,7 +87,8 @@ describe API::API, 'ProjectHooks', api: true do
   describe "POST /projects/:id/hooks" do
     it "adds hook to project" do
       expect do
-        post api("/projects/#{project.id}/hooks", user), url: "http://example.com", issues_events: true
+        post api("/projects/#{project.id}/hooks", user),
+          url: "http://example.com", issues_events: true, wiki_page_events: true
       end.to change {project.hooks.count}.by(1)
 
       expect(response).to have_http_status(201)
@@ -98,7 +100,7 @@ describe API::API, 'ProjectHooks', api: true do
       expect(json_response['note_events']).to eq(false)
       expect(json_response['build_events']).to eq(false)
       expect(json_response['pipeline_events']).to eq(false)
-      expect(json_response['wiki_page_events']).to eq(false)
+      expect(json_response['wiki_page_events']).to eq(true)
       expect(json_response['enable_ssl_verification']).to eq(true)
       expect(json_response).not_to include('token')
     end
@@ -203,7 +205,7 @@ describe API::API, 'ProjectHooks', api: true do
 
     it "returns a 404 if a user attempts to delete project hooks he/she does not own" do
       test_user = create(:user)
-      other_project = create(:project)
+      other_project = create(:empty_project)
       other_project.team << [test_user, :master]
 
       delete api("/projects/#{other_project.id}/hooks/#{hook.id}", test_user)

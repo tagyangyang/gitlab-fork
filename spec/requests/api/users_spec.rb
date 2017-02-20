@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe API::API, api: true  do
+describe API::Users, api: true  do
   include ApiHelpers
 
   let(:user)  { create(:user) }
@@ -40,7 +40,9 @@ describe API::API, api: true  do
 
       it "returns an array of users" do
         get api("/users", user)
+
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         username = user.username
         expect(json_response.detect do |user|
@@ -55,13 +57,16 @@ describe API::API, api: true  do
         get api("/users?blocked=true", user)
 
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response).to all(include('state' => /(blocked|ldap_blocked)/))
       end
 
       it "returns one user" do
         get api("/users?username=#{omniauth_user.username}", user)
+
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.first['username']).to eq(omniauth_user.username)
       end
@@ -70,7 +75,9 @@ describe API::API, api: true  do
     context "when admin" do
       it "returns an array of users" do
         get api("/users", admin)
+
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.first.keys).to include 'email'
         expect(json_response.first.keys).to include 'organization'
@@ -87,6 +94,7 @@ describe API::API, api: true  do
         get api("/users?external=true", admin)
 
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response).to all(include('external' => true))
       end
@@ -137,6 +145,15 @@ describe API::API, api: true  do
       expect(new_user.can_create_group).to eq(true)
     end
 
+    it "creates user with optional attributes" do
+      optional_attributes = { confirm: true }
+      attributes = attributes_for(:user).merge(optional_attributes)
+
+      post api('/users', admin), attributes
+
+      expect(response).to have_http_status(201)
+    end
+
     it "creates non-admin user" do
       post api('/users', admin), attributes_for(:user, admin: false, can_create_group: false)
       expect(response).to have_http_status(201)
@@ -179,6 +196,18 @@ describe API::API, api: true  do
       new_user = User.find(user_id)
       expect(new_user).not_to eq nil
       expect(new_user.external).to be_truthy
+    end
+
+    it "creates user with reset password" do
+      post api('/users', admin), attributes_for(:user, reset_password: true).except(:password)
+
+      expect(response).to have_http_status(201)
+
+      user_id = json_response['id']
+      new_user = User.find(user_id)
+
+      expect(new_user).not_to eq(nil)
+      expect(new_user.recently_sent_password_reset?).to eq(true)
     end
 
     it "does not create user with invalid email" do
@@ -265,6 +294,14 @@ describe API::API, api: true  do
         expect(response).to have_http_status(409)
         expect(json_response['message']).to eq('Username has already been taken')
       end
+
+      it 'creates user with new identity' do
+        post api("/users", admin), attributes_for(:user, provider: 'github', extern_uid: '67890')
+
+        expect(response).to have_http_status(201)
+        expect(json_response['identities'].first['extern_uid']).to eq('67890')
+        expect(json_response['identities'].first['provider']).to eq('github')
+      end
     end
   end
 
@@ -286,6 +323,13 @@ describe API::API, api: true  do
       expect(response).to have_http_status(200)
       expect(json_response['bio']).to eq('new test bio')
       expect(user.reload.bio).to eq('new test bio')
+    end
+
+    it "updates user with new password and forces reset on next login" do
+      put api("/users/#{user.id}", admin), password: '12345678'
+
+      expect(response).to have_http_status(200)
+      expect(user.reload.password_expires_at).to be <= Time.now
     end
 
     it "updates user with organization" do
@@ -317,9 +361,9 @@ describe API::API, api: true  do
     end
 
     it 'updates user with new identity' do
-      put api("/users/#{user.id}", admin), provider: 'github', extern_uid: '67890'
+      put api("/users/#{user.id}", admin), provider: 'github', extern_uid: 'john'
       expect(response).to have_http_status(200)
-      expect(user.reload.identities.first.extern_uid).to eq('67890')
+      expect(user.reload.identities.first.extern_uid).to eq('john')
       expect(user.reload.identities.first.provider).to eq('github')
     end
 
@@ -471,8 +515,11 @@ describe API::API, api: true  do
       it 'returns array of ssh keys' do
         user.keys << key
         user.save
+
         get api("/users/#{user.id}/keys", admin)
+
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.first['title']).to eq(key.title)
       end
@@ -559,8 +606,11 @@ describe API::API, api: true  do
       it 'returns array of emails' do
         user.emails << email
         user.save
+
         get api("/users/#{user.id}/emails", admin)
+
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.first['email']).to eq(email.email)
       end
@@ -651,20 +701,78 @@ describe API::API, api: true  do
   end
 
   describe "GET /user" do
-    it "returns current user" do
-      get api("/user", user)
-      expect(response).to have_http_status(200)
-      expect(json_response['email']).to eq(user.email)
-      expect(json_response['is_admin']).to eq(user.is_admin?)
-      expect(json_response['can_create_project']).to eq(user.can_create_project?)
-      expect(json_response['can_create_group']).to eq(user.can_create_group?)
-      expect(json_response['projects_limit']).to eq(user.projects_limit)
-      expect(json_response['private_token']).to be_blank
+    let(:personal_access_token) { create(:personal_access_token, user: user).token }
+
+    context 'with regular user' do
+      context 'with personal access token' do
+        it 'returns 403 without private token when sudo is defined' do
+          get api("/user?private_token=#{personal_access_token}&sudo=123")
+
+          expect(response).to have_http_status(403)
+        end
+      end
+
+      context 'with private token' do
+        it 'returns 403 without private token when sudo defined' do
+          get api("/user?private_token=#{user.private_token}&sudo=123")
+
+          expect(response).to have_http_status(403)
+        end
+      end
+
+      it 'returns current user without private token when sudo not defined' do
+        get api("/user", user)
+
+        expect(response).to have_http_status(200)
+        expect(response).to match_response_schema('user/public')
+        expect(json_response['id']).to eq(user.id)
+      end
     end
 
-    it "returns 401 error if user is unauthenticated" do
-      get api("/user")
-      expect(response).to have_http_status(401)
+    context 'with admin' do
+      let(:admin_personal_access_token) { create(:personal_access_token, user: admin).token }
+
+      context 'with personal access token' do
+        it 'returns 403 without private token when sudo defined' do
+          get api("/user?private_token=#{admin_personal_access_token}&sudo=#{user.id}")
+
+          expect(response).to have_http_status(403)
+        end
+
+        it 'returns initial current user without private token when sudo not defined' do
+          get api("/user?private_token=#{admin_personal_access_token}")
+
+          expect(response).to have_http_status(200)
+          expect(response).to match_response_schema('user/public')
+          expect(json_response['id']).to eq(admin.id)
+        end
+      end
+
+      context 'with private token' do
+        it 'returns sudoed user with private token when sudo defined' do
+          get api("/user?private_token=#{admin.private_token}&sudo=#{user.id}")
+
+          expect(response).to have_http_status(200)
+          expect(response).to match_response_schema('user/login')
+          expect(json_response['id']).to eq(user.id)
+        end
+
+        it 'returns initial current user without private token when sudo not defined' do
+          get api("/user?private_token=#{admin.private_token}")
+
+          expect(response).to have_http_status(200)
+          expect(response).to match_response_schema('user/public')
+          expect(json_response['id']).to eq(admin.id)
+        end
+      end
+    end
+
+    context 'with unauthenticated user' do
+      it "returns 401 error if user is unauthenticated" do
+        get api("/user")
+
+        expect(response).to have_http_status(401)
+      end
     end
   end
 
@@ -680,8 +788,11 @@ describe API::API, api: true  do
       it "returns array of ssh keys" do
         user.keys << key
         user.save
+
         get api("/user/keys", user)
+
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.first["title"]).to eq(key.title)
       end
@@ -797,8 +908,11 @@ describe API::API, api: true  do
       it "returns array of emails" do
         user.emails << email
         user.save
+
         get api("/user/emails", user)
+
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.first["email"]).to eq(email.email)
       end

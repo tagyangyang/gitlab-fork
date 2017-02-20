@@ -1,9 +1,10 @@
 require 'mime/types'
 
 module API
-  # Project commit statuses API
   class CommitStatuses < Grape::API
     resource :projects do
+      include PaginationParams
+
       before { authenticate! }
 
       desc "Get a commit's statuses" do
@@ -16,6 +17,7 @@ module API
         optional :stage, type: String, desc: 'The stage'
         optional :name,  type: String, desc: 'The name'
         optional :all,   type: String, desc: 'Show all statuses, default: false'
+        use :pagination
       end
       get ':id/repository/commits/:sha/statuses' do
         authorize!(:read_commit_status, user_project)
@@ -44,6 +46,7 @@ module API
         optional :description, type: String,  desc: 'A short description of the status'
         optional :name,        type: String,  desc: 'A string label to differentiate this status from the status of other systems. Default: "default"'
         optional :context,     type: String,  desc: 'A string label to differentiate this status from the status of other systems. Default: "default"'
+        optional :coverage,    type: Float,   desc: 'The total code coverage'
       end
       post ':id/statuses/:sha' do
         authorize! :create_commit_status, user_project
@@ -73,11 +76,14 @@ module API
           name: name,
           ref: ref,
           target_url: params[:target_url],
-          description: params[:description]
+          description: params[:description],
+          coverage: params[:coverage]
         )
 
+        render_validation_error!(status) if status.invalid?
+
         begin
-          case params[:state].to_s
+          case params[:state]
           when 'pending'
             status.enqueue!
           when 'running'

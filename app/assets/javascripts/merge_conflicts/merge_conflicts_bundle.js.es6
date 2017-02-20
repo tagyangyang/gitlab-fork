@@ -1,12 +1,15 @@
-/* eslint-disable */
-//= require vue
-//= require ./merge_conflict_store
-//= require ./merge_conflict_service
-//= require ./mixins/line_conflict_utils
-//= require ./mixins/line_conflict_actions
-//= require ./components/diff_file_editor
-//= require ./components/inline_conflict_lines
-//= require ./components/parallel_conflict_lines
+/* eslint-disable new-cap, comma-dangle, no-new */
+/* global Vue */
+/* global Flash */
+
+window.Vue = require('vue');
+require('./merge_conflict_store');
+require('./merge_conflict_service');
+require('./mixins/line_conflict_utils');
+require('./mixins/line_conflict_actions');
+require('./components/diff_file_editor');
+require('./components/inline_conflict_lines');
+require('./components/parallel_conflict_lines');
 
 $(() => {
   const INTERACTIVE_RESOLVE_MODE = 'interactive';
@@ -26,10 +29,10 @@ $(() => {
       'parallel-conflict-lines': gl.mergeConflicts.parallelConflictLines
     },
     computed: {
-      conflictsCountText() { return mergeConflictsStore.getConflictsCountText() },
-      readyToCommit() { return mergeConflictsStore.isReadyToCommit() },
-      commitButtonText() { return mergeConflictsStore.getCommitButtonText() },
-      showDiffViewTypeSwitcher() { return mergeConflictsStore.fileTextTypePresent() }
+      conflictsCountText() { return mergeConflictsStore.getConflictsCountText(); },
+      readyToCommit() { return mergeConflictsStore.isReadyToCommit(); },
+      commitButtonText() { return mergeConflictsStore.getCommitButtonText(); },
+      showDiffViewTypeSwitcher() { return mergeConflictsStore.fileTextTypePresent(); }
     },
     created() {
       mergeConflictsService
@@ -85,5 +88,5 @@ $(() => {
           });
       }
     }
-  })
+  });
 });

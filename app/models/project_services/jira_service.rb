@@ -9,7 +9,10 @@ class JiraService < IssueTrackerService
 
   before_update :reset_password
 
-  def supported_events
+  # This is confusing, but JiraService does not really support these events.
+  # The values here are required to display correct options in the service
+  # configuration screen.
+  def self.supported_events
     %w(commit merge_request)
   end
 
@@ -57,9 +60,9 @@ class JiraService < IssueTrackerService
   end
 
   def help
-    'See the ' \
-    '[integration doc](http://doc.gitlab.com/ce/integration/external-issue-tracker.html) '\
-    'for details.'
+    "You need to configure JIRA before enabling this service. For more details
+    read the
+    [JIRA service documentation](#{help_page_url('project_services/jira')})."
   end
 
   def title
@@ -78,7 +81,7 @@ class JiraService < IssueTrackerService
     end
   end
 
-  def to_param
+  def self.to_param
     'jira'
   end
 
@@ -105,18 +108,29 @@ class JiraService < IssueTrackerService
     "#{url}/secure/CreateIssue.jspa"
   end
 
-  def execute(push, issue = nil)
-    if issue.nil?
-      # No specific issue, that means
-      # we just want to test settings
-      test_settings
-    else
-      jira_issue = jira_request { client.Issue.find(issue.iid) }
+  def execute(push)
+    # This method is a no-op, because currently JiraService does not
+    # support any events.
+  end
 
-      return false unless jira_issue.present?
+  def close_issue(entity, external_issue)
+    issue = jira_request { client.Issue.find(external_issue.iid) }
 
-      close_issue(push, jira_issue)
-    end
+    return if issue.nil? || issue.resolution.present? || !jira_issue_transition_id.present?
+
+    commit_id = if entity.is_a?(Commit)
+                  entity.id
+                elsif entity.is_a?(MergeRequest)
+                  entity.diff_head_sha
+                end
+
+    commit_url = build_entity_url(:commit, commit_id)
+
+    # Depending on the JIRA project's workflow, a comment during transition
+    # may or may not be allowed. Refresh the issue after transition and check
+    # if it is closed, so we don't have one comment for every commit.
+    issue = jira_request { client.Issue.find(issue.key) } if transition_issue(issue)
+    add_issue_solved_comment(issue, commit_id, commit_url) if issue.resolution
   end
 
   def create_cross_reference_note(mentioned, noteable, author)
@@ -128,15 +142,9 @@ class JiraService < IssueTrackerService
 
     return unless jira_issue.present?
 
-    project = self.project
-    noteable_name = noteable.model_name.singular
-    noteable_id = if noteable.is_a?(Commit)
-                    noteable.id
-                  else
-                    noteable.iid
-                  end
-
-    entity_url = build_entity_url(noteable_name.to_sym, noteable_id)
+    noteable_id   = noteable.respond_to?(:iid) ? noteable.iid : noteable.id
+    noteable_type = noteable_name(noteable)
+    entity_url    = build_entity_url(noteable_type, noteable_id)
 
     data = {
       user: {
@@ -144,11 +152,11 @@ class JiraService < IssueTrackerService
         url: resource_url(user_path(author)),
       },
       project: {
-        name: project.path_with_namespace,
-        url: resource_url(namespace_project_path(project.namespace, project))
+        name: self.project.path_with_namespace,
+        url: resource_url(namespace_project_path(project.namespace, self.project))
       },
       entity: {
-        name: noteable_name.humanize.downcase,
+        name: noteable_type.humanize.downcase,
         url: entity_url,
         title: noteable.title
       }
@@ -160,6 +168,11 @@ class JiraService < IssueTrackerService
   # reason why service cannot be tested
   def disabled_title
     "Please fill in Password and Username."
+  end
+
+  def test(_)
+    result = test_settings
+    { success: result.present?, result: result }
   end
 
   def can_test?
@@ -188,24 +201,6 @@ class JiraService < IssueTrackerService
     end
   end
 
-  def close_issue(entity, issue)
-    return if issue.nil? || issue.resolution.present? || !jira_issue_transition_id.present?
-
-    commit_id = if entity.is_a?(Commit)
-                  entity.id
-                elsif entity.is_a?(MergeRequest)
-                  entity.diff_head_sha
-                end
-
-    commit_url = build_entity_url(:commit, commit_id)
-
-    # Depending on the JIRA project's workflow, a comment during transition
-    # may or may not be allowed. Refresh the issue after transition and check
-    # if it is closed, so we don't have one comment for every commit.
-    issue = jira_request { client.Issue.find(issue.key) } if transition_issue(issue)
-    add_issue_solved_comment(issue, commit_id, commit_url) if issue.resolution
-  end
-
   def transition_issue(issue)
     issue.transitions.build.save(transition: { id: jira_issue_transition_id })
   end
@@ -225,7 +220,7 @@ class JiraService < IssueTrackerService
     entity_title = data[:entity][:title]
     project_name = data[:project][:name]
 
-    message      = "[#{user_name}|#{user_url}] mentioned this issue in [a #{entity_name} of #{project_name}|#{entity_url}]:\n'#{entity_title}'"
+    message      = "[#{user_name}|#{user_url}] mentioned this issue in [a #{entity_name} of #{project_name}|#{entity_url}]:\n'#{entity_title.chomp}'"
     link_title   = "GitLab: Mentioned on #{entity_name} - #{entity_title}"
     link_props   = build_remote_link_props(url: entity_url, title: link_title)
 
@@ -255,20 +250,10 @@ class JiraService < IssueTrackerService
     end
   end
 
-  # Build remote link on JIRA properties
-  # Icons here must be available on WEB so JIRA can read the URL
-  # We are using a open word graphics icon which have LGPL license
   def build_remote_link_props(url:, title:, resolved: false)
     status = {
       resolved: resolved
     }
-
-    if resolved
-      status[:icon] = {
-        title: 'Closed',
-        url16x16: 'http://www.openwebgraphics.com/resources/data/1768/16x16_apply.png'
-      }
-    end
 
     {
       GlobalID: 'GitLab',
@@ -285,16 +270,24 @@ class JiraService < IssueTrackerService
     "#{Settings.gitlab.base_url.chomp("/")}#{resource}"
   end
 
-  def build_entity_url(entity_name, entity_id)
+  def build_entity_url(noteable_type, entity_id)
     polymorphic_url(
       [
         self.project.namespace.becomes(Namespace),
         self.project,
-        entity_name
+        noteable_type.to_sym
       ],
       id:   entity_id,
       host: Settings.gitlab.base_url
     )
+  end
+
+  def noteable_name(noteable)
+    name = noteable.model_name.singular
+
+    # ProjectSnippet inherits from Snippet class so it causes
+    # routing error building the URL.
+    name == "project_snippet" ? "snippet" : name
   end
 
   # Handle errors when doing JIRA API calls

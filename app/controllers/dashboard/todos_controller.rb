@@ -4,6 +4,9 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   def index
     @sort = params[:sort]
     @todos = @todos.page(params[:page])
+    if @todos.out_of_range? && @todos.total_pages != 0
+      redirect_to url_for(params.merge(page: @todos.total_pages))
+    end
   end
 
   def destroy
@@ -24,6 +27,12 @@ class Dashboard::TodosController < Dashboard::ApplicationController
       format.js { head :ok }
       format.json { render json: todos_counts }
     end
+  end
+
+  def restore
+    TodoService.new.mark_todos_as_pending_by_ids([params[:id]], current_user)
+
+    render json: todos_counts
   end
 
   private

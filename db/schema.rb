@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161121143603) do
+ActiveRecord::Schema.define(version: 20170215200045) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -98,14 +98,19 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.text "help_page_text_html"
     t.text "shared_runners_text_html"
     t.text "after_sign_up_text_html"
-    t.boolean "sidekiq_throttling_enabled", default: false
-    t.string "sidekiq_throttling_queues"
-    t.decimal "sidekiq_throttling_factor"
     t.boolean "housekeeping_enabled", default: true, null: false
     t.boolean "housekeeping_bitmaps_enabled", default: true, null: false
     t.integer "housekeeping_incremental_repack_period", default: 10, null: false
     t.integer "housekeeping_full_repack_period", default: 50, null: false
     t.integer "housekeeping_gc_period", default: 200, null: false
+    t.boolean "sidekiq_throttling_enabled", default: false
+    t.string "sidekiq_throttling_queues"
+    t.decimal "sidekiq_throttling_factor"
+    t.boolean "html_emails_enabled", default: true
+    t.string "plantuml_url"
+    t.boolean "plantuml_enabled"
+    t.integer "max_pages_size", default: 100, null: false
+    t.integer "terminal_max_session_time", default: 0, null: false
   end
 
   create_table "audit_events", force: :cascade do |t|
@@ -131,7 +136,6 @@ ActiveRecord::Schema.define(version: 20161121143603) do
 
   add_index "award_emoji", ["awardable_type", "awardable_id"], name: "index_award_emoji_on_awardable_type_and_awardable_id", using: :btree
   add_index "award_emoji", ["user_id", "name"], name: "index_award_emoji_on_user_id_and_name", using: :btree
-  add_index "award_emoji", ["user_id"], name: "index_award_emoji_on_user_id", using: :btree
 
   create_table "boards", force: :cascade do |t|
     t.integer "project_id", null: false
@@ -212,6 +216,7 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.datetime "queued_at"
     t.string "token"
     t.integer "lock_version"
+    t.string "coverage_regex"
   end
 
   add_index "ci_builds", ["commit_id", "stage_idx", "created_at"], name: "index_ci_builds_on_commit_id_and_stage_idx_and_created_at", using: :btree
@@ -221,6 +226,7 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   add_index "ci_builds", ["commit_id"], name: "index_ci_builds_on_commit_id", using: :btree
   add_index "ci_builds", ["project_id"], name: "index_ci_builds_on_project_id", using: :btree
   add_index "ci_builds", ["runner_id"], name: "index_ci_builds_on_runner_id", using: :btree
+  add_index "ci_builds", ["status", "type", "runner_id"], name: "index_ci_builds_on_status_and_type_and_runner_id", using: :btree
   add_index "ci_builds", ["status"], name: "index_ci_builds_on_status", using: :btree
   add_index "ci_builds", ["token"], name: "index_ci_builds_on_token", unique: true, using: :btree
 
@@ -299,6 +305,7 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.boolean "locked", default: false, null: false
   end
 
+  add_index "ci_runners", ["is_shared"], name: "index_ci_runners_on_is_shared", using: :btree
   add_index "ci_runners", ["locked"], name: "index_ci_runners_on_locked", using: :btree
   add_index "ci_runners", ["token"], name: "index_ci_runners_on_token", using: :btree
 
@@ -333,6 +340,8 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.datetime "updated_at"
     t.integer "commit_id"
   end
+
+  add_index "ci_trigger_requests", ["commit_id"], name: "index_ci_trigger_requests_on_commit_id", using: :btree
 
   create_table "ci_triggers", force: :cascade do |t|
     t.string "token"
@@ -380,9 +389,7 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   end
 
   add_index "deployments", ["project_id", "environment_id", "iid"], name: "index_deployments_on_project_id_and_environment_id_and_iid", using: :btree
-  add_index "deployments", ["project_id", "environment_id"], name: "index_deployments_on_project_id_and_environment_id", using: :btree
   add_index "deployments", ["project_id", "iid"], name: "index_deployments_on_project_id_and_iid", unique: true, using: :btree
-  add_index "deployments", ["project_id"], name: "index_deployments_on_project_id", using: :btree
 
   create_table "emails", force: :cascade do |t|
     t.integer "user_id", null: false
@@ -402,9 +409,11 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.string "external_url"
     t.string "environment_type"
     t.string "state", default: "available", null: false
+    t.string "slug", null: false
   end
 
-  add_index "environments", ["project_id", "name"], name: "index_environments_on_project_id_and_name", using: :btree
+  add_index "environments", ["project_id", "name"], name: "index_environments_on_project_id_and_name", unique: true, using: :btree
+  add_index "environments", ["project_id", "slug"], name: "index_environments_on_project_id_and_slug", unique: true, using: :btree
 
   create_table "events", force: :cascade do |t|
     t.string "target_type"
@@ -476,6 +485,7 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.integer "lock_version"
     t.text "title_html"
     t.text "description_html"
+    t.integer "time_estimate"
   end
 
   add_index "issues", ["assignee_id"], name: "index_issues_on_assignee_id", using: :btree
@@ -499,6 +509,8 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.string "type"
     t.string "fingerprint"
     t.boolean "public", default: false, null: false
+    t.boolean "can_push", default: false, null: false
+    t.datetime "last_used_at"
   end
 
   add_index "keys", ["fingerprint"], name: "index_keys_on_fingerprint", unique: true, using: :btree
@@ -540,7 +552,9 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   end
 
   add_index "labels", ["group_id", "project_id", "title"], name: "index_labels_on_group_id_and_project_id_and_title", unique: true, using: :btree
-  add_index "labels", ["group_id"], name: "index_labels_on_group_id", using: :btree
+  add_index "labels", ["type", "project_id"], name: "index_labels_on_type_and_project_id", using: :btree
+  add_index "labels", ["project_id"], name: "index_labels_on_project_id", using: :btree
+  add_index "labels", ["title"], name: "index_labels_on_title", using: :btree
 
   create_table "lfs_objects", force: :cascade do |t|
     t.string "oid", null: false
@@ -571,7 +585,6 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   end
 
   add_index "lists", ["board_id", "label_id"], name: "index_lists_on_board_id_and_label_id", unique: true, using: :btree
-  add_index "lists", ["board_id"], name: "index_lists_on_board_id", using: :btree
   add_index "lists", ["label_id"], name: "index_lists_on_label_id", using: :btree
 
   create_table "members", force: :cascade do |t|
@@ -655,6 +668,7 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.integer "lock_version"
     t.text "title_html"
     t.text "description_html"
+    t.integer "time_estimate"
   end
 
   add_index "merge_requests", ["assignee_id"], name: "index_merge_requests_on_assignee_id", using: :btree
@@ -691,12 +705,12 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.integer "iid"
     t.text "title_html"
     t.text "description_html"
+    t.date "start_date"
   end
 
   add_index "milestones", ["description"], name: "index_milestones_on_description_trigram", using: :gin, opclasses: {"description"=>"gin_trgm_ops"}
   add_index "milestones", ["due_date"], name: "index_milestones_on_due_date", using: :btree
   add_index "milestones", ["project_id", "iid"], name: "index_milestones_on_project_id_and_iid", unique: true, using: :btree
-  add_index "milestones", ["project_id"], name: "index_milestones_on_project_id", using: :btree
   add_index "milestones", ["title"], name: "index_milestones_on_title", using: :btree
   add_index "milestones", ["title"], name: "index_milestones_on_title_trigram", using: :gin, opclasses: {"title"=>"gin_trgm_ops"}
 
@@ -715,14 +729,16 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.datetime "deleted_at"
     t.boolean "lfs_enabled"
     t.text "description_html"
+    t.integer "parent_id"
   end
 
   add_index "namespaces", ["created_at"], name: "index_namespaces_on_created_at", using: :btree
   add_index "namespaces", ["deleted_at"], name: "index_namespaces_on_deleted_at", using: :btree
-  add_index "namespaces", ["name"], name: "index_namespaces_on_name", unique: true, using: :btree
+  add_index "namespaces", ["name", "parent_id"], name: "index_namespaces_on_name_and_parent_id", unique: true, using: :btree
   add_index "namespaces", ["name"], name: "index_namespaces_on_name_trigram", using: :gin, opclasses: {"name"=>"gin_trgm_ops"}
   add_index "namespaces", ["owner_id"], name: "index_namespaces_on_owner_id", using: :btree
-  add_index "namespaces", ["path"], name: "index_namespaces_on_path", unique: true, using: :btree
+  add_index "namespaces", ["parent_id", "id"], name: "index_namespaces_on_parent_id_and_id", unique: true, using: :btree
+  add_index "namespaces", ["path"], name: "index_namespaces_on_path", using: :btree
   add_index "namespaces", ["path"], name: "index_namespaces_on_path_trigram", using: :gin, opclasses: {"path"=>"gin_trgm_ops"}
   add_index "namespaces", ["type"], name: "index_namespaces_on_type", using: :btree
 
@@ -759,7 +775,6 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   add_index "notes", ["noteable_id", "noteable_type"], name: "index_notes_on_noteable_id_and_noteable_type", using: :btree
   add_index "notes", ["noteable_type"], name: "index_notes_on_noteable_type", using: :btree
   add_index "notes", ["project_id", "noteable_type"], name: "index_notes_on_project_id_and_noteable_type", using: :btree
-  add_index "notes", ["project_id"], name: "index_notes_on_project_id", using: :btree
   add_index "notes", ["updated_at"], name: "index_notes_on_updated_at", using: :btree
 
   create_table "notification_settings", force: :cascade do |t|
@@ -819,6 +834,17 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   add_index "oauth_applications", ["owner_id", "owner_type"], name: "index_oauth_applications_on_owner_id_and_owner_type", using: :btree
   add_index "oauth_applications", ["uid"], name: "index_oauth_applications_on_uid", unique: true, using: :btree
 
+  create_table "pages_domains", force: :cascade do |t|
+    t.integer "project_id"
+    t.text "certificate"
+    t.text "encrypted_key"
+    t.string "encrypted_key_iv"
+    t.string "encrypted_key_salt"
+    t.string "domain"
+  end
+
+  add_index "pages_domains", ["domain"], name: "index_pages_domains_on_domain", unique: true, using: :btree
+
   create_table "personal_access_tokens", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "token", null: false
@@ -827,17 +853,19 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "scopes", default: "--- []\n", null: false
   end
 
   add_index "personal_access_tokens", ["token"], name: "index_personal_access_tokens_on_token", unique: true, using: :btree
   add_index "personal_access_tokens", ["user_id"], name: "index_personal_access_tokens_on_user_id", using: :btree
 
-  create_table "project_authorizations", force: :cascade do |t|
+  create_table "project_authorizations", id: false, force: :cascade do |t|
     t.integer "user_id"
     t.integer "project_id"
     t.integer "access_level"
   end
 
+  add_index "project_authorizations", ["project_id"], name: "index_project_authorizations_on_project_id", using: :btree
   add_index "project_authorizations", ["user_id", "project_id", "access_level"], name: "index_project_authorizations_on_user_id_project_id_access_level", unique: true, using: :btree
 
   create_table "project_features", force: :cascade do |t|
@@ -873,6 +901,19 @@ ActiveRecord::Schema.define(version: 20161121143603) do
 
   add_index "project_import_data", ["project_id"], name: "index_project_import_data_on_project_id", using: :btree
 
+  create_table "project_statistics", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "namespace_id", null: false
+    t.integer "commit_count", limit: 8, default: 0, null: false
+    t.integer "storage_size", limit: 8, default: 0, null: false
+    t.integer "repository_size", limit: 8, default: 0, null: false
+    t.integer "lfs_objects_size", limit: 8, default: 0, null: false
+    t.integer "build_artifacts_size", limit: 8, default: 0, null: false
+  end
+
+  add_index "project_statistics", ["namespace_id"], name: "index_project_statistics_on_namespace_id", using: :btree
+  add_index "project_statistics", ["project_id"], name: "index_project_statistics_on_project_id", unique: true, using: :btree
+
   create_table "projects", force: :cascade do |t|
     t.string "name"
     t.string "path"
@@ -887,11 +928,9 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.boolean "archived", default: false, null: false
     t.string "avatar"
     t.string "import_status"
-    t.float "repository_size", default: 0.0
     t.integer "star_count", default: 0, null: false
     t.string "import_type"
     t.string "import_source"
-    t.integer "commit_count", default: 0
     t.text "import_error"
     t.integer "ci_id"
     t.boolean "shared_runners_enabled", default: true, null: false
@@ -968,6 +1007,18 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   add_index "releases", ["project_id", "tag"], name: "index_releases_on_project_id_and_tag", using: :btree
   add_index "releases", ["project_id"], name: "index_releases_on_project_id", using: :btree
 
+  create_table "routes", force: :cascade do |t|
+    t.integer "source_id", null: false
+    t.string "source_type", null: false
+    t.string "path", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "name"
+  end
+
+  add_index "routes", ["path"], name: "index_routes_on_path", unique: true, using: :btree
+  add_index "routes", ["source_type", "source_id"], name: "index_routes_on_source_type_and_source_id", unique: true, using: :btree
+
   create_table "sent_notifications", force: :cascade do |t|
     t.integer "project_id"
     t.integer "noteable_id"
@@ -1040,6 +1091,7 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "submitted_as_ham", default: false, null: false
+    t.boolean "recaptcha_verified", default: false, null: false
   end
 
   create_table "subscriptions", force: :cascade do |t|
@@ -1073,6 +1125,19 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   end
 
   add_index "tags", ["name"], name: "index_tags_on_name", unique: true, using: :btree
+
+  create_table "timelogs", force: :cascade do |t|
+    t.integer "time_spent", null: false
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "issue_id"
+    t.integer "merge_request_id"
+  end
+
+  add_index "timelogs", ["issue_id"], name: "index_timelogs_on_issue_id", using: :btree
+  add_index "timelogs", ["merge_request_id"], name: "index_timelogs_on_merge_request_id", using: :btree
+  add_index "timelogs", ["user_id"], name: "index_timelogs_on_user_id", using: :btree
 
   create_table "todos", force: :cascade do |t|
     t.integer "user_id", null: false
@@ -1145,7 +1210,6 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.string "linkedin", default: "", null: false
     t.string "twitter", default: "", null: false
     t.string "authentication_token"
-    t.integer "theme_id", default: 1, null: false
     t.string "bio"
     t.integer "failed_attempts", default: 0
     t.datetime "locked_at"
@@ -1186,6 +1250,7 @@ ActiveRecord::Schema.define(version: 20161121143603) do
     t.string "organization"
     t.string "incoming_email_token"
     t.boolean "authorized_projects_populated"
+    t.boolean "notified_of_own_activity", default: false, null: false
   end
 
   add_index "users", ["admin"], name: "index_users_on_admin", using: :btree
@@ -1212,7 +1277,6 @@ ActiveRecord::Schema.define(version: 20161121143603) do
 
   add_index "users_star_projects", ["project_id"], name: "index_users_star_projects_on_project_id", using: :btree
   add_index "users_star_projects", ["user_id", "project_id"], name: "index_users_star_projects_on_user_id_and_project_id", unique: true, using: :btree
-  add_index "users_star_projects", ["user_id"], name: "index_users_star_projects_on_user_id", using: :btree
 
   create_table "web_hooks", force: :cascade do |t|
     t.string "url", limit: 2000
@@ -1250,9 +1314,12 @@ ActiveRecord::Schema.define(version: 20161121143603) do
   add_foreign_key "personal_access_tokens", "users"
   add_foreign_key "project_authorizations", "projects", on_delete: :cascade
   add_foreign_key "project_authorizations", "users", on_delete: :cascade
+  add_foreign_key "project_statistics", "projects", on_delete: :cascade
   add_foreign_key "protected_branch_merge_access_levels", "protected_branches"
   add_foreign_key "protected_branch_push_access_levels", "protected_branches"
   add_foreign_key "subscriptions", "projects", on_delete: :cascade
+  add_foreign_key "timelogs", "issues", name: "fk_timelogs_issues_issue_id", on_delete: :cascade
+  add_foreign_key "timelogs", "merge_requests", name: "fk_timelogs_merge_requests_merge_request_id", on_delete: :cascade
   add_foreign_key "trending_projects", "projects", on_delete: :cascade
   add_foreign_key "u2f_registrations", "users"
 end

@@ -2,6 +2,7 @@ module Ci
   class Runner < ActiveRecord::Base
     extend Ci::Model
 
+    RUNNER_QUEUE_EXPIRY_TIME = 60.minutes
     LAST_CONTACT_TIME = 1.hour.ago
     AVAILABLE_SCOPES = %w[specific shared active paused online]
     FORM_EDITABLE = %i[description tag_list active run_untagged locked]
@@ -36,6 +37,8 @@ module Ci
     validate :tag_constraints
 
     acts_as_taggable
+
+    after_destroy :cleanup_runner_queue
 
     # Searches for runners matching the given query.
     #
@@ -122,7 +125,37 @@ module Ci
       ]
     end
 
+    def tick_runner_queue
+      SecureRandom.hex.tap do |new_update|
+        Gitlab::Redis.with do |redis|
+          redis.set(runner_queue_key, new_update, ex: RUNNER_QUEUE_EXPIRY_TIME)
+        end
+      end
+    end
+
+    def ensure_runner_queue_value
+      Gitlab::Redis.with do |redis|
+        value = SecureRandom.hex
+        redis.set(runner_queue_key, value, ex: RUNNER_QUEUE_EXPIRY_TIME, nx: true)
+        redis.get(runner_queue_key)
+      end
+    end
+
+    def is_runner_queue_value_latest?(value)
+      ensure_runner_queue_value == value if value.present?
+    end
+
     private
+
+    def cleanup_runner_queue
+      Gitlab::Redis.with do |redis|
+        redis.del(runner_queue_key)
+      end
+    end
+
+    def runner_queue_key
+      "runner:build_queue:#{self.token}"
+    end
 
     def tag_constraints
       unless has_tags? || run_untagged?

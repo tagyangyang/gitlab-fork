@@ -1,4 +1,5 @@
-/* eslint-disable */
+/* eslint-disable func-names, object-shorthand, comma-dangle, wrap-iife, space-before-function-paren, no-param-reassign, max-len */
+
 (function(global) {
   class GroupLabelSubscription {
     constructor(container) {
@@ -49,5 +50,4 @@
   }
 
   global.GroupLabelSubscription = GroupLabelSubscription;
-
 })(window.gl || (window.gl = {}));

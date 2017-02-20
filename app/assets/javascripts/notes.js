@@ -1,15 +1,20 @@
-/* eslint-disable func-names, space-before-function-paren, no-var, space-before-blocks, prefer-rest-params, wrap-iife, no-use-before-define, camelcase, no-unused-expressions, quotes, max-len, one-var, one-var-declaration-per-line, default-case, prefer-template, no-undef, consistent-return, no-alert, no-return-assign, no-param-reassign, prefer-arrow-callback, no-else-return, comma-dangle, no-new, brace-style, no-lonely-if, vars-on-top, no-unused-vars, semi, indent, no-sequences, no-shadow, newline-per-chained-call, no-useless-escape, radix, padded-blocks, max-len */
+/* eslint-disable no-restricted-properties, func-names, space-before-function-paren, no-var, prefer-rest-params, wrap-iife, no-use-before-define, camelcase, no-unused-expressions, quotes, max-len, one-var, one-var-declaration-per-line, default-case, prefer-template, consistent-return, no-alert, no-return-assign, no-param-reassign, prefer-arrow-callback, no-else-return, comma-dangle, no-new, brace-style, no-lonely-if, vars-on-top, no-unused-vars, no-sequences, no-shadow, newline-per-chained-call, no-useless-escape */
+/* global Flash */
+/* global Autosave */
+/* global ResolveService */
+/* global mrRefreshWidgetUrl */
 
-/*= require autosave */
-/*= require autosize */
-/*= require dropzone */
-/*= require dropzone_input */
-/*= require gfm_auto_complete */
-/*= require jquery.atwho */
-/*= require task_list */
+require('./autosave');
+window.autosize = require('vendor/autosize');
+window.Dropzone = require('dropzone');
+require('./dropzone_input');
+require('./gfm_auto_complete');
+require('vendor/jquery.caret'); // required by jquery.atwho
+require('vendor/jquery.atwho');
+require('./task_list');
 
 (function() {
-  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var bind = function(fn, me) { return function() { return fn.apply(me, arguments); }; };
 
   this.Notes = (function() {
     const MAX_VISIBLE_COMMIT_LIST_COUNT = 3;
@@ -46,8 +51,18 @@
       this.addBinding();
       this.setPollingInterval();
       this.setupMainTargetNoteForm();
-      this.initTaskList();
+      this.taskList = new gl.TaskList({
+        dataType: 'note',
+        fieldName: 'note',
+        selector: '.notes'
+      });
       this.collapseLongCommitList();
+
+      // We are in the Merge Requests page so we need another edit form for Changes tab
+      if (gl.utils.getPagePath(1) === 'merge_requests') {
+        $('.note-edit-form').clone()
+          .addClass('mr-note-edit-form').insertAfter('.note-edit-form');
+      }
     }
 
     Notes.prototype.addBinding = function() {
@@ -59,7 +74,7 @@
       // change note in UI after update
       $(document).on("ajax:success", "form.edit-note", this.updateNote);
       // Edit note link
-      $(document).on("click", ".js-note-edit", this.showEditForm);
+      $(document).on("click", ".js-note-edit", this.showEditForm.bind(this));
       $(document).on("click", ".note-edit-cancel", this.cancelEdit);
       // Reopen and close actions for Issue/MR combined with note form submit
       $(document).on("click", ".js-comment-button", this.updateCloseButton);
@@ -113,8 +128,7 @@
       $(document).off("click", ".js-note-discard");
       $(document).off("keydown", ".js-note-text");
       $(document).off('click', '.js-comment-resolve-button');
-      $('.note .js-task-list-container').taskList('disable');
-      return $(document).off('tasklist:changed', '.note .js-task-list-container');
+      $(document).off("click", '.system-note-commit-list-toggler');
     };
 
     Notes.prototype.keydownNoteText = function(e) {
@@ -208,7 +222,6 @@
       })(this));
     };
 
-
     /*
     Increase @pollingInterval up to 120 seconds on every function call,
     if `shouldReset` has a truthy value, 'null' or 'undefined' the variable
@@ -232,6 +245,15 @@
       return this.initRefresh();
     };
 
+    Notes.prototype.handleCreateChanges = function(note) {
+      if (typeof note === 'undefined') {
+        return;
+      }
+
+      if (note.commands_changes && note.commands_changes.indexOf('merge') !== -1) {
+        $.get(mrRefreshWidgetUrl);
+      }
+    };
 
     /*
     Render note in main comments area.
@@ -266,12 +288,11 @@
         // Update datetime format on the recent note
         gl.utils.localTimeAgo($notesList.find("#note_" + note.id + " .js-timeago"), false);
         this.collapseLongCommitList();
-        this.initTaskList();
+        this.taskList.init();
         this.refresh();
         return this.updateNotesCount(1);
       }
     };
-
 
     /*
     Check if note does not exists on page
@@ -284,7 +305,6 @@
     Notes.prototype.isParallelView = function() {
       return this.view === 'parallel';
     };
-
 
     /*
     Render note in discussion area.
@@ -304,7 +324,7 @@
       }
       row = form.closest("tr");
       note_html = $(note.html);
-      note_html.syntaxHighlight();
+      note_html.renderGFM();
       // is this the first note of discussion?
       discussionContainer = $(".notes[data-discussion-id='" + note.discussion_id + "']");
       if ((note.original_discussion_id != null) && discussionContainer.length === 0) {
@@ -321,7 +341,7 @@
         discussionContainer.append(note_html);
         // Init discussion on 'Discussion' page if it is merge request page
         if ($('body').attr('data-page').indexOf('projects:merge_request') === 0) {
-          $('ul.main-notes-list').append(note.discussion_html).syntaxHighlight();
+          $('ul.main-notes-list').append(note.discussion_html).renderGFM();
         }
       } else {
         // append new note to all matching discussions
@@ -332,10 +352,9 @@
         gl.diffNotesCompileComponents();
       }
 
-      gl.utils.localTimeAgo($('.js-timeago', note_html), false);
+      gl.utils.localTimeAgo($('.js-timeago'), false);
       return this.updateNotesCount(1);
     };
-
 
     /*
     Called in response the main target form has been successfully submitted.
@@ -368,7 +387,6 @@
       return form.find(".js-note-text").trigger("input");
     };
 
-
     /*
     Shows the main form and does some setup on it.
 
@@ -393,7 +411,6 @@
       return this.parentTimeline = form.parents('.timeline');
     };
 
-
     /*
     General note form setup.
 
@@ -405,11 +422,10 @@
 
     Notes.prototype.setupNoteForm = function(form) {
       var textarea;
-      new GLForm(form);
+      new gl.GLForm(form);
       textarea = form.find(".js-note-text");
       return new Autosave(textarea, ["Note", form.find("#note_noteable_type").val(), form.find("#note_noteable_id").val(), form.find("#note_commit_id").val(), form.find("#note_type").val(), form.find("#note_line_code").val(), form.find("#note_position").val()]);
     };
-
 
     /*
     Called in response to the new note form being submitted
@@ -418,13 +434,13 @@
      */
 
     Notes.prototype.addNote = function(xhr, note, status) {
+      this.handleCreateChanges(note);
       return this.renderNote(note);
     };
 
     Notes.prototype.addNoteError = function(xhr, note, status) {
       return new Flash('Your comment could not be submitted! Please check your network connection and try again.', 'alert', this.parentTimeline);
     };
-
 
     /*
     Called in response to the new note form being submitted
@@ -441,7 +457,7 @@
         var mergeRequestId = $form.data('noteable-iid');
 
         if (ResolveService != null) {
-          ResolveService.toggleResolveForDiscussion(projectPath, mergeRequestId, discussionId);
+          ResolveService.toggleResolveForDiscussion(mergeRequestId, discussionId);
         }
       }
 
@@ -449,7 +465,6 @@
       // cleanup after successfully creating a diff/discussion note
       this.removeDiscussionNoteForm($form);
     };
-
 
     /*
     Called in response to the edit note form being submitted
@@ -461,8 +476,9 @@
       var $html, $note_li;
       // Convert returned HTML to a jQuery object so we can modify it further
       $html = $(note.html);
+      this.revertNoteEditForm();
       gl.utils.localTimeAgo($('.js-timeago', $html));
-      $html.syntaxHighlight();
+      $html.renderGFM();
       $html.find('.js-task-list-container').taskList('enable');
       // Find the note's `li` element by ID and replace it with the updated HTML
       $note_li = $('.note-row-' + note.id);
@@ -474,51 +490,56 @@
       }
     };
 
+    Notes.prototype.checkContentToAllowEditing = function($el) {
+      var initialContent = $el.find('.original-note-content').text().trim();
+      var currentContent = $el.find('.note-textarea').val();
+      var isAllowed = true;
+
+      if (currentContent === initialContent) {
+        this.removeNoteEditForm($el);
+      }
+      else {
+        var $buttons = $el.find('.note-form-actions');
+        var isWidgetVisible = gl.utils.isInViewport($el.get(0));
+
+        if (!isWidgetVisible) {
+          gl.utils.scrollToElement($el);
+        }
+
+        $el.find('.js-edit-warning').show();
+        isAllowed = false;
+      }
+
+      return isAllowed;
+    };
 
     /*
     Called in response to clicking the edit note link
 
     Replaces the note text with the note edit form
     Adds a data attribute to the form with the original content of the note for cancellations
-     */
-
+    */
     Notes.prototype.showEditForm = function(e, scrollTo, myLastNote) {
-      var $noteText, done, form, note;
       e.preventDefault();
-      note = $(this).closest(".note");
-      note.addClass("is-editting");
-      form = note.find(".note-edit-form");
-      form.addClass('current-note-edit-form');
-      // Show the attachment delete link
-      note.find(".js-note-attachment-delete").show();
-      done = function($noteText) {
-        var noteTextVal;
-        // Neat little trick to put the cursor at the end
-        noteTextVal = $noteText.val();
-        // Store the original note text in a data attribute to retrieve if a user cancels edit.
-        form.find('form.edit-note').data('original-note', noteTextVal);
-        return $noteText.val('').val(noteTextVal);
-      };
-      new GLForm(form);
-      if ((scrollTo != null) && (myLastNote != null)) {
-        // scroll to the bottom
-        // so the open of the last element doesn't make a jump
-        $('html, body').scrollTop($(document).height());
-        return $('html, body').animate({
-          scrollTop: myLastNote.offset().top - 150
-        }, 500, function() {
-          var $noteText;
-          $noteText = form.find(".js-note-text");
-          $noteText.focus();
-          return done($noteText);
-        });
-      } else {
-        $noteText = form.find('.js-note-text');
-        $noteText.focus();
-        return done($noteText);
-      }
-    };
 
+      var $target = $(e.target);
+      var $editForm = $(this.getEditFormSelector($target));
+      var $note = $target.closest('.note');
+      var $currentlyEditing = $('.note.is-editting:visible');
+
+      if ($currentlyEditing.length) {
+        var isEditAllowed = this.checkContentToAllowEditing($currentlyEditing);
+
+        if (!isEditAllowed) {
+          return;
+        }
+      }
+
+      $note.find('.js-note-attachment-delete').show();
+      $editForm.addClass('current-note-edit-form');
+      $note.addClass('is-editting');
+      this.putEditFormInPlace($target);
+    };
 
     /*
     Called in response to clicking the edit note link
@@ -527,21 +548,42 @@
      */
 
     Notes.prototype.cancelEdit = function(e) {
-      var note;
       e.preventDefault();
-      note = $(e.target).closest('.note');
+      var $target = $(e.target);
+      var note = $target.closest('.note');
+      note.find('.js-edit-warning').hide();
+      this.revertNoteEditForm($target);
       return this.removeNoteEditForm(note);
     };
 
-    Notes.prototype.removeNoteEditForm = function(note) {
-      var form;
-      form = note.find(".current-note-edit-form");
-      note.removeClass("is-editting");
-      form.removeClass("current-note-edit-form");
-      // Replace markdown textarea text with original note text.
-      return form.find(".js-note-text").val(form.find('form.edit-note').data('original-note'));
+    Notes.prototype.revertNoteEditForm = function($target) {
+      $target = $target || $('.note.is-editting:visible');
+      var selector = this.getEditFormSelector($target);
+      var $editForm = $(selector);
+
+      $editForm.insertBefore('.notes-form');
+      $editForm.find('.js-comment-button').enable();
+      $editForm.find('.js-edit-warning').hide();
     };
 
+    Notes.prototype.getEditFormSelector = function($el) {
+      var selector = '.note-edit-form:not(.mr-note-edit-form)';
+
+      if ($el.parents('#diffs').length) {
+        selector = '.note-edit-form.mr-note-edit-form';
+      }
+
+      return selector;
+    };
+
+    Notes.prototype.removeNoteEditForm = function(note) {
+      var form = note.find('.current-note-edit-form');
+      note.removeClass('is-editting');
+      form.removeClass('current-note-edit-form');
+      form.find('.js-edit-warning').hide();
+      // Replace markdown textarea text with original note text.
+      return form.find('.js-note-text').val(form.find('form.edit-note').data('original-note'));
+    };
 
     /*
     Called in response to deleting a note of any kind.
@@ -582,7 +624,6 @@
       return this.updateNotesCount(-1);
     };
 
-
     /*
     Called in response to clicking the delete attachment link
 
@@ -598,7 +639,6 @@
       note.find(".note-header").show();
       return note.find(".current-note-edit-form").remove();
     };
-
 
     /*
     Called when clicking on the "reply" button for a diff line.
@@ -618,7 +658,6 @@
       // show the form
       return this.setupDiscussionNoteForm(replyLink, form);
     };
-
 
     /*
     Shows the diff or discussion form and does some setup on it.
@@ -661,7 +700,6 @@
         .addClass("discussion-form js-discussion-note-form");
     };
 
-
     /*
     Called when clicking on the "add a comment" button on the side of a diff line.
 
@@ -670,7 +708,7 @@
      */
 
     Notes.prototype.addDiffNote = function(e) {
-      var $link, addForm, hasNotes, lineType, newForm, nextRow, noteForm, notesContent, replyButton, row, rowCssToAdd, targetContent;
+      var $link, addForm, hasNotes, lineType, newForm, nextRow, noteForm, notesContent, notesContentSelector, replyButton, row, rowCssToAdd, targetContent;
       e.preventDefault();
       $link = $(e.currentTarget);
       row = $link.closest("tr");
@@ -718,7 +756,6 @@
       }
     };
 
-
     /*
     Called in response to "cancel" on a diff note form.
 
@@ -752,7 +789,6 @@
       return this.removeDiscussionNoteForm(form);
     };
 
-
     /*
     Called after an attachment file has been selected.
 
@@ -766,7 +802,6 @@
       filename = $(this).val().replace(/^.*[\\\/]/, "");
       return form.find(".js-attachment-filename").text(filename);
     };
-
 
     /*
     Called when the tab visibility changes
@@ -830,21 +865,32 @@
       }
     };
 
-    Notes.prototype.initTaskList = function() {
-      this.enableTaskList();
-      return $(document).on('tasklist:changed', '.note .js-task-list-container', this.updateTaskList);
-    };
+    Notes.prototype.putEditFormInPlace = function($el) {
+      var $editForm = $(this.getEditFormSelector($el));
+      var $note = $el.closest('.note');
 
-    Notes.prototype.enableTaskList = function() {
-      return $('.note .js-task-list-container').taskList('enable');
-    };
+      $editForm.insertAfter($note.find('.note-text'));
 
-    Notes.prototype.updateTaskList = function() {
-      return $('form', this).submit();
+      var $originalContentEl = $note.find('.original-note-content');
+      var originalContent = $originalContentEl.text().trim();
+      var postUrl = $originalContentEl.data('post-url');
+      var targetId = $originalContentEl.data('target-id');
+      var targetType = $originalContentEl.data('target-type');
+
+      new gl.GLForm($editForm.find('form'));
+
+      $editForm.find('form')
+        .attr('action', postUrl)
+        .attr('data-remote', 'true');
+      $editForm.find('.js-form-target-id').val(targetId);
+      $editForm.find('.js-form-target-type').val(targetType);
+      $editForm.find('.js-note-text').focus().val(originalContent);
+      $editForm.find('.js-md-write-button').trigger('click');
+      $editForm.find('.referenced-users').hide();
     };
 
     Notes.prototype.updateNotesCount = function(updateCount) {
-      return this.notesCountBadge.text(parseInt(this.notesCountBadge.text()) + updateCount);
+      return this.notesCountBadge.text(parseInt(this.notesCountBadge.text(), 10) + updateCount);
     };
 
     Notes.prototype.resolveDiscussion = function() {
@@ -859,9 +905,10 @@
     };
 
     Notes.prototype.toggleCommitList = function(e) {
-      const $element = $(e.target);
+      const $element = $(e.currentTarget);
       const $closestSystemCommitList = $element.siblings('.system-note-commit-list');
 
+      $element.find('.fa').toggleClass('fa-angle-down').toggleClass('fa-angle-up');
       $closestSystemCommitList.toggleClass('hide-shade');
     };
 
@@ -889,7 +936,5 @@
     };
 
     return Notes;
-
   })();
-
-}).call(this);
+}).call(window);

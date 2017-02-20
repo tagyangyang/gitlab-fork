@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe API::API, api: true  do
+describe API::DeployKeys, api: true  do
   include ApiHelpers
 
   let(:user)        { create(:user) }
   let(:admin)       { create(:admin) }
-  let(:project)     { create(:project, creator_id: user.id) }
-  let(:project2)    { create(:project, creator_id: user.id) }
+  let(:project)     { create(:empty_project, creator_id: user.id) }
+  let(:project2)    { create(:empty_project, creator_id: user.id) }
   let(:deploy_key)  { create(:deploy_key, public: true) }
 
   let!(:deploy_keys_project) do
@@ -35,6 +35,7 @@ describe API::API, api: true  do
         get api('/deploy_keys', admin)
 
         expect(response.status).to eq(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.first['id']).to eq(deploy_keys_project.deploy_key.id)
       end
@@ -48,6 +49,7 @@ describe API::API, api: true  do
       get api("/projects/#{project.id}/deploy_keys", admin)
 
       expect(response).to have_http_status(200)
+      expect(response).to include_pagination_headers
       expect(json_response).to be_an Array
       expect(json_response.first['title']).to eq(deploy_key.title)
     end
@@ -73,21 +75,14 @@ describe API::API, api: true  do
       post api("/projects/#{project.id}/deploy_keys", admin), { title: 'invalid key' }
 
       expect(response).to have_http_status(400)
-      expect(json_response['message']['key']).to eq([
-        'can\'t be blank',
-        'is too short (minimum is 0 characters)',
-        'is invalid'
-      ])
+      expect(json_response['error']).to eq('key is missing')
     end
 
     it 'should not create a key without title' do
       post api("/projects/#{project.id}/deploy_keys", admin), key: 'some key'
 
       expect(response).to have_http_status(400)
-      expect(json_response['message']['title']).to eq([
-        'can\'t be blank',
-        'is too short (minimum is 0 characters)'
-      ])
+      expect(json_response['error']).to eq('title is missing')
     end
 
     it 'should create new ssh key' do

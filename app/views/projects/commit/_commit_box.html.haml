@@ -1,13 +1,7 @@
 .page-content-header
   .header-main-content
-    %strong Commit
-    %strong.monospace.js-details-short= @commit.short_id
-    = link_to("#", class: "js-details-expand hidden-xs hidden-sm") do
-      %span.text-expander
-        \...
-    %span.js-details-content.hide
-      %strong.monospace.commit-hash-full= @commit.id
-    = clipboard_button(clipboard_text: @commit.id)
+    %strong Commit #{@commit.short_id}
+    = clipboard_button(clipboard_text: @commit.id, title: "Copy commit SHA to clipboard")
     %span.hidden-xs authored
     #{time_ago_with_tooltip(@commit.authored_date)}
     %span by
@@ -68,10 +62,11 @@
 
   - if @commit.status
     .well-segment.pipeline-info
-      .icon-container
-        = ci_icon_for_status(@commit.status)
+      %div{ class: "icon-container ci-status-icon-#{@commit.status}" }
+        = link_to namespace_project_pipeline_path(@project.namespace, @project, @commit.pipelines.last.id) do
+          = ci_icon_for_status(@commit.status)
       Pipeline
-      = link_to "##{@commit.pipelines.last.id}", pipelines_namespace_project_commit_path(@project.namespace, @project, @commit.id), class: "monospace"
+      = link_to "##{@commit.pipelines.last.id}", namespace_project_pipeline_path(@project.namespace, @project, @commit.pipelines.last.id), class: "monospace"
       for
       = link_to @commit.short_id, namespace_project_commit_path(@project.namespace, @project, @commit), class: "monospace"
       %span.ci-status-label

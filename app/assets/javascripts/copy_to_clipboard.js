@@ -1,12 +1,13 @@
-/* eslint-disable func-names, space-before-function-paren, one-var, no-var, one-var-declaration-per-line, no-undef, prefer-template, quotes, no-unused-vars, prefer-arrow-callback, padded-blocks, max-len */
+/* eslint-disable func-names, space-before-function-paren, one-var, no-var, one-var-declaration-per-line, prefer-template, quotes, no-unused-vars, prefer-arrow-callback, max-len */
+/* global Clipboard */
 
-/*= require clipboard */
+window.Clipboard = require('vendor/clipboard');
 
 (function() {
   var genericError, genericSuccess, showTooltip;
 
   genericSuccess = function(e) {
-    showTooltip(e.trigger, 'Copied!');
+    showTooltip(e.trigger, 'Copied');
     // Clear the selection and blur the trigger so it loses its border
     e.clearSelection();
     return $(e.trigger).blur();
@@ -31,7 +32,7 @@
     var originalTitle = $target.data('original-title');
 
     $target
-      .attr('title', 'Copied!')
+      .attr('title', 'Copied')
       .tooltip('fixTitle')
       .tooltip('show')
       .attr('title', originalTitle)
@@ -45,5 +46,4 @@
     clipboard.on('success', genericSuccess);
     return clipboard.on('error', genericError);
   });
-
-}).call(this);
+}).call(window);

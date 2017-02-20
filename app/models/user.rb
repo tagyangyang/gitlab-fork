@@ -21,7 +21,6 @@ class User < ActiveRecord::Base
   default_value_for :can_create_team, false
   default_value_for :hide_no_ssh_key, false
   default_value_for :hide_no_password, false
-  default_value_for :theme_id, gitlab_config.default_theme
 
   attr_encrypted :otp_secret,
     key:       Gitlab::Application.secrets.otp_key_base,
@@ -51,7 +50,12 @@ class User < ActiveRecord::Base
   has_one :namespace, -> { where type: nil }, dependent: :destroy, foreign_key: :owner_id
 
   # Profile
-  has_many :keys, dependent: :destroy
+  has_many :keys, -> do
+    type = Key.arel_table[:type]
+    where(type.not_eq('DeployKey').or(type.eq(nil)))
+  end, dependent: :destroy
+  has_many :deploy_keys, -> { where(type: 'DeployKey') }, dependent: :destroy
+
   has_many :emails, dependent: :destroy
   has_many :personal_access_tokens, dependent: :destroy
   has_many :identities, dependent: :destroy, autosave: true
@@ -73,7 +77,7 @@ class User < ActiveRecord::Base
   has_many :created_projects,         foreign_key: :creator_id, class_name: 'Project'
   has_many :users_star_projects, dependent: :destroy
   has_many :starred_projects, through: :users_star_projects, source: :project
-  has_many :project_authorizations, dependent: :destroy
+  has_many :project_authorizations
   has_many :authorized_projects, through: :project_authorizations, source: :project
 
   has_many :snippets,                 dependent: :destroy, foreign_key: :author_id
@@ -83,8 +87,6 @@ class User < ActiveRecord::Base
   has_many :events,                   dependent: :destroy, foreign_key: :author_id
   has_many :subscriptions,            dependent: :destroy
   has_many :recent_events, -> { order "id DESC" }, foreign_key: :author_id,   class_name: "Event"
-  has_many :assigned_issues,          dependent: :destroy, foreign_key: :assignee_id, class_name: "Issue"
-  has_many :assigned_merge_requests,  dependent: :destroy, foreign_key: :assignee_id, class_name: "MergeRequest"
   has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner, dependent: :destroy
   has_one  :abuse_report,             dependent: :destroy
   has_many :spam_logs,                dependent: :destroy
@@ -94,11 +96,15 @@ class User < ActiveRecord::Base
   has_many :notification_settings,    dependent: :destroy
   has_many :award_emoji,              dependent: :destroy
 
+  has_many :assigned_issues,          dependent: :nullify, foreign_key: :assignee_id, class_name: "Issue"
+  has_many :assigned_merge_requests,  dependent: :nullify, foreign_key: :assignee_id, class_name: "MergeRequest"
+
   #
   # Validations
   #
   # Note: devise :validatable above adds validations for :email and :password
   validates :name, presence: true
+  validates_confirmation_of :email
   validates :notification_email, presence: true
   validates :notification_email, email: true, if: ->(user) { user.notification_email != user.email }
   validates :public_email, presence: true, uniqueness: true, email: true, allow_blank: true
@@ -117,7 +123,7 @@ class User < ActiveRecord::Base
   validates :avatar, file_size: { maximum: 200.kilobytes.to_i }
 
   before_validation :generate_password, on: :create
-  before_validation :signup_domain_valid?, on: :create
+  before_validation :signup_domain_valid?, on: :create, if: ->(user) { !user.created_by_id }
   before_validation :sanitize_attrs
   before_validation :set_notification_email, if: ->(user) { user.email_changed? }
   before_validation :set_public_email, if: ->(user) { user.public_email_changed? }
@@ -165,6 +171,15 @@ class User < ActiveRecord::Base
       def blocked?
         true
       end
+
+      def active_for_authentication?
+        false
+      end
+
+      def inactive_message
+        "Your account has been blocked. Please contact your GitLab " \
+          "administrator if you think this is an error."
+      end
     end
   end
 
@@ -178,6 +193,8 @@ class User < ActiveRecord::Base
   scope :not_in_project, ->(project) { project.users.present? ? where("id not in (:ids)", ids: project.users.map(&:id) ) : all }
   scope :without_projects, -> { where('id NOT IN (SELECT DISTINCT(user_id) FROM members WHERE user_id IS NOT NULL AND requested_at IS NULL)') }
   scope :todo_authors, ->(user_id, state) { where(id: Todo.where(user_id: user_id, state: state).select(:author_id)) }
+  scope :order_recent_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('last_sign_in_at', 'DESC')) }
+  scope :order_oldest_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('last_sign_in_at', 'ASC')) }
 
   def self.with_two_factor
     joins("LEFT OUTER JOIN u2f_registrations AS u2f ON u2f.user_id = users.id").
@@ -205,8 +222,8 @@ class User < ActiveRecord::Base
 
     def sort(method)
       case method.to_s
-      when 'recent_sign_in' then reorder(last_sign_in_at: :desc)
-      when 'oldest_sign_in' then reorder(last_sign_in_at: :asc)
+      when 'recent_sign_in' then order_recent_sign_in
+      when 'oldest_sign_in' then order_oldest_sign_in
       else
         order_by(method)
       end
@@ -291,26 +308,22 @@ class User < ActiveRecord::Base
       end
     end
 
+    def find_by_username(username)
+      iwhere(username: username).take
+    end
+
     def find_by_username!(username)
-      find_by!('lower(username) = ?', username.downcase)
+      iwhere(username: username).take!
     end
 
     def find_by_personal_access_token(token_string)
       personal_access_token = PersonalAccessToken.active.find_by_token(token_string) if token_string
-      personal_access_token.user if personal_access_token
-    end
-
-    def by_username_or_id(name_or_id)
-      find_by('users.username = ? OR users.id = ?', name_or_id.to_s, name_or_id.to_i)
+      personal_access_token&.user
     end
 
     # Returns a user for the given SSH key.
     def find_by_ssh_key_id(key_id)
       find_by(id: Key.unscoped.select(:user_id).where(id: key_id))
-    end
-
-    def build_user(attrs = {})
-      User.new(attrs)
     end
 
     def reference_prefix
@@ -321,7 +334,7 @@ class User < ActiveRecord::Base
     def reference_pattern
       %r{
         #{Regexp.escape(reference_prefix)}
-        (?<user>#{Gitlab::Regex::NAMESPACE_REGEX_STR})
+        (?<user>#{Gitlab::Regex::NAMESPACE_REF_REGEX_STR})
       }x
     end
   end
@@ -334,7 +347,7 @@ class User < ActiveRecord::Base
     username
   end
 
-  def to_reference(_from_project = nil, _target_project = nil)
+  def to_reference(_from_project = nil, target_project: nil, full: nil)
     "#{self.class.reference_prefix}#{username}"
   end
 
@@ -390,7 +403,7 @@ class User < ActiveRecord::Base
   def namespace_uniq
     # Return early if username already failed the first uniqueness validation
     return if errors.key?(:username) &&
-      errors[:username].include?('has already been taken')
+        errors[:username].include?('has already been taken')
 
     existing_namespace = Namespace.by_path(username)
     if existing_namespace && existing_namespace != namespace
@@ -440,29 +453,26 @@ class User < ActiveRecord::Base
     Group.where("namespaces.id IN (#{union.to_sql})")
   end
 
+  def nested_groups
+    Group.member_descendants(id)
+  end
+
+  def nested_projects
+    Project.joins(:namespace).where('namespaces.parent_id IS NOT NULL').
+      member_descendants(id)
+  end
+
   def refresh_authorized_projects
-    loop do
-      begin
-        Gitlab::Database.serialized_transaction do
-          project_authorizations.delete_all
+    Users::RefreshAuthorizedProjectsService.new(self).execute
+  end
 
-          # project_authorizations_union can return multiple records for the same project/user with
-          # different access_level so we take row with the maximum access_level
-          project_authorizations.connection.execute <<-SQL
-            INSERT INTO project_authorizations (user_id, project_id, access_level)
-            SELECT user_id, project_id, MAX(access_level) AS access_level
-            FROM (#{project_authorizations_union.to_sql}) sub
-            GROUP BY user_id, project_id
-          SQL
+  def remove_project_authorizations(project_ids)
+    project_authorizations.where(project_id: project_ids).delete_all
+  end
 
-          update_column(:authorized_projects_populated, true) unless authorized_projects_populated
-        end
-
-        break
-      # In the event of a concurrent modification Rails raises StatementInvalid.
-      # In this case we want to keep retrying until the transaction succeeds
-      rescue ActiveRecord::StatementInvalid
-      end
+  def set_authorized_projects_column
+    unless authorized_projects_populated
+      update_column(:authorized_projects_populated, true)
     end
   end
 
@@ -514,7 +524,7 @@ class User < ActiveRecord::Base
   end
 
   def require_ssh_key?
-    keys.count == 0
+    keys.count == 0 && Gitlab::ProtocolAccess.allowed?('ssh')
   end
 
   def require_password?
@@ -702,20 +712,6 @@ class User < ActiveRecord::Base
   def can_leave_project?(project)
     project.namespace != namespace &&
       project.project_member(self)
-  end
-
-  # Reset project events cache related to this user
-  #
-  # Since we do cache @event we need to reset cache in special cases:
-  # * when the user changes their avatar
-  # Events cache stored like  events/23-20130109142513.
-  # The cache key includes updated_at timestamp.
-  # Thus it will automatically generate a new fragment
-  # when the event is updated because the key changes.
-  def reset_events_cache
-    Event.where(author_id: id).
-      order('id DESC').limit(1000).
-      update_all(updated_at: Time.now)
   end
 
   def full_website_url
@@ -921,19 +917,22 @@ class User < ActiveRecord::Base
     end
   end
 
-  private
-
-  # Returns a union query of projects that the user is authorized to access
-  def project_authorizations_union
-    relations = [
-      personal_projects.select("#{id} AS user_id, projects.id AS project_id, #{Gitlab::Access::OWNER} AS access_level"),
-      groups_projects.select_for_project_authorization,
-      projects.select_for_project_authorization,
-      groups.joins(:shared_projects).select_for_project_authorization
-    ]
-
-    Gitlab::SQL::Union.new(relations)
+  def access_level
+    if admin?
+      :admin
+    else
+      :regular
+    end
   end
+
+  def access_level=(new_level)
+    new_level = new_level.to_s
+    return unless %w(admin regular).include?(new_level)
+
+    self.admin = (new_level == 'admin')
+  end
+
+  private
 
   def ci_projects_union
     scope  = { access_level: [Gitlab::Access::MASTER, Gitlab::Access::OWNER] }

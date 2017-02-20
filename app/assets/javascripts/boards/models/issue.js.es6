@@ -1,12 +1,20 @@
-/* eslint-disable */
+/* eslint-disable no-unused-vars, space-before-function-paren, arrow-body-style, arrow-parens, comma-dangle, max-len */
+/* global Vue */
+/* global ListLabel */
+/* global ListMilestone */
+/* global ListUser */
+
 class ListIssue {
   constructor (obj) {
+    this.globalId = obj.id;
     this.id = obj.iid;
     this.title = obj.title;
     this.confidential = obj.confidential;
     this.dueDate = obj.due_date;
     this.subscribed = obj.subscribed;
     this.labels = [];
+    this.selected = false;
+    this.assignee = false;
 
     if (obj.assignee) {
       this.assignee = new ListUser(obj.assignee);
@@ -32,12 +40,12 @@ class ListIssue {
   }
 
   findLabel (findLabel) {
-    return this.labels.filter( label => label.title === findLabel.title )[0];
+    return this.labels.filter(label => label.title === findLabel.title)[0];
   }
 
   removeLabel (removeLabel) {
     if (removeLabel) {
-      this.labels = this.labels.filter( label => removeLabel.title !== label.title );
+      this.labels = this.labels.filter(label => removeLabel.title !== label.title);
     }
   }
 
@@ -46,7 +54,7 @@ class ListIssue {
   }
 
   getLists () {
-    return gl.issueBoards.BoardsStore.state.lists.filter( list => list.findIssue(this.id) );
+    return gl.issueBoards.BoardsStore.state.lists.filter(list => list.findIssue(this.id));
   }
 
   update (url) {
@@ -55,7 +63,7 @@ class ListIssue {
         milestone_id: this.milestone ? this.milestone.id : null,
         due_date: this.dueDate,
         assignee_id: this.assignee ? this.assignee.id : null,
-        label_ids: this.labels.map( (label) => label.id )
+        label_ids: this.labels.map((label) => label.id)
       }
     };
 
@@ -66,3 +74,5 @@ class ListIssue {
     return Vue.http.patch(url, data);
   }
 }
+
+window.ListIssue = ListIssue;

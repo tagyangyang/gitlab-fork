@@ -1,6 +1,9 @@
-/* eslint-disable */
-//= require ./board_card
-//= require ./board_new_issue
+/* eslint-disable comma-dangle, space-before-function-paren, max-len */
+/* global Vue */
+/* global Sortable */
+
+require('./board_card');
+require('./board_new_issue');
 
 (() => {
   const Store = gl.issueBoards.BoardsStore;
@@ -20,6 +23,7 @@
       issues: Array,
       loading: Boolean,
       issueLinkBase: String,
+      rootPath: String,
     },
     data () {
       return {
@@ -40,7 +44,7 @@
       issues () {
         this.$nextTick(() => {
           if (this.scrollHeight() <= this.listHeight() && this.list.issuesSize > this.list.issues.length) {
-            this.list.page++;
+            this.list.page += 1;
             this.list.getIssues(false);
           }
 
@@ -80,6 +84,7 @@
     },
     mounted () {
       const options = gl.issueBoards.getBoardSortableDefaultOptions({
+        scroll: document.querySelectorAll('.boards-list')[0],
         group: 'issues',
         sort: false,
         disabled: this.disabled,
@@ -88,18 +93,16 @@
           const card = this.$refs.issue[e.oldIndex];
 
           card.showDetail = false;
-          Store.moving.issue = card.issue;
           Store.moving.list = card.list;
+          Store.moving.issue = Store.moving.list.findIssue(+e.item.dataset.issueId);
 
           gl.issueBoards.onStart();
         },
         onAdd: (e) => {
-          // Add the element back to original list to allow Vue to handle DOM updates
-          e.from.appendChild(e.item);
+          gl.issueBoards.BoardsStore.moveIssueToList(Store.moving.list, this.list, Store.moving.issue, e.newIndex);
 
           this.$nextTick(() => {
-            // Update the issues once we know the element has been moved
-            gl.issueBoards.BoardsStore.moveIssueToList(Store.moving.list, this.list, Store.moving.issue);
+            e.item.remove();
           });
         },
       });

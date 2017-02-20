@@ -1,9 +1,12 @@
 module Notes
   class CreateService < BaseService
     def execute
-      note = project.notes.new(params)
-      note.author = current_user
-      note.system = false
+      merge_request_diff_head_sha = params.delete(:merge_request_diff_head_sha)
+
+      note = Note.new(params)
+      note.project = project
+      note.author  = current_user
+      note.system  = false
 
       if note.award_emoji?
         noteable = note.noteable
@@ -19,7 +22,8 @@ module Notes
       slash_commands_service = SlashCommandsService.new(project, current_user)
 
       if slash_commands_service.supported?(note)
-        content, command_params = slash_commands_service.extract_commands(note)
+        options = { merge_request_diff_head_sha: merge_request_diff_head_sha }
+        content, command_params = slash_commands_service.extract_commands(note, options)
 
         only_commands = content.empty?
 
@@ -41,8 +45,10 @@ module Notes
         # We must add the error after we call #save because errors are reset
         # when #save is called
         if only_commands
-          note.errors.add(:commands_only, 'Your commands have been executed!')
+          note.errors.add(:commands_only, 'Commands applied')
         end
+
+        note.commands_changes = command_params.keys
       end
 
       note

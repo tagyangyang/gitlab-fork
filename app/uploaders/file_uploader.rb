@@ -1,4 +1,4 @@
-class FileUploader < CarrierWave::Uploader::Base
+class FileUploader < GitlabUploader
   include UploaderHelper
   MARKDOWN_PATTERN = %r{\!?\[.*?\]\(/uploads/(?<secret>[0-9a-f]{32})/(?<file>.*?)\)}
 
@@ -36,7 +36,7 @@ class FileUploader < CarrierWave::Uploader::Base
     escaped_filename = filename.gsub("]", "\\]")
 
     markdown = "[#{escaped_filename}](#{self.secure_url})"
-    markdown.prepend("!") if image_or_video?
+    markdown.prepend("!") if image_or_video? || dangerous?
 
     {
       alt:      filename,

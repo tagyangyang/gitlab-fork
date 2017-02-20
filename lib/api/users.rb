@@ -1,7 +1,11 @@
 module API
-  # Users API
   class Users < Grape::API
-    before { authenticate! }
+    include PaginationParams
+
+    before do
+      allow_access_with_scope :read_user if request.get?
+      authenticate!
+    end
 
     resource :users, requirements: { uid: /[0-9]*/, id: /[0-9]*/ } do
       helpers do
@@ -12,7 +16,7 @@ module API
           optional :website_url, type: String, desc: 'The website of the user'
           optional :organization, type: String, desc: 'The organization of the user'
           optional :projects_limit, type: Integer, desc: 'The number of projects a user can create'
-          optional :extern_uid, type: Integer, desc: 'The external authentication provider UID'
+          optional :extern_uid, type: String, desc: 'The external authentication provider UID'
           optional :provider, type: String, desc: 'The external provider'
           optional :bio, type: String, desc: 'The biography of the user'
           optional :location, type: String, desc: 'The location of the user'
@@ -33,6 +37,7 @@ module API
         optional :active, type: Boolean, default: false, desc: 'Filters only active users'
         optional :external, type: Boolean, default: false, desc: 'Filters only external users'
         optional :blocked, type: Boolean, default: false, desc: 'Filters only blocked users'
+        use :pagination
       end
       get do
         unless can?(current_user, :read_users_list, nil)
@@ -49,7 +54,7 @@ module API
           users = users.external if params[:external] && current_user.is_admin?
         end
 
-        entity = current_user.is_admin? ? Entities::UserFull : Entities::UserBasic
+        entity = current_user.is_admin? ? Entities::UserPublic : Entities::UserBasic
         present paginate(users), with: entity
       end
 
@@ -64,7 +69,7 @@ module API
         not_found!('User') unless user
 
         if current_user && current_user.is_admin?
-          present user, with: Entities::UserFull
+          present user, with: Entities::UserPublic
         elsif can?(current_user, :read_user, user)
           present user, with: Entities::User
         else
@@ -73,11 +78,13 @@ module API
       end
 
       desc 'Create a user. Available only for admins.' do
-        success Entities::UserFull
+        success Entities::UserPublic
       end
       params do
         requires :email, type: String, desc: 'The email of the user'
-        requires :password, type: String, desc: 'The password of the new user'
+        optional :password, type: String, desc: 'The password of the new user'
+        optional :reset_password, type: Boolean, desc: 'Flag indicating the user will be sent a password reset token'
+        at_least_one_of :password, :reset_password
         requires :name, type: String, desc: 'The name of the user'
         requires :username, type: String, desc: 'The username of the user'
         use :optional_attributes
@@ -86,10 +93,21 @@ module API
         authenticated_as_admin!
 
         # Filter out params which are used later
-        identity_attrs = params.slice(:provider, :extern_uid)
-        confirm = params.delete(:confirm)
+        user_params = declared_params(include_missing: false)
+        identity_attrs = user_params.slice(:provider, :extern_uid)
+        confirm = user_params.delete(:confirm)
+        user = User.new(user_params.except(:extern_uid, :provider, :reset_password))
 
-        user = User.build_user(declared_params(include_missing: false))
+        if user_params.delete(:reset_password)
+          user.attributes = {
+            force_random_password: true,
+            password_expires_at: nil,
+            created_by_id: current_user.id
+          }
+          user.generate_password
+          user.generate_reset_token
+        end
+
         user.skip_confirmation! unless confirm
 
         if identity_attrs.any?
@@ -97,7 +115,7 @@ module API
         end
 
         if user.save
-          present user, with: Entities::UserFull
+          present user, with: Entities::UserPublic
         else
           conflict!('Email has already been taken') if User.
               where(email: user.email).
@@ -112,7 +130,7 @@ module API
       end
 
       desc 'Update a user. Available only for admins.' do
-        success Entities::UserFull
+        success Entities::UserPublic
       end
       params do
         requires :id, type: Integer, desc: 'The ID of the user'
@@ -140,7 +158,8 @@ module API
             User.where(username: params[:username]).
                 where.not(id: user.id).count > 0
 
-        identity_attrs = params.slice(:provider, :extern_uid)
+        user_params = declared_params(include_missing: false)
+        identity_attrs = user_params.slice(:provider, :extern_uid)
 
         if identity_attrs.any?
           identity = user.identities.find_by(provider: identity_attrs[:provider])
@@ -153,12 +172,10 @@ module API
           end
         end
 
-        # Delete already handled parameters
-        params.delete(:extern_uid)
-        params.delete(:provider)
+        user_params.merge!(password_expires_at: Time.now) if user_params[:password].present?
 
-        if user.update_attributes(declared_params(include_missing: false))
-          present user, with: Entities::UserFull
+        if user.update_attributes(user_params.except(:extern_uid, :provider))
+          present user, with: Entities::UserPublic
         else
           render_validation_error!(user)
         end
@@ -192,6 +209,7 @@ module API
       end
       params do
         requires :id, type: Integer, desc: 'The ID of the user'
+        use :pagination
       end
       get ':id/keys' do
         authenticated_as_admin!
@@ -199,7 +217,7 @@ module API
         user = User.find_by(id: params[:id])
         not_found!('User') unless user
 
-        present user.keys, with: Entities::SSHKey
+        present paginate(user.keys), with: Entities::SSHKey
       end
 
       desc 'Delete an existing SSH key from a specified user. Available only for admins.' do
@@ -249,13 +267,14 @@ module API
       end
       params do
         requires :id, type: Integer, desc: 'The ID of the user'
+        use :pagination
       end
       get ':id/emails' do
         authenticated_as_admin!
         user = User.find_by(id: params[:id])
         not_found!('User') unless user
 
-        present user.emails, with: Entities::Email
+        present paginate(user.emails), with: Entities::Email
       end
 
       desc 'Delete an email address of a specified user. Available only for admins.' do
@@ -288,7 +307,7 @@ module API
         user = User.find_by(id: params[:id])
         not_found!('User') unless user
 
-        DeleteUserService.new(current_user).execute(user)
+        ::Users::DestroyService.new(current_user).execute(user)
       end
 
       desc 'Block a user. Available only for admins.'
@@ -329,6 +348,7 @@ module API
       end
       params do
         requires :id, type: Integer, desc: 'The ID of the user'
+        use :pagination
       end
       get ':id/events' do
         user = User.find_by(id: params[:id])
@@ -346,17 +366,20 @@ module API
 
     resource :user do
       desc 'Get the currently authenticated user' do
-        success Entities::UserFull
+        success Entities::UserPublic
       end
       get do
-        present current_user, with: Entities::UserFull
+        present current_user, with: sudo? ? Entities::UserWithPrivateToken : Entities::UserPublic
       end
 
       desc "Get the currently authenticated user's SSH keys" do
         success Entities::SSHKey
       end
+      params do
+        use :pagination
+      end
       get "keys" do
-        present current_user.keys, with: Entities::SSHKey
+        present paginate(current_user.keys), with: Entities::SSHKey
       end
 
       desc 'Get a single key owned by currently authenticated user' do
@@ -405,8 +428,11 @@ module API
       desc "Get the currently authenticated user's email addresses" do
         success Entities::Email
       end
+      params do
+        use :pagination
+      end
       get "emails" do
-        present current_user.emails, with: Entities::Email
+        present paginate(current_user.emails), with: Entities::Email
       end
 
       desc 'Get a single email address owned by the currently authenticated user' do

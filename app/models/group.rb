@@ -48,7 +48,13 @@ class Group < Namespace
     end
 
     def sort(method)
-      order_by(method)
+      if method == 'storage_size_desc'
+        # storage_size is a virtual column so we need to
+        # pass a string to avoid AR adding the table name
+        reorder('storage_size DESC, namespaces.id DESC')
+      else
+        order_by(method)
+      end
     end
 
     def reference_prefix
@@ -65,15 +71,17 @@ class Group < Namespace
 
     def select_for_project_authorization
       if current_scope.joins_values.include?(:shared_projects)
-        select("members.user_id, projects.id AS project_id, project_group_links.group_access")
+        joins('INNER JOIN namespaces project_namespace ON project_namespace.id = projects.namespace_id')
+          .where('project_namespace.share_with_group_lock = ?',  false)
+          .select("members.user_id, projects.id AS project_id, LEAST(project_group_links.group_access, members.access_level) AS access_level")
       else
         super
       end
     end
   end
 
-  def to_reference(_from_project = nil)
-    "#{self.class.reference_prefix}#{name}"
+  def to_reference(_from_project = nil, full: nil)
+    "#{self.class.reference_prefix}#{full_path}"
   end
 
   def web_url
@@ -81,7 +89,7 @@ class Group < Namespace
   end
 
   def human_name
-    name
+    full_name
   end
 
   def visibility_level_field
@@ -153,15 +161,17 @@ class Group < Namespace
   end
 
   def has_owner?(user)
-    owners.include?(user)
+    members_with_parents.owners.where(user_id: user).any?
   end
 
   def has_master?(user)
-    members.masters.where(user_id: user).any?
+    members_with_parents.masters.where(user_id: user).any?
   end
 
+  # Check if user is a last owner of the group.
+  # Parent owners are ignored for nested groups.
   def last_owner?(user)
-    has_owner?(user) && owners.size == 1
+    owners.include?(user) && owners.size == 1
   end
 
   def avatar_type
@@ -187,6 +197,19 @@ class Group < Namespace
   end
 
   def refresh_members_authorized_projects
-    UserProjectAccessChangedService.new(users.pluck(:id)).execute
+    UserProjectAccessChangedService.new(user_ids_for_project_authorizations).
+      execute
+  end
+
+  def user_ids_for_project_authorizations
+    users_with_parents.pluck(:id)
+  end
+
+  def members_with_parents
+    GroupMember.non_request.where(source_id: ancestors.map(&:id).push(id))
+  end
+
+  def users_with_parents
+    User.where(id: members_with_parents.select(:user_id))
   end
 end

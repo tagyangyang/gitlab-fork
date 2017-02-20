@@ -29,7 +29,7 @@ namespace :gitlab do
             next
           end
 
-          project = Project.find_with_namespace(path)
+          project = Project.find_by_full_path(path)
 
           if project
             puts " * #{project.name} (#{repo_path}) exists"
@@ -63,8 +63,7 @@ namespace :gitlab do
 
             if project.persisted?
               puts " * Created #{project.name} (#{repo_path})".color(:green)
-              project.update_repository_size
-              project.update_commit_count
+              ProjectCacheWorker.perform_async(project.id)
             else
               puts " * Failed trying to create #{project.name} (#{repo_path})".color(:red)
               puts "   Errors: #{project.errors.messages}".color(:red)

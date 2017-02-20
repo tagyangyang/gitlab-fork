@@ -1,4 +1,5 @@
-/* eslint-disable */
+/* eslint-disable comma-dangle, no-unused-vars */
+
 class ProtectedBranchDropdown {
   constructor(options) {
     this.onSelect = options.onSelect;
@@ -48,7 +49,7 @@ class ProtectedBranchDropdown {
   onClickCreateWildcard() {
     // Refresh the dropdown's data, which ends up calling `getProtectedBranches`
     this.$dropdown.data('glDropdown').remote.execute();
-    this.$dropdown.data('glDropdown').selectRowAtIndex(0);
+    this.$dropdown.data('glDropdown').selectRowAtIndex();
   }
 
   getProtectedBranches(term, callback) {
@@ -75,3 +76,5 @@ class ProtectedBranchDropdown {
     this.$dropdownFooter.toggleClass('hidden', !branchName);
   }
 }
+
+window.ProtectedBranchDropdown = ProtectedBranchDropdown;

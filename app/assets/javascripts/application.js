@@ -1,88 +1,76 @@
-/* eslint-disable func-names, space-before-function-paren, no-var, no-undef, quotes, consistent-return, prefer-arrow-callback, comma-dangle, object-shorthand, no-new, max-len */
-// This is a manifest file that'll be compiled into including all the files listed below.
-// Add new JavaScript code in separate files in this directory and they'll automatically
-// be included in the compiled file accessible from http://example.com/assets/application.js
-// It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
-// the compiled file.
-//
-/*= require jquery2 */
-/*= require jquery-ui/autocomplete */
-/*= require jquery-ui/datepicker */
-/*= require jquery-ui/draggable */
-/*= require jquery-ui/effect-highlight */
-/*= require jquery-ui/sortable */
-/*= require jquery_ujs */
-/*= require jquery.endless-scroll */
-/*= require jquery.highlight */
-/*= require jquery.waitforimages */
-/*= require jquery.atwho */
-/*= require jquery.scrollTo */
-/*= require jquery.turbolinks */
-/*= require js.cookie */
-/*= require turbolinks */
-/*= require autosave */
-/*= require bootstrap/affix */
-/*= require bootstrap/alert */
-/*= require bootstrap/button */
-/*= require bootstrap/collapse */
-/*= require bootstrap/dropdown */
-/*= require bootstrap/modal */
-/*= require bootstrap/scrollspy */
-/*= require bootstrap/tab */
-/*= require bootstrap/transition */
-/*= require bootstrap/tooltip */
-/*= require bootstrap/popover */
-/*= require select2 */
-/*= require underscore */
-/*= require dropzone */
-/*= require mousetrap */
-/*= require mousetrap/pause */
-/*= require shortcuts */
-/*= require shortcuts_navigation */
-/*= require shortcuts_dashboard_navigation */
-/*= require shortcuts_issuable */
-/*= require shortcuts_network */
-/*= require jquery.nicescroll */
-/*= require date.format */
-/*= require_directory ./behaviors */
-/*= require_directory ./blob */
-/*= require_directory ./templates */
-/*= require_directory ./commit */
-/*= require_directory ./extensions */
-/*= require_directory ./lib/utils */
-/*= require_directory ./u2f */
-/*= require_directory . */
-/*= require fuzzaldrin-plus */
-/*= require es6-promise.auto */
+/* eslint-disable func-names, space-before-function-paren, no-var, quotes, consistent-return, prefer-arrow-callback, comma-dangle, object-shorthand, no-new, max-len, no-multi-spaces, import/newline-after-import */
+/* global bp */
+/* global Cookies */
+/* global Flash */
+/* global ConfirmDangerModal */
+/* global AwardsHandler */
+/* global Aside */
+
+function requireAll(context) { return context.keys().map(context); }
+
+window.$ = window.jQuery = require('jquery');
+require('jquery-ui/ui/autocomplete');
+require('jquery-ui/ui/draggable');
+require('jquery-ui/ui/effect-highlight');
+require('jquery-ui/ui/sortable');
+require('jquery-ujs');
+require('vendor/jquery.endless-scroll');
+require('vendor/jquery.highlight');
+require('vendor/jquery.waitforimages');
+require('vendor/jquery.caret');
+require('vendor/jquery.atwho');
+require('vendor/jquery.scrollTo');
+window.Cookies = require('js-cookie');
+require('./autosave');
+require('bootstrap/js/affix');
+require('bootstrap/js/alert');
+require('bootstrap/js/button');
+require('bootstrap/js/collapse');
+require('bootstrap/js/dropdown');
+require('bootstrap/js/modal');
+require('bootstrap/js/scrollspy');
+require('bootstrap/js/tab');
+require('bootstrap/js/transition');
+require('bootstrap/js/tooltip');
+require('bootstrap/js/popover');
+require('select2/select2.js');
+window.Pikaday = require('pikaday');
+window._ = require('underscore');
+window.Dropzone = require('dropzone');
+window.Sortable = require('vendor/Sortable');
+require('mousetrap');
+require('mousetrap/plugins/pause/mousetrap-pause');
+require('./shortcuts');
+require('./shortcuts_navigation');
+require('./shortcuts_dashboard_navigation');
+require('./shortcuts_issuable');
+require('./shortcuts_network');
+require('vendor/jquery.nicescroll');
+requireAll(require.context('./behaviors',  false, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./blob',       false, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./templates',  false, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./commit',     false, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./extensions', false, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./lib/utils',  false, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./u2f',        false, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./droplab',    false, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('.',            false, /^\.\/(?!application\.js).*\.(js|es6)$/));
+require('vendor/fuzzaldrin-plus');
+require('es6-promise').polyfill();
 
 (function () {
-  document.addEventListener('page:fetch', gl.utils.cleanupBeforeFetch);
-  window.addEventListener('hashchange', gl.utils.shiftWindow);
+  document.addEventListener('beforeunload', function () {
+    // Unbind scroll events
+    $(document).off('scroll');
+    // Close any open tooltips
+    $('.has-tooltip, [data-toggle="tooltip"]').tooltip('destroy');
+  });
 
-  // automatically adjust scroll position for hash urls taking the height of the navbar into account
-  // https://github.com/twitter/bootstrap/issues/1768
-  window.adjustScroll = function() {
-    var navbar = document.querySelector('.navbar-gitlab');
-    var subnav = document.querySelector('.layout-nav');
-    var fixedTabs = document.querySelector('.js-tabs-affix');
-
-    adjustment = 0;
-    if (navbar) adjustment -= navbar.offsetHeight;
-    if (subnav) adjustment -= subnav.offsetHeight;
-    if (fixedTabs) adjustment -= fixedTabs.offsetHeight;
-
-    return scrollBy(0, adjustment);
-  };
-
-  window.addEventListener("hashchange", adjustScroll);
-
-  window.onload = function () {
-    // Scroll the window to avoid the topnav bar
-    // https://github.com/twitter/bootstrap/issues/1768
-    if (location.hash) {
-      return setTimeout(adjustScroll, 100);
-    }
-  };
+  window.addEventListener('hashchange', gl.utils.handleLocationHash);
+  window.addEventListener('load', function onLoad() {
+    window.removeEventListener('load', onLoad, false);
+    gl.utils.handleLocationHash();
+  }, false);
 
   $(function () {
     var $body = $('body');
@@ -91,18 +79,28 @@
     var $sidebarGutterToggle = $('.js-sidebar-toggle');
     var $flash = $('.flash-container');
     var bootstrapBreakpoint = bp.getBreakpointSize();
-    var checkInitialSidebarSize;
     var fitSidebarForSize;
 
     // Set the default path for all cookies to GitLab's root directory
     Cookies.defaults.path = gon.relative_url_root || '/';
 
-    gl.utils.preventDisabledButtons();
-    $('.nav-sidebar').niceScroll({
-      cursoropacitymax: '0.4',
-      cursorcolor: '#FFF',
-      cursorborder: '1px solid #FFF'
+    // `hashchange` is not triggered when link target is already in window.location
+    $body.on('click', 'a[href^="#"]', function() {
+      var href = this.getAttribute('href');
+      if (href.substr(1) === gl.utils.getLocationHash()) {
+        setTimeout(gl.utils.handleLocationHash, 1);
+      }
     });
+
+    // prevent default action for disabled buttons
+    $('.btn').click(function(e) {
+      if ($(this).hasClass('disabled')) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    });
+
     $('.js-select-on-focus').on('focusin', function () {
       return $(this).select().one('mouseup', function (e) {
         return e.preventDefault();
@@ -237,20 +235,12 @@
         return $document.trigger('breakpoint:change', [bootstrapBreakpoint]);
       }
     };
-    checkInitialSidebarSize = function () {
-      bootstrapBreakpoint = bp.getBreakpointSize();
-      if (bootstrapBreakpoint === 'xs' || 'sm') {
-        return $document.trigger('breakpoint:change', [bootstrapBreakpoint]);
-      }
-    };
     $window.off('resize.app').on('resize.app', function () {
       return fitSidebarForSize();
     });
     gl.awardsHandler = new AwardsHandler();
-    checkInitialSidebarSize();
     new Aside();
 
-    // bind sidebar events
-    new gl.Sidebar();
+    gl.utils.initTimeagoTimeout();
   });
-}).call(this);
+}).call(window);

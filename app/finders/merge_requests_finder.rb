@@ -14,19 +14,10 @@
 #     search: string
 #     label_name: string
 #     sort: string
+#     non_archived: boolean
 #
 class MergeRequestsFinder < IssuableFinder
   def klass
     MergeRequest
-  end
-
-  private
-
-  def iid_pattern
-    @iid_pattern ||= %r{\A[
-      #{Regexp.escape(MergeRequest.reference_prefix)}
-      #{Regexp.escape(Issue.reference_prefix)}
-      ](?<iid>\d+)\z
-    }x
   end
 end

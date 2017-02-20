@@ -50,7 +50,7 @@ describe SystemNoteService, services: true do
 
       context 'without existing commits' do
         it 'adds a message header' do
-          expect(note_lines[0]).to eq "Added #{new_commits.size} commits:"
+          expect(note_lines[0]).to eq "added #{new_commits.size} commits"
         end
 
         it 'adds a message line for each commit' do
@@ -120,7 +120,7 @@ describe SystemNoteService, services: true do
 
     context 'when assignee added' do
       it 'sets the note text' do
-        expect(subject.note).to eq "Reassigned to @#{assignee.username}"
+        expect(subject.note).to eq "assigned to @#{assignee.username}"
       end
     end
 
@@ -128,7 +128,7 @@ describe SystemNoteService, services: true do
       let(:assignee) { nil }
 
       it 'sets the note text' do
-        expect(subject.note).to eq 'Assignee removed'
+        expect(subject.note).to eq 'removed assignee'
       end
     end
   end
@@ -147,7 +147,7 @@ describe SystemNoteService, services: true do
       let(:removed) { [] }
 
       it 'sets the note text' do
-        expect(subject.note).to eq "Added ~#{labels[0].id} ~#{labels[1].id} labels"
+        expect(subject.note).to eq "added ~#{labels[0].id} ~#{labels[1].id} labels"
       end
     end
 
@@ -156,7 +156,7 @@ describe SystemNoteService, services: true do
       let(:removed) { labels }
 
       it 'sets the note text' do
-        expect(subject.note).to eq "Removed ~#{labels[0].id} ~#{labels[1].id} labels"
+        expect(subject.note).to eq "removed ~#{labels[0].id} ~#{labels[1].id} labels"
       end
     end
 
@@ -165,7 +165,7 @@ describe SystemNoteService, services: true do
       let(:removed) { [labels[1]] }
 
       it 'sets the note text' do
-        expect(subject.note).to eq "Added ~#{labels[0].id} and removed ~#{labels[1].id} labels"
+        expect(subject.note).to eq "added ~#{labels[0].id} and removed ~#{labels[1].id} labels"
       end
     end
   end
@@ -179,7 +179,7 @@ describe SystemNoteService, services: true do
 
     context 'when milestone added' do
       it 'sets the note text' do
-        expect(subject.note).to eq "Milestone changed to #{milestone.to_reference}"
+        expect(subject.note).to eq "changed milestone to #{milestone.to_reference}"
       end
     end
 
@@ -187,7 +187,7 @@ describe SystemNoteService, services: true do
       let(:milestone) { nil }
 
       it 'sets the note text' do
-        expect(subject.note).to eq 'Milestone removed'
+        expect(subject.note).to eq 'removed milestone'
       end
     end
   end
@@ -204,13 +204,13 @@ describe SystemNoteService, services: true do
       let(:source) { double('commit', gfm_reference: 'commit 123456') }
 
       it 'sets the note text' do
-        expect(subject.note).to eq "Status changed to #{status} by commit 123456"
+        expect(subject.note).to eq "#{status} via commit 123456"
       end
     end
 
     context 'without a source' do
       it 'sets the note text' do
-        expect(subject.note).to eq "Status changed to #{status}"
+        expect(subject.note).to eq status
       end
     end
   end
@@ -225,8 +225,8 @@ describe SystemNoteService, services: true do
 
     it_behaves_like 'a system note'
 
-    it "posts the Merge When Build Succeeds system note" do
-      expect(subject.note).to match  /Enabled an automatic merge when the build for (\w+\/\w+@)?[0-9a-f]{40} succeeds/
+    it "posts the 'merge when pipeline succeeds' system note" do
+      expect(subject.note).to match  /enabled an automatic merge when the pipeline for (\w+\/\w+@)?\h{40} succeeds/
     end
   end
 
@@ -239,12 +239,14 @@ describe SystemNoteService, services: true do
 
     it_behaves_like 'a system note'
 
-    it "posts the Merge When Build Succeeds system note" do
-      expect(subject.note).to eq  "Canceled the automatic merge"
+    it "posts the 'merge when pipeline succeeds' system note" do
+      expect(subject.note).to eq  "canceled the automatic merge"
     end
   end
 
   describe '.change_title' do
+    let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum') }
+
     subject { described_class.change_title(noteable, project, author, 'Old title') }
 
     context 'when noteable responds to `title`' do
@@ -252,7 +254,7 @@ describe SystemNoteService, services: true do
 
       it 'sets the note text' do
         expect(subject.note).
-          to eq "Changed title: **{-Old title-}** → **{+#{noteable.title}+}**"
+          to eq "changed title from **{-Old title-}** to **{+Lorem ipsum+}**"
       end
     end
   end
@@ -264,7 +266,7 @@ describe SystemNoteService, services: true do
       it_behaves_like 'a system note'
 
       it 'sets the note text' do
-        expect(subject.note).to eq 'Made the issue visible'
+        expect(subject.note).to eq 'made the issue visible to everyone'
       end
     end
   end
@@ -278,7 +280,7 @@ describe SystemNoteService, services: true do
 
     context 'when target branch name changed' do
       it 'sets the note text' do
-        expect(subject.note).to eq "Target branch changed from `#{old_branch}` to `#{new_branch}`"
+        expect(subject.note).to eq "changed target branch from `#{old_branch}` to `#{new_branch}`"
       end
     end
   end
@@ -290,7 +292,7 @@ describe SystemNoteService, services: true do
 
     context 'when source branch deleted' do
       it 'sets the note text' do
-        expect(subject.note).to eq "Deleted source branch `feature`"
+        expect(subject.note).to eq "deleted source branch `feature`"
       end
     end
   end
@@ -302,7 +304,7 @@ describe SystemNoteService, services: true do
 
     context 'when a branch is created from the new branch button' do
       it 'sets the note text' do
-        expect(subject.note).to match /\AStarted branch [`1-mepmep`]/
+        expect(subject.note).to match /\Acreated branch [`1-mepmep`]/
       end
     end
   end
@@ -338,13 +340,13 @@ describe SystemNoteService, services: true do
             let(:mentioner) { project2.repository.commit }
 
             it 'references the mentioning commit' do
-              expect(subject.note).to eq "Mentioned in commit #{mentioner.to_reference(project)}"
+              expect(subject.note).to eq "mentioned in commit #{mentioner.to_reference(project)}"
             end
           end
 
           context 'from non-Commit' do
             it 'references the mentioning object' do
-              expect(subject.note).to eq "Mentioned in issue #{mentioner.to_reference(project)}"
+              expect(subject.note).to eq "mentioned in issue #{mentioner.to_reference(project)}"
             end
           end
         end
@@ -354,13 +356,13 @@ describe SystemNoteService, services: true do
             let(:mentioner) { project.repository.commit }
 
             it 'references the mentioning commit' do
-              expect(subject.note).to eq "Mentioned in commit #{mentioner.to_reference}"
+              expect(subject.note).to eq "mentioned in commit #{mentioner.to_reference}"
             end
           end
 
           context 'from non-Commit' do
             it 'references the mentioning object' do
-              expect(subject.note).to eq "Mentioned in issue #{mentioner.to_reference}"
+              expect(subject.note).to eq "mentioned in issue #{mentioner.to_reference}"
             end
           end
         end
@@ -370,7 +372,11 @@ describe SystemNoteService, services: true do
 
   describe '.cross_reference?' do
     it 'is truthy when text begins with expected text' do
-      expect(described_class.cross_reference?('Mentioned in something')).to be_truthy
+      expect(described_class.cross_reference?('mentioned in something')).to be_truthy
+    end
+
+    it 'is truthy when text begins with legacy capitalized expected text' do
+      expect(described_class.cross_reference?('mentioned in something')).to be_truthy
     end
 
     it 'is falsey when text does not begin with expected text' do
@@ -412,6 +418,45 @@ describe SystemNoteService, services: true do
           to be_truthy
       end
     end
+
+    context 'when noteable is an Issue' do
+      let(:issue) { create(:issue, project: project) }
+
+      it 'is truthy when issue is closed' do
+        issue.close
+
+        expect(described_class.cross_reference_disallowed?(issue, project.commit)).
+          to be_truthy
+      end
+
+      it 'is falsey when issue is open' do
+        expect(described_class.cross_reference_disallowed?(issue, project.commit)).
+          to be_falsy
+      end
+    end
+
+    context 'when noteable is a Merge Request' do
+      let(:merge_request) { create(:merge_request, :simple, source_project: project) }
+
+      it 'is truthy when merge request is closed' do
+        allow(merge_request).to receive(:closed?).and_return(:true)
+
+        expect(described_class.cross_reference_disallowed?(merge_request, project.commit)).
+          to be_truthy
+      end
+
+      it 'is truthy when merge request is merged' do
+        allow(merge_request).to receive(:closed?).and_return(:true)
+
+        expect(described_class.cross_reference_disallowed?(merge_request, project.commit)).
+          to be_truthy
+      end
+
+      it 'is falsey when merge request is open' do
+        expect(described_class.cross_reference_disallowed?(merge_request, project.commit)).
+          to be_falsy
+      end
+    end
   end
 
   describe '.cross_reference_exists?' do
@@ -433,6 +478,19 @@ describe SystemNoteService, services: true do
         expect(described_class.cross_reference_exists?(noteable, commit1)).
           to be_falsey
       end
+
+      context 'legacy capitalized cross reference' do
+        before do
+          # Mention issue (noteable) from commit0
+          system_note = described_class.cross_reference(noteable, commit0, author)
+          system_note.update(note: system_note.note.capitalize)
+        end
+
+        it 'is truthy when already mentioned' do
+          expect(described_class.cross_reference_exists?(noteable, commit0)).
+            to be_truthy
+        end
+      end
     end
 
     context 'commit from commit' do
@@ -450,6 +508,19 @@ describe SystemNoteService, services: true do
         expect(described_class.cross_reference_exists?(commit1, commit0)).
           to be_falsey
       end
+
+      context 'legacy capitalized cross reference' do
+        before do
+          # Mention commit1 from commit0
+          system_note = described_class.cross_reference(commit0, commit1, author)
+          system_note.update(note: system_note.note.capitalize)
+        end
+
+        it 'is truthy when already mentioned' do
+          expect(described_class.cross_reference_exists?(commit0, commit1)).
+            to be_truthy
+        end
+      end
     end
 
     context 'commit with cross-reference from fork' do
@@ -464,6 +535,18 @@ describe SystemNoteService, services: true do
       it 'is true when a fork mentions an external issue' do
         expect(described_class.cross_reference_exists?(noteable, commit2)).
             to be true
+      end
+
+      context 'legacy capitalized cross reference' do
+        before do
+          system_note = described_class.cross_reference(noteable, commit0, author2)
+          system_note.update(note: system_note.note.capitalize)
+        end
+
+        it 'is true when a fork mentions an external issue' do
+          expect(described_class.cross_reference_exists?(noteable, commit2)).
+              to be true
+        end
       end
     end
   end
@@ -488,7 +571,7 @@ describe SystemNoteService, services: true do
       end
 
       it 'mentions referenced project' do
-        expect(subject.note).to include new_project.to_reference
+        expect(subject.note).to include new_project.path_with_namespace
       end
     end
 
@@ -498,7 +581,7 @@ describe SystemNoteService, services: true do
       it_behaves_like 'cross project mentionable'
 
       it 'notifies about noteable being moved to' do
-        expect(subject.note).to match /Moved to/
+        expect(subject.note).to match /moved to/
       end
     end
 
@@ -508,7 +591,7 @@ describe SystemNoteService, services: true do
       it_behaves_like 'cross project mentionable'
 
       it 'notifies about noteable being moved from' do
-        expect(subject.note).to match /Moved from/
+        expect(subject.note).to match /moved from/
       end
     end
 
@@ -543,7 +626,10 @@ describe SystemNoteService, services: true do
     let(:comment_url)     { jira_api_comment_url(jira_issue.id) }
     let(:success_message) { "JiraService SUCCESS: Successfully posted to http://jira.example.net." }
 
-    before { stub_jira_urls(jira_issue.id) }
+    before do
+      stub_jira_urls(jira_issue.id)
+      jira_service_settings
+    end
 
     noteable_types = ["merge_requests", "commit"]
 
@@ -569,16 +655,16 @@ describe SystemNoteService, services: true do
       end
     end
 
-    context 'in JIRA issue tracker' do
-      before { jira_service_settings }
+    describe "new reference" do
+      context 'for commits' do
+        it "creates comment" do
+          result = described_class.cross_reference(jira_issue, commit, author)
 
-      describe "new reference" do
-        subject { described_class.cross_reference(jira_issue, commit, author) }
-
-        it { is_expected.to eq(success_message) }
+          expect(result).to eq(success_message)
+        end
 
         it "creates remote link" do
-          subject
+          described_class.cross_reference(jira_issue, commit, author)
 
           expect(WebMock).to have_requested(:post, jira_api_remote_link_url(jira_issue)).with(
             body: hash_including(
@@ -593,18 +679,18 @@ describe SystemNoteService, services: true do
           ).once
         end
       end
-    end
 
-    context 'in commit' do
-      context 'in JIRA issue tracker' do
-        before { jira_service_settings }
+      context 'for issues' do
+        let(:issue)           { create(:issue, project: project) }
 
-        subject { described_class.cross_reference(jira_issue, issue, author) }
+        it "creates comment" do
+          result = described_class.cross_reference(jira_issue, issue, author)
 
-        it { is_expected.to eq(success_message) }
+          expect(result).to eq(success_message)
+        end
 
         it "creates remote link" do
-          subject
+          described_class.cross_reference(jira_issue, issue, author)
 
           expect(WebMock).to have_requested(:post, jira_api_remote_link_url(jira_issue)).with(
             body: hash_including(
@@ -619,17 +705,45 @@ describe SystemNoteService, services: true do
           ).once
         end
       end
+
+      context 'for snippets' do
+        let(:snippet) { create(:snippet, project: project) }
+
+        it "creates comment" do
+          result = described_class.cross_reference(jira_issue, snippet, author)
+
+          expect(result).to eq(success_message)
+        end
+
+        it "creates remote link" do
+          described_class.cross_reference(jira_issue, snippet, author)
+
+          expect(WebMock).to have_requested(:post, jira_api_remote_link_url(jira_issue)).with(
+            body: hash_including(
+              GlobalID: "GitLab",
+              object: {
+                url: namespace_project_snippet_url(project.namespace, project, snippet),
+                title: "GitLab: Mentioned on snippet - #{snippet.title}",
+                icon: { title: "GitLab", url16x16: "https://gitlab.com/favicon.ico" },
+                status: { resolved: false }
+              }
+            )
+          ).once
+        end
+      end
     end
 
     describe "existing reference" do
       before do
-        message = "[#{author.name}|http://localhost/#{author.username}] mentioned this issue in [a commit of #{project.path_with_namespace}|http://localhost/#{project.path_with_namespace}/commit/#{commit.id}]:\n'#{commit.title}'"
+        message = "[#{author.name}|http://localhost/#{author.username}] mentioned this issue in [a commit of #{project.path_with_namespace}|http://localhost/#{project.path_with_namespace}/commit/#{commit.id}]:\n'#{commit.title.chomp}'"
         allow_any_instance_of(JIRA::Resource::Issue).to receive(:comments).and_return([OpenStruct.new(body: message)])
       end
 
-      subject { described_class.cross_reference(jira_issue, commit, author) }
+      it "does not return success message" do
+        result = described_class.cross_reference(jira_issue, commit, author)
 
-      it { is_expected.not_to eq(success_message) }
+        expect(result).not_to eq(success_message)
+      end
 
       it 'does not try to create comment and remote link' do
         subject
@@ -637,6 +751,122 @@ describe SystemNoteService, services: true do
         expect(WebMock).not_to have_requested(:post, jira_api_comment_url(jira_issue))
         expect(WebMock).not_to have_requested(:post, jira_api_remote_link_url(jira_issue))
       end
+    end
+  end
+
+  describe '.discussion_continued_in_issue' do
+    let(:discussion) { Discussion.for_diff_notes([create(:diff_note_on_merge_request)]).first }
+    let(:merge_request) { discussion.noteable }
+    let(:project) { merge_request.source_project }
+    let(:issue) { create(:issue, project: project) }
+    let(:user) { create(:user) }
+
+    def reloaded_merge_request
+      MergeRequest.find(merge_request.id)
+    end
+
+    before do
+      project.team << [user, :developer]
+    end
+
+    it 'creates a new note in the discussion' do
+      # we need to completely rebuild the merge request object, or the `@discussions` on the merge request are not reloaded.
+      expect { SystemNoteService.discussion_continued_in_issue(discussion, project, user, issue) }.
+        to change { reloaded_merge_request.discussions.first.notes.size }.by(1)
+    end
+
+    it 'mentions the created issue in the system note' do
+      note = SystemNoteService.discussion_continued_in_issue(discussion, project, user, issue)
+
+      expect(note.note).to include(issue.to_reference)
+    end
+  end
+
+  describe '.change_time_estimate' do
+    subject { described_class.change_time_estimate(noteable, project, author) }
+
+    it_behaves_like 'a system note'
+
+    context 'with a time estimate' do
+      it 'sets the note text' do
+        noteable.update_attribute(:time_estimate, 277200)
+
+        expect(subject.note).to eq "changed time estimate to 1w 4d 5h"
+      end
+    end
+
+    context 'without a time estimate' do
+      it 'sets the note text' do
+        expect(subject.note).to eq "removed time estimate"
+      end
+    end
+  end
+
+  describe '.change_time_spent' do
+    # We need a custom noteable in order to the shared examples to be green.
+    let(:noteable) do
+      mr = create(:merge_request, source_project: project)
+      mr.spend_time(duration: 360000, user: author)
+      mr.save!
+      mr
+    end
+
+    subject do
+      described_class.change_time_spent(noteable, project, author)
+    end
+
+    it_behaves_like 'a system note'
+
+    context 'when time was added' do
+      it 'sets the note text' do
+        spend_time!(277200)
+
+        expect(subject.note).to eq "added 1w 4d 5h of time spent"
+      end
+    end
+
+    context 'when time was subtracted' do
+      it 'sets the note text' do
+        spend_time!(-277200)
+
+        expect(subject.note).to eq "subtracted 1w 4d 5h of time spent"
+      end
+    end
+
+    context 'when time was removed' do
+      it 'sets the note text' do
+        spend_time!(:reset)
+
+        expect(subject.note).to eq "removed time spent"
+      end
+    end
+
+    def spend_time!(seconds)
+      noteable.spend_time(duration: seconds, user: author)
+      noteable.save!
+    end
+  end
+
+  describe '.add_merge_request_wip_from_commit' do
+    let(:noteable) do
+      create(:merge_request, source_project: project, target_project: project)
+    end
+
+    subject do
+      described_class.add_merge_request_wip_from_commit(
+        noteable,
+        project,
+        author,
+        noteable.diff_head_commit
+      )
+    end
+
+    it_behaves_like 'a system note'
+
+    it "posts the 'marked as a Work In Progress from commit' system note" do
+      expect(subject.note).to match(
+        /marked as a \*\*Work In Progress\*\* from #{Commit.reference_pattern}/
+      )
     end
   end
 end

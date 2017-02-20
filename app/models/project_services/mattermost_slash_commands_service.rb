@@ -1,4 +1,4 @@
-class MattermostSlashCommandsService < ChatService
+class MattermostSlashCommandsService < ChatSlashCommandsService
   include TriggersHelper
 
   prop_accessor :token
@@ -8,49 +8,44 @@ class MattermostSlashCommandsService < ChatService
   end
 
   def title
-    'Mattermost Command'
+    'Mattermost slash commands'
   end
 
   def description
-    "Perform common operations on GitLab in Mattermost"
+    "Perform common operations in Mattermost"
   end
 
-  def to_param
+  def self.to_param
     'mattermost_slash_commands'
   end
 
-  def help
-    "This service allows you to use slash commands with your Mattermost installation.<br/>
-    To setup this Service you need to create a new <b>Slash commands</b> in your Mattermost integration panel.<br/>
-    <br/>
-    Create integration with URL #{service_trigger_url(self)} and enter the token below."
+  def configure(user, params)
+    token = Mattermost::Command.new(user).
+      create(command(params))
+
+    update(active: true, token: token) if token
+  rescue Mattermost::Error => e
+    [false, e.message]
   end
 
-  def fields
-    [
-      { type: 'text', name: 'token', placeholder: '' }
-    ]
-  end
-
-  def trigger(params)
-    return nil unless valid_token?(params[:token])
-
-    user = find_chat_user(params)
-    unless user
-      url = authorize_chat_name_url(params)
-      return Mattermost::Presenter.authorize_chat_name(url)
-    end
-
-    Gitlab::ChatCommands::Command.new(project, user, params).execute
+  def list_teams(current_user)
+    [Mattermost::Team.new(current_user).all, nil]
+  rescue Mattermost::Error => e
+    [[], e.message]
   end
 
   private
 
-  def find_chat_user(params)
-    ChatNames::FindUserService.new(self, params).execute
-  end
+  def command(params)
+    pretty_project_name = project.name_with_namespace
 
-  def authorize_chat_name_url(params)
-    ChatNames::AuthorizeUserService.new(self, params).execute
+    params.merge(
+      auto_complete: true,
+      auto_complete_desc: "Perform common operations on: #{pretty_project_name}",
+      auto_complete_hint: '[help]',
+      description: "Perform common operations on: #{pretty_project_name}",
+      display_name: "GitLab / #{pretty_project_name}",
+      method: 'P',
+      username: 'GitLab')
   end
 end

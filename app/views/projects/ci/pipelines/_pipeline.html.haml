@@ -4,8 +4,7 @@
 
 %tr.commit
   %td.commit-link
-    = link_to namespace_project_pipeline_path(pipeline.project.namespace, pipeline.project, pipeline.id) do
-      = ci_status_with_icon(status)
+    = render 'ci/status/badge', status: pipeline.detailed_status(current_user)
 
   %td
     = link_to namespace_project_pipeline_path(pipeline.project.namespace, pipeline.project, pipeline.id) do
@@ -16,7 +15,7 @@
     - else
       %span.api.monospace API
     - if pipeline.latest?
-      %span.label.label-success.has-tooltip{ title: 'Latest build for this branch' } latest
+      %span.label.label-success.has-tooltip{ title: 'Latest pipeline for this branch' } latest
     - if pipeline.triggered?
       %span.label.label-primary triggered
     - if pipeline.yaml_errors.present?
@@ -41,15 +40,8 @@
       - else
         Cant find HEAD commit for this branch
 
-  - stages_status = pipeline.statuses.latest.stages_status
-  %td.stage-cell
-    - stages.each do |stage|
-      - status = stages_status[stage]
-      - tooltip = "#{stage.titleize}: #{status || 'not found'}"
-      - if status
-        .stage-container
-          = link_to namespace_project_pipeline_path(pipeline.project.namespace, pipeline.project, pipeline.id, anchor: stage), class: "has-tooltip ci-status-icon-#{status}", title: tooltip do
-            = ci_icon_for_status(status)
+  %td
+    = render 'shared/mini_pipeline_graph', pipeline: pipeline, klass: 'js-mini-pipeline-graph'
 
   %td
     - if pipeline.duration
@@ -69,32 +61,32 @@
         .btn-group.inline
           - if actions.any?
             .btn-group
-              %a.dropdown-toggle.btn.btn-default{type: 'button', 'data-toggle' => 'dropdown'}
+              %button.dropdown-toggle.btn.btn-default.has-tooltip.js-pipeline-dropdown-manual-actions{ type: 'button', title: 'Manual pipeline', data: { toggle: 'dropdown', placement: 'top' }, 'aria-label' => 'Manual pipeline' }
                 = custom_icon('icon_play')
-                = icon('caret-down')
+                = icon('caret-down', 'aria-hidden' => 'true')
               %ul.dropdown-menu.dropdown-menu-align-right
                 - actions.each do |build|
                   %li
                     = link_to play_namespace_project_build_path(pipeline.project.namespace, pipeline.project, build), method: :post, rel: 'nofollow' do
                       = custom_icon('icon_play')
-                      %span= build.name.humanize
+                      %span= build.name
           - if artifacts.present?
             .btn-group
-              %a.dropdown-toggle.btn.btn-default.build-artifacts{type: 'button', 'data-toggle' => 'dropdown'}
+              %button.dropdown-toggle.btn.btn-default.build-artifacts.has-tooltip.js-pipeline-dropdown-download{ type: 'button', title: 'Artifacts', data: { toggle: 'dropdown', placement: 'top' }, 'aria-label' => 'Artifacts' }
                 = icon("download")
                 = icon('caret-down')
               %ul.dropdown-menu.dropdown-menu-align-right
                 - artifacts.each do |build|
                   %li
-                    = link_to download_namespace_project_build_artifacts_path(pipeline.project.namespace, pipeline.project, build), rel: 'nofollow' do
+                    = link_to download_namespace_project_build_artifacts_path(pipeline.project.namespace, pipeline.project, build), rel: 'nofollow', download: '' do
                       = icon("download")
                       %span Download '#{build.name}' artifacts
 
       - if can?(current_user, :update_pipeline, pipeline.project)
         .cancel-retry-btns.inline
           - if pipeline.retryable?
-            = link_to retry_namespace_project_pipeline_path(pipeline.project.namespace, pipeline.project, pipeline.id), class: 'btn has-tooltip', title: "Retry", method: :post do
+            = link_to retry_namespace_project_pipeline_path(pipeline.project.namespace, pipeline.project, pipeline.id), class: 'btn has-tooltip', title: 'Retry', data: { toggle: 'dropdown', placement: 'top' }, 'aria-label' => 'Retry' , method: :post do
               = icon("repeat")
           - if pipeline.cancelable?
-            = link_to cancel_namespace_project_pipeline_path(pipeline.project.namespace, pipeline.project, pipeline.id), class: 'btn btn-remove has-tooltip', title: "Cancel", method: :post do
+            = link_to cancel_namespace_project_pipeline_path(pipeline.project.namespace, pipeline.project, pipeline.id), class: 'btn btn-remove has-tooltip', title: 'Cancel', data: { toggle: 'dropdown', placement: 'top' }, 'aria-label' => 'Cancel' , method: :post do
               = icon("remove")

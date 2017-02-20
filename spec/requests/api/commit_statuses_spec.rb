@@ -3,13 +3,16 @@ require 'spec_helper'
 describe API::CommitStatuses, api: true do
   include ApiHelpers
 
-  let!(:project) { create(:project) }
+  let!(:project) { create(:project, :repository) }
   let(:commit) { project.repository.commit }
-  let(:commit_status) { create(:commit_status, pipeline: pipeline) }
   let(:guest) { create_user(:guest) }
   let(:reporter) { create_user(:reporter) }
   let(:developer) { create_user(:developer) }
   let(:sha) { commit.id }
+
+  let(:commit_status) do
+    create(:commit_status, status: :pending, pipeline: pipeline)
+  end
 
   describe "GET /projects/:id/repository/commits/:sha/statuses" do
     let(:get_url) { "/projects/#{project.id}/repository/commits/#{sha}/statuses" }
@@ -54,7 +57,7 @@ describe API::CommitStatuses, api: true do
 
           it 'returns all commit statuses' do
             expect(response).to have_http_status(200)
-
+            expect(response).to include_pagination_headers
             expect(json_response).to be_an Array
             expect(statuses_id).to contain_exactly(status1.id, status2.id,
                                                    status3.id, status4.id,
@@ -67,7 +70,7 @@ describe API::CommitStatuses, api: true do
 
           it 'returns latest commit statuses for specific ref' do
             expect(response).to have_http_status(200)
-
+            expect(response).to include_pagination_headers
             expect(json_response).to be_an Array
             expect(statuses_id).to contain_exactly(status3.id, status5.id)
           end
@@ -78,7 +81,7 @@ describe API::CommitStatuses, api: true do
 
           it 'return latest commit statuses for specific name' do
             expect(response).to have_http_status(200)
-
+            expect(response).to include_pagination_headers
             expect(json_response).to be_an Array
             expect(statuses_id).to contain_exactly(status4.id, status5.id)
           end
@@ -152,8 +155,12 @@ describe API::CommitStatuses, api: true do
 
       context 'with all optional parameters' do
         before do
-          optional_params = { state: 'success', context: 'coverage',
-                              ref: 'develop', target_url: 'url', description: 'test' }
+          optional_params = { state: 'success',
+                              context: 'coverage',
+                              ref: 'develop',
+                              description: 'test',
+                              coverage: 80.0,
+                              target_url: 'http://gitlab.com/status' }
 
           post api(post_url, developer), optional_params
         end
@@ -164,12 +171,13 @@ describe API::CommitStatuses, api: true do
           expect(json_response['status']).to eq('success')
           expect(json_response['name']).to eq('coverage')
           expect(json_response['ref']).to eq('develop')
-          expect(json_response['target_url']).to eq('url')
+          expect(json_response['coverage']).to eq(80.0)
           expect(json_response['description']).to eq('test')
+          expect(json_response['target_url']).to eq('http://gitlab.com/status')
         end
       end
 
-      context 'invalid status' do
+      context 'when status is invalid' do
         before { post api(post_url, developer), state: 'invalid' }
 
         it 'does not create commit status' do
@@ -177,7 +185,7 @@ describe API::CommitStatuses, api: true do
         end
       end
 
-      context 'request without state' do
+      context 'when request without a state made' do
         before { post api(post_url, developer) }
 
         it 'does not create commit status' do
@@ -185,12 +193,25 @@ describe API::CommitStatuses, api: true do
         end
       end
 
-      context 'invalid commit' do
+      context 'when commit SHA is invalid' do
         let(:sha) { 'invalid_sha' }
         before { post api(post_url, developer), state: 'running' }
 
         it 'returns not found error' do
           expect(response).to have_http_status(404)
+        end
+      end
+
+      context 'when target URL is an invalid address' do
+        before do
+          post api(post_url, developer), state: 'pending',
+                                         target_url: 'invalid url'
+        end
+
+        it 'responds with bad request status and validation errors' do
+          expect(response).to have_http_status(400)
+          expect(json_response['message']['target_url'])
+            .to include 'must be a valid URL'
         end
       end
     end

@@ -61,6 +61,7 @@ module Ci
         allow_failure: job[:allow_failure] || false,
         when: job[:when] || 'on_success',
         environment: job[:environment_name],
+        coverage_regex: job[:coverage],
         yaml_variables: yaml_variables(name),
         options: {
           image: job[:image],
@@ -118,7 +119,7 @@ module Ci
         .merge(job_variables(name))
 
       variables.map do |key, value|
-        { key: key, value: value, public: true }
+        { key: key.to_s, value: value, public: true }
       end
     end
 

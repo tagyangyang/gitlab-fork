@@ -1,8 +1,9 @@
 class Projects::SnippetsController < Projects::ApplicationController
   include ToggleAwardEmoji
+  include SpammableActions
 
   before_action :module_enabled
-  before_action :snippet, only: [:show, :edit, :destroy, :update, :raw, :toggle_award_emoji]
+  before_action :snippet, only: [:show, :edit, :destroy, :update, :raw, :toggle_award_emoji, :mark_as_spam]
 
   # Allow read any snippet
   before_action :authorize_read_project_snippet!, except: [:new, :create, :index]
@@ -19,11 +20,16 @@ class Projects::SnippetsController < Projects::ApplicationController
   respond_to :html
 
   def index
-    @snippets = SnippetsFinder.new.execute(current_user, {
+    @snippets = SnippetsFinder.new.execute(
+      current_user,
       filter: :by_project,
-      project: @project
-    })
+      project: @project,
+      scope: params[:scope]
+    )
     @snippets = @snippets.page(params[:page])
+    if @snippets.out_of_range? && @snippets.total_pages != 0
+      redirect_to namespace_project_snippets_path(page: @snippets.total_pages)
+    end
   end
 
   def new
@@ -31,8 +37,8 @@ class Projects::SnippetsController < Projects::ApplicationController
   end
 
   def create
-    @snippet = CreateSnippetService.new(@project, current_user,
-                                        snippet_params).execute
+    create_params = snippet_params.merge(request: request)
+    @snippet = CreateSnippetService.new(@project, current_user, create_params).execute
 
     if @snippet.valid?
       respond_with(@snippet,
@@ -83,6 +89,7 @@ class Projects::SnippetsController < Projects::ApplicationController
     @snippet ||= @project.snippets.find(params[:id])
   end
   alias_method :awardable, :snippet
+  alias_method :spammable, :snippet
 
   def authorize_read_project_snippet!
     return render_404 unless can?(current_user, :read_project_snippet, @snippet)

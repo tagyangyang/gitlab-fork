@@ -38,7 +38,7 @@ feature 'Only allow merge requests to be merged if the build succeeds', feature:
         it 'does not allow to merge immediately' do
           visit_merge_request(merge_request)
 
-          expect(page).to have_button 'Merge When Build Succeeds'
+          expect(page).to have_button 'Merge When Pipeline Succeeds'
           expect(page).not_to have_button 'Select Merge Moment'
         end
       end
@@ -50,7 +50,7 @@ feature 'Only allow merge requests to be merged if the build succeeds', feature:
           visit_merge_request(merge_request)
 
           expect(page).not_to have_button 'Accept Merge Request'
-          expect(page).to have_content('Please retry the build or push a new commit to fix the failure.')
+          expect(page).to have_content('Please retry the job or push a new commit to fix the failure.')
         end
       end
 
@@ -61,7 +61,7 @@ feature 'Only allow merge requests to be merged if the build succeeds', feature:
           visit_merge_request(merge_request)
 
           expect(page).not_to have_button 'Accept Merge Request'
-          expect(page).to have_content('Please retry the build or push a new commit to fix the failure.')
+          expect(page).to have_content('Please retry the job or push a new commit to fix the failure.')
         end
       end
 
@@ -97,7 +97,7 @@ feature 'Only allow merge requests to be merged if the build succeeds', feature:
         it 'allows MR to be merged immediately', js: true do
           visit_merge_request(merge_request)
 
-          expect(page).to have_button 'Merge When Build Succeeds'
+          expect(page).to have_button 'Merge When Pipeline Succeeds'
 
           click_button 'Select Merge Moment'
           expect(page).to have_content 'Merge Immediately'

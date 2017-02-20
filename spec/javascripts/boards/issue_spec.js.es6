@@ -1,23 +1,21 @@
-/* eslint-disable */
-//= require jquery
-//= require jquery_ujs
-//= require js.cookie
-//= require vue
-//= require vue-resource
-//= require lib/utils/url_utility
-//= require boards/models/issue
-//= require boards/models/label
-//= require boards/models/list
-//= require boards/models/user
-//= require boards/services/board_service
-//= require boards/stores/boards_store
-//= require ./mock_data
+/* eslint-disable comma-dangle */
+/* global BoardService */
+/* global ListIssue */
+
+require('~/lib/utils/url_utility');
+require('~/boards/models/issue');
+require('~/boards/models/label');
+require('~/boards/models/list');
+require('~/boards/models/user');
+require('~/boards/services/board_service');
+require('~/boards/stores/boards_store');
+require('./mock_data');
 
 describe('Issue model', () => {
   let issue;
 
   beforeEach(() => {
-    gl.boardService = new BoardService('/test/issue-boards/board', '1');
+    gl.boardService = new BoardService('/test/issue-boards/board', '', '1');
     gl.issueBoards.BoardsStore.create();
 
     issue = new ListIssue({

@@ -1,4 +1,7 @@
-/* eslint-disable */
+/* eslint-disable comma-dangle, no-unused-vars */
+/* global Vue */
+/* global ListIssue */
+
 (() => {
   const Store = gl.issueBoards.BoardsStore;
 
@@ -34,6 +37,7 @@
             $(this.$refs.submitButton).enable();
 
             Store.detail.issue = issue;
+            Store.detail.list = this.list;
           })
           .catch(() => {
             // Need this because our jQuery very kindly disables buttons on ALL form submissions

@@ -1,4 +1,5 @@
-/* eslint-disable */
+/* eslint-disable comma-dangle, no-unused-vars, quote-props */
+
 const listObj = {
   id: 1,
   position: 0,
@@ -55,3 +56,8 @@ const boardsMockInterceptor = (request, next) => {
     status: 200
   }));
 };
+
+window.listObj = listObj;
+window.listObjDuplicate = listObjDuplicate;
+window.BoardsMockData = BoardsMockData;
+window.boardsMockInterceptor = boardsMockInterceptor;

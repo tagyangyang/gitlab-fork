@@ -18,8 +18,20 @@ feature 'issuable templates', feature: true, js: true do
     let(:description_addition) { ' appending to description' }
 
     background do
-      project.repository.commit_file(user, '.gitlab/issue_templates/bug.md', template_content, 'added issue template', 'master', false)
-      project.repository.commit_file(user, '.gitlab/issue_templates/test.md', longtemplate_content, 'added issue template', 'master', false)
+      project.repository.commit_file(
+        user,
+        '.gitlab/issue_templates/bug.md',
+        template_content,
+        message: 'added issue template',
+        branch_name: 'master',
+        update: false)
+      project.repository.commit_file(
+        user,
+        '.gitlab/issue_templates/test.md',
+        longtemplate_content,
+        message: 'added issue template',
+        branch_name: 'master',
+        update: false)
       visit edit_namespace_project_issue_path project.namespace, project, issue
       fill_in :'issue[title]', with: 'test issue title'
     end
@@ -27,7 +39,7 @@ feature 'issuable templates', feature: true, js: true do
     scenario 'user selects "bug" template' do
       select_template 'bug'
       wait_for_ajax
-      preview_template
+      assert_template
       save_changes
     end
 
@@ -35,8 +47,7 @@ feature 'issuable templates', feature: true, js: true do
       select_template 'bug'
       wait_for_ajax
       select_option 'No template'
-      wait_for_ajax
-      preview_template('')
+      assert_template('')
       save_changes('')
     end
 
@@ -44,9 +55,9 @@ feature 'issuable templates', feature: true, js: true do
       select_template 'bug'
       wait_for_ajax
       find_field('issue_description').send_keys(description_addition)
-      preview_template(template_content + description_addition)
+      assert_template(template_content + description_addition)
       select_option 'Reset template'
-      preview_template
+      assert_template
       save_changes
     end
 
@@ -68,7 +79,13 @@ feature 'issuable templates', feature: true, js: true do
     let(:issue) { create(:issue, author: user, assignee: user, project: project) }
 
     background do
-      project.repository.commit_file(user, '.gitlab/issue_templates/bug.md', template_content, 'added issue template', 'master', false)
+      project.repository.commit_file(
+        user,
+        '.gitlab/issue_templates/bug.md',
+        template_content,
+        message: 'added issue template',
+        branch_name: 'master',
+        update: false)
       visit edit_namespace_project_issue_path project.namespace, project, issue
       fill_in :'issue[title]', with: 'test issue title'
       fill_in :'issue[description]', with: prior_description
@@ -77,7 +94,7 @@ feature 'issuable templates', feature: true, js: true do
     scenario 'user selects "bug" template' do
       select_template 'bug'
       wait_for_ajax
-      preview_template("#{template_content}")
+      assert_template("#{template_content}")
       save_changes
     end
   end
@@ -87,7 +104,13 @@ feature 'issuable templates', feature: true, js: true do
     let(:merge_request) { create(:merge_request, :with_diffs, source_project: project) }
 
     background do
-      project.repository.commit_file(user, '.gitlab/merge_request_templates/feature-proposal.md', template_content, 'added merge request template', 'master', false)
+      project.repository.commit_file(
+        user,
+        '.gitlab/merge_request_templates/feature-proposal.md',
+        template_content,
+        message: 'added merge request template',
+        branch_name: 'master',
+        update: false)
       visit edit_namespace_project_merge_request_path project.namespace, project, merge_request
       fill_in :'merge_request[title]', with: 'test merge request title'
     end
@@ -95,7 +118,7 @@ feature 'issuable templates', feature: true, js: true do
     scenario 'user selects "feature-proposal" template' do
       select_template 'feature-proposal'
       wait_for_ajax
-      preview_template
+      assert_template
       save_changes
     end
   end
@@ -112,7 +135,13 @@ feature 'issuable templates', feature: true, js: true do
       fork_project.team << [fork_user, :master]
       create(:forked_project_link, forked_to_project: fork_project, forked_from_project: project)
       login_as fork_user
-      project.repository.commit_file(fork_user, '.gitlab/merge_request_templates/feature-proposal.md', template_content, 'added merge request template', 'master', false)
+      project.repository.commit_file(
+        fork_user,
+        '.gitlab/merge_request_templates/feature-proposal.md',
+        template_content,
+        message: 'added merge request template',
+        branch_name: 'master',
+        update: false)
       visit edit_namespace_project_merge_request_path project.namespace, project, merge_request
       fill_in :'merge_request[title]', with: 'test merge request title'
     end
@@ -122,17 +151,15 @@ feature 'issuable templates', feature: true, js: true do
         scenario 'user selects template' do
           select_template 'feature-proposal'
           wait_for_ajax
-          preview_template
+          assert_template
           save_changes
         end
       end
     end
   end
 
-  def preview_template(expected_content = template_content)
-    click_link 'Preview'
-    expect(page).to have_content expected_content
-    click_link 'Write'
+  def assert_template(expected_content = template_content)
+    expect(find('textarea')['value']).to eq(expected_content)
   end
 
   def save_changes(expected_content = template_content)

@@ -1,131 +1,90 @@
-/* eslint-disable no-param-reassign */
-(() => {
-  window.gl = window.gl || {};
-  window.gl.environmentsList = window.gl.environmentsList || {};
+require('~/lib/utils/common_utils');
+/**
+ * Environments Store.
+ *
+ * Stores received environments, count of stopped environments and count of
+ * available environments.
+ */
+class EnvironmentsStore {
+  constructor() {
+    this.state = {};
+    this.state.environments = [];
+    this.state.stoppedCounter = 0;
+    this.state.availableCounter = 0;
+    this.state.paginationInformation = {};
 
-  gl.environmentsList.EnvironmentsStore = {
-    state: {},
+    return this;
+  }
 
-    create() {
-      this.state.environments = [];
-      this.state.stoppedCounter = 0;
-      this.state.availableCounter = 0;
+  /**
+   *
+   * Stores the received environments.
+   *
+   * In the main environments endpoint, each environment has the following schema
+   * { name: String, size: Number, latest: Object }
+   * In the endpoint to retrieve environments from each folder, the environment does
+   * not have the `latest` key and the data is all in the root level.
+   * To avoid doing this check in the view, we store both cases the same by extracting
+   * what is inside the `latest` key.
+   *
+   * If the `size` is bigger than 1, it means it should be rendered as a folder.
+   * In those cases we add `isFolder` key in order to render it properly.
+   *
+   * @param  {Array} environments
+   * @returns {Array}
+   */
+  storeEnvironments(environments = []) {
+    const filteredEnvironments = environments.map((env) => {
+      let filtered = {};
 
-      return this;
-    },
+      if (env.size > 1) {
+        filtered = Object.assign({}, env, { isFolder: true, folderName: env.name });
+      }
 
-    /**
-     * In order to display a tree view we need to modify the received
-     * data in to a tree structure based on `environment_type`
-     * sorted alphabetically.
-     * In each children a `vue-` property will be added. This property will be
-     * used to know if an item is a children mostly for css purposes. This is
-     * needed because the children row is a fragment instance and therfore does
-     * not accept non-prop attributes.
-     *
-     *
-     * @example
-     * it will transform this:
-     * [
-     *   { name: "environment", environment_type: "review" },
-     *   { name: "environment_1", environment_type: null }
-     *   { name: "environment_2, environment_type: "review" }
-     * ]
-     * into this:
-     * [
-     *   { name: "review", children:
-     *      [
-     *        { name: "environment", environment_type: "review", vue-isChildren: true},
-     *        { name: "environment_2", environment_type: "review", vue-isChildren: true}
-     *      ]
-     *   },
-     *  {name: "environment_1", environment_type: null}
-     * ]
-     *
-     *
-     * @param  {Array} environments List of environments.
-     * @returns {Array} Tree structured array with the received environments.
-     */
-    storeEnvironments(environments = []) {
-      this.state.stoppedCounter = this.countByState(environments, 'stopped');
-      this.state.availableCounter = this.countByState(environments, 'available');
+      if (env.latest) {
+        filtered = Object.assign(filtered, env, env.latest);
+        delete filtered.latest;
+      } else {
+        filtered = Object.assign(filtered, env);
+      }
 
-      const environmentsTree = environments.reduce((acc, environment) => {
-        if (environment.environment_type !== null) {
-          const occurs = acc.filter(element => element.children &&
-             element.name === environment.environment_type);
+      return filtered;
+    });
 
-          environment['vue-isChildren'] = true;
+    this.state.environments = filteredEnvironments;
 
-          if (occurs.length) {
-            acc[acc.indexOf(occurs[0])].children.push(environment);
-            acc[acc.indexOf(occurs[0])].children.sort(this.sortByName);
-          } else {
-            acc.push({
-              name: environment.environment_type,
-              children: [environment],
-              isOpen: false,
-              'vue-isChildren': environment['vue-isChildren'],
-            });
-          }
-        } else {
-          acc.push(environment);
-        }
+    return filteredEnvironments;
+  }
 
-        return acc;
-      }, []).sort(this.sortByName);
+  setPagination(pagination = {}) {
+    const normalizedHeaders = gl.utils.normalizeHeaders(pagination);
+    const paginationInformation = gl.utils.parseIntPagination(normalizedHeaders);
 
-      this.state.environments = environmentsTree;
+    this.state.paginationInformation = paginationInformation;
+    return paginationInformation;
+  }
 
-      return environmentsTree;
-    },
+  /**
+   * Stores the number of available environments.
+   *
+   * @param  {Number} count = 0
+   * @return {Number}
+   */
+  storeAvailableCount(count = 0) {
+    this.state.availableCounter = count;
+    return count;
+  }
 
-    /**
-     * Toggles folder open property given the environment type.
-     *
-     * @param  {String} envType
-     * @return {Array}
-     */
-    toggleFolder(envType) {
-      const environments = this.state.environments;
+  /**
+   * Stores the number of closed environments.
+   *
+   * @param  {Number} count = 0
+   * @return {Number}
+   */
+  storeStoppedCount(count = 0) {
+    this.state.stoppedCounter = count;
+    return count;
+  }
+}
 
-      const environmentsCopy = environments.map((env) => {
-        if (env['vue-isChildren'] && env.name === envType) {
-          env.isOpen = !env.isOpen;
-        }
-
-        return env;
-      });
-
-      this.state.environments = environmentsCopy;
-
-      return environmentsCopy;
-    },
-
-    /**
-     * Given an array of environments, returns the number of environments
-     * that have the given state.
-     *
-     * @param  {Array} environments
-     * @param  {String} state
-     * @returns {Number}
-     */
-    countByState(environments, state) {
-      return environments.filter(env => env.state === state).length;
-    },
-
-    /**
-     * Sorts the two objects provided by their name.
-     *
-     * @param  {Object} a
-     * @param  {Object} b
-     * @returns {Number}
-     */
-    sortByName(a, b) {
-      const nameA = a.name.toUpperCase();
-      const nameB = b.name.toUpperCase();
-
-      return nameA < nameB ? -1 : nameA > nameB ? 1 : 0; // eslint-disable-line
-    },
-  };
-})();
+module.exports = EnvironmentsStore;

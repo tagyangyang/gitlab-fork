@@ -1,20 +1,26 @@
-/* eslint-disable */
-//= require vue
-//= require vue-resource
-//= require Sortable
-//= require_tree ./models
-//= require_tree ./stores
-//= require_tree ./services
-//= require_tree ./mixins
-//= require_tree ./filters
-//= require ./components/board
-//= require ./components/board_sidebar
-//= require ./components/new_list_dropdown
-//= require ./vue_resource_interceptor
+/* eslint-disable one-var, quote-props, comma-dangle, space-before-function-paren, import/newline-after-import, no-multi-spaces, max-len */
+/* global Vue */
+/* global BoardService */
+
+function requireAll(context) { return context.keys().map(context); }
+
+window.Vue = require('vue');
+window.Vue.use(require('vue-resource'));
+requireAll(require.context('./models',   true, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./stores',   true, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./services', true, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./mixins',   true, /^\.\/.*\.(js|es6)$/));
+requireAll(require.context('./filters',  true, /^\.\/.*\.(js|es6)$/));
+require('./components/board');
+require('./components/board_sidebar');
+require('./components/new_list_dropdown');
+require('./components/modal/index');
+require('../vue_shared/vue_resource_interceptor');
 
 $(() => {
-  const $boardApp = document.getElementById('board-app'),
-        Store = gl.issueBoards.BoardsStore;
+  const $boardApp = document.getElementById('board-app');
+  const Store = gl.issueBoards.BoardsStore;
+  const ModalStore = gl.issueBoards.ModalStore;
 
   window.gl = window.gl || {};
 
@@ -28,7 +34,8 @@ $(() => {
     el: $boardApp,
     components: {
       'board': gl.issueBoards.Board,
-      'board-sidebar': gl.issueBoards.BoardSidebar
+      'board-sidebar': gl.issueBoards.BoardSidebar,
+      'board-add-issues-modal': gl.issueBoards.IssuesModal,
     },
     data: {
       state: Store.state,
@@ -37,6 +44,8 @@ $(() => {
       boardId: $boardApp.dataset.boardId,
       disabled: $boardApp.dataset.disabled === 'true',
       issueLinkBase: $boardApp.dataset.issueLinkBase,
+      rootPath: $boardApp.dataset.rootPath,
+      bulkUpdatePath: $boardApp.dataset.bulkUpdatePath,
       detailIssue: Store.detail
     },
     computed: {
@@ -45,7 +54,7 @@ $(() => {
       },
     },
     created () {
-      gl.boardService = new BoardService(this.endpoint, this.boardId);
+      gl.boardService = new BoardService(this.endpoint, this.bulkUpdatePath, this.boardId);
     },
     mounted () {
       Store.disabled = this.disabled;
@@ -56,8 +65,6 @@ $(() => {
 
             if (list.type === 'done') {
               list.position = Infinity;
-            } else if (list.type === 'backlog') {
-              list.position = -1;
             }
           });
 
@@ -70,12 +77,35 @@ $(() => {
   });
 
   gl.IssueBoardsSearch = new Vue({
-    el: '#js-boards-seach',
+    el: document.getElementById('js-boards-search'),
     data: {
       filters: Store.state.filters
     },
     mounted () {
       gl.issueBoards.newListDropdownInit();
     }
+  });
+
+  gl.IssueBoardsModalAddBtn = new Vue({
+    mixins: [gl.issueBoards.ModalMixins],
+    el: document.getElementById('js-add-issues-btn'),
+    data: {
+      modal: ModalStore.store,
+      store: Store.state,
+    },
+    computed: {
+      disabled() {
+        return !this.store.lists.filter(list => list.type !== 'blank' && list.type !== 'done').length;
+      },
+    },
+    template: `
+      <button
+        class="btn btn-create pull-right prepend-left-10 has-tooltip"
+        type="button"
+        :disabled="disabled"
+        @click="toggleModal(true)">
+        Add issues
+      </button>
+    `,
   });
 });

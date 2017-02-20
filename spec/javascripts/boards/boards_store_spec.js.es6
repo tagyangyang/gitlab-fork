@@ -1,22 +1,24 @@
-/* eslint-disable */
-//= require jquery
-//= require jquery_ujs
-//= require js.cookie
-//= require vue
-//= require vue-resource
-//= require lib/utils/url_utility
-//= require boards/models/issue
-//= require boards/models/label
-//= require boards/models/list
-//= require boards/models/user
-//= require boards/services/board_service
-//= require boards/stores/boards_store
-//= require ./mock_data
+/* eslint-disable comma-dangle, one-var, no-unused-vars */
+/* global Vue */
+/* global BoardService */
+/* global boardsMockInterceptor */
+/* global Cookies */
+/* global listObj */
+/* global listObjDuplicate */
+
+require('~/lib/utils/url_utility');
+require('~/boards/models/issue');
+require('~/boards/models/label');
+require('~/boards/models/list');
+require('~/boards/models/user');
+require('~/boards/services/board_service');
+require('~/boards/stores/boards_store');
+require('./mock_data');
 
 describe('Store', () => {
   beforeEach(() => {
     Vue.http.interceptors.push(boardsMockInterceptor);
-    gl.boardService = new BoardService('/test/issue-boards/board', '1');
+    gl.boardService = new BoardService('/test/issue-boards/board', '', '1');
     gl.issueBoards.BoardsStore.create();
 
     Cookies.set('issue_board_welcome_hidden', 'false', {
@@ -50,18 +52,6 @@ describe('Store', () => {
     it('finds list by type', () => {
       gl.issueBoards.BoardsStore.addList(listObj);
       const list = gl.issueBoards.BoardsStore.findList('type', 'label');
-
-      expect(list).toBeDefined();
-    });
-
-    it('finds list limited by type', () => {
-      gl.issueBoards.BoardsStore.addList({
-        id: 1,
-        position: 0,
-        title: 'Test',
-        list_type: 'backlog'
-      });
-      const list = gl.issueBoards.BoardsStore.findList('id', 1, 'backlog');
 
       expect(list).toBeDefined();
     });
@@ -110,10 +100,7 @@ describe('Store', () => {
       expect(gl.issueBoards.BoardsStore.shouldAddBlankState()).toBe(false);
     });
 
-    it('check for blank state adding when backlog & done list exist', () => {
-      gl.issueBoards.BoardsStore.addList({
-        list_type: 'backlog'
-      });
+    it('check for blank state adding when done list exist', () => {
       gl.issueBoards.BoardsStore.addList({
         list_type: 'done'
       });
@@ -139,8 +126,8 @@ describe('Store', () => {
     });
 
     it('moves the position of lists', () => {
-      const listOne = gl.issueBoards.BoardsStore.addList(listObj),
-            listTwo = gl.issueBoards.BoardsStore.addList(listObjDuplicate);
+      const listOne = gl.issueBoards.BoardsStore.addList(listObj);
+      const listTwo = gl.issueBoards.BoardsStore.addList(listObjDuplicate);
 
       expect(gl.issueBoards.BoardsStore.state.lists.length).toBe(2);
 
@@ -150,8 +137,8 @@ describe('Store', () => {
     });
 
     it('moves an issue from one list to another', (done) => {
-      const listOne = gl.issueBoards.BoardsStore.addList(listObj),
-            listTwo = gl.issueBoards.BoardsStore.addList(listObjDuplicate);
+      const listOne = gl.issueBoards.BoardsStore.addList(listObj);
+      const listTwo = gl.issueBoards.BoardsStore.addList(listObjDuplicate);
 
       expect(gl.issueBoards.BoardsStore.state.lists.length).toBe(2);
 

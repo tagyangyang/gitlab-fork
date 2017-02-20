@@ -21,7 +21,7 @@ module BlobHelper
                                      options[:link_opts])
 
     if !on_top_of_branch?(project, ref)
-      button_tag "Edit", class: "btn disabled has-tooltip btn-file-option", title: "You can only edit files when you are on a branch", data: { container: 'body' }
+      button_tag "Edit", class: "btn disabled has-tooltip", title: "You can only edit files when you are on a branch", data: { container: 'body' }
     elsif can_edit_blob?(blob, project, ref)
       link_to "Edit", edit_path, class: 'btn btn-sm'
     elsif can?(current_user, :fork_project, project)
@@ -32,7 +32,7 @@ module BlobHelper
       }
       fork_path = namespace_project_forks_path(project.namespace, project, namespace_key: current_user.namespace.id, continue: continue_params)
 
-      link_to "Edit", fork_path, class: 'btn btn-file-option', method: :post
+      link_to "Edit", fork_path, class: 'btn', method: :post
     end
   end
 
@@ -188,7 +188,11 @@ module BlobHelper
   end
 
   def gitlab_ci_ymls
-    @gitlab_ci_ymls ||= Gitlab::Template::GitlabCiYmlTemplate.dropdown_names
+    @gitlab_ci_ymls ||= Gitlab::Template::GitlabCiYmlTemplate.dropdown_names(params[:context])
+  end
+
+  def dockerfile_names
+    @dockerfile_names ||= Gitlab::Template::DockerfileTemplate.dropdown_names
   end
 
   def blob_editor_paths

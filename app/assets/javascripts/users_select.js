@@ -1,10 +1,15 @@
-/* eslint-disable func-names, space-before-function-paren, one-var, no-var, space-before-blocks, prefer-rest-params, wrap-iife, quotes, max-len, one-var-declaration-per-line, vars-on-top, prefer-arrow-callback, consistent-return, no-undef, comma-dangle, object-shorthand, no-shadow, no-unused-vars, no-plusplus, no-else-return, no-self-compare, prefer-template, no-unused-expressions, no-lonely-if, yoda, prefer-spread, no-void, camelcase, keyword-spacing, no-param-reassign, padded-blocks, max-len */
+/* eslint-disable func-names, space-before-function-paren, one-var, no-var, prefer-rest-params, wrap-iife, quotes, max-len, one-var-declaration-per-line, vars-on-top, prefer-arrow-callback, consistent-return, comma-dangle, object-shorthand, no-shadow, no-unused-vars, no-else-return, no-self-compare, prefer-template, no-unused-expressions, no-lonely-if, yoda, prefer-spread, no-void, camelcase, no-param-reassign */
+/* global Vue */
+/* global Issuable */
+/* global ListUser */
+
 (function() {
-  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  var bind = function(fn, me) { return function() { return fn.apply(me, arguments); }; },
     slice = [].slice;
 
   this.UsersSelect = (function() {
-    function UsersSelect(currentUser) {
+    function UsersSelect(currentUser, els) {
+      var $els;
       this.users = bind(this.users, this);
       this.user = bind(this.user, this);
       this.usersPath = "/autocomplete/users.json";
@@ -16,7 +21,14 @@
           this.currentUser = JSON.parse(currentUser);
         }
       }
-      $('.js-user-search').each((function(_this) {
+
+      $els = $(els);
+
+      if (!els) {
+        $els = $('.js-user-search');
+      }
+
+      $els.each((function(_this) {
         return function(i, dropdown) {
           var options = {};
           var $block, $collapsedSidebar, $dropdown, $loading, $selectbox, $value, abilityName, assignTo, assigneeTemplate, collapsedAssigneeTemplate, defaultLabel, firstUser, issueURL, selectedId, showAnyUser, showNullUser, showMenuAbove;
@@ -112,7 +124,7 @@
                   showDivider = 0;
                   if (firstUser) {
                     // Move current user to the front of the list
-                    for (index = j = 0, len = users.length; j < len; index = ++j) {
+                    for (index = j = 0, len = users.length; j < len; index = (j += 1)) {
                       obj = users[index];
                       if (obj.username === firstUser) {
                         users.splice(index, 1);
@@ -189,7 +201,9 @@
                 selectedId = user.id;
                 return;
               }
-              if ($('html').hasClass('issue-boards-page') && !$dropdown.hasClass('js-issue-board-sidebar')) {
+              if ($el.closest('.add-issues-modal').length) {
+                gl.issueBoards.ModalStore.store.filter[$dropdown.data('field-name')] = user.id;
+              } else if ($('html').hasClass('issue-boards-page') && !$dropdown.hasClass('js-issue-board-sidebar')) {
                 selectedId = user.id;
                 gl.issueBoards.BoardsStore.state.filters[$dropdown.data('field-name')] = user.id;
                 gl.issueBoards.BoardsStore.updateFiltersUrl();
@@ -274,7 +288,7 @@
                   if (firstUser) {
                     // Move current user to the front of the list
                     ref = data.results;
-                    for (index = j = 0, len = ref.length; j < len; index = ++j) {
+                    for (index = j = 0, len = ref.length; j < len; index = (j += 1)) {
                       obj = ref[index];
                       if (obj.username === firstUser) {
                         data.results.splice(index, 1);
@@ -367,7 +381,7 @@
     };
 
     UsersSelect.prototype.user = function(user_id, callback) {
-      if(!/^\d+$/.test(user_id)) {
+      if (!/^\d+$/.test(user_id)) {
         return false;
       }
 
@@ -417,7 +431,5 @@
     };
 
     return UsersSelect;
-
   })();
-
-}).call(this);
+}).call(window);

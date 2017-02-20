@@ -1,6 +1,10 @@
 module API
-  # Projects API
   class ProjectHooks < Grape::API
+    include PaginationParams
+
+    before { authenticate! }
+    before { authorize_admin_project }
+
     helpers do
       params :project_hook_properties do
         requires :url, type: String, desc: "The URL to send the request to"
@@ -11,14 +15,11 @@ module API
         optional :note_events, type: Boolean, desc: "Trigger hook on note(comment) events"
         optional :build_events, type: Boolean, desc: "Trigger hook on build events"
         optional :pipeline_events, type: Boolean, desc: "Trigger hook on pipeline events"
-        optional :wiki_events, type: Boolean, desc: "Trigger hook on wiki events"
+        optional :wiki_page_events, type: Boolean, desc: "Trigger hook on wiki events"
         optional :enable_ssl_verification, type: Boolean, desc: "Do SSL verification when triggering the hook"
         optional :token, type: String, desc: "Secret token to validate received payloads; this will not be returned in the response"
       end
     end
-
-    before { authenticate! }
-    before { authorize_admin_project }
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -27,10 +28,11 @@ module API
       desc 'Get project hooks' do
         success Entities::ProjectHook
       end
+      params do
+        use :pagination
+      end
       get ":id/hooks" do
-        hooks = paginate user_project.hooks
-
-        present hooks, with: Entities::ProjectHook
+        present paginate(user_project.hooks), with: Entities::ProjectHook
       end
 
       desc 'Get a project hook' do

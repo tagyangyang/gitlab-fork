@@ -1,4 +1,7 @@
-/* eslint-disable */
+/* eslint-disable space-before-function-paren, comma-dangle */
+/* global Vue */
+/* global ListLabel */
+
 (() => {
   const Store = gl.issueBoards.BoardsStore;
 
@@ -12,7 +15,7 @@
           new ListLabel({ title: 'To Do', color: '#F0AD4E' }),
           new ListLabel({ title: 'Doing', color: '#5CB85C' })
         ]
-      }
+      };
     },
     methods: {
       addDefaultLists () {

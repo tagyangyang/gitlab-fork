@@ -52,6 +52,22 @@ feature 'Environments page', :feature, :js do
       scenario 'does show no deployments' do
         expect(page).to have_content('No deployments yet')
       end
+
+      context 'for available environment' do
+        given(:environment) { create(:environment, project: project, state: :available) }
+
+        scenario 'does not shows stop button' do
+          expect(page).not_to have_selector('.stop-env-link')
+        end
+      end
+
+      context 'for stopped environment' do
+        given(:environment) { create(:environment, project: project, state: :stopped) }
+
+        scenario 'does not shows stop button' do
+          expect(page).not_to have_selector('.stop-env-link')
+        end
+      end
     end
 
     context 'with deployments' do
@@ -85,14 +101,14 @@ feature 'Environments page', :feature, :js do
         end
 
         scenario 'does show a play button' do
-          find('.dropdown-play-icon-container').click
+          find('.js-dropdown-play-icon-container').click
           expect(page).to have_content(manual.name.humanize)
         end
 
         scenario 'does allow to play manual action', js: true do
           expect(manual).to be_skipped
 
-          find('.dropdown-play-icon-container').click
+          find('.js-dropdown-play-icon-container').click
           expect(page).to have_content(manual.name.humanize)
 
           expect { click_link(manual.name.humanize) }
@@ -111,6 +127,10 @@ feature 'Environments page', :feature, :js do
 
         scenario 'does not show external link button' do
           expect(page).not_to have_css('external-url')
+        end
+
+        scenario 'does not show terminal button' do
+          expect(page).not_to have_terminal_button
         end
 
         context 'with external_url' do
@@ -145,6 +165,26 @@ feature 'Environments page', :feature, :js do
             end
           end
         end
+
+        context 'with terminal' do
+          let(:project) { create(:kubernetes_project, :test_repo) }
+
+          context 'for project master' do
+            let(:role) { :master }
+
+            scenario 'it shows the terminal button' do
+              expect(page).to have_terminal_button
+            end
+          end
+
+          context 'for developer' do
+            let(:role) { :developer }
+
+            scenario 'does not show terminal button' do
+              expect(page).not_to have_terminal_button
+            end
+          end
+        end
       end
     end
   end
@@ -170,7 +210,7 @@ feature 'Environments page', :feature, :js do
         end
 
         scenario 'does create a new pipeline' do
-          expect(page).to have_content('Production')
+          expect(page).to have_content('production')
         end
       end
 
@@ -193,6 +233,10 @@ feature 'Environments page', :feature, :js do
         expect(page).not_to have_link('New environment')
       end
     end
+  end
+
+  def have_terminal_button
+    have_link(nil, href: terminal_namespace_project_environment_path(project.namespace, project, environment))
   end
 
   def visit_environments(project)

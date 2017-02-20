@@ -1,6 +1,7 @@
-/* eslint-disable */
-((global) => {
+/* eslint-disable comma-dangle, no-unused-vars, class-methods-use-this, quotes, consistent-return, func-names, prefer-arrow-callback, space-before-function-paren, max-len */
+/* global Flash */
 
+((global) => {
   class Profile {
     constructor({ form } = {}) {
       this.onSubmitForm = this.onSubmitForm.bind(this);
@@ -24,6 +25,7 @@
     bindEvents() {
       $('.js-preferences-form').on('change.preference', 'input[type=radio]', this.submitForm);
       $('#user_notification_email').on('change', this.submitForm);
+      $('#user_notified_of_own_activity').on('change', this.submitForm);
       $('.update-username').on('ajax:before', this.beforeUpdateUsername);
       $('.update-username').on('ajax:complete', this.afterUpdateUsername);
       $('.update-notifications').on('ajax:success', this.onUpdateNotifs);
@@ -40,15 +42,12 @@
     }
 
     beforeUpdateUsername() {
-      $('.loading-username').show();
-      $(this).find('.update-success').hide();
-      return $(this).find('.update-failed').hide();
+      $('.loading-username', this).removeClass('hidden');
     }
 
     afterUpdateUsername() {
-      $('.loading-username').hide();
-      $(this).find('.btn-save').enable();
-      return $(this).find('.loading-gif').hide();
+      $('.loading-username', this).addClass('hidden');
+      $('button[type=submit]', this).enable();
     }
 
     onUpdateNotifs(e, data) {
@@ -97,5 +96,4 @@
       return new Profile();
     }
   });
-
 })(window.gl || (window.gl = {}));

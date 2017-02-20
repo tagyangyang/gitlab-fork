@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe API::API, api: true  do
+describe API::Deployments, api: true  do
   include ApiHelpers
 
   let(:user)        { create(:user) }
@@ -22,6 +22,7 @@ describe API::API, api: true  do
         get api("/projects/#{project.id}/deployments", user)
 
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.size).to eq(1)
         expect(json_response.first['iid']).to eq(deployment.iid)

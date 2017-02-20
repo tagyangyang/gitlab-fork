@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-describe API::API do
+describe API::Triggers do
   include ApiHelpers
 
   let(:user) { create(:user) }
   let(:user2) { create(:user) }
   let!(:trigger_token) { 'secure_token' }
   let!(:trigger_token_2) { 'secure_token_2' }
-  let!(:project) { create(:project, creator_id: user.id) }
+  let!(:project) { create(:project, :repository, creator: user) }
   let!(:master) { create(:project_member, :master, user: user, project: project) }
   let!(:developer) { create(:project_member, :developer, user: user2, project: project) }
   let!(:trigger) { create(:ci_trigger, project: project, token: trigger_token) }
@@ -15,7 +15,7 @@ describe API::API do
   let!(:trigger_request) { create(:ci_trigger_request, trigger: trigger, created_at: '2015-01-01 12:13:14') }
 
   describe 'POST /projects/:project_id/trigger' do
-    let!(:project2) { create(:empty_project) }
+    let!(:project2) { create(:project) }
     let(:options) do
       {
         token: trigger_token
@@ -100,6 +100,7 @@ describe API::API do
         get api("/projects/#{project.id}/triggers", user)
 
         expect(response).to have_http_status(200)
+        expect(response).to include_pagination_headers
         expect(json_response).to be_a(Array)
         expect(json_response[0]).to have_key('token')
       end

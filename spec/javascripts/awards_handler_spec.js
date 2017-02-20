@@ -1,9 +1,8 @@
-/* eslint-disable space-before-function-paren, no-var, one-var, one-var-declaration-per-line, no-unused-expressions, comma-dangle, no-undef, new-parens, no-unused-vars, quotes, jasmine/no-spec-dupes, prefer-template, padded-blocks, max-len */
+/* eslint-disable space-before-function-paren, no-var, one-var, one-var-declaration-per-line, no-unused-expressions, comma-dangle, new-parens, no-unused-vars, quotes, jasmine/no-spec-dupes, prefer-template, max-len */
+/* global AwardsHandler */
 
-/*= require awards_handler */
-/*= require jquery */
-/*= require js.cookie */
-/*= require ./fixtures/emoji_menu */
+require('~/awards_handler');
+require('./fixtures/emoji_menu');
 
 (function() {
   var awardsHandler, lazyAssert, urlRoot;
@@ -33,9 +32,9 @@
   };
 
   describe('AwardsHandler', function() {
-    fixture.preload('awards_handler.html');
+    preloadFixtures('issues/open-issue.html.raw');
     beforeEach(function() {
-      fixture.load('awards_handler.html');
+      loadFixtures('issues/open-issue.html.raw');
       awardsHandler = new AwardsHandler;
       spyOn(awardsHandler, 'postEmoji').and.callFake((function(_this) {
         return function(url, emoji, cb) {
@@ -112,8 +111,8 @@
       });
     });
     describe('::getAwardUrl', function() {
-      return it('should return the url for request', function() {
-        return expect(awardsHandler.getAwardUrl()).toBe('/gitlab-org/gitlab-test/issues/8/toggle_award_emoji');
+      return it('returns the url for request', function() {
+        return expect(awardsHandler.getAwardUrl()).toBe('http://test.host/frontend-fixtures/issues-project/issues/1/toggle_award_emoji');
       });
     });
     describe('::addAward and ::checkMutuality', function() {
@@ -209,7 +208,7 @@
         $('.js-add-award').eq(0).click();
         $menu = $('.emoji-menu');
         $block = $('.js-awards-block');
-        $emoji = $menu.find(".emoji-menu-list-item " + selector);
+        $emoji = $menu.find('.emoji-menu-list:not(.frequent-emojis) ' + selector);
         expect($emoji.length).toBe(1);
         expect($block.find(selector).length).toBe(0);
         $emoji.click();
@@ -224,11 +223,10 @@
         openEmojiMenuAndAddEmoji();
         $('.js-add-award').eq(0).click();
         $block = $('.js-awards-block');
-        $emoji = $('.emoji-menu').find(".emoji-menu-list-item " + selector);
+        $emoji = $('.emoji-menu').find(".emoji-menu-list:not(.frequent-emojis) " + selector);
         $emoji.click();
         return expect($block.find(selector).length).toBe(0);
       });
     });
   });
-
-}).call(this);
+}).call(window);

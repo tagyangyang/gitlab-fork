@@ -1,7 +1,9 @@
-/* eslint-disable */
-/*= require blob/template_selector */
-((global) => {
+/* eslint-disable no-param-reassign, comma-dangle */
+/* global Api */
 
+require('./template_selector');
+
+((global) => {
   class BlobCiYamlSelector extends gl.TemplateSelector {
     requestFile(query) {
       return Api.gitlabCiYml(query.name, this.requestFileSuccess.bind(this));
@@ -37,5 +39,4 @@
   }
 
   global.BlobCiYamlSelectors = BlobCiYamlSelectors;
-
 })(window.gl || (window.gl = {}));

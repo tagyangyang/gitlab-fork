@@ -1,6 +1,7 @@
-/* eslint-disable */
-((global) => {
+/* eslint-disable no-param-reassign, comma-dangle */
+/* global Vue */
 
+((global) => {
   global.mergeConflicts = global.mergeConflicts || {};
 
   global.mergeConflicts.parallelConflictLines = Vue.extend({
@@ -19,10 +20,9 @@
             </td>
             <td class="diff-line-num old_line" :class="lineCssClass(line)" v-if="!line.isHeader">{{line.lineNumber}}</td>
             <td class="line_content parallel" :class="lineCssClass(line)" v-if="!line.isHeader" v-html="line.richText"></td>
-          </template> 
+          </template>
         </tr>
       </table>
     `,
   });
-
 })(window.gl || (window.gl = {}));

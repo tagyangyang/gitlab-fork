@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe API::API, api: true  do
+describe API::Labels, api: true  do
   include ApiHelpers
 
   let(:user) { create(:user) }
-  let(:project) { create(:project, creator_id: user.id, namespace: user.namespace) }
+  let(:project) { create(:empty_project, creator_id: user.id, namespace: user.namespace) }
   let!(:label1) { create(:label, title: 'label1', project: project) }
   let!(:priority_label) { create(:label, title: 'bug', project: project, priority: 3) }
 
@@ -30,6 +30,7 @@ describe API::API, api: true  do
       get api("/projects/#{project.id}/labels", user)
 
       expect(response).to have_http_status(200)
+      expect(response).to include_pagination_headers
       expect(json_response).to be_an Array
       expect(json_response.size).to eq(3)
       expect(json_response.first.keys).to match_array expected_keys

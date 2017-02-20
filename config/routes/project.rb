@@ -1,28 +1,27 @@
-resources :projects, constraints: { id: /[^\/]+/ }, only: [:index, :new, :create]
+require 'constraints/project_url_constrainer'
 
-resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only: [] do
-  resources(:projects, constraints: { id: /[a-zA-Z.0-9_\-]+(?<!\.atom)/ }, except:
-            [:new, :create, :index], path: "/") do
-    member do
-      put :transfer
-      delete :remove_fork
-      post :archive
-      post :unarchive
-      post :housekeeping
-      post :toggle_star
-      post :preview_markdown
-      post :export
-      post :remove_export
-      post :generate_new_export
-      get :download_export
-      get :autocomplete_sources
-      get :activity
-      get :refs
-      put :new_issue_address
-    end
+resources :projects, only: [:index, :new, :create]
 
-    scope module: :projects do
-      draw :git_http
+draw :git_http
+
+constraints(ProjectUrlConstrainer.new) do
+  scope(path: '*namespace_id', as: :namespace) do
+    scope(path: ':project_id',
+          constraints: { project_id: Gitlab::Regex.project_route_regex },
+          module: :projects,
+          as: :project) do
+
+      resources :autocomplete_sources, only: [] do
+        collection do
+          get 'emojis'
+          get 'members'
+          get 'issues'
+          get 'merge_requests'
+          get 'labels'
+          get 'milestones'
+          get 'commands'
+        end
+      end
 
       #
       # Templates
@@ -33,14 +32,15 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
       resources :commit, only: [:show], constraints: { id: /\h{7,40}/ } do
         member do
           get :branches
-          get :builds
           get :pipelines
-          post :cancel_builds
-          post :retry_builds
           post :revert
           post :cherry_pick
           get :diff_for_path
         end
+      end
+
+      resource :pages, only: [:show, :destroy] do
+        resources :domains, only: [:show, :new, :create, :destroy], controller: 'pages_domains', constraints: { id: /[^\/]+/ }
       end
 
       resources :compare, only: [:index, :create] do
@@ -68,6 +68,7 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
       resources :snippets, concerns: :awardable, constraints: { id: /\d+/ } do
         member do
           get 'raw'
+          post :mark_as_spam
         end
       end
 
@@ -76,6 +77,8 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
           get :test
         end
       end
+
+      resource :mattermost, only: [:new, :create]
 
       resources :deploy_keys, constraints: { id: /\d+/ }, only: [:index, :new, :create] do
         member do
@@ -93,10 +96,10 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
           get :diffs
           get :conflicts
           get :conflict_for_path
-          get :builds
           get :pipelines
           get :merge_check
           post :merge
+          get :merge_widget_refresh
           post :cancel_merge_when_build_succeeds
           get :ci_status
           get :ci_environments_status
@@ -140,14 +143,22 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
         end
 
         member do
+          get :stage
           post :cancel
           post :retry
+          get :builds
         end
       end
 
       resources :environments, except: [:destroy] do
         member do
           post :stop
+          get :terminal
+          get '/terminal.ws/authorize', to: 'environments#terminal_websocket_authorize', constraints: { format: nil }
+        end
+
+        collection do
+          get :folder, path: 'folders/:id'
         end
       end
 
@@ -218,6 +229,7 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
         end
 
         member do
+          post :promote
           post :toggle_subscription
           delete :remove_priority
         end
@@ -263,7 +275,7 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
 
       resources :boards, only: [:index, :show] do
         scope module: :boards do
-          resources :issues, only: [:update]
+          resources :issues, only: [:index, :update]
 
           resources :lists, only: [:index, :create, :update, :destroy] do
             collection do
@@ -305,11 +317,38 @@ resources :namespaces, path: '/', constraints: { id: /[a-zA-Z.0-9_\-]+/ }, only:
           end
         end
       end
+      namespace :settings do
+        resource :members, only: [:show]
+        resource :ci_cd, only: [:show], controller: 'ci_cd'
+        resource :integrations, only: [:show]
+      end
 
       # Since both wiki and repository routing contains wildcard characters
       # its preferable to keep it below all other project routes
       draw :wiki
       draw :repository
+    end
+
+    resources(:projects,
+              path: '/',
+              constraints: { id: Gitlab::Regex.project_route_regex },
+              only: [:edit, :show, :update, :destroy]) do
+      member do
+        put :transfer
+        delete :remove_fork
+        post :archive
+        post :unarchive
+        post :housekeeping
+        post :toggle_star
+        post :preview_markdown
+        post :export
+        post :remove_export
+        post :generate_new_export
+        get :download_export
+        get :activity
+        get :refs
+        put :new_issue_address
+      end
     end
   end
 end

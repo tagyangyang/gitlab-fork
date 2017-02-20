@@ -2,7 +2,8 @@ require 'mime/types'
 
 module API
   class Repositories < Grape::API
-    before { authenticate! }
+    include PaginationParams
+
     before { authorize! :download_code, user_project }
 
     params do
@@ -25,6 +26,7 @@ module API
         optional :ref_name, type: String, desc: 'The name of a repository branch or tag, if not given the default branch is used'
         optional :path, type: String, desc: 'The path of the tree'
         optional :recursive, type: Boolean, default: false, desc: 'Used to get a recursive tree'
+        use :pagination
       end
       get ':id/repository/tree' do
         ref = params[:ref_name] || user_project.try(:default_branch) || 'master'
@@ -34,8 +36,8 @@ module API
         not_found!('Tree') unless commit
 
         tree = user_project.repository.tree(commit.id, path, recursive: params[:recursive])
-
-        present tree.sorted_entries, with: Entities::RepoTreeObject
+        entries = ::Kaminari.paginate_array(tree.sorted_entries)
+        present paginate(entries), with: Entities::RepoTreeObject
       end
 
       desc 'Get a raw file contents'
@@ -79,8 +81,6 @@ module API
         optional :format, type: String, desc: 'The archive format'
       end
       get ':id/repository/archive', requirements: { format: Gitlab::Regex.archive_formats_regex } do
-        authorize! :download_code, user_project
-
         begin
           send_git_archive user_project.repository, ref: params[:sha], format: params[:format]
         rescue
@@ -96,7 +96,6 @@ module API
         requires :to, type: String, desc: 'The commit, branch name, or tag name to stop comparison'
       end
       get ':id/repository/compare' do
-        authorize! :download_code, user_project
         compare = Gitlab::Git::Compare.new(user_project.repository.raw_repository, params[:from], params[:to])
         present compare, with: Entities::Compare
       end
@@ -104,12 +103,13 @@ module API
       desc 'Get repository contributors' do
         success Entities::Contributor
       end
+      params do
+        use :pagination
+      end
       get ':id/repository/contributors' do
-        authorize! :download_code, user_project
-
         begin
-          present user_project.repository.contributors,
-                  with: Entities::Contributor
+          contributors = ::Kaminari.paginate_array(user_project.repository.contributors)
+          present paginate(contributors), with: Entities::Contributor
         rescue
           not_found!
         end

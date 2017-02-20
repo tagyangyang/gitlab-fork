@@ -20,7 +20,7 @@ feature 'Merge request conflict resolution', js: true, feature: true do
 
       within find('.files-wrapper .diff-file', text: 'files/ruby/regex.rb') do
         all('button', text: 'Use ours').each do |button|
-          button.click
+          button.trigger('click')
         end
       end
 
@@ -141,7 +141,7 @@ feature 'Merge request conflict resolution', js: true, feature: true do
 
         click_on 'Changes'
         wait_for_ajax
-        find('.click-to-expand').click
+        click_link 'Expand all'
         wait_for_ajax
 
         expect(page).to have_content('Gregor Samsa woke from troubled dreams')

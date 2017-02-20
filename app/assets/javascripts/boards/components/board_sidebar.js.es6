@@ -1,4 +1,12 @@
-/* eslint-disable */
+/* eslint-disable comma-dangle, space-before-function-paren, no-new */
+/* global Vue */
+/* global IssuableContext */
+/* global MilestoneSelect */
+/* global LabelsSelect */
+/* global Sidebar */
+
+require('./sidebar/remove_issue');
+
 (() => {
   const Store = gl.issueBoards.BoardsStore;
 
@@ -12,7 +20,8 @@
     data() {
       return {
         detail: Store.detail,
-        issue: {}
+        issue: {},
+        list: {},
       };
     },
     computed: {
@@ -23,7 +32,14 @@
     watch: {
       detail: {
         handler () {
+          if (this.issue.id !== this.detail.issue.id) {
+            $('.js-issue-board-sidebar', this.$el).each((i, el) => {
+              $(el).data('glDropdown').clearMenu();
+            });
+          }
+
           this.issue = this.detail.issue;
+          this.list = this.detail.list;
         },
         deep: true
       },
@@ -47,7 +63,10 @@
       new gl.DueDateSelectors();
       new LabelsSelect();
       new Sidebar();
-      new Subscription('.subscription');
-    }
+      gl.Subscription.bindAll('.subscription');
+    },
+    components: {
+      removeBtn: gl.issueBoards.RemoveIssueBtn,
+    },
   });
 })();

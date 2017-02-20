@@ -72,7 +72,6 @@ GET /users
     "organization": "",
     "last_sign_in_at": "2012-06-01T11:41:01Z",
     "confirmed_at": "2012-05-23T09:05:22Z",
-    "theme_id": 1,
     "color_scheme_id": 2,
     "projects_limit": 100,
     "current_sign_in_at": "2012-06-02T06:36:55Z",
@@ -105,7 +104,6 @@ GET /users
     "organization": "",
     "last_sign_in_at": null,
     "confirmed_at": "2012-05-30T16:53:06.148Z",
-    "theme_id": 1,
     "color_scheme_id": 3,
     "projects_limit": 100,
     "current_sign_in_at": "2014-03-19T17:54:13Z",
@@ -198,7 +196,6 @@ Parameters:
   "organization": "",
   "last_sign_in_at": "2012-06-01T11:41:01Z",
   "confirmed_at": "2012-05-23T09:05:22Z",
-  "theme_id": 1,
   "color_scheme_id": 2,
   "projects_limit": 100,
   "current_sign_in_at": "2012-06-02T06:36:55Z",
@@ -216,7 +213,7 @@ Parameters:
 
 ## User creation
 
-Creates a new user. Note only administrators can create new users.
+Creates a new user. Note only administrators can create new users. Either `password` or `reset_password` should be specified (`reset_password` takes priority).
 
 ```
 POST /users
@@ -225,7 +222,8 @@ POST /users
 Parameters:
 
 - `email` (required)            - Email
-- `password` (required)         - Password
+- `password` (optional)         - Password
+- `reset_password` (optional)   - Send user password reset link - true or false(default)
 - `username` (required)         - Username
 - `name` (required)             - Name
 - `skype` (optional)            - Skype ID
@@ -271,8 +269,9 @@ Parameters:
 - `can_create_group` (optional) - User can create groups - true or false
 - `external` (optional)         - Flags the user as external - true or false(default)
 
-Note, at the moment this method does only return a 404 error,
-even in cases where a 409 (Conflict) would be more appropriate,
+On password update, user will be forced to change it upon next login.
+Note, at the moment this method does only return a `404` error,
+even in cases where a `409` (Conflict) would be more appropriate,
 e.g. when renaming the email address to some existing one.
 
 ## User deletion
@@ -291,7 +290,9 @@ Parameters:
 
 - `id` (required) - The ID of the user
 
-## Current user
+## User
+
+### For normal users
 
 Gets currently authenticated user.
 
@@ -319,7 +320,6 @@ GET /user
   "organization": "",
   "last_sign_in_at": "2012-06-01T11:41:01Z",
   "confirmed_at": "2012-05-23T09:05:22Z",
-  "theme_id": 1,
   "color_scheme_id": 2,
   "projects_limit": 100,
   "current_sign_in_at": "2012-06-02T06:36:55Z",
@@ -332,6 +332,52 @@ GET /user
   "can_create_project": true,
   "two_factor_enabled": true,
   "external": false
+}
+```
+
+### For admins
+
+Parameters:
+
+- `sudo` (required) - the ID of a user
+
+```
+GET /user
+```
+
+```json
+{
+  "id": 1,
+  "username": "john_smith",
+  "email": "john@example.com",
+  "name": "John Smith",
+  "state": "active",
+  "avatar_url": "http://localhost:3000/uploads/user/avatar/1/index.jpg",
+  "web_url": "http://localhost:3000/john_smith",
+  "created_at": "2012-05-23T08:00:58Z",
+  "is_admin": false,
+  "bio": null,
+  "location": null,
+  "skype": "",
+  "linkedin": "",
+  "twitter": "",
+  "website_url": "",
+  "organization": "",
+  "last_sign_in_at": "2012-06-01T11:41:01Z",
+  "confirmed_at": "2012-05-23T09:05:22Z",
+  "color_scheme_id": 2,
+  "projects_limit": 100,
+  "current_sign_in_at": "2012-06-02T06:36:55Z",
+  "identities": [
+    {"provider": "github", "extern_uid": "2435223452345"},
+    {"provider": "bitbucket", "extern_uid": "john_smith"},
+    {"provider": "google_oauth2", "extern_uid": "8776128412476123468721346"}
+  ],
+  "can_create_group": true,
+  "can_create_project": true,
+  "two_factor_enabled": true,
+  "external": false,
+  "private_token": "dd34asd13as"
 }
 ```
 
@@ -448,8 +494,6 @@ Parameters:
 - `id` (required)    - id of specified user
 - `title` (required) - new SSH Key's title
 - `key` (required)   - new SSH key
-
-Will return created key with status `201 Created` on success, or `404 Not found` on fail.
 
 ## Delete SSH key for current user
 
@@ -580,8 +624,6 @@ Parameters:
 
 - `id` (required)    - id of specified user
 - `email` (required) - email address
-
-Will return created email with status `201 Created` on success, or `404 Not found` on fail.
 
 ## Delete email for current user
 

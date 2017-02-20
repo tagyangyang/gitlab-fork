@@ -35,13 +35,52 @@ describe Issue, "Issuable" do
     it { is_expected.to validate_presence_of(:iid) }
     it { is_expected.to validate_presence_of(:author) }
     it { is_expected.to validate_presence_of(:title) }
-    it { is_expected.to validate_length_of(:title).is_at_least(0).is_at_most(255) }
+    it { is_expected.to validate_length_of(:title).is_at_most(255) }
   end
 
   describe "Scope" do
     it { expect(described_class).to respond_to(:opened) }
     it { expect(described_class).to respond_to(:closed) }
     it { expect(described_class).to respond_to(:assigned) }
+  end
+
+  describe "before_save" do
+    describe "#update_cache_counts" do
+      context "when previous assignee exists" do
+        before do
+          assignee = create(:user)
+          issue.project.team << [assignee, :developer]
+          issue.update(assignee: assignee)
+        end
+
+        it "updates cache counts for new assignee" do
+          user = create(:user)
+
+          expect(user).to receive(:update_cache_counts)
+
+          issue.update(assignee: user)
+        end
+
+        it "updates cache counts for previous assignee" do
+          old_assignee = issue.assignee
+          allow(User).to receive(:find_by_id).with(old_assignee.id).and_return(old_assignee)
+
+          expect(old_assignee).to receive(:update_cache_counts)
+
+          issue.update(assignee: nil)
+        end
+      end
+
+      context "when previous assignee does not exist" do
+        before{ issue.update(assignee: nil) }
+
+        it "updates cache count for the new assignee" do
+          expect_any_instance_of(User).to receive(:update_cache_counts)
+
+          issue.update(assignee: user)
+        end
+      end
+    end
   end
 
   describe ".search" do
@@ -262,7 +301,7 @@ describe Issue, "Issuable" do
   end
 
   describe '#labels_array' do
-    let(:project) { create(:project) }
+    let(:project) { create(:empty_project) }
     let(:bug) { create(:label, project: project, title: 'bug') }
     let(:issue) { create(:issue, project: project) }
 
@@ -276,7 +315,7 @@ describe Issue, "Issuable" do
   end
 
   describe '#user_notes_count' do
-    let(:project) { create(:project) }
+    let(:project) { create(:empty_project) }
     let(:issue1) { create(:issue, project: project) }
     let(:issue2) { create(:issue, project: project) }
 
@@ -320,7 +359,7 @@ describe Issue, "Issuable" do
   end
 
   describe ".with_label" do
-    let(:project) { create(:project, :public) }
+    let(:project) { create(:empty_project, :public) }
     let(:bug) { create(:label, project: project, title: 'bug') }
     let(:feature) { create(:label, project: project, title: 'feature') }
     let(:enhancement) { create(:label, project: project, title: 'enhancement') }
@@ -367,6 +406,44 @@ describe Issue, "Issuable" do
 
     it 'returns false for a user that is not the assignee or author' do
       expect(issue.assignee_or_author?(user)).to eq(false)
+    end
+  end
+
+  describe '#spend_time' do
+    let(:user) { create(:user) }
+    let(:issue) { create(:issue) }
+
+    def spend_time(seconds)
+      issue.spend_time(duration: seconds, user: user)
+      issue.save!
+    end
+
+    context 'adding time' do
+      it 'should update the total time spent' do
+        spend_time(1800)
+
+        expect(issue.total_time_spent).to eq(1800)
+      end
+    end
+
+    context 'substracting time' do
+      before do
+        spend_time(1800)
+      end
+
+      it 'should update the total time spent' do
+        spend_time(-900)
+
+        expect(issue.total_time_spent).to eq(900)
+      end
+
+      context 'when time to substract exceeds the total time spent' do
+        it 'raise a validation error' do
+          expect do
+            spend_time(-3600)
+          end.to raise_error(ActiveRecord::RecordInvalid)
+        end
+      end
     end
   end
 end

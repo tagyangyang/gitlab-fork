@@ -1,4 +1,5 @@
-/* eslint-disable */
+/* eslint-disable wrap-iife, func-names, space-before-function-paren, object-shorthand, comma-dangle, one-var, one-var-declaration-per-line, no-restricted-syntax, max-len, no-param-reassign */
+
 (function(global) {
   class ProjectLabelSubscription {
     constructor(container) {
@@ -37,17 +38,18 @@
         this.$buttons.attr('data-status', newStatus);
         this.$buttons.find('> span').text(newAction);
 
-        for (let button of this.$buttons) {
-          let $button = $(button);
+        this.$buttons.map((button) => {
+          const $button = $(button);
 
           if ($button.attr('data-original-title')) {
             $button.tooltip('hide').attr('data-original-title', newAction).tooltip('fixTitle');
           }
-        }
+
+          return button;
+        });
       });
     }
   }
 
   global.ProjectLabelSubscription = ProjectLabelSubscription;
-
 })(window.gl || (window.gl = {}));

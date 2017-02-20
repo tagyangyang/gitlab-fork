@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe API::API, 'MergeRequestDiffs', api: true  do
+describe API::MergeRequestDiffs, 'MergeRequestDiffs', api: true  do
   include ApiHelpers
 
   let!(:user)          { create(:user) }
@@ -19,6 +19,8 @@ describe API::API, 'MergeRequestDiffs', api: true  do
       merge_request_diff = merge_request.merge_request_diffs.first
 
       expect(response.status).to eq 200
+      expect(response).to include_pagination_headers
+      expect(json_response).to be_an Array
       expect(json_response.size).to eq(merge_request.merge_request_diffs.size)
       expect(json_response.first['id']).to eq(merge_request_diff.id)
       expect(json_response.first['head_commit_sha']).to eq(merge_request_diff.head_commit_sha)

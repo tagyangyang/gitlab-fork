@@ -1,18 +1,23 @@
-/* eslint-disable */
+/* eslint-disable comma-dangle, object-shorthand, func-names, quote-props, no-else-return, camelcase, no-new, max-len */
+/* global CommentsStore */
+/* global ResolveService */
+/* global Flash */
+const Vue = require('vue');
+
 (() => {
   const ResolveBtn = Vue.extend({
     props: {
       noteId: Number,
       discussionId: String,
       resolved: Boolean,
-      projectPath: String,
       canResolve: Boolean,
       resolvedBy: String
     },
     data: function () {
       return {
         discussions: CommentsStore.state,
-        loading: false
+        loading: false,
+        note: {},
       };
     },
     watch: {
@@ -24,13 +29,6 @@
     computed: {
       discussion: function () {
         return this.discussions[this.discussionId];
-      },
-      note: function () {
-        if (this.discussion) {
-          return this.discussion.getNote(this.noteId);
-        } else {
-          return undefined;
-        }
       },
       buttonText: function () {
         if (this.isResolved) {
@@ -54,9 +52,11 @@
     },
     methods: {
       updateTooltip: function () {
-        $(this.$refs.button)
-          .tooltip('hide')
-          .tooltip('fixTitle');
+        this.$nextTick(() => {
+          $(this.$refs.button)
+            .tooltip('hide')
+            .tooltip('fixTitle');
+        });
       },
       resolve: function () {
         if (!this.canResolve) return;
@@ -66,10 +66,10 @@
 
         if (this.isResolved) {
           promise = ResolveService
-            .unresolve(this.projectPath, this.noteId);
+            .unresolve(this.noteId);
         } else {
           promise = ResolveService
-            .resolve(this.projectPath, this.noteId);
+            .resolve(this.noteId);
         }
 
         promise.then((response) => {
@@ -85,7 +85,7 @@
             new Flash('An error occurred when trying to resolve a comment. Please try again.', 'alert');
           }
 
-          this.$nextTick(this.updateTooltip);
+          this.updateTooltip();
         });
       }
     },
@@ -99,6 +99,8 @@
     },
     created: function () {
       CommentsStore.create(this.discussionId, this.noteId, this.canResolve, this.resolved, this.resolvedBy);
+
+      this.note = this.discussion.getNote(this.noteId);
     }
   });
 

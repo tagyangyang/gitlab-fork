@@ -24,8 +24,16 @@ FactoryGirl.define do
       visibility_level Gitlab::VisibilityLevel::PRIVATE
     end
 
+    trait :archived do
+      archived true
+    end
+
     trait :access_requestable do
       request_access_enabled true
+    end
+
+    trait :repository do
+      # no-op... for now!
     end
 
     trait :empty_repo do
@@ -41,6 +49,31 @@ FactoryGirl.define do
         FileUtils.rm_r(File.join(project.repository_storage_path, "#{project.path_with_namespace}.git", 'refs'))
       end
     end
+
+    trait :test_repo do
+      after :create do |project|
+        TestEnv.copy_repo(project)
+      end
+    end
+
+    trait(:wiki_enabled)            { wiki_access_level ProjectFeature::ENABLED }
+    trait(:wiki_disabled)           { wiki_access_level ProjectFeature::DISABLED }
+    trait(:wiki_private)            { wiki_access_level ProjectFeature::PRIVATE }
+    trait(:builds_enabled)          { builds_access_level ProjectFeature::ENABLED }
+    trait(:builds_disabled)         { builds_access_level ProjectFeature::DISABLED }
+    trait(:builds_private)          { builds_access_level ProjectFeature::PRIVATE }
+    trait(:snippets_enabled)        { snippets_access_level ProjectFeature::ENABLED }
+    trait(:snippets_disabled)       { snippets_access_level ProjectFeature::DISABLED }
+    trait(:snippets_private)        { snippets_access_level ProjectFeature::PRIVATE }
+    trait(:issues_disabled)         { issues_access_level ProjectFeature::DISABLED }
+    trait(:issues_enabled)          { issues_access_level ProjectFeature::ENABLED }
+    trait(:issues_private)          { issues_access_level ProjectFeature::PRIVATE }
+    trait(:merge_requests_enabled)  { merge_requests_access_level ProjectFeature::ENABLED }
+    trait(:merge_requests_disabled) { merge_requests_access_level ProjectFeature::DISABLED }
+    trait(:merge_requests_private)  { merge_requests_access_level ProjectFeature::PRIVATE }
+    trait(:repository_enabled)      { repository_access_level ProjectFeature::ENABLED }
+    trait(:repository_disabled)     { repository_access_level ProjectFeature::DISABLED }
+    trait(:repository_private)      { repository_access_level ProjectFeature::PRIVATE }
 
     # Nest Project Feature attributes
     transient do
@@ -91,8 +124,42 @@ FactoryGirl.define do
   factory :project, parent: :empty_project do
     path { 'gitlabhq' }
 
-    after :create do |project|
+    test_repo
+
+    transient do
+      create_template nil
+    end
+
+    after :create do |project, evaluator|
       TestEnv.copy_repo(project)
+
+      if evaluator.create_template
+        args = evaluator.create_template
+
+        project.add_user(args[:user], args[:access])
+
+        project.repository.commit_file(
+          args[:user],
+          ".gitlab/#{args[:path]}/bug.md",
+          'something valid',
+          message: 'test 3',
+          branch_name: 'master',
+          update: false)
+        project.repository.commit_file(
+          args[:user],
+          ".gitlab/#{args[:path]}/template_test.md",
+          'template_test',
+          message: 'test 1',
+          branch_name: 'master',
+          update: false)
+        project.repository.commit_file(
+          args[:user],
+          ".gitlab/#{args[:path]}/feature_proposal.md",
+          'feature_proposal',
+          message: 'test 2',
+          branch_name: 'master',
+          update: false)
+      end
     end
   end
 
@@ -129,6 +196,19 @@ FactoryGirl.define do
           title: 'JIRA tracker',
           url: 'http://jira.example.net',
           project_key: 'JIRA'
+        }
+      )
+    end
+  end
+
+  factory :kubernetes_project, parent: :empty_project do
+    after :create do |project|
+      project.create_kubernetes_service(
+        active: true,
+        properties: {
+          namespace: project.path,
+          api_url: 'https://kubernetes.example.com',
+          token: 'a' * 40,
         }
       )
     end
