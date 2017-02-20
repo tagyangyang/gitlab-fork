@@ -63,14 +63,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       end
     end
 
-    allowed_key_types = params[:application_setting][:allowed_key_types]
-    if allowed_key_types.nil?
-      params[:application_setting][:allowed_key_types] = []
-    else
-      allowed_key_types.map! do |type|
-        type.to_sym
-      end
-    end
+    params[:application_setting][:allowed_key_types] = Array(params[:application_setting][:allowed_key_types])
 
     enabled_oauth_sign_in_sources = params[:application_setting].delete(:enabled_oauth_sign_in_sources)
 

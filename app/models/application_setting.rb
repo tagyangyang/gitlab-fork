@@ -116,6 +116,8 @@ class ApplicationSetting < ActiveRecord::Base
             presence: true,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+  validates :allowed_key_types, presence: true
+
   validates :minimum_rsa_bits,
             presence: true,
             numericality: { only_integer: true, greater_than: 0 }
@@ -149,11 +151,9 @@ class ApplicationSetting < ActiveRecord::Base
   end
 
   validates_each :allowed_key_types do |record, attr, value|
-    unless value.nil?
-      value.each do |type|
-        unless Gitlab::SSHPublicKey::TYPES.include?(type.to_sym)
-          record.errors.add(attr, "'#{type}' is not an valid SSH key type")
-        end
+    value&.each do |type|
+      unless Gitlab::SSHPublicKey.allowed_type?(type)
+        record.errors.add(attr, "'#{type}' is not a valid SSH key type")
       end
     end
   end
@@ -206,8 +206,8 @@ class ApplicationSetting < ActiveRecord::Base
       koding_url: nil,
       max_artifacts_size: Settings.artifacts['max_size'],
       max_attachment_size: Settings.gitlab['max_attachment_size'],
-      minimum_rsa_bits: 1024,
       minimum_ecdsa_bits: 256,
+      minimum_rsa_bits: 1024,
       plantuml_enabled: false,
       plantuml_url: nil,
       recaptcha_enabled: false,
@@ -304,14 +304,11 @@ class ApplicationSetting < ActiveRecord::Base
     sidekiq_throttling_enabled
   end
 
-  def allowed_key_types
-    read_attribute(:allowed_key_types).map(&:to_sym)
-  end
-
   private
 
   def check_repository_storages
     invalid = repository_storages - Gitlab.config.repositories.storages.keys
-    errors.add(:repository_storages, "can't include: #{invalid.join(", ")}") unless invalid.empty?
+    errors.add(:repository_storages, "can't include: #{invalid.join(", ")}") unless
+      invalid.empty?
   end
 end

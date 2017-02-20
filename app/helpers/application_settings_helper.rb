@@ -95,13 +95,14 @@ module ApplicationSettingsHelper
 
   def allowed_key_types_checkboxes(help_block_id)
     Gitlab::SSHPublicKey::TYPES.map do |type|
-      checked = current_application_settings.allowed_key_types.include?(type.to_sym)
-      checkbox_name = 'application_setting[allowed_key_types][]'
+      checked = current_application_settings.allowed_key_types.include?(type)
+      checkbox_id = "allowed_key_types-#{type}"
 
-      label_tag(checkbox_name, class: checked ? 'active' : nil) do
-        check_box_tag(checkbox_name, type, checked,
+      label_tag(checkbox_id, class: checked ? 'active' : nil) do
+        check_box_tag('application_setting[allowed_key_types][]', type, checked,
                       autocomplete: 'off',
-                      'aria-describedby' => help_block_id) + type.upcase
+                      'aria-describedby' => help_block_id,
+                      id: checkbox_id) + type.upcase
       end
     end
   end

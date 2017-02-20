@@ -19,8 +19,9 @@ describe Key, models: true do
 
     it { is_expected.to validate_presence_of(:key) }
     it { is_expected.to validate_length_of(:key).is_at_most(5000) }
-    it { is_expected.to allow_value('ssh-foo').for(:key) }
-    it { is_expected.to allow_value('ecdsa-foo').for(:key) }
+    it { is_expected.to allow_value(attributes_for(:dsa_key)[:key]).for(:key) }
+    it { is_expected.to allow_value(attributes_for(:ecdsa_key)[:key]).for(:key) }
+    it { is_expected.to allow_value(attributes_for(:key)[:key]).for(:key) }
     it { is_expected.not_to allow_value('foo-bar').for(:key) }
   end
 
@@ -136,25 +137,33 @@ describe Key, models: true do
   end
 
   context 'validate the key type is allowed' do
-    it 'accepts a key if type is allowed' do
+    it 'accepts RSA, ECDSA, and DSA keys by default' do
       expect(build(:key)).to be_valid
+      expect(build(:dsa_key)).to be_valid
+      expect(build(:ecdsa_key)).to be_valid
     end
 
-    it 'rejects RSA key if RSA is not an allowed type' do
-      stub_application_setting(allowed_key_types: [:dsa])
+    it 'rejects RSA and ECDSA key if DSA is the only allowed type' do
+      stub_application_setting(allowed_key_types: ['dsa'])
 
       expect(build(:key)).not_to be_valid
+      expect(build(:dsa_key)).to be_valid
+      expect(build(:ecdsa_key)).not_to be_valid
     end
 
-    it 'rejects DSA key if DSA is not an allowed type' do
-      stub_application_setting(allowed_key_types: [:ecdsa])
+    it 'rejects RSA and DSA key if ECDSA is the only allowed type' do
+      stub_application_setting(allowed_key_types: ['ecdsa'])
 
+      expect(build(:key)).not_to be_valid
       expect(build(:dsa_key)).not_to be_valid
+      expect(build(:ecdsa_key)).to be_valid
     end
 
-    it 'rejects ECDSA key if ECDSA is not an allowed type' do
-      stub_application_setting(allowed_key_types: [:rsa])
+    it 'rejects DSA and ECDSA key if RSA is the only allowed type' do
+      stub_application_setting(allowed_key_types: ['rsa'])
 
+      expect(build(:key)).to be_valid
+      expect(build(:dsa_key)).not_to be_valid
       expect(build(:ecdsa_key)).not_to be_valid
     end
   end
@@ -174,9 +183,7 @@ describe Key, models: true do
   end
 
   describe '#key=' do
-    let(:valid_key) do
-      "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAIEAiPWx6WM4lhHNedGfBpPJNPpZ7yKu+dnn1SJejgt4596k6YjzGGphH2TUxwKzxcKDKKezwkpfnxPkSMkuEspGRt/aZZ9wa++Oi7Qkr8prgHc4soW6NUlfDzpvZK2H5E7eQaSeP3SAwGmQKUFHCddNaP0L+hM7zhFNzjFvpaMgJw0= dummy@gitlab.com"
-    end
+    let(:valid_key) { attributes_for(:key)[:key] }
 
     it 'strips white spaces' do
       expect(described_class.new(key: " #{valid_key} ").key).to eq(valid_key)

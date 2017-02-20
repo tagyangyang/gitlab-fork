@@ -20,7 +20,7 @@ describe API::Settings, 'Settings', api: true  do
       expect(json_response['plantuml_url']).to be_nil
       expect(json_response['minimum_rsa_bits']).to eq(1024)
       expect(json_response['minimum_ecdsa_bits']).to eq(256)
-      expect(json_response['allowed_key_types']).to eq(['rsa', 'dsa', 'ecdsa'])
+      expect(json_response['allowed_key_types']).to eq(%w[rsa dsa ecdsa])
     end
   end
 

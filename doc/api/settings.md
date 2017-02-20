@@ -91,7 +91,7 @@ PUT /application/settings
 | `terminal_max_session_time` | integer | no | Maximum time for web terminal websocket connection (in seconds). Set to 0 for unlimited time. |
 | `minimum_rsa_bits` | integer | no | The minimum allowed bit length of an uploaded RSA key. Default is `1024`.
 | `minimum_ecdsa_bits` | integer | no | The minimum allowed curve size (in bits) of an uploaded ECDSA key. Default is `256`.
-| `minimum_ecdsa_bits` | array of strings | no | Array of SSH key types accepted by the application. Allowed values are: `rsa`, `dsa`, and `ecdsa`. Default is `["rsa", "dsa", "ecdsa"]`.
+| `allowed_key_types` | array of strings | no | Array of SSH key types accepted by the application. Allowed values are: `rsa`, `dsa`, and `ecdsa`. Default is `["rsa", "dsa", "ecdsa"]`.
 
 ```bash
 curl --request PUT --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" https://gitlab.example.com/api/v3/application/settings?signup_enabled=false&default_project_visibility=1

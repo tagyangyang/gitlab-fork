@@ -1,33 +1,19 @@
 require 'spec_helper'
 
 describe Gitlab::SSHPublicKey, lib: true do
+  let(:key) { attributes_for(:key)[:key] }
   let(:public_key) { described_class.new(key) }
-  let(:key) { 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDPizF8D6ywvnsLKmGH8LjUku9L5YGbnM3RkSQgNxzem6YBCYQ7HHSipqGTYSFBGnNzHm7Ndj0BrMH8ZTwn+X0F3Q+6gUQe/v37OMHhBOazdxU3RDZzrlQs8qqkQr9mqJJcvuCdDI03hoVFEkZg6TzwIv0Sk7dBP4FOG3j83oZ8rQ== dummy@gitlab.com' }
 
-  describe 'unknown key type' do
+  describe '.allowed_type?' do
     it 'determines the key type' do
-      ssh_key = described_class.new('foo')
-
-      expect { ssh_key.type }.to raise Gitlab::SSHPublicKey::UnsupportedSSHPublicKeyTypeError
-    end
-  end
-
-  describe '#type' do
-    it 'determines the key type' do
-      expect(public_key.type).to eq(:rsa)
-    end
-  end
-
-  describe '#size' do
-    it 'determines the key length in bits' do
-      expect(public_key.size).to eq(1024)
+      expect(described_class.allowed_type?('foo')).to be(false)
     end
   end
 
   describe '#valid?' do
     context 'with a valid SSH key' do
       it 'returns true' do
-        expect(public_key.valid?).to eq(true)
+        expect(public_key).to be_valid
       end
     end
 
@@ -35,13 +21,58 @@ describe Gitlab::SSHPublicKey, lib: true do
       let(:key) { 'this is not a key' }
 
       it 'returns false' do
-        expect(public_key.valid?).to eq(false)
+        expect(public_key).not_to be_valid
+      end
+    end
+  end
+
+  describe '#type' do
+    context 'with a DSA key' do
+      let(:key) { attributes_for(:dsa_key)[:key] }
+
+      it 'determines the key type' do
+        expect(public_key.type).to eq(:dsa)
+      end
+    end
+
+    context 'with a ECDSA key' do
+      let(:key) { attributes_for(:ecdsa_key)[:key] }
+
+      it 'determines the key type' do
+        expect(public_key.type).to eq(:ecdsa)
+      end
+    end
+
+    context 'with a RSA key' do
+      it 'determines the key type' do
+        expect(public_key.type).to eq(:rsa)
+      end
+    end
+
+    context 'with an invalid SSH key' do
+      let(:key) { 'this is not a key' }
+
+      it 'determines the key type' do
+        expect(public_key.type).to be_nil
+      end
+    end
+  end
+
+  describe '#size' do
+    it 'determines the key length in bits' do
+      expect(public_key.size).to eq(1024)
+    end
+
+    context 'with an invalid SSH key' do
+      let(:key) { 'this is not a key' }
+
+      it 'determines the key type' do
+        expect(public_key.size).to be_nil
       end
     end
   end
 
   describe '#fingerprint' do
-    let(:key) { 'ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAIEAiPWx6WM4lhHNedGfBpPJNPpZ7yKu+dnn1SJejgt4596k6YjzGGphH2TUxwKzxcKDKKezwkpfnxPkSMkuEspGRt/aZZ9wa++Oi7Qkr8prgHc4soW6NUlfDzpvZK2H5E7eQaSeP3SAwGmQKUFHCddNaP0L+hM7zhFNzjFvpaMgJw0=' }
     let(:fingerprint) { '3f:a2:ee:de:b5:de:53:c3:aa:2f:9c:45:24:4c:47:7b' }
 
     it "generates the key's fingerprint" do

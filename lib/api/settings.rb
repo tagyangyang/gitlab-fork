@@ -109,6 +109,10 @@ module API
         requires :housekeeping_gc_period, type: Integer, desc: "Number of Git pushes after which 'git gc' is run."
       end
       optional :terminal_max_session_time, type: Integer, desc: 'Maximum time for web terminal websocket connection (in seconds). Set to 0 for unlimited time.'
+      optional :minimum_rsa_bits, type: Integer, desc: 'The minimum allowed bit length of an uploaded RSA key.'
+      optional :minimum_ecdsa_bits, type: Integer, desc: 'The minimum allowed curve size (in bits) of an uploaded ECDSA key.'
+      optional :allowed_key_types, type: Array[String], values: Gitlab::SSHPublicKey::TYPES, desc: 'The SSH key types accepted by the application (`rsa`, `dsa`, or `ecdsa`).'
+
       at_least_one_of :default_branch_protection, :default_project_visibility, :default_snippet_visibility,
                       :default_group_visibility, :restricted_visibility_levels, :import_sources,
                       :enabled_git_access_protocol, :gravatar_enabled, :default_projects_limit,

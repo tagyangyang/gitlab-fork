@@ -95,8 +95,6 @@ class Key < ActiveRecord::Base
   end
 
   def key_meets_minimum_bit_length
-    return unless key?
-
     case public_key.type
     when :ecdsa
       if public_key.size < current_application_settings.minimum_ecdsa_bits
@@ -110,10 +108,8 @@ class Key < ActiveRecord::Base
   end
 
   def key_type_is_allowed
-    return unless key?
-
-    unless current_application_settings.allowed_key_types.include?(public_key.type)
-      allowed_types = current_application_settings.allowed_key_types.to_sentence(last_word_connector: ', or ', two_words_connector: ' or ')
+    unless current_application_settings.allowed_key_types.include?(public_key.type.to_s)
+      allowed_types = current_application_settings.allowed_key_types.map(&:upcase).to_sentence(last_word_connector: ', or ', two_words_connector: ' or ')
       errors.add(:key, "type is not allowed. Must be #{allowed_types}")
     end
   end

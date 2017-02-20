@@ -4,9 +4,11 @@ module Gitlab
   class SSHPublicKey
     include Gitlab::Popen
 
-    UnsupportedSSHPublicKeyTypeError = Class.new(ArgumentError)
+    TYPES = %w[rsa dsa ecdsa].freeze
 
-    TYPES = %i[rsa dsa ecdsa].freeze
+    def self.allowed_type?(type)
+      TYPES.include?(type.to_s)
+    end
 
     def initialize(key_text)
       @key_text = key_text
@@ -17,7 +19,9 @@ module Gitlab
     end
 
     def type
-      @type ||=
+      return @type if defined?(@type)
+
+      @type =
         case key
         when OpenSSL::PKey::EC
           :ecdsa
@@ -25,13 +29,13 @@ module Gitlab
           :rsa
         when OpenSSL::PKey::DSA
           :dsa
-        else
-          raise UnsupportedSSHPublicKeyTypeError, "#{key.class} is not supported"
         end
     end
 
     def size
-      @size ||=
+      return @size if defined?(@size)
+
+      @size =
         case type
         when :ecdsa
           key.public_key.to_bn.num_bits / 2
@@ -39,8 +43,6 @@ module Gitlab
           key.n.num_bits
         when :dsa
           1024
-        else
-          raise UnsupportedSSHPublicKeyTypeError, "#{key.class} is not supported"
         end
     end
 
@@ -87,7 +89,7 @@ module Gitlab
       # OpenSSH 6.8 introduces a new default output format for fingerprints.
       # Check the version and decide which command to use.
 
-      version_output, version_status = popen(%w(ssh -V))
+      version_output, version_status = popen(%w[ssh -V])
       return false unless version_status.zero?
 
       version_matches = version_output.match(/OpenSSH_(?<major>\d+)\.(?<minor>\d+)/)

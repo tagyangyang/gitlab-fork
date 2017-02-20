@@ -195,7 +195,7 @@ describe ApplicationSetting, models: true do
 
     it 'get value as array of symbols' do
       setting.allowed_key_types = ['rsa']
-      expect(setting.allowed_key_types).to eq([:rsa])
+      expect(setting.allowed_key_types).to eq(['rsa'])
     end
   end
 end

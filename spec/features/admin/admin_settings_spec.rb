@@ -43,6 +43,24 @@ feature 'Admin updates settings', feature: true do
     expect(find('#service_push_channel').value).to eq '#test_channel'
   end
 
+  scenario 'Change Keys settings' do
+    uncheck 'RSA'
+    uncheck 'DSA'
+    fill_in 'Minimum ECDSA key length', with: '384'
+    click_on 'Save'
+
+    expect(page).to have_content 'Application settings saved successfully'
+
+    expect(find_field('RSA', checked: false)).not_to be_checked
+    expect(find_field('DSA', checked: false)).not_to be_checked
+    expect(find_field('Minimum ECDSA key length').value).to eq '384'
+
+    uncheck 'ECDSA'
+    click_on 'Save'
+
+    expect(page).to have_content "Allowed key types can't be blank"
+  end
+
   def check_all_events
     page.check('Active')
     page.check('Push')

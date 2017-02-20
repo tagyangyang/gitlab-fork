@@ -9,7 +9,7 @@ class AddMinimumKeyLengthToApplicationSettings < ActiveRecord::Migration
   def up
     add_column_with_default :application_settings, :minimum_rsa_bits, :integer, default: 1024
     add_column_with_default :application_settings, :minimum_ecdsa_bits, :integer, default: 256
-    add_column_with_default :application_settings, :allowed_key_types, :text, default: %w[rsa dsa ecdsa].to_yaml
+    add_column_with_default :application_settings, :allowed_key_types, :string, default: %w[rsa dsa ecdsa].to_yaml
   end
 
   def down
