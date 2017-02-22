@@ -54,7 +54,7 @@ describe Gitlab::SSHPublicKey, lib: true do
     end
 
     context 'with a ECDSA key' do
-      let(:key) { attributes_for(:ecdsa_key)[:key] }
+      let(:key) { attributes_for(:ecdsa_key_256)[:key] }
 
       it 'determines the key type' do
         expect(public_key.type).to eq(:ecdsa)
@@ -77,8 +77,26 @@ describe Gitlab::SSHPublicKey, lib: true do
   end
 
   describe '#size' do
-    it 'determines the key length in bits' do
-      expect(public_key.size).to eq(1024)
+    context 'for a RSA key' do
+      it 'determines the key length in bits' do
+        expect(public_key.size).to eq(2048)
+      end
+    end
+
+    context 'for a ECDSA key' do
+      let(:key) { attributes_for(:ecdsa_key_256)[:key] }
+
+      it 'determines the curve size (in bits)' do
+        expect(public_key.size).to eq(257)
+      end
+    end
+
+    context 'for a DSA key' do
+      let(:key) { attributes_for(:dsa_key_2048)[:key] }
+
+      it 'determines the key length in bits' do
+        expect(public_key.size).to eq(2048)
+      end
     end
 
     context 'with an invalid SSH key' do

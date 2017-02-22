@@ -19,8 +19,8 @@ describe Key, models: true do
 
     it { is_expected.to validate_presence_of(:key) }
     it { is_expected.to validate_length_of(:key).is_at_most(5000) }
-    it { is_expected.to allow_value(attributes_for(:ecdsa_key)[:key]).for(:key) }
     it { is_expected.to allow_value(attributes_for(:dsa_key_2048)[:key]).for(:key) }
+    it { is_expected.to allow_value(attributes_for(:ecdsa_key_256)[:key]).for(:key) }
     it { is_expected.to allow_value(attributes_for(:rsa_key_2048)[:key]).for(:key) }
     it { is_expected.not_to allow_value('foo-bar').for(:key) }
     it { is_expected.not_to allow_value("#{attributes_for(:dsa_key_2048)[:key]}\nfoo").for(:key) }
@@ -127,45 +127,45 @@ describe Key, models: true do
     end
 
     it 'accepts an ECDSA key above the minimum bit length' do
-      expect(build(:ecdsa_key)).to be_valid
+      expect(build(:ecdsa_key_256)).to be_valid
     end
 
     it 'rejects an ECDSA key below minimum bit length' do
       stub_application_setting(minimum_ecdsa_bits: 384)
 
-      expect(build(:ecdsa_key)).not_to be_valid
+      expect(build(:ecdsa_key_256)).not_to be_valid
     end
   end
 
   context 'validate the key type is allowed' do
     it 'accepts RSA, ECDSA, and DSA keys by default' do
       expect(build(:key)).to be_valid
-      expect(build(:ecdsa_key)).to be_valid
       expect(build(:dsa_key_2048)).to be_valid
+      expect(build(:ecdsa_key_256)).to be_valid
     end
 
     it 'rejects RSA and ECDSA key if DSA is the only allowed type' do
       stub_application_setting(allowed_key_types: ['dsa'])
 
       expect(build(:key)).not_to be_valid
-      expect(build(:ecdsa_key)).not_to be_valid
       expect(build(:dsa_key_2048)).to be_valid
+      expect(build(:ecdsa_key_256)).not_to be_valid
     end
 
     it 'rejects RSA and DSA key if ECDSA is the only allowed type' do
       stub_application_setting(allowed_key_types: ['ecdsa'])
 
       expect(build(:key)).not_to be_valid
-      expect(build(:ecdsa_key)).to be_valid
       expect(build(:dsa_key_2048)).not_to be_valid
+      expect(build(:ecdsa_key_256)).to be_valid
     end
 
     it 'rejects DSA and ECDSA key if RSA is the only allowed type' do
       stub_application_setting(allowed_key_types: ['rsa'])
 
       expect(build(:key)).to be_valid
-      expect(build(:ecdsa_key)).not_to be_valid
       expect(build(:dsa_key_2048)).not_to be_valid
+      expect(build(:ecdsa_key_256)).not_to be_valid
     end
   end
 

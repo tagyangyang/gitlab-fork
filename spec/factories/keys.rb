@@ -24,9 +24,9 @@ FactoryGirl.define do
       end
     end
 
-    factory :ecdsa_key do
+    factory :ecdsa_key_256 do
       key do
-        "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAYicnuE46DT02Z6o9X/NqmlYG4Sp8loMVftDoGNibWFGj4sQ05py10GVEEZS0rRiOeSJj2Q7chSHklSOuLeUxY= dummy@gitlab.com"
+        "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJZmkzTgY0fiCQ+DVReyH/fFwTFz0XoR3RUO0u+199H19KFw7mNPxRSMOVS7tEtONj3Q7FcZXfqthHvgAzDiHsc= dummy@gitlab.com"
       end
     end
 
