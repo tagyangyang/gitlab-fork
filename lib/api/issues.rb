@@ -105,7 +105,12 @@ module API
       end
       get ":id/issues/:issue_id" do
         issue = find_project_issue(params[:issue_id])
-        present issue, with: Entities::Issue, current_user: current_user, project: user_project
+
+        present issue,
+          with: Entities::Issue,
+          current_user: current_user,
+          project: user_project,
+          request: request
       end
 
       desc 'Create a new project issue' do

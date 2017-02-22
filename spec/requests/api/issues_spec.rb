@@ -713,6 +713,14 @@ describe API::Issues, api: true  do
       expect(json_response['confidential']).to be_falsy
     end
 
+    it 'exposes related resources URIs' do
+      get api("/projects/#{project.id}/issues/#{issue.id}", user)
+
+      relationship_urls = json_response.fetch('relationship_urls')
+
+      expect(relationship_urls).to eql('asdf')
+    end
+
     it "returns a project issue by id" do
       get api("/projects/#{project.id}/issues/#{issue.id}", user)
 
