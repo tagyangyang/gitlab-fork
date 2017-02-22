@@ -15,7 +15,7 @@ module Ci
     def persisted_environment
       @persisted_environment ||= Environment.find_by(
         name: expanded_environment_name,
-        project_id: project_id
+        project: project
       )
     end
 
@@ -221,7 +221,9 @@ module Ci
 
     def merge_request
       merge_requests = MergeRequest.includes(:merge_request_diff)
-                                   .where(source_branch: ref, source_project_id: pipeline.project_id)
+                                   .where(
+                                      source_branch: ref,
+                                      source_project: pipeline.project)
                                    .reorder(iid: :asc)
 
       merge_requests.find do |merge_request|
