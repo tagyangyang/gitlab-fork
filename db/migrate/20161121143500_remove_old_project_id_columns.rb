@@ -6,7 +6,8 @@ class RemoveOldProjectIdColumns < ActiveRecord::Migration
   DOWNTIME_REASON = 'Unused columns are being removed.'
 
   def up
-    remove_index :ci_builds, :project_id
+    remove_index :ci_builds, :project_id if
+      index_exists?(:ci_builds, :project_id)
 
     remove_column :ci_builds, :project_id
     remove_column :ci_commits, :project_id
@@ -22,6 +23,6 @@ class RemoveOldProjectIdColumns < ActiveRecord::Migration
     add_column :ci_triggers, :project_id, :integer
     add_column :ci_variables, :project_id, :integer
 
-    add_concurrent_index "ci_builds", ["project_id"], name: "index_ci_builds_on_project_id", using: :btree
+    add_concurrent_index :ci_builds, :project_id
   end
 end
