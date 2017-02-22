@@ -50,8 +50,8 @@ describe ApplicationSetting, models: true do
     it { is_expected.not_to allow_value(128).for(:minimum_dsa_bits) }
 
     describe 'allowed_key_types validations' do
-      it { is_expected.to allow_value([:rsa], [:rsa, :dsa, :ecdsa]).for(:allowed_key_types) }
-      it { is_expected.not_to allow_value([:foo]).for(:allowed_key_types) }
+      it { is_expected.to allow_value(Gitlab::SSHPublicKey.technology_names).for(:allowed_key_types) }
+      it { is_expected.not_to allow_value(['foo']).for(:allowed_key_types) }
     end
 
     it_behaves_like 'an object with email-formated attributes', :admin_notification_email do
