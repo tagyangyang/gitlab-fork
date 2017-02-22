@@ -14,6 +14,7 @@ require('./gfm_auto_complete');
 require('vendor/jquery.caret'); // required by jquery.atwho
 require('vendor/jquery.atwho');
 require('./task_list');
+require('./gl_lightbox');
 
 (function() {
   var bind = function(fn, me) { return function() { return fn.apply(me, arguments); }; };

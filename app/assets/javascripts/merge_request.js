@@ -3,6 +3,7 @@
 
 require('vendor/jquery.waitforimages');
 require('./task_list');
+require('./gl_lightbox');
 require('./merge_request_tabs');
 
 (function() {
@@ -18,6 +19,7 @@ require('./merge_request_tabs');
       this.opts = opts != null ? opts : {};
       this.submitNoteForm = bind(this.submitNoteForm, this);
       this.$el = $('.merge-request');
+      this.$lightbox = $('.lightbox');
       this.$('.show-all-commits').on('click', (function(_this) {
         return function() {
           return _this.showAllCommits();

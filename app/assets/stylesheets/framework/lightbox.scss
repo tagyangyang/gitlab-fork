@@ -1,0 +1,46 @@
+.gl-lightbox {
+  position: fixed;
+  top: -10vh;
+  left: -100vw;
+  height: 110vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $lightbox-bg;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity $lightbox-trans ease-in-out, top $lightbox-trans ease-in-out, left 0s linear $lightbox-trans;
+
+  .dismiss {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    font-size: 18px;
+    color: $gray-dark;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity $lightbox-trans ease-in-out;
+
+    &:hover {
+      color: $white-normal;
+    }
+  }
+
+
+  &.show-box {
+    top: -5vh;
+    left: 0;
+    opacity: 1;
+    transition: opacity $lightbox-trans ease-in-out, top $lightbox-trans ease-in-out;
+
+    .dismiss {
+      opacity: 1;
+    }
+  }
+
+  img {
+    max-width: 85vw;
+    max-height: 85vh;
+  }
+}

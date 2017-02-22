@@ -37,6 +37,7 @@
           preview.removeClass('md-preview-loading').html(response.body);
           preview.renderGFM();
           this.renderReferencedUsers(response.references.users, $form);
+          $(document).triggerHandler('markdown-preview:fetched', [$form]);
         }).bind(this));
       }
     };
