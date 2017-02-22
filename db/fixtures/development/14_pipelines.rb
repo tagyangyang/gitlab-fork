@@ -55,7 +55,7 @@ class Gitlab::Seeder::Pipelines
   def seed!
     pipelines.each do |pipeline|
       begin
-        BUILDS.each { |opts| build_create!(pipeline, opts) }
+        BUILDS.each { |opts| build_create!(pipeline, opts.merge(trace: 'trace') }
         EXTERNAL_JOBS.each { |opts| commit_status_create!(pipeline, opts) }
         print '.'
       rescue ActiveRecord::RecordInvalid
