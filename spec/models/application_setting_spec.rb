@@ -45,6 +45,10 @@ describe ApplicationSetting, models: true do
     it { is_expected.to allow_value(*Gitlab::SSHPublicKey.allowed_sizes('ecdsa')).for(:minimum_ecdsa_bits) }
     it { is_expected.not_to allow_value(128).for(:minimum_ecdsa_bits) }
 
+    it { is_expected.to validate_presence_of(:minimum_dsa_bits) }
+    it { is_expected.to allow_value(*Gitlab::SSHPublicKey.allowed_sizes('dsa')).for(:minimum_dsa_bits) }
+    it { is_expected.not_to allow_value(128).for(:minimum_dsa_bits) }
+
     describe 'allowed_key_types validations' do
       it { is_expected.to allow_value([:rsa], [:rsa, :dsa, :ecdsa]).for(:allowed_key_types) }
       it { is_expected.not_to allow_value([:foo]).for(:allowed_key_types) }

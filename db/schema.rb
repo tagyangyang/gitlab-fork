@@ -99,8 +99,9 @@ ActiveRecord::Schema.define(version: 20170215200045) do
     t.text "shared_runners_text_html"
     t.text "after_sign_up_text_html"
     t.integer "minimum_ecdsa_bits", default: 256, null: false
-    t.string "allowed_key_types", default: "---\n- rsa\n- dsa\n- ecdsa\n", null: false
     t.integer "minimum_rsa_bits", default: 2048, null: false
+    t.integer "minimum_dsa_bits", default: 2048, null: false
+    t.string "allowed_key_types", default: "---\n- ecdsa\n- rsa\n- dsa\n", null: false
     t.boolean "housekeeping_enabled", default: true, null: false
     t.boolean "housekeeping_bitmaps_enabled", default: true, null: false
     t.integer "housekeeping_incremental_repack_period", default: 10, null: false

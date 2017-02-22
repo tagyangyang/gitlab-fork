@@ -126,6 +126,10 @@ class ApplicationSetting < ActiveRecord::Base
             presence: true,
             inclusion: { in: Gitlab::SSHPublicKey.allowed_sizes('ecdsa') }
 
+  validates :minimum_dsa_bits,
+            presence: true,
+            inclusion: { in: Gitlab::SSHPublicKey.allowed_sizes('dsa') }
+
   validates_each :restricted_visibility_levels do |record, attr, value|
     value&.each do |level|
       unless Gitlab::VisibilityLevel.options.has_value?(level)
@@ -206,6 +210,7 @@ class ApplicationSetting < ActiveRecord::Base
       koding_url: nil,
       max_artifacts_size: Settings.artifacts['max_size'],
       max_attachment_size: Settings.gitlab['max_attachment_size'],
+      minimum_dsa_bits: 2048,
       minimum_ecdsa_bits: 256,
       minimum_rsa_bits: 2048,
       plantuml_enabled: false,

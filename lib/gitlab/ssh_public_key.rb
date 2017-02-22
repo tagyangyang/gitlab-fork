@@ -63,7 +63,7 @@ module Gitlab
         when :rsa
           key.n.num_bits
         when :dsa
-          1024
+          key.p.num_bits
         end
     end
 

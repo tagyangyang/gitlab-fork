@@ -76,7 +76,7 @@ class Key < ActiveRecord::Base
     GitlabShellWorker.perform_async(
       :remove_key,
       shell_id,
-      key,
+      key
     )
   end
 
@@ -104,12 +104,18 @@ class Key < ActiveRecord::Base
       if public_key.size < current_application_settings.minimum_rsa_bits
         errors.add(:key, "length must be at least #{current_application_settings.minimum_rsa_bits} bits")
       end
+    when :dsa
+      if public_key.size < current_application_settings.minimum_dsa_bits
+        errors.add(:key, "length must be at least #{current_application_settings.minimum_dsa_bits} bits")
+      end
     end
   end
 
   def key_type_is_allowed
     unless current_application_settings.allowed_key_types.include?(public_key.type.to_s)
-      allowed_types = current_application_settings.allowed_key_types.map(&:upcase).to_sentence(last_word_connector: ', or ', two_words_connector: ' or ')
+      allowed_types = current_application_settings.allowed_key_types.
+        map(&:upcase).
+        to_sentence(last_word_connector: ', or ', two_words_connector: ' or ')
       errors.add(:key, "type is not allowed. Must be #{allowed_types}")
     end
   end

@@ -68,6 +68,13 @@
         .help-block
           The minimum elliptic curve size for user ECDSA SSH keys (in bits)
 
+    .form-group
+      = f.label :minimum_dsa_bits, 'Minimum DSA key length', class: 'control-label col-sm-2'
+      .col-sm-10
+        = f.select :minimum_dsa_bits, Gitlab::SSHPublicKey.allowed_sizes('dsa'), {}, class: 'form-control'
+        .help-block
+          The minimum length for user DSA SSH keys (in bits)
+
   %fieldset
     %legend Account and Limit Settings
     .form-group

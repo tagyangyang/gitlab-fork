@@ -46,7 +46,7 @@ describe Gitlab::SSHPublicKey, lib: true do
 
   describe '#type' do
     context 'with a DSA key' do
-      let(:key) { attributes_for(:dsa_key)[:key] }
+      let(:key) { attributes_for(:dsa_key_2048)[:key] }
 
       it 'determines the key type' do
         expect(public_key.type).to eq(:dsa)

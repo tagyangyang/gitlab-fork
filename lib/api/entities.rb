@@ -575,6 +575,7 @@ module API
       expose :terminal_max_session_time
       expose :minimum_rsa_bits
       expose :minimum_ecdsa_bits
+      expose :minimum_dsa_bits
       expose :allowed_key_types
     end
 

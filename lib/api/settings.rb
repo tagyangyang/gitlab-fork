@@ -111,6 +111,7 @@ module API
       optional :terminal_max_session_time, type: Integer, desc: 'Maximum time for web terminal websocket connection (in seconds). Set to 0 for unlimited time.'
       optional :minimum_rsa_bits, type: Integer, values: Gitlab::SSHPublicKey.allowed_sizes('rsa'), desc: 'The minimum allowed bit length of an uploaded RSA key.'
       optional :minimum_ecdsa_bits, type: Integer, values: Gitlab::SSHPublicKey.allowed_sizes('ecdsa'), desc: 'The minimum allowed curve size (in bits) of an uploaded ECDSA key.'
+      optional :minimum_dsa_bits, type: Integer, values: Gitlab::SSHPublicKey.allowed_sizes('dsa'), desc: 'The minimum allowed bit length of an uploaded DSA key.'
       optional :allowed_key_types, type: Array[String], values: Gitlab::SSHPublicKey.technology_names, desc: 'The SSH key types accepted by the application (`rsa`, `dsa`, or `ecdsa`).'
 
       at_least_one_of :default_branch_protection, :default_project_visibility, :default_snippet_visibility,
