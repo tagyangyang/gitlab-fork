@@ -21,7 +21,7 @@ describe Key, models: true do
     it { is_expected.to validate_length_of(:key).is_at_most(5000) }
     it { is_expected.to allow_value(attributes_for(:dsa_key)[:key]).for(:key) }
     it { is_expected.to allow_value(attributes_for(:ecdsa_key)[:key]).for(:key) }
-    it { is_expected.to allow_value(attributes_for(:key)[:key]).for(:key) }
+    it { is_expected.to allow_value(attributes_for(:rsa_key_2048)[:key]).for(:key) }
     it { is_expected.not_to allow_value('foo-bar').for(:key) }
   end
 
@@ -120,7 +120,7 @@ describe Key, models: true do
     end
 
     it 'rejects a RSA key below minimum bit length' do
-      stub_application_setting(minimum_rsa_bits: 2048)
+      stub_application_setting(minimum_rsa_bits: 4096)
 
       expect(build(:key)).not_to be_valid
     end

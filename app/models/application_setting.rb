@@ -207,7 +207,7 @@ class ApplicationSetting < ActiveRecord::Base
       max_artifacts_size: Settings.artifacts['max_size'],
       max_attachment_size: Settings.gitlab['max_attachment_size'],
       minimum_ecdsa_bits: 256,
-      minimum_rsa_bits: 1024,
+      minimum_rsa_bits: 2048,
       plantuml_enabled: false,
       plantuml_url: nil,
       recaptcha_enabled: false,
