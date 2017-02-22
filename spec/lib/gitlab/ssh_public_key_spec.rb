@@ -109,10 +109,26 @@ describe Gitlab::SSHPublicKey, lib: true do
   end
 
   describe '#fingerprint' do
-    let(:fingerprint) { '3f:a2:ee:de:b5:de:53:c3:aa:2f:9c:45:24:4c:47:7b' }
+    context 'for a RSA key' do
+      it "generates the key's fingerprint" do
+        expect(public_key.fingerprint).to eq('2e:ca:dc:e0:37:29:ed:fc:f0:1d:bf:66:d4:cd:51:b1')
+      end
+    end
 
-    it "generates the key's fingerprint" do
-      expect(public_key.fingerprint).to eq(fingerprint)
+    context 'for a ECDSA key' do
+      let(:key) { attributes_for(:ecdsa_key_256)[:key] }
+
+      it "generates the key's fingerprint" do
+        expect(public_key.fingerprint).to eq('67:a3:a9:7d:b8:e1:15:d4:80:40:21:34:bb:ed:97:38')
+      end
+    end
+
+    context 'for a DSA key' do
+      let(:key) { attributes_for(:dsa_key_2048)[:key] }
+
+      it "generates the key's fingerprint" do
+        expect(public_key.fingerprint).to eq('bc:c1:a4:be:7e:8c:84:56:b3:58:93:53:c6:80:78:8c')
+      end
     end
   end
 end
