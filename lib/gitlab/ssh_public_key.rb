@@ -6,8 +6,29 @@ module Gitlab
 
     TYPES = %w[rsa dsa ecdsa].freeze
 
+    Technology = Struct.new(:name, :allowed_sizes)
+
+    Technologies = [
+      Technology.new('rsa',   [1024, 2048, 3072, 4096]),
+      Technology.new('dsa',   [1024, 2048, 3072]),
+      Technology.new('ecdsa', [256, 384, 521])
+    ].freeze
+
+    def self.technology_names
+      Technologies.map(&:name)
+    end
+
+    def self.technology(name)
+      Technologies.find { |ssh_key_technology| ssh_key_technology.name == name }
+    end
+    private_class_method :technology
+
+    def self.allowed_sizes(name)
+      technology(name).allowed_sizes
+    end
+
     def self.allowed_type?(type)
-      TYPES.include?(type.to_s)
+      technology_names.include?(type.to_s)
     end
 
     def initialize(key_text)

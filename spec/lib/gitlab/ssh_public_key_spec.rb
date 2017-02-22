@@ -4,6 +4,24 @@ describe Gitlab::SSHPublicKey, lib: true do
   let(:key) { attributes_for(:key)[:key] }
   let(:public_key) { described_class.new(key) }
 
+  describe '.technology_names' do
+    it 'returns the available technology names' do
+      expect(described_class.technology_names).to eq(%w[rsa dsa ecdsa])
+    end
+  end
+
+  describe '.allowed_sizes(name)' do
+    {
+      'rsa' => [1024, 2048, 3072, 4096],
+      'dsa' => [1024, 2048, 3072],
+      'ecdsa' => [256, 384, 521]
+    }.each do |name, sizes|
+      it "returns '#{sizes}' for #{name}" do
+        expect(described_class.allowed_sizes(name)).to eq(sizes)
+      end
+    end
+  end
+
   describe '.allowed_type?' do
     it 'determines the key type' do
       expect(described_class.allowed_type?('foo')).to be(false)
