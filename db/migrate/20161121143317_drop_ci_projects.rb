@@ -1,8 +1,7 @@
 class DropCiProjects < ActiveRecord::Migration
   include Gitlab::Database::MigrationHelpers
 
-  DOWNTIME = true
-  DOWNTIME_REASON = "Removing an unused table"
+  DOWNTIME = false
 
   def up
     drop_table :ci_projects
