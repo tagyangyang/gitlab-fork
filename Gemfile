@@ -240,7 +240,7 @@ gem 'jquery-ui-rails',    '~> 5.0.0'
 gem 'request_store',      '~> 1.3'
 gem 'select2-rails',      '~> 3.5.9'
 gem 'virtus',             '~> 1.0.1'
-gem 'net-ssh',            '~> 3.0.1'
+gem 'net-ssh',            '~> 4.1.0'
 gem 'base32',             '~> 0.3.0'
 
 # Sentry integration
