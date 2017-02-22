@@ -120,11 +120,11 @@ class ApplicationSetting < ActiveRecord::Base
 
   validates :minimum_rsa_bits,
             presence: true,
-            numericality: { only_integer: true, greater_than: 0 }
+            inclusion: { in: Gitlab::SSHPublicKey.allowed_sizes('rsa') }
 
   validates :minimum_ecdsa_bits,
             presence: true,
-            numericality: { only_integer: true, greater_than: 0 }
+            inclusion: { in: Gitlab::SSHPublicKey.allowed_sizes('ecdsa') }
 
   validates_each :restricted_visibility_levels do |record, attr, value|
     value&.each do |level|

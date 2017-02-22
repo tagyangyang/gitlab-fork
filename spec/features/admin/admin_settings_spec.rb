@@ -46,7 +46,7 @@ feature 'Admin updates settings', feature: true do
   scenario 'Change Keys settings' do
     uncheck 'RSA'
     uncheck 'DSA'
-    fill_in 'Minimum ECDSA key length', with: '384'
+    select '384', from: 'Minimum ECDSA key length'
     click_on 'Save'
 
     expect(page).to have_content 'Application settings saved successfully'

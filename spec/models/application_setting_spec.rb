@@ -38,9 +38,12 @@ describe ApplicationSetting, models: true do
     end
 
     it { is_expected.to validate_presence_of(:minimum_rsa_bits) }
-    it { is_expected.to validate_numericality_of(:minimum_rsa_bits).only_integer.is_greater_than(0) }
+    it { is_expected.to allow_value(*Gitlab::SSHPublicKey.allowed_sizes('rsa')).for(:minimum_rsa_bits) }
+    it { is_expected.not_to allow_value(128).for(:minimum_rsa_bits) }
+
     it { is_expected.to validate_presence_of(:minimum_ecdsa_bits) }
-    it { is_expected.to validate_numericality_of(:minimum_ecdsa_bits).only_integer.is_greater_than(0) }
+    it { is_expected.to allow_value(*Gitlab::SSHPublicKey.allowed_sizes('ecdsa')).for(:minimum_ecdsa_bits) }
+    it { is_expected.not_to allow_value(128).for(:minimum_ecdsa_bits) }
 
     describe 'allowed_key_types validations' do
       it { is_expected.to allow_value([:rsa], [:rsa, :dsa, :ecdsa]).for(:allowed_key_types) }

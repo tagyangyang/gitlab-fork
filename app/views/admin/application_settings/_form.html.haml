@@ -53,17 +53,19 @@
           .checkbox= key_type_checkbox
         %span.help-block#allowed-key-types-help
           Only SSH keys with allowed algorithms can be uploaded.
+
     .form-group
       = f.label :minimum_rsa_bits, 'Minimum RSA key length', class: 'control-label col-sm-2'
       .col-sm-10
-        = f.number_field :minimum_rsa_bits, class: 'form-control'
-        %span.help-block#session_expire_delay_help_block
+        = f.select :minimum_rsa_bits, Gitlab::SSHPublicKey.allowed_sizes('rsa'), {}, class: 'form-control'
+        .help-block
           The minimum length for user RSA SSH keys (in bits)
+
     .form-group
       = f.label :minimum_ecdsa_bits, 'Minimum ECDSA key length', class: 'control-label col-sm-2'
       .col-sm-10
-        = f.number_field :minimum_ecdsa_bits, class: 'form-control'
-        %span.help-block#session_expire_delay_help_block
+        = f.select :minimum_ecdsa_bits, Gitlab::SSHPublicKey.allowed_sizes('ecdsa'), {}, class: 'form-control'
+        .help-block
           The minimum elliptic curve size for user ECDSA SSH keys (in bits)
 
   %fieldset
