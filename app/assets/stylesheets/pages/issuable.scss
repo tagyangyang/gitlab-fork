@@ -95,7 +95,7 @@
   }
 
   .issuable-header-text {
-    margin-top: 7px;
+    margin-top: 3px;
   }
 
   .block {
@@ -114,10 +114,6 @@
 
     &:last-child {
       border: none;
-    }
-
-    span {
-      display: inline-block;
     }
 
     .select2-container span {
