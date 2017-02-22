@@ -16,6 +16,7 @@ import Vue from 'vue';
     toggleSubscription(event) {
       const button = event.currentTarget;
       const buttonSpan = button.querySelector('span');
+      const toggleButton = $('.toggle-button');
       if (!buttonSpan || button.classList.contains('disabled')) {
         return;
       }
@@ -36,6 +37,13 @@ import Vue from 'vue';
           );
         } else {
           buttonSpan.innerHTML = isSubscribed ? 'Subscribe' : 'Unsubscribe';
+          if (isSubscribed) {
+            toggleButton.addClass('unsubscribed')
+            toggleButton.removeClass('subscribed')
+          } else {
+            toggleButton.addClass('subscribed')
+            toggleButton.removeClass('unsubscribed')
+          }
         }
       });
     }
