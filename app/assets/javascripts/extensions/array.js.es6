@@ -2,12 +2,6 @@
 
 'use strict';
 
-const from = require('array.from');
-
-if (!Array.from) {
-  from.shim();
-}
-
 Array.prototype.first = function() {
   return this[0];
 };

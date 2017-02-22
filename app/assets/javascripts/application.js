@@ -47,7 +47,6 @@ require('./shortcuts_issuable');
 require('./shortcuts_network');
 require('vendor/jquery.nicescroll');
 requireAll(require.context('./extensions', false, /^\.\/.*\.(js|es6)$/));
-require('string.prototype.codepointat');
 requireAll(require.context('./behaviors',  false, /^\.\/.*\.(js|es6)$/));
 requireAll(require.context('./blob',       false, /^\.\/.*\.(js|es6)$/));
 requireAll(require.context('./templates',  false, /^\.\/.*\.(js|es6)$/));

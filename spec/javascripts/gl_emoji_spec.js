@@ -1,6 +1,6 @@
 
+require('~/extensions/string');
 require('~/extensions/array');
-require('string.prototype.codepointat');
 
 const glEmoji = require('~/behaviors/gl_emoji');
 
@@ -200,8 +200,6 @@ describe('gl_emoji', () => {
     });
   });
 
-  // TODO: Find `Array.from` polyfill for PhantomJS
-  // `array.from` doesn't work well with astral symbols, https://github.com/mathiasbynens/Array.from/issues/47
   describe('isSkinToneComboEmoji', () => {
     it('should detect hand_splayed_tone5', () => {
       expect(isSkinToneComboEmoji('🖐🏿')).toBeTruthy();
@@ -337,8 +335,11 @@ describe('gl_emoji', () => {
     it('use native keycap on >=57 chrome', () => {
       const emojiKey = 'five';
       const unicodeSupportMap = Object.assign({}, emptySupportMap, {
-        isChrome: true,
-        chromeVersion: 57,
+        '3.0': true,
+        meta: {
+          isChrome: true,
+          chromeVersion: 57,
+        },
       });
       const isSupported = isEmojiUnicodeSupported(
         unicodeSupportMap,
@@ -351,8 +352,11 @@ describe('gl_emoji', () => {
     it('fallback keycap on <57 chrome', () => {
       const emojiKey = 'five';
       const unicodeSupportMap = Object.assign({}, emptySupportMap, {
-        isChrome: true,
-        chromeVersion: 50,
+        '3.0': true,
+        meta: {
+          isChrome: true,
+          chromeVersion: 50,
+        },
       });
       const isSupported = isEmojiUnicodeSupported(
         unicodeSupportMap,
