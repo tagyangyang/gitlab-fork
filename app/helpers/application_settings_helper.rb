@@ -94,7 +94,7 @@ module ApplicationSettingsHelper
   end
 
   def allowed_key_types_checkboxes(help_block_id)
-    Gitlab::SSHPublicKey::TYPES.map do |type|
+    Gitlab::SSHPublicKey.technology_names.map do |type|
       checked = current_application_settings.allowed_key_types.include?(type)
       checkbox_id = "allowed_key_types-#{type}"
 

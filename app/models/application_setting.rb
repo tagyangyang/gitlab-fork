@@ -186,7 +186,7 @@ class ApplicationSetting < ActiveRecord::Base
     {
       after_sign_up_text: nil,
       akismet_enabled: false,
-      allowed_key_types: Gitlab::SSHPublicKey::TYPES,
+      allowed_key_types: Gitlab::SSHPublicKey.technology_names,
       container_registry_token_expire_delay: 5,
       default_branch_protection: Settings.gitlab['default_branch_protection'],
       default_project_visibility: Settings.gitlab.default_projects_features['visibility_level'],
