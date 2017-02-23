@@ -132,6 +132,12 @@ class CommitStatus < ActiveRecord::Base
     false
   end
 
+  # Dummy for old installation importing new projects from new installation
+  # Remove it whenever we decided to break this
+  def gl_project_id
+    'dummy'
+  end
+
   def detailed_status(current_user)
     Gitlab::Ci::Status::Factory
       .new(self, current_user)
