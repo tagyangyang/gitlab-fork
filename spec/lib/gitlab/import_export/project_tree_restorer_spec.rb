@@ -129,6 +129,33 @@ describe Gitlab::ImportExport::ProjectTreeRestorer, services: true do
           expect(Ci::Build.where(token: 'abcd')).to be_empty
         end
       end
+
+      context 'has restored the same number of records' do
+        let(:json) do
+          JSON.parse(File.read(File.join(__dir__, 'project.json')))
+        end
+
+        it 'has the same number of merge requests' do
+          expect(@project.merge_requests.size)
+            .to eq(json['merge_requests'].size)
+        end
+
+        it 'has the same number of merge requests' do
+          expect(@project.triggers.size)
+            .to eq(json['triggers'].size)
+        end
+
+        it 'has the same number of pipelines and statuses' do
+          expect(@project.pipelines.size)
+            .to eq(json['pipelines'].size)
+
+          @project.pipelines.zip(json['pipelines'])
+            .each do |(imported, exported)|
+              expect(imported.statuses.size)
+                .to eq(exported['statuses'].size)
+            end
+        end
+      end
     end
   end
 
