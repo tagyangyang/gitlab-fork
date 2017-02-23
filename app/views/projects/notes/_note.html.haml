@@ -11,7 +11,7 @@
       .note-header
         %a.visible-xs{ href: user_path(note.author) }
           = note.author.to_reference
-        = link_to_member(note.project, note.author, avatar: false, extra_class: 'hidden-xs')
+        = link_to_member(note.project, note.author, avatar: false, extra_class: 'hidden-xs hidden-sm')
         .note-headline-light
           %span.hidden-xs
             = note.author.to_reference
