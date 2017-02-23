@@ -75,6 +75,7 @@ excluded_attributes:
     - :awardable_id
   statuses:
     - :trace
+    - :token
 
 methods:
   labels:
