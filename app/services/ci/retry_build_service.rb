@@ -11,7 +11,7 @@ module Ci
                            created_at updated_at started_at finished_at
                            queued_at erased_by erased_at].freeze
 
-    IGNORE_ATTRIBUTES = %i[type lock_version gl_project_id target_url
+    IGNORE_ATTRIBUTES = %i[type lock_version target_url
                            deploy job_id description].freeze
 
     def execute(build)
