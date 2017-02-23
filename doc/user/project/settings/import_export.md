@@ -27,7 +27,6 @@ with all their related data and be moved into a new GitLab instance.
 
 | GitLab version | Import/Export version |
 | -------- | -------- |
-| 9.0 to current | 0.1.7    |
 | 8.17.0 to current  | 0.1.6    |
 | 8.13.0   | 0.1.5    |
 | 8.12.0   | 0.1.4    |
