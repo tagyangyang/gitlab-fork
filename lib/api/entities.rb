@@ -274,7 +274,7 @@ module API
           { name: :repo_branches_url, entity: RepoBranch, params: { id: issue.project_id } }
         ]
 
-        API::GrapeRelationshipUri.build(relationships, options.fetch(:request))
+        GrapeRelationshipUri.build(relationships, options.fetch(:request))
       end
     end
 
