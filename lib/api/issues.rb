@@ -50,7 +50,10 @@ module API
       get do
         issues = find_issues(scope: 'authored')
 
-        present paginate(issues), with: Entities::Issue, current_user: current_user
+        present paginate(issues),
+          with: Entities::Issue,
+          current_user: current_user,
+          request: request
       end
     end
 
@@ -71,7 +74,10 @@ module API
 
         issues = find_issues(group_id: group.id, state: params[:state] || 'opened')
 
-        present paginate(issues), with: Entities::Issue, current_user: current_user
+        present paginate(issues),
+          with: Entities::Issue,
+          current_user: current_user,
+          request: request
       end
     end
 
@@ -94,7 +100,11 @@ module API
 
         issues = find_issues(project_id: project.id)
 
-        present paginate(issues), with: Entities::Issue, current_user: current_user, project: user_project
+        present paginate(issues),
+          with: Entities::Issue,
+          current_user: current_user,
+          project: user_project,
+          request: request
       end
 
       desc 'Get a single project issue' do
@@ -146,7 +156,11 @@ module API
         end
 
         if issue.valid?
-          present issue, with: Entities::Issue, current_user: current_user, project: user_project
+          present issue,
+            with: Entities::Issue,
+            current_user: current_user,
+            project: user_project,
+            request: request
         else
           render_validation_error!(issue)
         end
@@ -183,7 +197,11 @@ module API
         render_spam_error! if issue.spam?
 
         if issue.valid?
-          present issue, with: Entities::Issue, current_user: current_user, project: user_project
+          present issue,
+            with: Entities::Issue,
+            current_user: current_user,
+            project: user_project,
+            request: request
         else
           render_validation_error!(issue)
         end
@@ -205,7 +223,11 @@ module API
 
         begin
           issue = ::Issues::MoveService.new(user_project, current_user).execute(issue, new_project)
-          present issue, with: Entities::Issue, current_user: current_user, project: user_project
+          present issue,
+            with: Entities::Issue,
+            current_user: current_user,
+            project: user_project,
+            request: request
         rescue ::Issues::MoveService::MoveError => error
           render_api_error!(error.message, 400)
         end

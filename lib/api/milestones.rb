@@ -118,7 +118,11 @@ module API
         }
 
         issues = IssuesFinder.new(current_user, finder_params).execute
-        present paginate(issues), with: Entities::Issue, current_user: current_user, project: user_project
+        present paginate(issues),
+          with: Entities::Issue,
+          current_user: current_user,
+          project: user_project,
+          request: request
       end
 
       desc 'Get all merge requests for a single project milestone' do

@@ -376,6 +376,15 @@ module API
       header(*Gitlab::Workhorse.send_git_archive(repository, ref: ref, format: format))
     end
 
+    # TODO: Please, remove this when V3 API is gone.
+    def v3_issue_entity(project)
+      if project.has_external_issue_tracker?
+        Entities::ExternalIssue
+      else
+        ::API::V3::Entities::Issue
+      end
+    end
+
     def issue_entity(project)
       if project.has_external_issue_tracker?
         Entities::ExternalIssue

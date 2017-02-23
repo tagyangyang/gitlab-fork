@@ -27,7 +27,11 @@ module API
             not_modified!
           else
             resource.subscribe(current_user, user_project)
-            present resource, with: entity_class, current_user: current_user, project: user_project
+            present resource,
+              with: entity_class,
+              current_user: current_user,
+              project: user_project,
+              request: request
           end
         end
 
@@ -41,7 +45,11 @@ module API
             not_modified!
           else
             resource.unsubscribe(current_user, user_project)
-            present resource, with: entity_class, current_user: current_user, project: user_project
+            present resource,
+              with: entity_class,
+              current_user: current_user,
+              project: user_project,
+              request: request
           end
         end
       end

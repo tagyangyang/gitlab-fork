@@ -719,9 +719,9 @@ describe API::Issues, api: true  do
       relationship_urls = json_response.fetch('relationship_urls')
 
       expect(relationship_urls).to eql({
-        "issues_url" => "http://www.example.com/api/v4/projects/1/issues",
-        "merge_requests_url" => "http://www.example.com/api/v4/projects/1/merge_requests",
-        "repo_branches_url" => "http://www.example.com/api/v4/projects/1/repository/branches",
+        "issues_url" => "http://www.example.com/api/v4/projects/#{project.id}/issues",
+        "merge_requests_url" => "http://www.example.com/api/v4/projects/#{project.id}/merge_requests",
+        "repo_branches_url" => "http://www.example.com/api/v4/projects/#{project.id}/repository/branches",
       })
     end
 

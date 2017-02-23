@@ -27,7 +27,7 @@ module API
           todo = TodoService.new.mark_todo(issuable, current_user).first
 
           if todo
-            present todo, with: Entities::Todo, current_user: current_user
+            present todo, with: Entities::Todo, current_user: current_user, request: request
           else
             not_modified!
           end
@@ -49,7 +49,10 @@ module API
         use :pagination
       end
       get do
-        present paginate(find_todos), with: Entities::Todo, current_user: current_user
+        present paginate(find_todos),
+          with: Entities::Todo,
+          current_user: current_user,
+          request: request
       end
 
       desc 'Mark a todo as done' do
@@ -62,7 +65,7 @@ module API
         todo = current_user.todos.find(params[:id])
         TodoService.new.mark_todos_as_done([todo], current_user)
 
-        present todo.reload, with: Entities::Todo, current_user: current_user
+        present todo.reload, with: Entities::Todo, current_user: current_user, request: request
       end
 
       desc 'Mark all todos as done'

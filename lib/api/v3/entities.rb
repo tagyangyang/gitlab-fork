@@ -45,6 +45,24 @@ module API
         expose :created_at, :updated_at
         expose :awardable_id, :awardable_type
       end
+
+      class Issue < ::API::Entities::ProjectEntity
+        expose :label_names, as: :labels
+        expose :milestone, using: ::API::Entities::Milestone
+        expose :assignee, :author, using: ::API::Entities::UserBasic
+
+        expose :subscribed do |issue, options|
+          issue.subscribed?(options[:current_user], options[:project] || issue.project)
+        end
+        expose :user_notes_count
+        expose :upvotes, :downvotes
+        expose :due_date
+        expose :confidential
+
+        expose :web_url do |issue, options|
+          Gitlab::UrlBuilder.build(issue)
+        end
+      end
     end
   end
 end
