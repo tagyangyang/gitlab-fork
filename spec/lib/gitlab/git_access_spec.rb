@@ -14,14 +14,9 @@ describe Gitlab::GitAccess, lib: true do
   end
 
   describe '#check with single protocols allowed' do
-    def disable_protocol(protocol)
-      settings = ::ApplicationSetting.create_from_defaults
-      settings.update_attribute(:enabled_git_access_protocol, protocol)
-    end
-
     context 'ssh disabled' do
       before do
-        disable_protocol('ssh')
+        stub_application_setting(enabled_git_access_protocol: 'ssh')
         @acc = Gitlab::GitAccess.new(actor, project, 'ssh', authentication_abilities: authentication_abilities)
       end
 
@@ -36,7 +31,7 @@ describe Gitlab::GitAccess, lib: true do
 
     context 'http disabled' do
       before do
-        disable_protocol('http')
+        stub_application_setting(enabled_git_access_protocol: 'http')
         @acc = Gitlab::GitAccess.new(actor, project, 'http', authentication_abilities: authentication_abilities)
       end
 
@@ -48,6 +43,52 @@ describe Gitlab::GitAccess, lib: true do
         expect(@acc.check('git-upload-pack', '_any').allowed?).to be_falsey
       end
     end
+  end
+
+  # This requires a `ssh_key` variable
+  shared_examples '#check with a key that is not valid' do
+    let(:access) { described_class.new(ssh_key, project, 'ssh', authentication_abilities: authentication_abilities) }
+    subject { access.check('git-upload-pack', '_any') }
+
+    before do
+      project.add_master(user)
+    end
+
+    context 'key is too small' do
+      before do
+        stub_application_setting(minimum_rsa_bits: 4096)
+      end
+
+      it 'does not allow keys wich are too small' do
+        aggregate_failures do
+          expect(ssh_key).not_to be_valid
+          expect(subject.allowed?).to be_falsey
+          expect(subject.message).to eq('Your SSH key length must be at least 4096 bits.')
+        end
+      end
+    end
+
+    context 'key type is not allowed' do
+      before do
+        stub_application_setting(allowed_key_types: ['ecdsa'])
+      end
+
+      it 'does not allow keys wich are too small' do
+        aggregate_failures do
+          expect(ssh_key).not_to be_valid
+          expect(subject.allowed?).to be_falsey
+          expect(subject.message).to eq('Your SSH key type is not allowed. Must be ECDSA.')
+        end
+      end
+    end
+  end
+
+  it_behaves_like '#check with a key that is not valid' do
+    let(:ssh_key) { build(:rsa_key_2048, user: user) }
+  end
+
+  it_behaves_like '#check with a key that is not valid' do
+    let(:ssh_key) { build(:rsa_deploy_key_2048, user: user) }
   end
 
   describe '#check_download_access!' do
