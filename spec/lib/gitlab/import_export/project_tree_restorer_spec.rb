@@ -130,29 +130,21 @@ describe Gitlab::ImportExport::ProjectTreeRestorer, services: true do
         end
       end
 
-      context 'has restored the same number of records' do
-        let(:json) do
-          JSON.parse(File.read(File.join(__dir__, 'project.json')))
+      context 'has restored the correct number of records' do
+        it 'has the correct number of merge requests' do
+          expect(@project.merge_requests.size).to eq(9)
         end
 
-        it 'has the same number of merge requests' do
-          expect(@project.merge_requests.size)
-            .to eq(json['merge_requests'].size)
+        it 'has the correct number of triggers' do
+          expect(@project.triggers.size).to eq(1)
         end
 
-        it 'has the same number of merge requests' do
-          expect(@project.triggers.size)
-            .to eq(json['triggers'].size)
-        end
+        it 'has the correct number of pipelines and statuses' do
+          expect(@project.pipelines.size).to eq(5)
 
-        it 'has the same number of pipelines and statuses' do
-          expect(@project.pipelines.size)
-            .to eq(json['pipelines'].size)
-
-          @project.pipelines.zip(json['pipelines'])
-            .each do |(imported, exported)|
-              expect(imported.statuses.size)
-                .to eq(exported['statuses'].size)
+          @project.pipelines.zip([2, 2, 2, 2, 2])
+            .each do |(pipeline, expected_status_size)|
+              expect(pipeline.statuses.size).to eq(expected_status_size)
             end
         end
       end
