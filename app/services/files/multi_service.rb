@@ -43,8 +43,6 @@ module Files
           raise ValidationError, "No files to #{action[:action]}."
         end
 
-        validate_file_exists!(action)
-
         case action[:action]
         when :create
           validate_create!(action)
@@ -61,20 +59,14 @@ module Files
     end
 
     def validate_file_exists!(action)
-      return if action[:action] == :create
-
       file_path = action[:file_path]
       file_path = action[:previous_path] if action[:action] == :move
 
-      blob = repository.blob_at_branch(params[:branch], file_path)
+      blob = @start_project.repository.blob_at_branch(@start_branch, file_path)
 
       unless blob
         raise ValidationError, "File to be #{action[:action]}d `#{file_path}` does not exist."
       end
-    end
-
-    def last_commit
-      Gitlab::Git::Commit.last_for_path(repository, @start_branch, @file_path)
     end
 
     def validate_path!(file)
@@ -96,9 +88,9 @@ module Files
     end
 
     def validate_create!(action)
-      return if project.empty_repo?
+      return if @start_project.empty_repo?
 
-      if repository.blob_at_branch(params[:branch], action[:file_path])
+      if @start_project.repository.blob_at_branch(@start_branch, action[:file_path])
         raise ValidationError, "Your changes could not be committed because a file with the name `#{action[:file_path]}` already exists."
       end
 
@@ -117,30 +109,31 @@ module Files
       end
     end
 
+    def validate_update!(action)
+      validate_file_exists!(action)
+    end
+
     def validate_delete!(action)
+      validate_file_exists!(action)
     end
 
     def validate_move!(action, index)
+      validate_file_exists!(action)
+
       if action[:previous_path].nil?
         raise ValidationError, "You must supply the original file path when moving file `#{action[:file_path]}`."
       end
 
-      blob = repository.blob_at_branch(params[:branch], action[:file_path])
+      blob = @start_project.repository.blob_at_branch(@start_branch, action[:file_path])
 
       if blob
         raise ValidationError, "Move destination `#{action[:file_path]}` already exists."
       end
 
       if action[:content].nil?
-        blob = repository.blob_at_branch(params[:branch], action[:previous_path])
-        blob.load_all_data!(repository) if blob.truncated?
+        blob = @start_project.repository.blob_at_branch(@start_branch, action[:previous_path])
+        blob.load_all_data!(@start_project.repository) if blob.truncated?
         params[:actions][index][:content] = blob.data
-      end
-    end
-
-    def validate_update!(action)
-      if file_has_changed?
-        raise FileChangedError.new("You are attempting to update a file `#{action[:file_path]}` that has changed since you started editing it.")
       end
     end
   end
