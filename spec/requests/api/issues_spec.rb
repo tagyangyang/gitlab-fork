@@ -718,7 +718,11 @@ describe API::Issues, api: true  do
 
       relationship_urls = json_response.fetch('relationship_urls')
 
-      expect(relationship_urls).to eql('asdf')
+      expect(relationship_urls).to eql({
+        "issues_url" => "http://www.example.com/api/v4/projects/1/issues",
+        "merge_requests_url" => "http://www.example.com/api/v4/projects/1/merge_requests",
+        "repo_branches_url" => "http://www.example.com/api/v4/projects/1/repository/branches",
+      })
     end
 
     it "returns a project issue by id" do

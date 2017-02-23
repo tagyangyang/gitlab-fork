@@ -266,6 +266,16 @@ module API
       expose :web_url do |issue, options|
         Gitlab::UrlBuilder.build(issue)
       end
+
+      expose :relationship_urls do |issue, options|
+        relationships = [
+          { name: :merge_requests_url, entity: MergeRequest, params: { id: issue.project_id } },
+          { name: :issues_url, entity: Issue, params: { id: issue.project_id } },
+          { name: :repo_branches_url, entity: RepoBranch, params: { id: issue.project_id } }
+        ]
+
+        API::GrapeRelationshipUri.build(relationships, options.fetch(:request))
+      end
     end
 
     class IssuableTimeStats < Grape::Entity
