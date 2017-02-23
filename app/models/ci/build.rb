@@ -221,9 +221,8 @@ module Ci
 
     def merge_request
       merge_requests = MergeRequest.includes(:merge_request_diff)
-                                   .where(
-                                      source_branch: ref,
-                                      source_project: pipeline.project)
+                                   .where(source_branch: ref,
+                                          source_project: pipeline.project)
                                    .reorder(iid: :asc)
 
       merge_requests.find do |merge_request|
