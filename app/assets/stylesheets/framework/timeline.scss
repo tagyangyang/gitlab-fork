@@ -59,7 +59,21 @@
       }
     }
   }
+
+  // remove timeline icon (avatar) for diff file in mobile
+  .diff-file {
+    .timeline-entry .timeline-entry-inner {
+      .timeline-icon {
+        display: none;
+      }
+
+      .timeline-content {
+        margin-left: 0;
+      }
+    }
+  }
 }
+
 
 .discussion .timeline-entry {
   margin: 0;

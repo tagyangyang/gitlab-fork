@@ -3,9 +3,17 @@
  */
 
 @-webkit-keyframes targe3-note {
-  from { background: $note-targe3-outside; }
-  50% { background: $note-targe3-inside; }
-  to { background: $note-targe3-outside; }
+  from {
+    background: $note-targe3-outside;
+  }
+
+  50% {
+    background: $note-targe3-inside;
+  }
+
+  to {
+    background: $note-targe3-outside;
+  }
 }
 
 ul.notes {
@@ -447,7 +455,6 @@ ul.notes {
   border-radius: $border-radius-base;
 }
 
-
 /**
  * Line note button on the side of diffs
  */
@@ -574,7 +581,23 @@ ul.notes {
 }
 
 // Merge request notes in diffs
+
 .diff-file {
+  .notes_content {
+    &.parallel {
+      @media (max-width: $screen-sm-max) {
+        .note-header {
+          display: inline-block;
+        }
+
+        .note-actions {
+          float: left;
+          margin: 5px 0 0;
+          right: auto;
+        }
+      }
+    }
+  }
 
   .note-header {
     display: flex;
@@ -587,8 +610,9 @@ ul.notes {
       position: relative;
 
       @media (max-width: $screen-xs-max) {
+        float: left;
         margin: 5px 0 0;
-        right: inherit;
+        right: auto;
       }
     }
 
@@ -596,7 +620,7 @@ ul.notes {
       flex: 1;
 
       @media (max-width: $screen-xs-max) {
-        flex-basis: 100%;
+        width: 100%;
       }
     }
   }
@@ -606,5 +630,4 @@ ul.notes {
       clear: both;
     }
   }
-
 }
