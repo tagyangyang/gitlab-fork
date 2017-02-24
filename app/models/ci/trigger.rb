@@ -7,8 +7,8 @@ module Ci
     belongs_to :project
     has_many :trigger_requests, dependent: :destroy
 
-    validates_presence_of :token
-    validates_uniqueness_of :token
+    validates :token, presence: true
+    validates :token, uniqueness: true
 
     before_validation :set_default_values
 
