@@ -5,7 +5,7 @@
   .fade-right
     = icon('angle-right')
   %ul.nav-links.scrolling-tabs
-    = nav_link(path: ['groups#show', 'groups#activity', 'group_members#index'], html_options: { class: 'home' }) do
+    = nav_link(path: ['groups#show', 'groups#subgroups', 'groups#activity', 'group_members#index'], html_options: { class: 'home' }) do
       = link_to group_path(@group), title: 'Home' do
         %span
           Group
