@@ -17,6 +17,12 @@ feature 'Slack slash commands', feature: true do
     expect(token_placeholder).to eq('XXxxXXxxXXxxXXxxXXxxXXxx')
   end
 
+  it 'prevents autocomplete for token field' do
+    autocomplete = find_field('service_token')['autocomplete']
+
+    expect(autocomplete).to eq('off')
+  end
+
   it 'shows a help message' do
     expect(page).to have_content('This service allows users to perform common')
   end
