@@ -18,9 +18,10 @@ module Gitlab
         document.xpath('//blockquote').each(&:remove)
         document.xpath('//table').each(&:remove)
 
-        # these bogus links are added by outlook, and can
-        # result in extra square brackets being added to the text
-        document.xpath('//a[@name="_MailEndCompose"]').each do |link|
+        # bogus links with no href are sometimes added by outlook,
+        # and can result in Html2Text adding extra square brackets
+        # to the text, so we remove them here.
+        document.xpath('//a[not(@href)]').each do |link|
           link.replace(link.children)
         end
       end
