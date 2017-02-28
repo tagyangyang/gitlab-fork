@@ -35,7 +35,7 @@ module Banzai
       def emoji_name_element_unicode_filter(text)
         text.gsub(emoji_pattern) do |match|
           name = $1
-          Gitlab::Emoji.gl_emoji_tag(name, fallback_image_source: emoji_fallback_image_source_url(name))
+          Gitlab::Emoji.gl_emoji_tag(name)
         end
       end
 
@@ -47,7 +47,7 @@ module Banzai
       def emoji_unicode_element_unicode_filter(text)
         text.gsub(emoji_unicode_pattern) do |moji|
           emoji_info = Gitlab::Emoji.emojis_by_moji[moji]
-          Gitlab::Emoji.gl_emoji_tag(emoji_info['name'], fallback_image_source: emoji_fallback_image_source_url(emoji_info['name']))
+          Gitlab::Emoji.gl_emoji_tag(emoji_info['name'])
         end
       end
 
@@ -62,25 +62,6 @@ module Banzai
       end
 
       private
-
-      def emoji_fallback_image_source_url(name)
-        emoji_path = "#{Gitlab::Emoji.emoji_filename(name)}.png"
-
-        if context[:asset_host]
-          # Asset host is specified.
-          url_to_image(emoji_path)
-        elsif context[:asset_root]
-          # Gitlab url is specified
-          File.join(context[:asset_root], url_to_image(emoji_path))
-        else
-          # All other cases
-          url_to_image(emoji_path)
-        end
-      end
-
-      def url_to_image(image)
-        ActionController::Base.helpers.url_to_image(image)
-      end
 
       def emoji_pattern
         self.class.emoji_pattern

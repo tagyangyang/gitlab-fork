@@ -110,25 +110,11 @@ describe Banzai::Filter::EmojiFilter, lib: true do
     expect(doc.to_html).to match(/^This deserves a <gl-emoji.+>, big time\.\z/)
   end
 
-  it 'uses a custom asset_root context' do
-    root = Gitlab.config.gitlab.url + 'gitlab/root'
-
-    doc = filter(':smile:', asset_root: root)
-    expect(doc.css('gl-emoji').first.attr('data-fallback-src')).to start_with(root)
-  end
-
   it 'uses a custom asset_host context' do
     ActionController::Base.asset_host = 'https://cdn.example.com'
 
     doc = filter(':frowning:', asset_host: 'https://this-is-ignored-i-guess?')
     expect(doc.css('gl-emoji').first.attr('data-fallback-src')).to start_with('https://cdn.example.com')
-  end
-
-  it 'uses a custom asset_root context' do
-    root = Gitlab.config.gitlab.url + 'gitlab/root'
-
-    doc = filter("'🎱'", asset_root: root)
-    expect(doc.css('gl-emoji').first.attr('data-fallback-src')).to start_with(root)
   end
 
   it 'uses a custom asset_host context' do

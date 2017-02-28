@@ -2,6 +2,7 @@ module Gitlab
   module Emoji
     extend self
     @emoji_unicode_version = JSON.parse(File.read(File.absolute_path(File.dirname(__FILE__) + '/../../node_modules/emoji-unicode-version/emoji-unicode-version-map.json')))
+    @emoji_aliases = JSON.parse(File.read(File.join(Rails.root, 'fixtures', 'emojis', 'aliases.json')))
 
     def emojis
       Gemojione.index.instance_variable_get(:@emoji_by_name)
@@ -17,6 +18,10 @@ module Gitlab
 
     def emojis_names
       emojis.keys
+    end
+
+    def emojis_aliases
+      @emoji_aliases
     end
 
     def emoji_filename(name)
@@ -36,11 +41,12 @@ module Gitlab
     end
 
     # CSS sprite fallback takes precedence over image fallback
-    def gl_emoji_tag(name, fallback_image_source: nil, sprite: false, force_fallback: false)
-      emoji_info = emojis[name]
-      emoji_fallback_image_source = fallback_image_source || ActionController::Base.helpers.url_to_image("#{emoji_info['unicode']}.png")
-      emoji_fallback_sprite_class = "emoji-#{name}"
-      "<gl-emoji #{force_fallback && sprite ? "class='emoji-icon #{emoji_fallback_sprite_class}'" : ""} data-name='#{name}' data-fallback-src='#{emoji_fallback_image_source}' #{sprite ? "data-fallback-sprite-class='#{emoji_fallback_sprite_class}'" : ""} data-unicode-version='#{emoji_unicode_version(name)}'>#{force_fallback && sprite === false ? emoji_image_tag(name, emoji_fallback_image_source) : emoji_info['moji']}</gl-emoji>"
+    def gl_emoji_tag(name, sprite: false, force_fallback: false)
+      emoji_name = emojis_aliases[name] || name
+      emoji_info = emojis[emoji_name]
+      emoji_fallback_image_source = ActionController::Base.helpers.asset_url("emoji/#{emoji_info['name']}.png")
+      emoji_fallback_sprite_class = "emoji-#{emoji_name}"
+      "<gl-emoji #{force_fallback && sprite ? "class='emoji-icon #{emoji_fallback_sprite_class}'" : ""} data-name='#{emoji_name}' data-fallback-src='#{emoji_fallback_image_source}' #{sprite ? "data-fallback-sprite-class='#{emoji_fallback_sprite_class}'" : ""} data-unicode-version='#{emoji_unicode_version(emoji_name)}'>#{force_fallback && sprite === false ? emoji_image_tag(emoji_name, emoji_fallback_image_source) : emoji_info['moji']}</gl-emoji>"
     end
   end
 end

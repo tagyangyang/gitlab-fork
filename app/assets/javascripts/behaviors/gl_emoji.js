@@ -18,8 +18,9 @@ function glEmojiTag(inputName, options) {
   const opts = Object.assign({}, glEmojiTagDefaults, options);
   const name = emojiAliases[inputName] || inputName;
   const emojiInfo = emojiMap[name];
-
+  const fallbackImageSrc = `${gon.relative_url_root || ''}/assets/emoji/${name}-${emojiInfo.digest}.png`;
   const fallbackSpriteClass = `emoji-${name}`;
+
   const classList = [];
   if (opts.forceFallback && opts.sprite) {
     classList.push('emoji-icon');
@@ -29,14 +30,14 @@ function glEmojiTag(inputName, options) {
   const fallbackSpriteAttribute = opts.sprite ? `data-fallback-sprite-class="${fallbackSpriteClass}"` : '';
   let contents = emojiInfo.moji;
   if (opts.forceFallback && !opts.sprite) {
-    contents = emojiImageTag(name, emojiInfo.fallbackImageSrc);
+    contents = emojiImageTag(name, fallbackImageSrc);
   }
 
   return `
   <gl-emoji
     ${classAttribute}
     data-name="${name}"
-    data-fallback-src="${emojiInfo.fallbackImageSrc}"
+    data-fallback-src="${fallbackImageSrc}"
     ${fallbackSpriteAttribute}
     data-unicode-version="${emojiInfo.unicodeVersion}"
   >

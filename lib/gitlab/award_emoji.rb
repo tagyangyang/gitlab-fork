@@ -9,11 +9,7 @@ module Gitlab
     end
 
     def self.aliases
-      @aliases ||=
-        begin
-          json_path = File.join(Rails.root, 'fixtures', 'emojis', 'aliases.json')
-          JSON.parse(File.read(json_path))
-        end
+      Gitlab::Emoji.emojis_aliases
     end
   end
 end
