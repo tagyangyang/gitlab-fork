@@ -103,7 +103,6 @@ module Gitlab
           @relation_hash.delete('token')
 
           imported_object do |object|
-            object.trace = trace
             object.commit_id = nil
           end
         else
