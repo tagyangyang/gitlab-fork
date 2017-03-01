@@ -29,11 +29,11 @@ import Vue from 'vue';
         button.classList.remove('disabled');
 
         if (isSubscribed) {
-          toggleButton.addClass('unsubscribed')
-          toggleButton.removeClass('subscribed')
+          toggleButton.addClass('unsubscribed');
+          toggleButton.removeClass('subscribed');
         } else {
-          toggleButton.addClass('subscribed')
-          toggleButton.removeClass('unsubscribed')
+          toggleButton.addClass('subscribed');
+          toggleButton.removeClass('unsubscribed');
         }
 
         // hack to allow this to work with the issue boards Vue object
