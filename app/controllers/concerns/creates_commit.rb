@@ -11,7 +11,6 @@ module CreatesCommit
     end
 
     @start_branch ||= @ref || @branch_name
-    @start_branch = nil unless @project.repository.branch_exists?(@start_branch)
 
     commit_params = @commit_params.merge(
       start_project: @project,
