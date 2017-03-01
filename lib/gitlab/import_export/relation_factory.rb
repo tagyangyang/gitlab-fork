@@ -98,8 +98,8 @@ module Gitlab
       end
 
       def generate_imported_object
-        if BUILD_MODELS.include?(@relation_name) # call #trace= method after assigning the other attributes
-          trace = @relation_hash.delete('trace')
+        if BUILD_MODELS.include?(@relation_name)
+          @relation_hash.delete('trace') # old export files have trace
           @relation_hash.delete('token')
 
           imported_object do |object|
