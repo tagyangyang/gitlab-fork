@@ -1,7 +1,7 @@
 module Commits
   class CreateService < ::BaseService
-    class ValidationError < StandardError; end
-    class ChangeError < StandardError; end
+    ValidationError = Class.new(StandardError)
+    ChangeError = Class.new(StandardError)
 
     def initialize(*args)
       super
