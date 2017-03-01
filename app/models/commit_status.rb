@@ -131,8 +131,8 @@ class CommitStatus < ActiveRecord::Base
     false
   end
 
-  # Dummy for old installation importing new projects from new installation
-  # Remove it whenever we decided to break this
+  # Added in 9.0 to keep compatibility to keep using the same I/E version as
+  # in 8.17. Remove it only whenever we decided to break this
   def gl_project_id
     'dummy'
   end
