@@ -56,7 +56,7 @@ class GitOperationService
     start_project: repository.project,
     &block)
 
-    start_branch ||= branch_name
+    start_branch_name ||= branch_name
 
     verify_start_branch_exists!(start_project.repository, start_branch_name)
 
