@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import terminalComp from '~/environments/components/environment_terminal_button';
 
-fdescribe('Stop Component', () => {
+describe('Stop Component', () => {
   let TerminalComponent;
   let component;
   const terminalPath = '/path';

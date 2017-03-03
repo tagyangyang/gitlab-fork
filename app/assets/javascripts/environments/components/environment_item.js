@@ -1,13 +1,12 @@
-const Vue = require('vue');
-const Timeago = require('timeago.js');
-
-require('../../lib/utils/text_utility');
-require('../../vue_shared/components/commit');
-const ActionsComponent = require('./environment_actions').default;
-const ExternalUrlComponent = require('./environment_external_url').default;
-const StopComponent = require('./environment_stop').default;
-const RollbackComponent = require('./environment_rollback').default;
-const TerminalButtonComponent = require('./environment_terminal_button').default;
+/* global Timeago */
+import Timeago from 'timeago.js';
+import ActionsComponent from './environment_actions';
+import ExternalUrlComponent from './environment_external_url';
+import StopComponent from './environment_stop';
+import RollbackComponent from './environment_rollback';
+import TerminalButtonComponent from './environment_terminal_button';
+import '../../lib/utils/text_utility';
+import '../../vue_shared/components/commit.js.es6';
 
 /**
  * Envrionment Item Component
@@ -17,7 +16,7 @@ const TerminalButtonComponent = require('./environment_terminal_button').default
 
 const timeagoInstance = new Timeago();
 
-module.exports = Vue.component('environment-item', {
+export default {
 
   components: {
     'commit-component': gl.CommitComponent,
@@ -516,4 +515,4 @@ module.exports = Vue.component('environment-item', {
       </td>
     </tr>
   `,
-});
+};
