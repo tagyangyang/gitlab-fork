@@ -18,6 +18,7 @@ export default {
 
   template: `
     <a class="btn terminal-button"
+      title="Open web terminal"
       :href="terminalPath">
       ${terminalIconSvg}
     </a>

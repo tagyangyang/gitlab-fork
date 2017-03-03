@@ -46,7 +46,8 @@ export default {
     <button type="button"
       class="btn stop-env-link"
       @click="onClick"
-      :disabled="isLoading">
+      :disabled="isLoading"
+      title="Stop Environment">
       <i class="fa fa-stop stop-env-icon" aria-hidden="true"></i>
       <i v-if="isLoading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
     </button>
