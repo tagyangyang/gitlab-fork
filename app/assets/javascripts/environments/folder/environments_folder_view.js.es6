@@ -88,11 +88,11 @@ module.exports = Vue.component('environment-folder-view', {
 
     const endpoint = `${this.endpoint}?scope=${scope}&page=${pageNumber}`;
 
-    const service = new EnvironmentsService(endpoint);
+    this.service = new EnvironmentsService(endpoint);
 
     this.isLoading = true;
 
-    return service.get()
+    return this.service.get()
       .then(resp => ({
         headers: resp.headers,
         body: resp.json(),
@@ -168,13 +168,12 @@ module.exports = Vue.component('environment-folder-view', {
             :can-read-environment="canReadEnvironmentParsed"
             :play-icon-svg="playIconSvg"
             :terminal-icon-svg="terminalIconSvg"
-            :commit-icon-svg="commitIconSvg">
-          </environment-table>
+            :commit-icon-svg="commitIconSvg"
+            :service="service"/>
 
           <table-pagination v-if="state.paginationInformation && state.paginationInformation.totalPages > 1"
             :change="changePage"
-            :pageInfo="state.paginationInformation">
-          </table-pagination>
+            :pageInfo="state.paginationInformation"/>
         </div>
       </div>
     </div>

@@ -4,19 +4,14 @@ import stopComp from '~/environments/components/environment_stop';
 describe('Stop Component', () => {
   let StopComponent;
   let component;
-  let spy;
   const stopURL = '/stop';
 
   beforeEach(() => {
     StopComponent = Vue.extend(stopComp);
-    spy = jasmine.createSpy('spy').and.returnValue(Promise.resolve());
 
     component = new StopComponent({
       propsData: {
         stopUrl: stopURL,
-        service: {
-          postAction: spy,
-        },
       },
     }).$mount();
   });
@@ -27,11 +22,20 @@ describe('Stop Component', () => {
   });
 
   it('should call the service when an action is clicked', () => {
+    const spy = jasmine.createSpy('spy').and.returnValue(Promise.resolve());
+    spyOn(window, 'confirm').and.returnValue(true);
+
+    component = new StopComponent({
+      propsData: {
+        stopUrl: stopURL,
+        service: {
+          postAction: spy,
+        },
+      },
+    }).$mount();
+
     component.$el.click();
 
-    spyOn(window, 'confirm').and.returnValue(true);
-    setTimeout(() => {
-      expect(spy).toHaveBeenCalledWith(stopURL);
-    }, 0);
+    expect(spy).toHaveBeenCalled();
   });
 });

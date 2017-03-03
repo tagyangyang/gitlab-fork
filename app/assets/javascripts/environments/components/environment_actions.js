@@ -42,9 +42,9 @@ export default {
 
   template: `
     <div class="btn-group" role="group">
-      <button class="dropdown btn btn-default dropdown-new" data-toggle="dropdown" :disabled="isLoading">
+      <button class="dropdown btn btn-default dropdown-new js-dropdown-play-icon-container" data-toggle="dropdown" :disabled="isLoading">
         <span>
-          <span class="js-dropdown-play-icon-container" v-html="playIconSvg"></span>
+          <span v-html="playIconSvg"></span>
           <i class="fa fa-caret-down" aria-hidden="true"></i>
           <i v-if="isLoading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
         </span>
