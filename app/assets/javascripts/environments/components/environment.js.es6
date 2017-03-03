@@ -71,11 +71,11 @@ module.exports = Vue.component('environment-component', {
 
     const endpoint = `${this.endpoint}?scope=${scope}&page=${pageNumber}`;
 
-    const service = new EnvironmentsService(endpoint);
+    this.service = new EnvironmentsService(endpoint);
 
     this.isLoading = true;
 
-    return service.get()
+    return this.service.get()
       .then(resp => ({
         headers: resp.headers,
         body: resp.json(),
@@ -144,7 +144,7 @@ module.exports = Vue.component('environment-component', {
 
       <div class="content-list environments-container">
         <div class="environments-list-loading text-center" v-if="isLoading">
-          <i class="fa fa-spinner fa-spin"></i>
+          <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
         </div>
 
         <div class="blank-state blank-state-no-icon"
@@ -173,7 +173,8 @@ module.exports = Vue.component('environment-component', {
           <environment-table
             :environments="state.environments"
             :can-create-deployment="canCreateDeploymentParsed"
-            :can-read-environment="canReadEnvironmentParsed"/>
+            :can-read-environment="canReadEnvironmentParsed"
+            :service="service"/>
         </div>
 
         <table-pagination v-if="state.paginationInformation && state.paginationInformation.totalPages > 1"

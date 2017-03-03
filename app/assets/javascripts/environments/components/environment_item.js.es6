@@ -3,11 +3,11 @@ const Timeago = require('timeago.js');
 
 require('../../lib/utils/text_utility');
 require('../../vue_shared/components/commit');
-const ActionsComponent = require('./environment_actions');
-const ExternalUrlComponent = require('./environment_external_url');
-const StopComponent = require('./environment_stop');
-const RollbackComponent = require('./environment_rollback');
-const TerminalButtonComponent = require('./environment_terminal_button');
+const ActionsComponent = require('./environment_actions').default;
+const ExternalUrlComponent = require('./environment_external_url').default;
+const StopComponent = require('./environment_stop').default;
+const RollbackComponent = require('./environment_rollback').default;
+const TerminalButtonComponent = require('./environment_terminal_button').default;
 
 /**
  * Envrionment Item Component
@@ -45,6 +45,12 @@ module.exports = Vue.component('environment-item', {
       type: Boolean,
       required: false,
       default: false,
+    },
+
+    service: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
   },
 
@@ -489,20 +495,23 @@ module.exports = Vue.component('environment-item', {
       <td class="environments-actions">
         <div v-if="!model.isFolder" class="btn-group pull-right" role="group">
           <actions-component v-if="hasManualActions && canCreateDeployment"
+            :service="service"
             :actions="manualActions"/>
 
           <external-url-component v-if="externalURL && canReadEnvironment"
             :external-url="externalURL"/>
 
           <stop-component v-if="hasStopAction && canCreateDeployment"
-            :stop-url="model.stop_path"/>
+            :stop-url="model.stop_path"
+            :service="service"/>
 
           <terminal-button-component v-if="model && model.terminal_path"
             :terminal-path="model.terminal_path"/>
 
           <rollback-component v-if="canRetry && canCreateDeployment"
             :is-last-deployment="isLastDeployment"
-            :retry-url="retryUrl"/>
+            :retry-url="retryUrl"
+            :service="service"/>
         </div>
       </td>
     </tr>

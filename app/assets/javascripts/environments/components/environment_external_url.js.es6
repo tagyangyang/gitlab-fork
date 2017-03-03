@@ -1,9 +1,7 @@
 /**
  * Renders the external url link in environments table.
  */
-const Vue = require('vue');
-
-module.exports = Vue.component('external-url-component', {
+export default {
   props: {
     externalUrl: {
       type: String,
@@ -16,4 +14,4 @@ module.exports = Vue.component('external-url-component', {
       <i class="fa fa-external-link"></i>
     </a>
   `,
-});
+};

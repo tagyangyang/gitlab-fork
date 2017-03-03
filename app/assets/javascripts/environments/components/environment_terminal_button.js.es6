@@ -2,10 +2,9 @@
  * Renders a terminal button to open a web terminal.
  * Used in environments table.
  */
-const Vue = require('vue');
-const terminalIconSvg = require('icons/_icon_terminal.svg');
+import terminalIconSvg from 'icons/_icon_terminal.svg';
 
-module.exports = Vue.component('terminal-button-component', {
+export default {
   props: {
     terminalPath: {
       type: String,
@@ -23,4 +22,4 @@ module.exports = Vue.component('terminal-button-component', {
       ${terminalIconSvg}
     </a>
   `,
-});
+};

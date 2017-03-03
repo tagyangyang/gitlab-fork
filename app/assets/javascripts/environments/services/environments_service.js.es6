@@ -8,6 +8,10 @@ class EnvironmentsService {
   get() {
     return this.environments.get();
   }
+
+  postAction(endpoint) {
+    return Vue.http.post(endpoint, {}, { emulateJSON: true });
+  }
 }
 
 module.exports = EnvironmentsService;

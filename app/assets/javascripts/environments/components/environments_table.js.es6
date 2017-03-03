@@ -28,6 +28,12 @@ module.exports = Vue.component('environment-table-component', {
       required: false,
       default: false,
     },
+
+    service: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
   },
 
   template: `
@@ -48,7 +54,8 @@ module.exports = Vue.component('environment-table-component', {
           <tr is="environment-item"
             :model="model"
             :can-create-deployment="canCreateDeployment"
-            :can-read-environment="canReadEnvironment"></tr>
+            :can-read-environment="canReadEnvironment"
+            :service="service"></tr>
         </template>
       </tbody>
     </table>
