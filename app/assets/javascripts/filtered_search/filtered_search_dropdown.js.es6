@@ -78,7 +78,9 @@
     dismissDropdown() {
       // Focusing on the input will dismiss dropdown
       // (default droplab functionality)
+
       this.input.focus();
+      this.resetFilters();
     }
 
     dispatchInputEvent() {
