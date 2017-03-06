@@ -6,7 +6,7 @@ import StopComponent from './environment_stop';
 import RollbackComponent from './environment_rollback';
 import TerminalButtonComponent from './environment_terminal_button';
 import '../../lib/utils/text_utility';
-import '../../vue_shared/components/commit.js.es6';
+import '../../vue_shared/components/commit';
 
 /**
  * Envrionment Item Component

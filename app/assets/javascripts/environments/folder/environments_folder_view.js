@@ -1,16 +1,16 @@
 /* eslint-disable no-param-reassign, no-new */
 /* global Flash */
+import EnvironmentsService from '../services/environments_service';
+import EnvironmentTable from '../components/environments_table';
+import EnvironmentsStore from '../stores/environments_store';
 
 const Vue = window.Vue = require('vue');
 window.Vue.use(require('vue-resource'));
-const EnvironmentsService = require('../services/environments_service').default;
-const EnvironmentTable = require('../components/environments_table').default;
-const EnvironmentsStore = require('../stores/environments_store').default;
 require('../../vue_shared/components/table_pagination');
 require('../../lib/utils/common_utils');
 require('../../vue_shared/vue_resource_interceptor');
 
-module.exports = Vue.component('environment-folder-view', {
+export default Vue.component('environment-folder-view', {
 
   components: {
     'environment-table': EnvironmentTable,

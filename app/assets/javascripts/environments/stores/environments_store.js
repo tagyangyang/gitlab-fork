@@ -1,4 +1,4 @@
-import '~/lib/utils/common_utils.js.es6';
+import '~/lib/utils/common_utils';
 
 /**
  * Environments Store.
