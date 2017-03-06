@@ -25,6 +25,7 @@ describe('Environment item', () => {
         environments: [{ mockItem }],
         canCreateDeployment: false,
         canReadEnvironment: true,
+        service: {},
       },
     }).$mount();
 

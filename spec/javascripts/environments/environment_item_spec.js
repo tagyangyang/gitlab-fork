@@ -27,6 +27,7 @@ describe('Environment item', () => {
           model: mockItem,
           canCreateDeployment: false,
           canReadEnvironment: true,
+          service: {},
         },
       }).$mount();
     });
@@ -114,6 +115,7 @@ describe('Environment item', () => {
           model: environment,
           canCreateDeployment: true,
           canReadEnvironment: true,
+          service: {},
         },
       }).$mount();
     });

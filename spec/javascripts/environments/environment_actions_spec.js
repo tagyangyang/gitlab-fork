@@ -4,6 +4,8 @@ import actionsComp from '~/environments/components/environment_actions';
 describe('Actions Component', () => {
   let ActionsComponent;
   let actionsMock;
+  let spy;
+  let component;
 
   beforeEach(() => {
     ActionsComponent = Vue.extend(actionsComp);
@@ -18,23 +20,9 @@ describe('Actions Component', () => {
         play_path: '#',
       },
     ];
-  });
 
-  it('should render a dropdown with the provided actions', () => {
-    const component = new ActionsComponent({
-      propsData: {
-        actions: actionsMock,
-      },
-    }).$mount();
-
-    expect(
-      component.$el.querySelectorAll('.dropdown-menu li').length,
-    ).toEqual(actionsMock.length);
-  });
-
-  it('should call the service when an action is clicked', () => {
-    const spy = jasmine.createSpy('spy').and.returnValue(Promise.resolve());
-    const component = new ActionsComponent({
+    spy = jasmine.createSpy('spy').and.returnValue(Promise.resolve());
+    component = new ActionsComponent({
       propsData: {
         actions: actionsMock,
         service: {
@@ -42,7 +30,15 @@ describe('Actions Component', () => {
         },
       },
     }).$mount();
+  });
 
+  it('should render a dropdown with the provided actions', () => {
+    expect(
+      component.$el.querySelectorAll('.dropdown-menu li').length,
+    ).toEqual(actionsMock.length);
+  });
+
+  it('should call the service when an action is clicked', () => {
     component.$el.querySelector('.dropdown').click();
     component.$el.querySelector('.js-manual-action-link').click();
 

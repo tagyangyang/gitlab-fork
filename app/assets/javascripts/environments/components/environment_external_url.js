@@ -10,8 +10,12 @@ export default {
   },
 
   template: `
-    <a class="btn external_url" :href="externalUrl" target="_blank">
-      <i class="fa fa-external-link"></i>
+    <a
+      class="btn external_url"
+      :href="externalUrl"
+      target="_blank"
+      title="Environment external URL">
+      <i class="fa fa-external-link" aria-hidden="true"></i>
     </a>
   `,
 };
