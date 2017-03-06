@@ -236,6 +236,8 @@ Ci::Trigger:
 - deleted_at
 - created_at
 - updated_at
+- owner_id
+- description
 DeployKey:
 - id
 - user_id
