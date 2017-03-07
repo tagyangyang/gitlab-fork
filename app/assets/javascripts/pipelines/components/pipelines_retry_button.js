@@ -22,10 +22,6 @@ export default {
   },
 
   methods: {
-    download(name) {
-      return `Download ${name} artifacts`;
-    },
-
     onClickRetry() {
       this.isLoading = true;
 

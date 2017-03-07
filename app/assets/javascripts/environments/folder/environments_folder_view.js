@@ -14,7 +14,7 @@ module.exports = Vue.component('environment-folder-view', {
 
   components: {
     'environment-table': EnvironmentTable,
-    'table-pagination': gl.VueGlPagination,
+    'table-pagination': TablePagination,
   },
 
   data() {

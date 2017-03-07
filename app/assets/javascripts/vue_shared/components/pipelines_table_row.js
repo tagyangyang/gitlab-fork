@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import PipelinesActionsComponent from '../../pipelines/components/pipelines_actions';
 import PipelinesArtifactsComponent from '../../pipelines/components/pipelines_artifacts';
 import PipelineCancelButtonComponent from '../../pipelines/components/pipelines_cancel_button';
@@ -6,8 +7,7 @@ import PipelinesStatusComponent from '../../pipelines/components/status';
 import PipelinesUrlComponent from '../../pipelines/components/pipeline_url';
 import PipelinesStageComponent from '../../pipelines/components/stage';
 import PipelinesTimeagoComponent from '../../pipelines/components/time_ago';
-
-require('./commit');
+import CommitComponent from './commit';
 
 /**
  * Pipeline table row.
@@ -30,7 +30,7 @@ export default {
   },
 
   components: {
-    'commit-component': gl.CommitComponent,
+    'commit-component': CommitComponent,
     'pipeline-actions': PipelinesActionsComponent,
     'pipeline-artifacts': PipelinesArtifactsComponent,
     'pipeline-retry-button': PipelinesRetryButtonComponent,
