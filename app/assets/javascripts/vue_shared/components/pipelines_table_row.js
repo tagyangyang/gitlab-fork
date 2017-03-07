@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
 /* global Vue */
 
-import PipelinesActions from '../../pipelines/components/pipelines_actions';
-import PipelinesArtifacts from '../../pipelines/components/pipelines_artifacts';
-import PipelineCancelButton from '../../pipelines/components/pipelines_cancel_button'
+import PipelinesActionsComponent from '../../pipelines/components/pipelines_actions';
+import PipelinesArtifactsComponent from '../../pipelines/components/pipelines_artifacts';
+import PipelineCancelButtonComponent from '../../pipelines/components/pipelines_cancel_button'
+import PipelinesStatusComponent from '../../pipelines/components/status';
 
-require('../../pipelines/status');
 require('../../pipelines/pipeline_url');
 require('../../pipelines/stage');
 require('../../pipelines/time_ago');
@@ -33,12 +33,12 @@ export default {
 
   components: {
     'commit-component': gl.CommitComponent,
-    'pipeline-actions': PipelinesActions,
-    'pipeline-artifacts': PipelinesArtifacts,
-    'pipeline-cancel-button': PipelineCancelButton,
+    'pipeline-actions': PipelinesActionsComponent,
+    'pipeline-artifacts': PipelinesArtifactsComponent,
+    'pipeline-cancel-button': PipelineCancelButtonComponent,
     'dropdown-stage': gl.VueStage,
     'pipeline-url': gl.VuePipelineUrl,
-    'status-scope': gl.VueStatusScope,
+    'status-scope': PipelinesStatusComponent,
     'time-ago': gl.VueTimeAgo,
   },
 
