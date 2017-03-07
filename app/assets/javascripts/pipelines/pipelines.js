@@ -2,7 +2,6 @@
 /* global Flash */
 
 import Vue from 'vue';
-import CommitPipelinesStoreWithTimeAgo from '../commit/pipelines/pipelines_store';
 import PipelinesService from './services/pipelines_service';
 import PipelinesStore from './stores/pipelines_store';
 
@@ -65,7 +64,7 @@ export default {
 
   beforeUpdate() {
     if (this.state.pipelines.length && this.$children) {
-      CommitPipelinesStoreWithTimeAgo.startTimeAgoLoops.call(this, Vue);
+      this.store.startTimeAgoLoops.call(this, Vue);
     }
   },
 

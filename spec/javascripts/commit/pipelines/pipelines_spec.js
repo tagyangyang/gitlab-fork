@@ -1,8 +1,6 @@
 /* global pipeline, Vue */
 
 require('~/flash');
-require('~/commit/pipelines/pipelines_store');
-require('~/commit/pipelines/pipelines_service');
 require('~/commit/pipelines/pipelines_table');
 require('~/vue_shared/vue_resource_interceptor');
 const pipeline = require('./mock_data');

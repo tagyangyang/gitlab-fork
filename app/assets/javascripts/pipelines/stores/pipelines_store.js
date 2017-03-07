@@ -1,3 +1,6 @@
+/* eslint-disable no-underscore-dangle*/
+import '../../vue_realtime_listener';
+
 export default class PipelinesStore {
   constructor() {
     this.state = {};
@@ -26,5 +29,33 @@ export default class PipelinesStore {
     }
 
     this.state.pageInfo = paginationInfo;
+  }
+
+  /**
+   * TODO: FIXME - MOVE THIS TO TIMEAGO COMPONENT. REMOVE IT FROM STORE.
+   *
+   * Once the data is received we will start the time ago loops.
+   *
+   * Everytime a request is made like retry or cancel a pipeline, every 10 seconds we
+   * update the time to show how long as passed.
+   *
+   */
+  static startTimeAgoLoops() {
+    const startTimeLoops = () => {
+      this.timeLoopInterval = setInterval(() => {
+        this.$children[0].$children.reduce((acc, component) => {
+          const timeAgoComponent = component.$children.filter(el => el.$options._componentTag === 'time-ago')[0];
+          acc.push(timeAgoComponent);
+          return acc;
+        }, []).forEach(e => e.changeTime());
+      }, 10000);
+    };
+
+    startTimeLoops();
+
+    const removeIntervals = () => clearInterval(this.timeLoopInterval);
+    const startIntervals = () => startTimeLoops();
+
+    gl.VueRealtimeListener(removeIntervals, startIntervals);
   }
 }
