@@ -1,4 +1,4 @@
-exoprt default {
+export default {
   props: [
     'pipeline',
   ],

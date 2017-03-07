@@ -3,9 +3,8 @@ import PipelinesArtifactsComponent from '../../pipelines/components/pipelines_ar
 import PipelineCancelButtonComponent from '../../pipelines/components/pipelines_cancel_button';
 import PipelinesStatusComponent from '../../pipelines/components/status';
 import PipelinesUrlComponent from '../../pipelines/components/pipeline_url';
+import PipelinesStageComponent from '../../pipelines/components/stage';
 
-require('../../pipelines/pipeline_url');
-require('../../pipelines/stage');
 require('../../pipelines/time_ago');
 require('./commit');
 
@@ -34,7 +33,7 @@ export default {
     'pipeline-actions': PipelinesActionsComponent,
     'pipeline-artifacts': PipelinesArtifactsComponent,
     'pipeline-cancel-button': PipelineCancelButtonComponent,
-    'dropdown-stage': gl.VueStage,
+    'dropdown-stage': PipelinesStageComponent,
     'pipeline-url': PipelinesUrlComponent,
     'status-scope': PipelinesStatusComponent,
     'time-ago': gl.VueTimeAgo,
