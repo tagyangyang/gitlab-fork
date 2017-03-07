@@ -9,7 +9,7 @@ module Gitlab
       gon.shortcuts_path         = help_page_path('shortcuts')
       gon.user_color_scheme      = Gitlab::ColorSchemes.for_user(current_user).css_class
       gon.katex_css_url          = ActionController::Base.helpers.asset_path('katex.css')
-      gon.katex_js_url           = ActionController::Base.helpers.asset_path('katex.js')
+      gon.katex_js_url           = ActionController::Base.helpers.webpack_asset_paths('katex').first
 
       if current_user
         gon.current_user_id = current_user.id
