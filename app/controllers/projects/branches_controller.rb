@@ -2,15 +2,16 @@ class Projects::BranchesController < Projects::ApplicationController
   include ActionView::Helpers::SanitizeHelper
   include SortingHelper
 
+  before_action :finder, only: [:index]
+
   # Authorize
   before_action :require_non_empty_project, except: :create
   before_action :authorize_download_code!
   before_action :authorize_push_code!, only: [:new, :create, :destroy, :destroy_all_merged]
 
   def index
-    @sort = params[:sort].presence || sort_value_name
-    @branches = BranchesFinder.new(@repository, params).execute
-    @branches = Kaminari.paginate_array(@branches).page(params[:page])
+    @sort = finder.sort
+    @branches = Kaminari.paginate_array(finder.execute).page(params[:page])
 
     @max_commits = @branches.reduce(0) do |memo, branch|
       diverging_commit_counts = repository.diverging_commit_counts(branch)
@@ -80,6 +81,10 @@ class Projects::BranchesController < Projects::ApplicationController
   end
 
   private
+
+  def finder
+    @finder ||= BranchesFinder.new(@repository, { sort: sort_value_name }.merge(params))
+  end
 
   def ref
     if params[:ref]

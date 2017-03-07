@@ -86,8 +86,12 @@ module Gitlab
         Gitlab::Git::Branch.new(self, rugged_ref.name, rugged_ref.target) if rugged_ref
       end
 
+      def local_rugged_branches
+        rugged.branches.each(:local)
+      end
+
       def local_branches
-        rugged.branches.each(:local).map do |branch|
+        local_rugged_branches.map do |branch|
           Gitlab::Git::Branch.new(self, branch.name, branch.target)
         end
       end

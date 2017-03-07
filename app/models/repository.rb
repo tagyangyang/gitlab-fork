@@ -670,6 +670,23 @@ class Repository
     end
   end
 
+  def sort_rugged_branches_by_updated
+    rugged_branches.sort { |a, b| a.target.committer[:time] <=> b.target.committer[:time] }
+  end
+
+  def rugged_branches_sorted_by(value)
+    case value
+    when 'name'
+      rugged_branches.sort_by(&:name)
+    when 'updated_desc'
+      sort_rugged_branches_by_updated.reverse
+    when 'updated_asc'
+      sort_rugged_branches_by_updated
+    else
+      rugged_branches
+    end
+  end
+
   def tags_sorted_by(value)
     case value
     when 'name'
@@ -740,6 +757,12 @@ class Repository
   end
 
   alias_method :branches, :local_branches
+
+  def local_rugged_branches
+    @local_rugged_branches ||= raw_repository.local_rugged_branches
+  end
+
+  alias_method :rugged_branches, :local_rugged_branches
 
   def tags
     @tags ||= raw_repository.tags
