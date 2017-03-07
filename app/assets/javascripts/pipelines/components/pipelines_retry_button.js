@@ -39,11 +39,12 @@ export default {
   template: `
     <button
       type="button"
+      @click="onClickRetry"
       class="btn btn-default btn-retry has-tooltip"
       title="Retry Pipeline"
       aria-label="Retry Pipeline"
       data-placement="top"
-      :disable="isLoading">
+      :disabled="isLoading">
       <i class="fa fa-repeat" aria-hidden="true"></i>
       <i v-if="isLoading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
     </button>

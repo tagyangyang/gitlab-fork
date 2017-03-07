@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import pipelinesActionsComp from '~/pipelines/components/pipelines_actions';
 
-fdescribe('Pipelines Actions dropdown', () => {
+describe('Pipelines Actions dropdown', () => {
   let component;
   let spy;
   let actions;
@@ -35,8 +35,8 @@ fdescribe('Pipelines Actions dropdown', () => {
   });
 
   it('should call the service when an action is clicked', () => {
-    component.$el.querySelector('.dropdown').click();
-    component.$el.querySelector('.js-manual-action-link').click();
+    component.$el.querySelector('.js-pipeline-dropdown-manual-actions').click();
+    component.$el.querySelector('.js-pipeline-action-link').click();
 
     expect(spy).toHaveBeenCalledWith(actions[0].path);
   });

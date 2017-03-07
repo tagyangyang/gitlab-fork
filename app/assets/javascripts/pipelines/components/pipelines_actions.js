@@ -57,7 +57,7 @@ export default {
         <li v-for="action in actions">
           <button
             type="button"
-            class="no-btn"
+            class="js-pipeline-action-link no-btn"
             @click="onClickAction(action.path)">
             ${playIconSvg}
             <span>{{action.name}}</span>
