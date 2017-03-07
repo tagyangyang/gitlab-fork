@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
 /* global Vue, VueResource, gl */
+
+import Pipelines from './pipelines';
+
 window.Vue = require('vue');
 window.Vue.use(require('vue-resource'));
-require('../lib/utils/common_utils');
 require('../vue_shared/vue_resource_interceptor');
-require('./pipelines');
 
 $(() => new Vue({
   el: document.querySelector('.vue-pipelines-index'),
@@ -13,17 +14,13 @@ $(() => new Vue({
     const project = document.querySelector('.pipelines');
 
     return {
-      scope: project.dataset.url,
-      store: new gl.PipelineStore(),
+      endpoint: project.dataset.url,
     };
   },
   components: {
-    'vue-pipelines': gl.VuePipelines,
+    'vue-pipelines': Pipelines,
   },
   template: `
-    <vue-pipelines
-      :scope="scope"
-      :store="store">
-    </vue-pipelines>
+    <vue-pipelines :endpoint="endpoint"/>
   `,
 }));

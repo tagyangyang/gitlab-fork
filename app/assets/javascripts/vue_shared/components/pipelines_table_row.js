@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
 /* global Vue */
 
-require('../../vue_pipelines_index/status');
-require('../../vue_pipelines_index/pipeline_url');
-require('../../vue_pipelines_index/stage');
-require('../../vue_pipelines_index/pipeline_actions');
-require('../../vue_pipelines_index/time_ago');
+require('../../pipelines/status');
+require('../../pipelines/pipeline_url');
+require('../../pipelines/stage');
+require('../../pipelines/pipeline_actions');
+require('../../pipelines/time_ago');
 require('./commit');
 /**
  * Pipeline table row.

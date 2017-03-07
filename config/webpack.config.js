@@ -36,12 +36,12 @@ var config = {
     merge_conflicts:      './merge_conflicts/merge_conflicts_bundle.js',
     merge_request_widget: './merge_request_widget/ci_bundle.js',
     network:              './network/network_bundle.js',
+    pipelines:            './pipelines/index.js',
     profile:              './profile/profile_bundle.js',
     protected_branches:   './protected_branches/protected_branches_bundle.js',
     snippet:              './snippet/snippet_bundle.js',
     terminal:             './terminal/terminal_bundle.js',
     users:                './users/users_bundle.js',
-    vue_pipelines:        './vue_pipelines_index/index.js',
   },
 
   output: {
@@ -109,7 +109,7 @@ var config = {
         'environments_folder',
         'issuable',
         'merge_conflicts',
-        'vue_pipelines',
+        'pipelines',
       ],
       minChunks: function(module, count) {
         return module.resource && (/vue_shared/).test(module.resource);
