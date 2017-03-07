@@ -6,7 +6,7 @@ window.Vue.use(require('vue-resource'));
 const EnvironmentsService = require('../services/environments_service');
 const EnvironmentTable = require('../components/environments_table');
 const EnvironmentsStore = require('../stores/environments_store');
-require('../../vue_shared/components/table_pagination');
+const TablePagination = require('../../vue_shared/components/table_pagination').default;
 require('../../lib/utils/common_utils');
 require('../../vue_shared/vue_resource_interceptor');
 
