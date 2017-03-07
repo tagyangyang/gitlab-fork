@@ -1,5 +1,5 @@
-import '../lib/utils/datetime_utility';
-import iconTimerSvg from '../../../views/shared/icons/_icon_timer.svg';
+import '../../lib/utils/datetime_utility';
+import iconTimerSvg from 'icons/_icon_timer.svg';
 
 export default {
   data() {
