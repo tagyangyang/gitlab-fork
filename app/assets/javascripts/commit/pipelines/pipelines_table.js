@@ -8,6 +8,7 @@ require('../../vue_shared/vue_resource_interceptor');
 require('../../vue_shared/components/pipelines_table');
 require('./pipelines_service');
 const PipelineStore = require('./pipelines_store');
+import PipelinesService from '../../pipelines/services/pipelines_service';
 
 /**
  *
@@ -58,7 +59,7 @@ const PipelineStore = require('./pipelines_store');
      *
      */
     beforeMount() {
-      const pipelinesService = new gl.commits.pipelines.PipelinesService(this.endpoint);
+      const pipelinesService = new PipelinesService(this.endpoint);
 
       this.isLoading = true;
       return pipelinesService.all()

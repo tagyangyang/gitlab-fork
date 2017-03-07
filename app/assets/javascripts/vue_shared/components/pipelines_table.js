@@ -21,6 +21,10 @@ require('./pipelines_table_row');
         default: () => ([]),
       },
 
+      service: {
+        type: Object,
+        required: true,
+      },
     },
 
     components: {
@@ -43,7 +47,8 @@ require('./pipelines_table_row');
           <template v-for="model in pipelines"
             v-bind:model="model">
             <tr is="pipelines-table-row-component"
-              :pipeline="model"></tr>
+              :pipeline="model"
+              :service="service"></tr>
           </template>
         </tbody>
       </table>

@@ -4,9 +4,14 @@
 require('../../pipelines/status');
 require('../../pipelines/pipeline_url');
 require('../../pipelines/stage');
-require('../../pipelines/pipeline_actions');
 require('../../pipelines/time_ago');
 require('./commit');
+
+import PipelinesActions from './components/pipelines_actions';
+import PipelinesArtifacts from './components/pipelines_artifacts';
+import PipelineCancelButton from './components/pipelines_cancel_button';
+
+
 /**
  * Pipeline table row.
  *
@@ -25,11 +30,17 @@ require('./commit');
         default: () => ({}),
       },
 
+      service: {
+        type: Object,
+        required: true,
+      },
     },
 
     components: {
       'commit-component': gl.CommitComponent,
-      'pipeline-actions': gl.VuePipelineActions,
+      'pipeline-actions': PipelinesActions,
+      'pipeline-artifacts': PipelinesArtifacts,
+      'pipeline-cancel-button': PipelineCancelButton,
       'dropdown-stage': gl.VueStage,
       'pipeline-url': gl.VuePipelineUrl,
       'status-scope': gl.VueStatusScope,
@@ -192,7 +203,29 @@ require('./commit');
 
         <time-ago :pipeline="pipeline"/>
 
-        <pipeline-actions :pipeline="pipeline" />
+        <td class="pipeline-actions">
+          <div class="pull-right btn-group">
+            <pipelines-actions
+              v-if="pipeline.details.manual_actions.length"
+              :actions="pipeline.details.manual_actions"
+              :service="service" />
+
+            <pipelines-artifacts
+              v-if="pipeline.details.manual_actions.length"
+              :artifacts="pipeline.details.artifacts"
+              :service="service" />
+
+            <pipeline-retry-button
+              v-if="pipeline.flags.retryable"
+              :retry_path:"pipeline.retry_path"
+              :service="service" />
+
+            <pipeline-cancel-button
+              v-if="pipeline.flags.cancelable"
+              :cancel_path="pipeline.cancel_path"
+              :service="service" />
+          </div>
+        </td>
       </tr>
     `,
   });
