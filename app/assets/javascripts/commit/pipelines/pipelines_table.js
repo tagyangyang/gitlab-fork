@@ -53,10 +53,10 @@ export default {
    *
    */
   beforeMount() {
-    const pipelinesService = new PipelinesService(this.endpoint);
+    this.pipelinesService = new PipelinesService(this.endpoint);
 
     this.isLoading = true;
-    return pipelinesService.all()
+    return this.pipelinesService.getPipelines()
       .then(response => response.json())
       .then((json) => {
         // depending of the endpoint the response can either bring a `pipelines` key or not.
@@ -72,7 +72,7 @@ export default {
 
   beforeUpdate() {
     if (this.state.pipelines.length && this.$children) {
-      PipelineStore.startTimeAgoLoops.call(this, Vue);
+      this.store.startTimeAgoLoops.call(this, Vue);
     }
   },
 
@@ -91,7 +91,9 @@ export default {
 
       <div class="table-holder pipelines"
         v-if="!isLoading && state.pipelines.length > 0">
-        <pipelines-table-component :pipelines="state.pipelines"/>
+        <pipelines-table-component
+          :pipelines="state.pipelines"
+          :service="pipelinesService"/>
       </div>
     </div>
   `,

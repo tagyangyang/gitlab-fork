@@ -1,7 +1,6 @@
 import commitIconSvg from 'icons/_icon_commit.svg';
 
 export default {
-
   props: {
     /**
      * Indicates the existance of a tag.
