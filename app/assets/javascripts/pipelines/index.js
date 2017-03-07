@@ -1,6 +1,8 @@
-import Vue from 'vue';
 import Pipelines from './pipelines';
-import '../vue_shared/vue_resource_interceptor';
+
+const Vue = window.Vue = require('vue');
+window.Vue.use(require('vue-resource'));
+require('../vue_shared/vue_resource_interceptor');
 
 $(() => new Vue({
   el: document.querySelector('.vue-pipelines-index'),

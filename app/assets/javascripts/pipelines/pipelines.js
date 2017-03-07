@@ -1,7 +1,6 @@
 /* eslint-disable no-new */
 /* global Flash */
 
-import Vue from 'vue';
 import PipelinesService from './services/pipelines_service';
 import PipelinesStore from './stores/pipelines_store';
 import PipelinesTable from '../vue_shared/components/pipelines_table';
