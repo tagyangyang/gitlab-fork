@@ -4,15 +4,15 @@
 import Vue from 'vue';
 import PipelinesService from './services/pipelines_service';
 import PipelinesStore from './stores/pipelines_store';
+import PipelinesTable from '../vue_shared/components/pipelines_table';
 
 require('../vue_shared/components/table_pagination');
-require('../vue_shared/components/pipelines_table');
 
 export default {
 
   components: {
     'gl-pagination': gl.VueGlPagination,
-    'pipelines-table-component': gl.pipelines.PipelinesTableComponent,
+    'pipelines-table-component': PipelinesTable,
   },
 
   data() {
