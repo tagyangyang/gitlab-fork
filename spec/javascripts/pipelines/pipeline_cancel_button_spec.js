@@ -1,18 +1,19 @@
 import Vue from 'vue';
 import cancelButtonComp from '~/pipelines/components/pipelines_cancel_button';
 
-describe('Pipelines Actions dropdown', () => {
+describe('Pipelines Cancel Button', () => {
   let component;
   let spy;
 
   beforeEach(() => {
     const CancelButton = Vue.extend(cancelButtonComp);
 
+    spyOn(window, 'confirm').and.returnValue(true);
     spy = jasmine.createSpy('spy').and.returnValue(Promise.resolve());
 
     component = new CancelButton({
       propsData: {
-        retry_path: '/',
+        cancel_path: '/',
         service: {
           postAction: spy,
         },

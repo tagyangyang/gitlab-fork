@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import retryButtonComp from '~/pipelines/components/pipelines_retry_button';
 
-describe('Pipelines Actions dropdown', () => {
+describe('Pipelines Retry Button', () => {
   let component;
   let spy;
 

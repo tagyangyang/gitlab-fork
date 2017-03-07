@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import artifactsComp from '~/pipelines/components/pipelines_actions';
+import artifactsComp from '~/pipelines/components/pipelines_artifacts';
 
-describe('Pipelines Actions dropdown', () => {
+describe('Pipelines Artifacts dropdown', () => {
   let component;
   let artifacts;
 
@@ -22,7 +22,7 @@ describe('Pipelines Actions dropdown', () => {
     }).$mount();
   });
 
-  it('should render a dropdown with the provided actions', () => {
+  it('should render a dropdown with the provided artifacts', () => {
     expect(
       component.$el.querySelectorAll('.dropdown-menu li').length,
     ).toEqual(artifacts.length);
@@ -30,11 +30,11 @@ describe('Pipelines Actions dropdown', () => {
 
   it('should render a link with the provided path', () => {
     expect(
-      component.$el.querySelectorAll('.dropdown-menu li a').getAttribute('href'),
+      component.$el.querySelector('.dropdown-menu li a').getAttribute('href'),
     ).toEqual(artifacts[0].path);
 
     expect(
-      component.$el.querySelectorAll('.dropdown-menu li a span').textContent,
+      component.$el.querySelector('.dropdown-menu li a span').textContent,
     ).toContain(artifacts[0].name);
   });
 });
