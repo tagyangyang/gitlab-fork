@@ -1,3 +1,4 @@
+import PrometheusGraph from './monitoring/prometheus_graph'; // TODO: Maybe Make this a bundle
 /* eslint-disable func-names, space-before-function-paren, no-var, prefer-arrow-callback, wrap-iife, no-shadow, consistent-return, one-var, one-var-declaration-per-line, camelcase, default-case, no-new, quotes, no-duplicate-case, no-case-declarations, no-fallthrough, max-len */
 /* global UsernameValidator */
 /* global ActiveTabMemoizer */
@@ -35,6 +36,7 @@
 /* global Labels */
 /* global Shortcuts */
 
+import BindInOut from './behaviors/bind_in_out';
 import GroupsList from './groups_list';
 import ProjectsList from './projects_list';
 
@@ -229,9 +231,14 @@ const UserCallout = require('./user_callout');
           new UsersSelect();
           break;
         case 'groups:new':
+        case 'admin:groups:new':
+        case 'groups:create':
+        case 'admin:groups:create':
+          BindInOut.initAll();
+        case 'groups:new':
+        case 'admin:groups:new':
         case 'groups:edit':
         case 'admin:groups:edit':
-        case 'admin:groups:new':
           new GroupAvatar();
           break;
         case 'projects:tree:show':
@@ -280,7 +287,7 @@ const UserCallout = require('./user_callout');
         case 'search:show':
           new Search();
           break;
-        case 'projects:protected_branches:index':
+        case 'projects:repository:show':
           new gl.ProtectedBranchCreate();
           new gl.ProtectedBranchEditList();
           break;
@@ -291,6 +298,8 @@ const UserCallout = require('./user_callout');
         case 'ci:lints:show':
           new gl.CILintEditor();
           break;
+        case 'projects:environments:metrics':
+          new PrometheusGraph();
         case 'users:show':
           new UserCallout();
           break;

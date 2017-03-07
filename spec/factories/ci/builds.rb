@@ -15,8 +15,8 @@ FactoryGirl.define do
 
     options do
       {
-        image: "ruby:2.1",
-        services: ["postgres"]
+        image: 'ruby:2.1',
+        services: ['postgres']
       }
     end
 
@@ -57,7 +57,7 @@ FactoryGirl.define do
     end
 
     trait :manual do
-      status 'skipped'
+      status 'manual'
       self.when 'manual'
     end
 
@@ -71,8 +71,11 @@ FactoryGirl.define do
       allow_failure true
     end
 
+    trait :ignored do
+      allowed_to_fail
+    end
+
     trait :playable do
-      skipped
       manual
     end
 
@@ -162,6 +165,32 @@ FactoryGirl.define do
       after(:build) do |build|
         allow(build).to receive(:commit).and_return build(:commit)
       end
+    end
+
+    trait :extended_options do
+      options do
+        {
+            image: 'ruby:2.1',
+            services: ['postgres'],
+            after_script: "ls\ndate",
+            artifacts: {
+                name: 'artifacts_file',
+                untracked: false,
+                paths: ['out/'],
+                when: 'always',
+                expire_in: '7d'
+            },
+            cache: {
+                key: 'cache_key',
+                untracked: false,
+                paths: ['vendor/*']
+            }
+        }
+      end
+    end
+
+    trait :no_options do
+      options { {} }
     end
   end
 end

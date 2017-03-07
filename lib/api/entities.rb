@@ -49,7 +49,8 @@ module API
 
     class ProjectHook < Hook
       expose :project_id, :issues_events, :merge_requests_events
-      expose :note_events, :build_events, :pipeline_events, :wiki_page_events
+      expose :note_events, :pipeline_events, :wiki_page_events
+      expose :build_events, as: :job_events
     end
 
     class BasicProjectDetails < Grape::Entity
@@ -80,7 +81,7 @@ module API
       expose(:issues_enabled) { |project, options| project.feature_available?(:issues, options[:current_user]) }
       expose(:merge_requests_enabled) { |project, options| project.feature_available?(:merge_requests, options[:current_user]) }
       expose(:wiki_enabled) { |project, options| project.feature_available?(:wiki, options[:current_user]) }
-      expose(:builds_enabled) { |project, options| project.feature_available?(:builds, options[:current_user]) }
+      expose(:jobs_enabled) { |project, options| project.feature_available?(:builds, options[:current_user]) }
       expose(:snippets_enabled) { |project, options| project.feature_available?(:snippets, options[:current_user]) }
 
       expose :created_at, :last_activity_at
@@ -93,7 +94,7 @@ module API
       expose :star_count, :forks_count
       expose :open_issues_count, if: lambda { |project, options| project.feature_available?(:issues, options[:current_user]) && project.default_issues_tracker? }
       expose :runners_token, if: lambda { |_project, options| options[:user_can_admin_project] }
-      expose :public_builds
+      expose :public_builds, as: :public_jobs
       expose :shared_with_groups do |project, options|
         SharedGroup.represent(project.project_group_links.all, options)
       end
@@ -109,7 +110,7 @@ module API
       expose :storage_size
       expose :repository_size
       expose :lfs_objects_size
-      expose :build_artifacts_size
+      expose :build_artifacts_size, as: :job_artifacts_size
     end
 
     class Member < UserBasic
@@ -144,7 +145,7 @@ module API
           expose :storage_size
           expose :repository_size
           expose :lfs_objects_size
-          expose :build_artifacts_size
+          expose :build_artifacts_size, as: :job_artifacts_size
         end
       end
     end
@@ -454,7 +455,8 @@ module API
     class ProjectService < Grape::Entity
       expose :id, :title, :created_at, :updated_at, :active
       expose :push_events, :issues_events, :merge_requests_events
-      expose :tag_push_events, :note_events, :build_events, :pipeline_events
+      expose :tag_push_events, :note_events, :pipeline_events
+      expose :build_events, as: :job_events
       # Expose serialized properties
       expose :properties do |service, options|
         field_names = service.fields.
@@ -626,7 +628,7 @@ module API
       expose :id, :token
     end
 
-    class BuildArtifactFile < Grape::Entity
+    class JobArtifactFile < Grape::Entity
       expose :filename, :size
     end
 
@@ -634,11 +636,11 @@ module API
       expose :id, :sha, :ref, :status
     end
 
-    class Build < Grape::Entity
+    class Job < Grape::Entity
       expose :id, :status, :stage, :name, :ref, :tag, :coverage
       expose :created_at, :started_at, :finished_at
       expose :user, with: User
-      expose :artifacts_file, using: BuildArtifactFile, if: -> (build, opts) { build.artifacts? }
+      expose :artifacts_file, using: JobArtifactFile, if: -> (job, opts) { job.artifacts? }
       expose :commit, with: RepoCommit
       expose :runner, with: Runner
       expose :pipeline, with: PipelineBasic
@@ -669,14 +671,14 @@ module API
     end
 
     class Environment < EnvironmentBasic
-      expose :project, using: Entities::Project
+      expose :project, using: Entities::BasicProjectDetails
     end
 
     class Deployment < Grape::Entity
       expose :id, :iid, :ref, :sha, :created_at
       expose :user,        using: Entities::UserBasic
       expose :environment, using: Entities::EnvironmentBasic
-      expose :deployable,  using: Entities::Build
+      expose :deployable,  using: Entities::Job
     end
 
     class RepoLicense < Grape::Entity
@@ -702,6 +704,100 @@ module API
     class BroadcastMessage < Grape::Entity
       expose :id, :message, :starts_at, :ends_at, :color, :font
       expose :active?, as: :active
+    end
+
+    class PersonalAccessToken < Grape::Entity
+      expose :id, :name, :revoked, :created_at, :scopes
+      expose :active?, as: :active
+      expose :expires_at do |personal_access_token|
+        personal_access_token.expires_at ? personal_access_token.expires_at.strftime("%Y-%m-%d") : nil
+      end
+    end
+
+    class PersonalAccessTokenWithToken < PersonalAccessToken
+      expose :token
+    end
+
+    class ImpersonationToken < PersonalAccessTokenWithToken
+      expose :impersonation
+    end
+
+    module JobRequest
+      class JobInfo < Grape::Entity
+        expose :name, :stage
+        expose :project_id, :project_name
+      end
+
+      class GitInfo < Grape::Entity
+        expose :repo_url, :ref, :sha, :before_sha
+        expose :ref_type do |model|
+          if model.tag
+            'tag'
+          else
+            'branch'
+          end
+        end
+      end
+
+      class RunnerInfo < Grape::Entity
+        expose :timeout
+      end
+
+      class Step < Grape::Entity
+        expose :name, :script, :timeout, :when, :allow_failure
+      end
+
+      class Image < Grape::Entity
+        expose :name
+      end
+
+      class Artifacts < Grape::Entity
+        expose :name, :untracked, :paths, :when, :expire_in
+      end
+
+      class Cache < Grape::Entity
+        expose :key, :untracked, :paths
+      end
+
+      class Credentials < Grape::Entity
+        expose :type, :url, :username, :password
+      end
+
+      class ArtifactFile < Grape::Entity
+        expose :filename, :size
+      end
+
+      class Dependency < Grape::Entity
+        expose :id, :name
+        expose :artifacts_file, using: ArtifactFile, if: ->(job, _) { job.artifacts? }
+      end
+
+      class Response < Grape::Entity
+        expose :id
+        expose :token
+        expose :allow_git_fetch
+
+        expose :job_info, using: JobInfo do |model|
+          model
+        end
+
+        expose :git_info, using: GitInfo do |model|
+          model
+        end
+
+        expose :runner_info, using: RunnerInfo do |model|
+          model
+        end
+
+        expose :variables
+        expose :steps, using: Step
+        expose :image, using: Image
+        expose :services, using: Image
+        expose :artifacts, using: Artifacts
+        expose :cache, using: Cache
+        expose :credentials, using: Credentials
+        expose :depends_on_builds, as: :dependencies, using: Dependency
+      end
     end
   end
 end

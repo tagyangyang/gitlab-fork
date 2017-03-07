@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170305203726) do
+ActiveRecord::Schema.define(version: 20170306170512) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -61,6 +61,7 @@ ActiveRecord::Schema.define(version: 20170305203726) do
     t.boolean "shared_runners_enabled", default: true, null: false
     t.integer "max_artifacts_size", default: 100, null: false
     t.string "runners_registration_token"
+    t.integer "max_pages_size", default: 100, null: false
     t.boolean "require_two_factor_authentication", default: false
     t.integer "two_factor_grace_period", default: 48
     t.boolean "metrics_enabled", default: false
@@ -109,9 +110,11 @@ ActiveRecord::Schema.define(version: 20170305203726) do
     t.boolean "html_emails_enabled", default: true
     t.string "plantuml_url"
     t.boolean "plantuml_enabled"
-    t.integer "max_pages_size", default: 100, null: false
     t.integer "terminal_max_session_time", default: 0, null: false
     t.string "default_artifacts_expire_in", default: "0", null: false
+    t.integer "unique_ips_limit_per_user"
+    t.integer "unique_ips_limit_time_window"
+    t.boolean "unique_ips_limit_enabled", default: false, null: false
   end
 
   create_table "audit_events", force: :cascade do |t|
@@ -171,6 +174,16 @@ ActiveRecord::Schema.define(version: 20170305203726) do
 
   add_index "chat_names", ["service_id", "team_id", "chat_id"], name: "index_chat_names_on_service_id_and_team_id_and_chat_id", unique: true, using: :btree
   add_index "chat_names", ["user_id", "service_id"], name: "index_chat_names_on_user_id_and_service_id", unique: true, using: :btree
+
+  create_table "chat_teams", force: :cascade do |t|
+    t.integer "namespace_id", null: false
+    t.string "team_id"
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "chat_teams", ["namespace_id"], name: "index_chat_teams_on_namespace_id", unique: true, using: :btree
 
   create_table "ci_application_settings", force: :cascade do |t|
     t.boolean "all_broken_builds"
@@ -758,8 +771,8 @@ ActiveRecord::Schema.define(version: 20170305203726) do
     t.integer "visibility_level", default: 20, null: false
     t.boolean "request_access_enabled", default: false, null: false
     t.datetime "deleted_at"
-    t.boolean "lfs_enabled"
     t.text "description_html"
+    t.boolean "lfs_enabled"
     t.integer "parent_id"
   end
 
@@ -865,6 +878,11 @@ ActiveRecord::Schema.define(version: 20170305203726) do
   add_index "oauth_applications", ["owner_id", "owner_type"], name: "index_oauth_applications_on_owner_id_and_owner_type", using: :btree
   add_index "oauth_applications", ["uid"], name: "index_oauth_applications_on_uid", unique: true, using: :btree
 
+  create_table "oauth_openid_requests", force: :cascade do |t|
+    t.integer "access_grant_id", null: false
+    t.string "nonce", null: false
+  end
+
   create_table "pages_domains", force: :cascade do |t|
     t.integer "project_id"
     t.text "certificate"
@@ -881,10 +899,11 @@ ActiveRecord::Schema.define(version: 20170305203726) do
     t.string "token", null: false
     t.string "name", null: false
     t.boolean "revoked", default: false
-    t.datetime "expires_at"
+    t.date "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "scopes", default: "--- []\n", null: false
+    t.boolean "impersonation", default: false, null: false
   end
 
   add_index "personal_access_tokens", ["token"], name: "index_personal_access_tokens_on_token", unique: true, using: :btree
@@ -1211,6 +1230,20 @@ ActiveRecord::Schema.define(version: 20170305203726) do
   add_index "u2f_registrations", ["key_handle"], name: "index_u2f_registrations_on_key_handle", using: :btree
   add_index "u2f_registrations", ["user_id"], name: "index_u2f_registrations_on_user_id", using: :btree
 
+  create_table "uploads", force: :cascade do |t|
+    t.integer "size", limit: 8, null: false
+    t.string "path", null: false
+    t.string "checksum", limit: 64
+    t.integer "model_id"
+    t.string "model_type"
+    t.string "uploader", null: false
+    t.datetime "created_at", null: false
+  end
+
+  add_index "uploads", ["checksum"], name: "index_uploads_on_checksum", using: :btree
+  add_index "uploads", ["model_id", "model_type"], name: "index_uploads_on_model_id_and_model_type", using: :btree
+  add_index "uploads", ["path"], name: "index_uploads_on_path", using: :btree
+
   create_table "user_agent_details", force: :cascade do |t|
     t.string "user_agent", null: false
     t.string "ip_address", null: false
@@ -1335,6 +1368,7 @@ ActiveRecord::Schema.define(version: 20170305203726) do
   add_index "web_hooks", ["project_id"], name: "index_web_hooks_on_project_id", using: :btree
 
   add_foreign_key "boards", "projects"
+  add_foreign_key "chat_teams", "namespaces", on_delete: :cascade
   add_foreign_key "ci_triggers", "users", column: "owner_id", name: "fk_e8e10d1964", on_delete: :cascade
   add_foreign_key "issue_metrics", "issues", on_delete: :cascade
   add_foreign_key "label_priorities", "labels", on_delete: :cascade
@@ -1346,6 +1380,7 @@ ActiveRecord::Schema.define(version: 20170305203726) do
   add_foreign_key "merge_request_metrics", "merge_requests", on_delete: :cascade
   add_foreign_key "merge_requests_closing_issues", "issues", on_delete: :cascade
   add_foreign_key "merge_requests_closing_issues", "merge_requests", on_delete: :cascade
+  add_foreign_key "oauth_openid_requests", "oauth_access_grants", column: "access_grant_id", name: "fk_oauth_openid_requests_oauth_access_grants_access_grant_id"
   add_foreign_key "personal_access_tokens", "users"
   add_foreign_key "project_authorizations", "projects", on_delete: :cascade
   add_foreign_key "project_authorizations", "users", on_delete: :cascade

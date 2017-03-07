@@ -82,16 +82,16 @@ module API
       label || not_found!('Label')
     end
 
-    def find_project_issue(id)
-      IssuesFinder.new(current_user, project_id: user_project.id).find(id)
+    def find_project_issue(iid)
+      IssuesFinder.new(current_user, project_id: user_project.id).find_by!(iid: iid)
     end
 
-    def find_project_merge_request(id)
-      MergeRequestsFinder.new(current_user, project_id: user_project.id).find(id)
+    def find_project_merge_request(iid)
+      MergeRequestsFinder.new(current_user, project_id: user_project.id).find_by!(iid: iid)
     end
 
-    def find_merge_request_with_access(id, access_level = :read_merge_request)
-      merge_request = user_project.merge_requests.find(id)
+    def find_merge_request_with_access(iid, access_level = :read_merge_request)
+      merge_request = user_project.merge_requests.find_by!(iid: iid)
       authorize! access_level, merge_request
       merge_request
     end
@@ -336,16 +336,17 @@ module API
 
     def initial_current_user
       return @initial_current_user if defined?(@initial_current_user)
+      Gitlab::Auth::UniqueIpsLimiter.limit_user! do
+        @initial_current_user ||= find_user_by_private_token(scopes: @scopes)
+        @initial_current_user ||= doorkeeper_guard(scopes: @scopes)
+        @initial_current_user ||= find_user_from_warden
 
-      @initial_current_user ||= find_user_by_private_token(scopes: @scopes)
-      @initial_current_user ||= doorkeeper_guard(scopes: @scopes)
-      @initial_current_user ||= find_user_from_warden
+        unless @initial_current_user && Gitlab::UserAccess.new(@initial_current_user).allowed?
+          @initial_current_user = nil
+        end
 
-      unless @initial_current_user && Gitlab::UserAccess.new(@initial_current_user).allowed?
-        @initial_current_user = nil
+        @initial_current_user
       end
-
-      @initial_current_user
     end
 
     def sudo!
