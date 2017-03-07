@@ -40,7 +40,7 @@ export default class PipelinesStore {
    * update the time to show how long as passed.
    *
    */
-  static startTimeAgoLoops() {
+  startTimeAgoLoops() {
     const startTimeLoops = () => {
       this.timeLoopInterval = setInterval(() => {
         this.$children[0].$children.reduce((acc, component) => {

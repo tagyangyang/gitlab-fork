@@ -1,11 +1,12 @@
 import PipelinesActionsComponent from '../../pipelines/components/pipelines_actions';
 import PipelinesArtifactsComponent from '../../pipelines/components/pipelines_artifacts';
 import PipelineCancelButtonComponent from '../../pipelines/components/pipelines_cancel_button';
+import PipelinesRetryButtonComponent from '../../pipelines/components/pipelines_retry_button';
 import PipelinesStatusComponent from '../../pipelines/components/status';
 import PipelinesUrlComponent from '../../pipelines/components/pipeline_url';
 import PipelinesStageComponent from '../../pipelines/components/stage';
+import PipelinesTimeagoComponent from '../../pipelines/components/time_ago';
 
-require('../../pipelines/time_ago');
 require('./commit');
 
 /**
@@ -32,11 +33,12 @@ export default {
     'commit-component': gl.CommitComponent,
     'pipeline-actions': PipelinesActionsComponent,
     'pipeline-artifacts': PipelinesArtifactsComponent,
+    'pipeline-retry-button': PipelinesRetryButtonComponent,
     'pipeline-cancel-button': PipelineCancelButtonComponent,
     'dropdown-stage': PipelinesStageComponent,
     'pipeline-url': PipelinesUrlComponent,
     'status-scope': PipelinesStatusComponent,
-    'time-ago': gl.VueTimeAgo,
+    'time-ago': PipelinesTimeagoComponent,
   },
 
   computed: {
@@ -197,19 +199,19 @@ export default {
 
       <td class="pipeline-actions">
         <div class="pull-right btn-group">
-          <pipelines-actions
+          <pipeline-actions
             v-if="pipeline.details.manual_actions.length"
             :actions="pipeline.details.manual_actions"
             :service="service" />
 
-          <pipelines-artifacts
-            v-if="pipeline.details.manual_actions.length"
+          <pipeline-artifacts
+            v-if="pipeline.details.artifacts.length"
             :artifacts="pipeline.details.artifacts"
             :service="service" />
 
           <pipeline-retry-button
             v-if="pipeline.flags.retryable"
-            :retry_path:"pipeline.retry_path"
+            :retry_path="pipeline.retry_path"
             :service="service" />
 
           <pipeline-cancel-button

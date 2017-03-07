@@ -42,8 +42,10 @@ export default {
       @click="onClickCancel"
       class="btn btn-remove has-tooltip"
       title="Cancel"
-      aria-label="Cancel">
+      aria-label="Cancel"
+      :disabled="isLoading">
       <i class="fa fa-remove" aria-hidden="true"></i>
+      <i v-if="isLoading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
     </button>
   `,
 };

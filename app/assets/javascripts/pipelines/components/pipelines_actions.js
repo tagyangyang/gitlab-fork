@@ -54,9 +54,10 @@ export default {
       </button>
 
       <ul class="dropdown-menu dropdown-menu-align-right">
-        <li v-for="action in pipeline.details.manual_actions">
+        <li v-for="action in actions">
           <button
             type="button"
+            class="no-btn"
             @click="onClickAction(action.path)">
             ${playIconSvg}
             <span>{{action.name}}</span>
