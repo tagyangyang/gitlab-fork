@@ -1,5 +1,3 @@
 import Vue from 'vue';
 
-const eventHub = new Vue();
-
-export default eventHub;
+export default new Vue();
