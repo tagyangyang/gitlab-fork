@@ -4,6 +4,7 @@
  * Renders the stop "button" that allows stop an environment.
  * Used in environments table.
  */
+import eventHub from '../event_hub';
 
 export default {
   props: {
@@ -32,6 +33,7 @@ export default {
         this.service.postAction(this.retryUrl)
         .then(() => {
           this.isLoading = false;
+          eventHub.$emit('refreshEnvironments');
         })
         .catch(() => {
           this.isLoading = false;

@@ -156,13 +156,6 @@ feature 'Environments page', :feature, :js do
             expect(page).to have_selector('.stop-env-link')
           end
 
-          # TODO: FIX ME, we won't open a new page, how to test this?
-          # scenario 'starts build when stop button clicked' do
-          #   find('.stop-env-link').click
-          #
-          #   expect(page).to have_content('close_app')
-          # end
-
           context 'for reporter' do
             let(:role) { :reporter }
 
