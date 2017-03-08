@@ -64,7 +64,7 @@ export default class TemplateSelector {
   // To be implemented on the extending class
   // e.g. Api.gitlabCiYml(query.name, file => this.setEditorContent(file));
 
-  setEditorContent(file, { skipFocus } = {}) {
+  setEditorContent(file, { skipFocus }) {
     if (!file) return;
 
     const newValue = file.content;

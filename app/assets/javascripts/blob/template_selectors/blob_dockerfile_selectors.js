@@ -1,7 +1,7 @@
 import BlobDockerfileSelector from './blob_dockerfile_selector';
 
 export default class BlobDockerfileSelectors {
-  constructor({ editor, $dropdowns }) {
+  constructor({ editor, $dropdowns } = {}) {
     this.editor = editor;
     this.$dropdowns = $dropdowns || $('.js-dockerfile-selector');
     this.initSelectors();

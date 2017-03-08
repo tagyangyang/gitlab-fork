@@ -1,17 +1,13 @@
 /* global ace */
 
-import BlobLicenseSelectors from '../blob/template_selectors/blob_license_selectors';
-import BlobGitignoreSelectors from '../blob/template_selectors/blob_gitignore_selectors';
-import BlobCiYamlSelectors from '../blob/template_selectors/blob_ci_yaml_selectors';
-import BlobDockerfileSelectors from '../blob/template_selectors/blob_dockerfile_selectors';
+import FileTemplateMediator from '../blob/template_selectors/file_template_mediator';
 
 export default class EditBlob {
-  constructor(assetsPath, aceMode) {
+  constructor(assetsPath, aceMode, currentAction) {
     this.configureAceEditor(aceMode, assetsPath);
-    this.prepFileContentForSubmit();
     this.initModePanesAndLinks();
     this.initSoftWrap();
-    this.initFileSelectors();
+    this.initFileSelectors(currentAction);
   }
 
   configureAceEditor(aceMode, assetsPath) {
@@ -26,27 +22,8 @@ export default class EditBlob {
     }
   }
 
-  prepFileContentForSubmit() {
-    $('form').submit(() => {
-      $('#file-content').val(this.editor.getValue());
-    });
-  }
-
-  initFileSelectors() {
-    this.blobTemplateSelectors = [
-      new BlobLicenseSelectors({
-        editor: this.editor,
-      }),
-      new BlobGitignoreSelectors({
-        editor: this.editor,
-      }),
-      new BlobCiYamlSelectors({
-        editor: this.editor,
-      }),
-      new BlobDockerfileSelectors({
-        editor: this.editor,
-      }),
-    ];
+  initFileSelectors(currentAction) {
+    this.fileTemplateMediator = new FileTemplateMediator({ editor: this.editor, currentAction });
   }
 
   initModePanesAndLinks() {

@@ -76,7 +76,8 @@
   .license-selector,
   .gitignore-selector,
   .gitlab-ci-yml-selector,
-  .dockerfile-selector {
+  .dockerfile-selector,
+  .template-type-selector {
     display: inline-block;
     vertical-align: top;
     font-family: $regular_font;
