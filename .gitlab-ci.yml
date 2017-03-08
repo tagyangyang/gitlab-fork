@@ -27,6 +27,7 @@ before_script:
 
 stages:
 - prepare
+- lint
 - test
 - post-test
 - pages
@@ -180,22 +181,26 @@ spinach 9 10: *spinach-knapsack
   script:
     - bundle exec $CI_BUILD_NAME
 
+.exec-lint: &exec-lint
+  <<: *exec
+  stage: lint
+
 rubocop:
   <<: *ruby-static-analysis
   <<: *dedicated-runner
-  stage: test
+  stage: lint
   script:
     - bundle exec "rubocop --require rubocop-rspec"
 
-rake haml_lint: *exec
-rake scss_lint: *exec
-rake config_lint: *exec
-rake brakeman: *exec
-rake flay: *exec
-license_finder: *exec
-rake downtime_check: *exec
+rake haml_lint: *exec-lint
+rake scss_lint: *exec-lint
+rake config_lint: *exec-lint
+rake brakeman: *exec-lint
+rake flay: *exec-lint
+license_finder: *exec-lint
+rake downtime_check: *exec-lint
 rake ee_compat_check:
-  <<: *exec
+  <<: *exec-lint
   only:
     - branches@gitlab-org/gitlab-ce
   except:
@@ -216,7 +221,7 @@ rake ee_compat_check:
       - ee_compat_check/patches/*.patch
 
 rake db:migrate:reset:
-  stage: test
+  stage: lint
   <<: *use-db
   <<: *dedicated-runner
   script:
@@ -276,7 +281,7 @@ rake karma:
     - coverage-javascript/
 
 lint-doc:
-  stage: test
+  stage: lint
   <<: *dedicated-runner
   image: "phusion/baseimage:latest"
   before_script: []
@@ -284,14 +289,14 @@ lint-doc:
     - scripts/lint-doc.sh
 
 bundler:check:
-  stage: test
+  stage: lint
   <<: *dedicated-runner
   <<: *ruby-static-analysis
   script:
    - bundle check
 
 bundler:audit:
-  stage: test
+  stage: lint
   <<: *ruby-static-analysis
   <<: *dedicated-runner
   only:
@@ -345,7 +350,7 @@ lint:javascript:
   cache:
     paths:
       - node_modules/
-  stage: test
+  stage: lint
   before_script: []
   script:
     - yarn run eslint
