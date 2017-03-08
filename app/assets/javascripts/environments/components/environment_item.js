@@ -7,7 +7,7 @@ const ExternalUrlComponent = require('./environment_external_url');
 const StopComponent = require('./environment_stop');
 const RollbackComponent = require('./environment_rollback');
 const TerminalButtonComponent = require('./environment_terminal_button');
-const CommitComponent = require('../../vue_shared/components/commit');
+const CommitComponent = require('../../vue_shared/components/commit').default;
 
 /**
  * Envrionment Item Component
