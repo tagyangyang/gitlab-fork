@@ -1,10 +1,11 @@
 /* eslint-disable no-new */
 /* global Flash */
-
+import Vue from 'vue';
 import PipelinesService from './services/pipelines_service';
 import PipelinesStore from './stores/pipelines_store';
 import PipelinesTable from '../vue_shared/components/pipelines_table';
 import TablePagination from '../vue_shared/components/table_pagination';
+import eventHub from './event_hub';
 
 export default {
 
@@ -33,31 +34,11 @@ export default {
   },
 
   created() {
-    const pageNumber = gl.utils.getParameterByName('page') || this.pagenum;
-    const scope = gl.utils.getParameterByName('scope') || this.apiScope;
+    this.service = new PipelinesService(this.endpoint);
 
-    const endpoint = `${this.endpoint}?scope=${scope}&page=${pageNumber}`;
+    this.fetchPipelines();
 
-    this.service = new PipelinesService(endpoint);
-
-    this.pageRequest = true;
-    return this.service.getPipelines(endpoint)
-      .then(resp => ({
-        headers: resp.headers,
-        body: resp.json(),
-      }))
-      .then((response) => {
-        this.store.storeCount(response.body.count);
-        this.store.storePipelines(response.body.pipelines);
-        this.store.storePagination(response.headers);
-      })
-      .then(() => {
-        this.pageRequest = false;
-      })
-      .catch(() => {
-        this.pageRequest = false;
-        new Flash('An error occurred while fetching the pipelines, please reload the page again.');
-      });
+    eventHub.$on('refreshPipelines', this.fetchPipelines);
   },
 
   beforeUpdate() {
@@ -78,6 +59,30 @@ export default {
       gl.utils.visitUrl(param);
       return param;
     },
+
+    fetchPipelines() {
+      const pageNumber = gl.utils.getParameterByName('page') || this.pagenum;
+      const scope = gl.utils.getParameterByName('scope') || this.apiScope;
+
+      this.pageRequest = true;
+      return this.service.getPipelines(scope, pageNumber)
+        .then(resp => ({
+          headers: resp.headers,
+          body: resp.json(),
+        }))
+        .then((response) => {
+          this.store.storeCount(response.body.count);
+          this.store.storePipelines(response.body.pipelines);
+          this.store.storePagination(response.headers);
+        })
+        .then(() => {
+          this.pageRequest = false;
+        })
+        .catch(() => {
+          this.pageRequest = false;
+          new Flash('An error occurred while fetching the pipelines, please reload the page again.');
+        });
+    },
   },
   template: `
     <div>
@@ -95,7 +100,7 @@ export default {
       <div class="table-holder" v-if="!pageRequest && state.pipelines.length">
         <pipelines-table-component
           :pipelines="state.pipelines"
-          :service="service"/>
+          :service="service" />
       </div>
 
       <gl-pagination
@@ -103,7 +108,7 @@ export default {
         :pagenum="pagenum"
         :change="change"
         :count="state.count.all"
-        :pageInfo="state.pageInfo"/>
+        :pageInfo="state.pageInfo" />
     </div>
   `,
 };

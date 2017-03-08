@@ -20,8 +20,8 @@ export default class PipelinesService {
     this.pipelines = Vue.resource(endpoint);
   }
 
-  getPipelines() {
-    return this.pipelines.get();
+  getPipelines(scope, page) {
+    return this.pipelines.get({ scope, page });
   }
 
   /**

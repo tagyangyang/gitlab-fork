@@ -1,6 +1,7 @@
 /* eslint-disable no-new */
 /* global Flash */
 import '~/flash';
+import eventHub from '../event_hub';
 
 export default {
   props: {
@@ -28,6 +29,7 @@ export default {
       this.service.postAction(this.retry_path)
       .then(() => {
         this.isLoading = false;
+        eventHub.$emit('refreshPipelines');
       })
       .catch(() => {
         this.isLoading = false;

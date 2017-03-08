@@ -206,8 +206,7 @@ export default {
 
           <pipeline-artifacts
             v-if="pipeline.details.artifacts.length"
-            :artifacts="pipeline.details.artifacts"
-            :service="service" />
+            :artifacts="pipeline.details.artifacts" />
 
           <pipeline-retry-button
             v-if="pipeline.flags.retryable"

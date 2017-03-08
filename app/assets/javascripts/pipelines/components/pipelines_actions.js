@@ -2,6 +2,7 @@
 /* global Flash */
 import '~/flash';
 import playIconSvg from 'icons/_icon_play.svg';
+import eventHub from '../event_hub';
 
 export default {
   props: {
@@ -30,6 +31,7 @@ export default {
       this.service.postAction(endpoint)
       .then(() => {
         this.isLoading = false;
+        eventHub.$emit('refreshPipelines');
       })
       .catch(() => {
         this.isLoading = false;

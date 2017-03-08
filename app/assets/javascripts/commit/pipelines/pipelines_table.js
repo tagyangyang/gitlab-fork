@@ -55,25 +55,31 @@ export default {
   beforeMount() {
     this.pipelinesService = new PipelinesService(this.endpoint);
 
-    this.isLoading = true;
-    return this.pipelinesService.getPipelines()
-      .then(response => response.json())
-      .then((json) => {
-        // depending of the endpoint the response can either bring a `pipelines` key or not.
-        const pipelines = json.pipelines || json;
-        this.store.storePipelines(pipelines);
-        this.isLoading = false;
-      })
-      .catch(() => {
-        this.isLoading = false;
-        new Flash('An error occurred while fetching the pipelines, please reload the page again.', 'alert');
-      });
+    this.fetchPipelines();
   },
 
   beforeUpdate() {
     if (this.state.pipelines.length && this.$children) {
       this.store.startTimeAgoLoops.call(this, Vue);
     }
+  },
+
+  methods: {
+    fetchPipelines() {
+      this.isLoading = true;
+      return this.pipelinesService.getPipelines()
+        .then(response => response.json())
+        .then((json) => {
+          // depending of the endpoint the response can either bring a `pipelines` key or not.
+          const pipelines = json.pipelines || json;
+          this.store.storePipelines(pipelines);
+          this.isLoading = false;
+        })
+        .catch(() => {
+          this.isLoading = false;
+          new Flash('An error occurred while fetching the pipelines, please reload the page again.', 'alert');
+        });
+    },
   },
 
   template: `
@@ -93,7 +99,8 @@ export default {
         v-if="!isLoading && state.pipelines.length > 0">
         <pipelines-table-component
           :pipelines="state.pipelines"
-          :service="pipelinesService"/>
+          :service="pipelinesService"
+          v-on:refreshPipelines="fetchPipelines"/>
       </div>
     </div>
   `,
