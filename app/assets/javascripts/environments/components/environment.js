@@ -74,6 +74,10 @@ export default Vue.component('environment-component', {
     eventHub.$on('refreshEnvironments', this.fetchEnvironments);
   },
 
+  beforeDestroyed() {
+    eventHub.$off('refreshEnvironments');
+  },
+
   methods: {
     toggleRow(model) {
       return this.store.toggleFolder(model.name);
