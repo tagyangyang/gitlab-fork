@@ -4,9 +4,10 @@ import cancelButtonComp from '~/pipelines/components/pipelines_cancel_button';
 describe('Pipelines Cancel Button', () => {
   let component;
   let spy;
+  let CancelButton;
 
   beforeEach(() => {
-    const CancelButton = Vue.extend(cancelButtonComp);
+    CancelButton = Vue.extend(cancelButtonComp);
 
     spyOn(window, 'confirm').and.returnValue(true);
     spy = jasmine.createSpy('spy').and.returnValue(Promise.resolve());
@@ -29,5 +30,21 @@ describe('Pipelines Cancel Button', () => {
   it('should call the service when is clicked', () => {
     component.$el.click();
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('should hide loading if request fails', () => {
+    spy = jasmine.createSpy('spy').and.returnValue(Promise.reject());
+
+    component = new CancelButton({
+      propsData: {
+        cancel_path: '/',
+        service: {
+          postAction: spy,
+        },
+      },
+    }).$mount();
+
+    component.$el.click();
+    expect(component.$el.querySelector('.fa-spinner')).toBe(null);
   });
 });

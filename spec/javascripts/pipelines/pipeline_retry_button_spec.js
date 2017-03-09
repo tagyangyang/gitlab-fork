@@ -4,9 +4,10 @@ import retryButtonComp from '~/pipelines/components/pipelines_retry_button';
 describe('Pipelines Retry Button', () => {
   let component;
   let spy;
+  let RetryButton;
 
   beforeEach(() => {
-    const RetryButton = Vue.extend(retryButtonComp);
+    RetryButton = Vue.extend(retryButtonComp);
 
     spy = jasmine.createSpy('spy').and.returnValue(Promise.resolve());
 
@@ -28,5 +29,21 @@ describe('Pipelines Retry Button', () => {
   it('should call the service when is clicked', () => {
     component.$el.click();
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('should hide loading if request fails', () => {
+    spy = jasmine.createSpy('spy').and.returnValue(Promise.reject());
+
+    component = new RetryButton({
+      propsData: {
+        retry_path: '/',
+        service: {
+          postAction: spy,
+        },
+      },
+    }).$mount();
+
+    component.$el.click();
+    expect(component.$el.querySelector('.fa-spinner')).toBe(null);
   });
 });

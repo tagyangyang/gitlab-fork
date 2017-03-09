@@ -5,9 +5,10 @@ describe('Pipelines Actions dropdown', () => {
   let component;
   let spy;
   let actions;
+  let ActionsComponent;
 
   beforeEach(() => {
-    const ActionsComponent = Vue.extend(pipelinesActionsComp);
+    ActionsComponent = Vue.extend(pipelinesActionsComp);
 
     actions = [
       {
@@ -39,5 +40,23 @@ describe('Pipelines Actions dropdown', () => {
     component.$el.querySelector('.js-pipeline-action-link').click();
 
     expect(spy).toHaveBeenCalledWith(actions[0].path);
+  });
+
+  it('should hide loading if request fails', () => {
+    spy = jasmine.createSpy('spy').and.returnValue(Promise.reject());
+
+    component = new ActionsComponent({
+      propsData: {
+        actions,
+        service: {
+          postAction: spy,
+        },
+      },
+    }).$mount();
+
+    component.$el.querySelector('.js-pipeline-dropdown-manual-actions').click();
+    component.$el.querySelector('.js-pipeline-action-link').click();
+
+    expect(component.$el.querySelector('.fa-spinner')).toEqual(null);
   });
 });
