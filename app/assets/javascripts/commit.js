@@ -1,14 +1,10 @@
-/* eslint-disable func-names, space-before-function-paren, wrap-iife */
+/* eslint-disable func-names */
 /* global CommitFile */
 
-(function() {
-  this.Commit = (function() {
-    function Commit() {
-      $('.files .diff-file').each(function() {
-        return new CommitFile(this);
-      });
-    }
+function Commit() {
+  $('.files .diff-file').each(function () {
+    return new CommitFile(this);
+  });
+}
 
-    return Commit;
-  })();
-}).call(window);
+window.Commit = Commit;
