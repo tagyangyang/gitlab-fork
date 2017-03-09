@@ -44,7 +44,7 @@ export default {
     <div class="btn-group" v-if="actions">
       <button
         type="button"
-        class="dropdown-toggle btn btn-default has-tooltip js-pipeline-dropdown-manual-actions"
+        class="dropdown btn btn-default has-tooltip js-pipeline-dropdown-manual-actions"
         title="Manual job"
         data-toggle="dropdown"
         data-placement="top"

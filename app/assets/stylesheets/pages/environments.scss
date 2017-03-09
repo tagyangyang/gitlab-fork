@@ -15,6 +15,26 @@
   padding-top: 20px;
 }
 
+.ci-table .no-btn {
+  border: none;
+  background: none;
+  outline: none;
+  width: 100%;
+  text-align: left;
+
+  .icon-play {
+    height: 13px;
+    width: 12px;
+    margin-right: 5px;
+    position: relative;
+    top: 2px;
+  }
+
+  span {
+    color: $gl-text-color-secondary;
+  }
+}
+
 .environments-container {
   .table-holder {
     width: 100%;
@@ -140,14 +160,6 @@
       .commit-id {
         margin-right: 0;
       }
-    }
-
-    .no-btn {
-      border: none;
-      background: none;
-      outline: none;
-      width: 100%;
-      text-align: left;
     }
   }
 }
