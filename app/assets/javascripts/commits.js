@@ -1,4 +1,4 @@
-/* eslint-disable func-names, space-before-function-paren, wrap-iife, quotes, consistent-return, no-return-assign, no-param-reassign, one-var, no-var, one-var-declaration-per-line, no-unused-vars, prefer-template, object-shorthand, comma-dangle, max-len, prefer-arrow-callback */
+/* eslint-disable func-names, space-before-function-paren, quotes, consistent-return, no-return-assign, no-param-reassign, one-var, no-var, one-var-declaration-per-line, no-unused-vars, prefer-template, object-shorthand, comma-dangle, max-len, prefer-arrow-callback */
 /* global Pager */
 
 var CommitsList = {};
@@ -24,12 +24,10 @@ CommitsList.init = function(limit) {
 
 CommitsList.initSearch = function() {
   this.timer = null;
-  return this.searchField.keyup((function(_this) {
-    return function() {
-      clearTimeout(_this.timer);
-      return _this.timer = setTimeout(_this.filterResults, 500);
-    };
-  })(this));
+  return this.searchField.keyup(function() {
+    clearTimeout(this.timer);
+    return this.timer = setTimeout(this.filterResults, 500);
+  }.bind(this));
 };
 
 CommitsList.filterResults = function() {
