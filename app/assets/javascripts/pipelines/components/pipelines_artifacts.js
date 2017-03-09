@@ -1,7 +1,3 @@
-/* eslint-disable no-new */
-/* global Flash */
-import '~/flash';
-
 export default {
   props: {
     artifacts: {
