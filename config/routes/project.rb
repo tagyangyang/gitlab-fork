@@ -166,6 +166,12 @@ constraints(ProjectUrlConstrainer.new) do
         collection do
           get :folder, path: 'folders/:id'
         end
+
+        resources :deployments, only: [] do
+          member do
+            get :metrics
+          end
+        end
       end
 
       resource :cycle_analytics, only: [:show]

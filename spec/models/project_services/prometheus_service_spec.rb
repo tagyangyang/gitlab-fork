@@ -55,7 +55,7 @@ describe PrometheusService, models: true, caching: true do
 
     context 'with valid data' do
       before do
-        stub_reactive_cache(service, prometheus_data, 'env-slug')
+        stub_reactive_cache(service, prometheus_data, 'env-slug', nil, nil)
       end
 
       it 'returns reactive data' do
@@ -72,7 +72,7 @@ describe PrometheusService, models: true, caching: true do
     end
 
     subject do
-      service.calculate_reactive_cache(environment.slug)
+      service.calculate_reactive_cache(environment.slug, nil, nil)
     end
 
     context 'when service is inactive' do

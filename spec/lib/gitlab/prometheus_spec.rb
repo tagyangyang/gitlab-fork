@@ -51,7 +51,11 @@ describe Gitlab::Prometheus, lib: true do
 
   describe '#query' do
     let(:prometheus_query) { prometheus_cpu_query('env-slug') }
-    let(:query_url) { prometheus_query_url(prometheus_query) }
+    let(:query_url) { prometheus_query_with_time_url(prometheus_query, Time.now.utc) }
+
+    around do |example|
+      Timecop.freeze { example.run }
+    end
 
     context 'when request returns vector results' do
       it 'returns data from the API call' do
