@@ -90,6 +90,8 @@ import Vue from 'vue';
           }
 
           this.updateTooltip();
+        }).catch(() => {
+          new Flash('An error occurred when trying to resolve a comment. Please try again.', 'alert');
         });
       }
     },

@@ -73,6 +73,8 @@ import boardCard from './board_card';
           this.list.loadingMore = true;
           getIssues.then(() => {
             this.list.loadingMore = false;
+          }).catch(() => {
+            this.list.loadingMore = false;
           });
         }
       },

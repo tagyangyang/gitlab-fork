@@ -29,6 +29,9 @@
           $.get($this.attr('data-labels'))
             .then((resp) => {
               callback(resp);
+            })
+            .catch(() => {
+              // An empty catch!
             });
         },
         renderRow (label) {

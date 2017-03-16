@@ -166,6 +166,9 @@ import Vue from 'vue';
                 .then(function () {
                   $dropdown.trigger('loaded.gl.dropdown');
                   $loading.fadeOut();
+                })
+                .catch(function () {
+                  $loading.fadeOut();
                 });
             } else {
               selected = $selectbox.find('input[type="hidden"]').val();

@@ -148,6 +148,9 @@ class List {
     gl.boardService.moveIssue(issue.id, listFrom.id, this.id, moveBeforeIid, moveAfterIid)
       .then(() => {
         listFrom.getIssues(false);
+      })
+      .catch(() => {
+        // An empty catch!
       });
   }
 

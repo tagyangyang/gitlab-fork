@@ -398,6 +398,9 @@
               gl.issueBoards.BoardsStore.detail.issue.update($dropdown.attr('data-issue-update'))
                 .then(function () {
                   $loading.fadeOut();
+                })
+                .catch(function () {
+                  $loading.fadeOut();
                 });
             }
             else {

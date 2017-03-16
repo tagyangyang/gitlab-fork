@@ -88,6 +88,9 @@ $(() => {
 
           Store.addBlankState();
           this.loading = false;
+        })
+        .catch(() => {
+          this.loading = false;
         });
     },
     methods: {

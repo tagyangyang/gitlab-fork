@@ -54,6 +54,8 @@ Vue.use(VueResource);
         } else {
           new Flash('An error occurred when trying to resolve a discussion. Please try again.', 'alert');
         }
+      }).catch(() => {
+        new Flash('An error occurred when trying to resolve a discussion. Please try again.', 'alert');
       });
     }
 

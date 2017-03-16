@@ -119,6 +119,9 @@ class DueDateSelect {
     gl.issueBoards.BoardsStore.detail.issue.update(this.$dropdown.attr('data-issue-update'))
       .then(() => {
         this.$loading.fadeOut();
+      })
+      .catch(() => {
+        this.$loading.fadeOut();
       });
   }
 

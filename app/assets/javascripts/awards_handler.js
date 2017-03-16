@@ -231,6 +231,8 @@ AwardsHandler
       if (menu) {
         menu.dispatchEvent(new CustomEvent('build-emoji-menu-finish'));
       }
+    }).catch(() => {
+      // An empty catch!
     });
   };
 

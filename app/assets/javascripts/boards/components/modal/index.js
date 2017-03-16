@@ -56,6 +56,9 @@ require('./empty_state');
           this.loadIssues()
             .then(() => {
               this.loading = false;
+            })
+            .catch(() => {
+              this.loading = false;
             });
         } else if (!this.showAddIssuesModal) {
           this.issues = [];

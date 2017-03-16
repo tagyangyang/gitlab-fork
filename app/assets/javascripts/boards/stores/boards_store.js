@@ -37,6 +37,9 @@ import Cookies from 'js-cookie';
         .save()
         .then(() => {
           this.state.lists = _.sortBy(this.state.lists, 'position');
+        })
+        .catch(() => {
+          // An empty catch!
         });
       this.removeBlankState();
     },
