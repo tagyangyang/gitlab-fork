@@ -156,3 +156,13 @@ ul.related-merge-requests > li {
 .recaptcha {
   margin-bottom: 30px;
 }
+
+.create-merge-request-dropdown {
+  .dropdown-toggle {
+    background-color: $green-light;
+
+    .fa {
+      pointer-events: none;
+    }
+  }
+}

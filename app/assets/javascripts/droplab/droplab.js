@@ -1,741 +1,982 @@
-/* eslint-disable */
-// Determine where to place this
-if (typeof Object.assign != 'function') {
-  Object.assign = function (target, varArgs) { // .length of function is 2
-    'use strict';
-    if (target == null) { // TypeError if undefined or null
-      throw new TypeError('Cannot convert undefined or null to object');
-    }
+/******/ (function(modules) { // webpackBootstrap
+/******/  // The module cache
+/******/  var installedModules = {};
+/******/
+/******/  // The require function
+/******/  function __webpack_require__(moduleId) {
+/******/
+/******/    // Check if module is in cache
+/******/    if(installedModules[moduleId])
+/******/      return installedModules[moduleId].exports;
+/******/
+/******/    // Create a new module (and put it into the cache)
+/******/    var module = installedModules[moduleId] = {
+/******/      i: moduleId,
+/******/      l: false,
+/******/      exports: {}
+/******/    };
+/******/
+/******/    // Execute the module function
+/******/    modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/    // Flag the module as loaded
+/******/    module.l = true;
+/******/
+/******/    // Return the exports of the module
+/******/    return module.exports;
+/******/  }
+/******/
+/******/
+/******/  // expose the modules object (__webpack_modules__)
+/******/  __webpack_require__.m = modules;
+/******/
+/******/  // expose the module cache
+/******/  __webpack_require__.c = installedModules;
+/******/
+/******/  // identity function for calling harmony imports with the correct context
+/******/  __webpack_require__.i = function(value) { return value; };
+/******/
+/******/  // define getter function for harmony exports
+/******/  __webpack_require__.d = function(exports, name, getter) {
+/******/    if(!__webpack_require__.o(exports, name)) {
+/******/      Object.defineProperty(exports, name, {
+/******/        configurable: false,
+/******/        enumerable: true,
+/******/        get: getter
+/******/      });
+/******/    }
+/******/  };
+/******/
+/******/  // getDefaultExport function for compatibility with non-harmony modules
+/******/  __webpack_require__.n = function(module) {
+/******/    var getter = module && module.__esModule ?
+/******/      function getDefault() { return module['default']; } :
+/******/      function getModuleExports() { return module; };
+/******/    __webpack_require__.d(getter, 'a', getter);
+/******/    return getter;
+/******/  };
+/******/
+/******/  // Object.prototype.hasOwnProperty.call
+/******/  __webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/  // __webpack_public_path__
+/******/  __webpack_require__.p = "";
+/******/
+/******/  // Load entry module and return exports
+/******/  return __webpack_require__(__webpack_require__.s = 9);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
 
-    var to = Object(target);
+"use strict";
 
-    for (var index = 1; index < arguments.length; index++) {
-      var nextSource = arguments[index];
 
-      if (nextSource != null) { // Skip over if undefined or null
-        for (var nextKey in nextSource) {
-          // Avoid bugs when hasOwnProperty is shadowed
-          if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-            to[nextKey] = nextSource[nextKey];
-          }
-        }
-      }
-    }
-    return to;
-  };
-}
-
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.droplab = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 var DATA_TRIGGER = 'data-dropdown-trigger';
 var DATA_DROPDOWN = 'data-dropdown';
+var SELECTED_CLASS = 'droplab-item-selected';
+var ACTIVE_CLASS = 'droplab-item-active';
 
-module.exports = {
+var constants = {
   DATA_TRIGGER: DATA_TRIGGER,
   DATA_DROPDOWN: DATA_DROPDOWN,
-}
-
-},{}],2:[function(require,module,exports){
-// Custom event support for IE
-if ( typeof CustomEvent === "function" ) {
-  module.exports = CustomEvent;
-} else {
-  require('./window')(function(w){
-    var CustomEvent = function ( event, params ) {
-      params = params || { bubbles: false, cancelable: false, detail: undefined };
-      var evt = document.createEvent( 'CustomEvent' );
-      evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-      return evt;
-    }
-    CustomEvent.prototype = w.Event.prototype;
-
-    w.CustomEvent = CustomEvent;
-  });
-  module.exports = CustomEvent;
-}
-
-},{"./window":11}],3:[function(require,module,exports){
-var CustomEvent = require('./custom_event_polyfill');
-var utils = require('./utils');
-
-var DropDown = function(list) {
-  this.currentIndex = 0;
-  this.hidden = true;
-  this.list = list;
-  this.items = [];
-  this.getItems();
-  this.initTemplateString();
-  this.addEvents();
-  this.initialState = list.innerHTML;
+  SELECTED_CLASS: SELECTED_CLASS,
+  ACTIVE_CLASS: ACTIVE_CLASS
 };
 
-Object.assign(DropDown.prototype, {
-  getItems: function() {
-    this.items = [].slice.call(this.list.querySelectorAll('li'));
-    return this.items;
-  },
+exports.default = constants;
 
-  initTemplateString: function() {
-    var items = this.items || this.getItems();
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
 
-    var templateString = '';
-    if(items.length > 0) {
-      templateString = items[items.length - 1].outerHTML;
+// Polyfill for creating CustomEvents on IE9/10/11
+
+// code pulled from:
+// https://github.com/d4tocchini/customevent-polyfill
+// https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent#Polyfill
+
+try {
+    var ce = new window.CustomEvent('test');
+    ce.preventDefault();
+    if (ce.defaultPrevented !== true) {
+        // IE has problems with .preventDefault() on custom events
+        // http://stackoverflow.com/questions/23349191
+        throw new Error('Could not prevent default');
     }
-    this.templateString = templateString;
-    return this.templateString;
-  },
-
-  clickEvent: function(e) {
-    // climb up the tree to find the LI
-    var selected = utils.closest(e.target, 'LI');
-
-    if(selected) {
-      e.preventDefault();
-      this.hide();
-      var listEvent = new CustomEvent('click.dl', {
-        detail: {
-          list: this,
-          selected: selected,
-          data: e.target.dataset,
-        },
-      });
-      this.list.dispatchEvent(listEvent);
-    }
-  },
-
-  addEvents: function() {
-    this.clickWrapper = this.clickEvent.bind(this);
-    // event delegation.
-    this.list.addEventListener('click', this.clickWrapper);
-  },
-
-  toggle: function() {
-    if(this.hidden) {
-      this.show();
-    } else {
-      this.hide();
-    }
-  },
-
-  setData: function(data) {
-    this.data = data;
-    this.render(data);
-  },
-
-  addData: function(data) {
-    this.data = (this.data || []).concat(data);
-    this.render(this.data);
-  },
-
-  // call render manually on data;
-  render: function(data){
-    // debugger
-    // empty the list first
-    var templateString = this.templateString;
-    var newChildren = [];
-    var toAppend;
-
-    newChildren = (data ||[]).map(function(dat){
-      var html = utils.t(templateString, dat);
-      var template = document.createElement('div');
-      template.innerHTML = html;
-
-      // Help set the image src template
-      var imageTags = template.querySelectorAll('img[data-src]');
-      // debugger
-      for(var i = 0; i < imageTags.length; i++) {
-        var imageTag = imageTags[i];
-        imageTag.src = imageTag.getAttribute('data-src');
-        imageTag.removeAttribute('data-src');
-      }
-
-      if(dat.hasOwnProperty('droplab_hidden') && dat.droplab_hidden){
-        template.firstChild.style.display = 'none'
-      }else{
-        template.firstChild.style.display = 'block';
-      }
-      return template.firstChild.outerHTML;
-    });
-    toAppend = this.list.querySelector('ul[data-dynamic]');
-    if(toAppend) {
-      toAppend.innerHTML = newChildren.join('');
-    } else {
-      this.list.innerHTML = newChildren.join('');
-    }
-  },
-
-  show: function() {
-    if (this.hidden) {
-      // debugger
-      this.list.style.display = 'block';
-      this.currentIndex = 0;
-      this.hidden = false;
-    }
-  },
-
-  hide: function() {
-    if (!this.hidden) {
-      // debugger
-      this.list.style.display = 'none';
-      this.currentIndex = 0;
-      this.hidden = true;
-    }
-  },
-
-  destroy: function() {
-    this.hide();
-    this.list.removeEventListener('click', this.clickWrapper);
-  }
-});
-
-module.exports = DropDown;
-
-},{"./custom_event_polyfill":2,"./utils":10}],4:[function(require,module,exports){
-require('./window')(function(w){
-  module.exports = function(deps) {
-    deps = deps || {};
-    var window = deps.window || w;
-    var document = deps.document || window.document;
-    var CustomEvent = deps.CustomEvent || require('./custom_event_polyfill');
-    var HookButton = deps.HookButton || require('./hook_button');
-    var HookInput = deps.HookInput || require('./hook_input');
-    var utils = deps.utils || require('./utils');
-    var DATA_TRIGGER = require('./constants').DATA_TRIGGER;
-
-    var DropLab = function(hook){
-      if (!(this instanceof DropLab)) return new DropLab(hook);
-      this.ready = false;
-      this.hooks = [];
-      this.queuedData = [];
-      this.config = {};
-      this.loadWrapper;
-      if(typeof hook !== 'undefined'){
-        this.addHook(hook);
-      }
+} catch(e) {
+  var CustomEvent = function(event, params) {
+    var evt, origPrevent;
+    params = params || {
+      bubbles: false,
+      cancelable: false,
+      detail: undefined
     };
 
-
-    Object.assign(DropLab.prototype, {
-      load: function() {
-        this.loadWrapper();
-      },
-
-      loadWrapper: function(){
-        var dropdownTriggers = [].slice.apply(document.querySelectorAll('['+DATA_TRIGGER+']'));
-        this.addHooks(dropdownTriggers).init();
-      },
-
-      addData: function () {
-        var args = [].slice.apply(arguments);
-        this.applyArgs(args, '_addData');
-      },
-
-      setData: function() {
-        var args = [].slice.apply(arguments);
-        this.applyArgs(args, '_setData');
-      },
-
-      destroy: function() {
-        for(var i = 0; i < this.hooks.length; i++) {
-          this.hooks[i].destroy();
-        }
-        this.hooks = [];
-        this.removeEvents();
-      },
-
-      applyArgs: function(args, methodName) {
-        if(this.ready) {
-          this[methodName].apply(this, args);
-        } else {
-          this.queuedData = this.queuedData || [];
-          this.queuedData.push(args);
-        }
-      },
-
-      _addData: function(trigger, data) {
-        this._processData(trigger, data, 'addData');
-      },
-
-      _setData: function(trigger, data) {
-        this._processData(trigger, data, 'setData');
-      },
-
-      _processData: function(trigger, data, methodName) {
-        for(var i = 0; i < this.hooks.length; i++) {
-          var hook = this.hooks[i];
-          if(hook.trigger.dataset.hasOwnProperty('id')) {
-            if(hook.trigger.dataset.id === trigger) {
-              hook.list[methodName](data);
-            }
+    evt = document.createEvent("CustomEvent");
+    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+    origPrevent = evt.preventDefault;
+    evt.preventDefault = function () {
+      origPrevent.call(this);
+      try {
+        Object.defineProperty(this, 'defaultPrevented', {
+          get: function () {
+            return true;
           }
-        }
-      },
-
-      addEvents: function() {
-        var self = this;
-        this.windowClickedWrapper = function(e){
-          var thisTag = e.target;
-          if(thisTag.tagName !== 'UL'){
-            // climb up the tree to find the UL
-            thisTag = utils.closest(thisTag, 'UL');
-          }
-          if(utils.isDropDownParts(thisTag)){ return }
-          if(utils.isDropDownParts(e.target)){ return }
-          for(var i = 0; i < self.hooks.length; i++) {
-            self.hooks[i].list.hide();
-          }
-        }.bind(this);
-        document.addEventListener('click', this.windowClickedWrapper);
-      },
-
-      removeEvents: function(){
-        w.removeEventListener('click', this.windowClickedWrapper);
-        w.removeEventListener('load', this.loadWrapper);
-      },
-
-      changeHookList: function(trigger, list, plugins, config) {
-        trigger = document.querySelector('[data-id="'+trigger+'"]');
-        // list = document.querySelector(list);
-        this.hooks.every(function(hook, i) {
-          if(hook.trigger === trigger) {
-            hook.destroy();
-            this.hooks.splice(i, 1);
-            this.addHook(trigger, list, plugins, config);
-            return false;
-          }
-          return true
-        }.bind(this));
-      },
-
-      addHook: function(hook, list, plugins, config) {
-        if(!(hook instanceof HTMLElement) && typeof hook === 'string'){
-          hook = document.querySelector(hook);
-        }
-        if(!list){
-          list = document.querySelector(hook.dataset[utils.toDataCamelCase(DATA_TRIGGER)]);
-        }
-
-        if(hook) {
-          if(hook.tagName === 'A' || hook.tagName === 'BUTTON') {
-            this.hooks.push(new HookButton(hook, list, plugins, config));
-          } else if(hook.tagName === 'INPUT') {
-            this.hooks.push(new HookInput(hook, list, plugins, config));
-          }
-        }
-        return this;
-      },
-
-      addHooks: function(hooks, plugins, config) {
-        for(var i = 0; i < hooks.length; i++) {
-          var hook = hooks[i];
-          this.addHook(hook, null, plugins, config);
-        }
-        return this;
-      },
-
-      setConfig: function(obj){
-        this.config = obj;
-      },
-
-      init: function () {
-        this.addEvents();
-        var readyEvent = new CustomEvent('ready.dl', {
-          detail: {
-            dropdown: this,
-          },
         });
-        window.dispatchEvent(readyEvent);
-        this.ready = true;
-        for(var i = 0; i < this.queuedData.length; i++) {
-          this.addData.apply(this, this.queuedData[i]);
-        }
-        this.queuedData = [];
-        return this;
-      },
-    });
-
-    return DropLab;
+      } catch(e) {
+        this.defaultPrevented = true;
+      }
+    };
+    return evt;
   };
+
+  CustomEvent.prototype = window.Event.prototype;
+  window.CustomEvent = CustomEvent; // expose definition to window
+}
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
 
-},{"./constants":1,"./custom_event_polyfill":2,"./hook_button":6,"./hook_input":7,"./utils":10,"./window":11}],5:[function(require,module,exports){
-var DropDown = require('./dropdown');
+var _dropdown = __webpack_require__(6);
 
-var Hook = function(trigger, list, plugins, config){
+var _dropdown2 = _interopRequireDefault(_dropdown);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Hook = function Hook(trigger, list, plugins, config) {
   this.trigger = trigger;
-  this.list = new DropDown(list);
+  this.list = new _dropdown2.default(list);
   this.type = 'Hook';
   this.event = 'click';
   this.plugins = plugins || [];
   this.config = config || {};
-  this.id = trigger.dataset.id;
+  this.id = trigger.id;
 };
 
 Object.assign(Hook.prototype, {
 
-  addEvents: function(){},
+  addEvents: function addEvents() {},
 
-  constructor: Hook,
+  constructor: Hook
 });
 
-module.exports = Hook;
+exports.default = Hook;
 
-},{"./dropdown":3}],6:[function(require,module,exports){
-var CustomEvent = require('./custom_event_polyfill');
-var Hook = require('./hook');
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
 
-var HookButton = function(trigger, list, plugins, config) {
-  Hook.call(this, trigger, list, plugins, config);
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _constants = __webpack_require__(0);
+
+var _constants2 = _interopRequireDefault(_constants);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DATA_TRIGGER = _constants2.default.DATA_TRIGGER,
+    DATA_DROPDOWN = _constants2.default.DATA_DROPDOWN;
+
+
+var utils = {
+  toCamelCase: function toCamelCase(attr) {
+    return this.camelize(attr.split('-').slice(1).join(' '));
+  },
+  t: function t(s, d) {
+    for (var p in d) {
+      if (Object.prototype.hasOwnProperty.call(d, p)) {
+        s = s.replace(new RegExp('{{' + p + '}}', 'g'), d[p]);
+      }
+    }
+    return s;
+  },
+  camelize: function camelize(str) {
+    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (letter, index) {
+      return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
+    }).replace(/\s+/g, '');
+  },
+  closest: function closest(thisTag, stopTag) {
+    while (thisTag && thisTag.tagName !== stopTag && thisTag.tagName !== 'HTML') {
+      thisTag = thisTag.parentNode;
+    }
+    return thisTag;
+  },
+  isDropDownParts: function isDropDownParts(target) {
+    if (!target || target.tagName === 'HTML') return false;
+    return target.hasAttribute(DATA_TRIGGER) || target.hasAttribute(DATA_DROPDOWN);
+  }
+};
+
+exports.default = utils;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function () {
+  var DropLab = function DropLab(hook, list) {
+    if (!this instanceof DropLab) return new DropLab(hook);
+
+    this.ready = false;
+    this.hooks = [];
+    this.queuedData = [];
+    this.config = {};
+
+    this.eventWrapper = {};
+
+    if (!hook) return this.loadStatic();
+    this.addHook(hook, list);
+    this.init();
+  };
+
+  Object.assign(DropLab.prototype, {
+    loadStatic: function loadStatic() {
+      var dropdownTriggers = [].slice.apply(document.querySelectorAll('[' + DATA_TRIGGER + ']'));
+      this.addHooks(dropdownTriggers).init();
+    },
+
+    addData: function addData() {
+      var args = [].slice.apply(arguments);
+      this.applyArgs(args, '_addData');
+    },
+
+    setData: function setData() {
+      var args = [].slice.apply(arguments);
+      this.applyArgs(args, '_setData');
+    },
+
+    destroy: function destroy() {
+      this.hooks.forEach(function (hook) {
+        return hook.destroy();
+      });
+      this.hooks = [];
+      this.removeEvents();
+    },
+
+    applyArgs: function applyArgs(args, methodName) {
+      if (this.ready) return this[methodName].apply(this, args);
+
+      this.queuedData = this.queuedData || [];
+      this.queuedData.push(args);
+    },
+
+    _addData: function _addData(trigger, data) {
+      this._processData(trigger, data, 'addData');
+    },
+
+    _setData: function _setData(trigger, data) {
+      this._processData(trigger, data, 'setData');
+    },
+
+    _processData: function _processData(trigger, data, methodName) {
+      this.hooks.forEach(function (hook) {
+        if (Array.isArray(trigger)) hook.list[methodName](trigger);
+
+        if (hook.trigger.id === trigger) hook.list[methodName](data);
+      });
+    },
+
+    addEvents: function addEvents() {
+      this.eventWrapper.documentClicked = this.documentClicked.bind(this);
+      document.addEventListener('click', this.eventWrapper.documentClicked);
+    },
+
+    documentClicked: function documentClicked(e) {
+      var thisTag = e.target;
+
+      if (thisTag.tagName !== 'UL') thisTag = _utils2.default.closest(thisTag, 'UL');
+      if (_utils2.default.isDropDownParts(thisTag, this.hooks) || _utils2.default.isDropDownParts(e.target, this.hooks)) return;
+
+      this.hooks.forEach(function (hook) {
+        return hook.list.hide();
+      });
+    },
+
+    removeEvents: function removeEvents() {
+      document.removeEventListener('click', this.eventWrapper.documentClicked);
+    },
+
+    changeHookList: function changeHookList(trigger, list, plugins, config) {
+      var _this = this;
+
+      var availableTrigger = typeof trigger === 'string' ? document.getElementById(trigger) : trigger;
+
+      this.hooks.forEach(function (hook, i) {
+        hook.list.list.dataset.dropdownActive = false;
+
+        if (hook.trigger !== availableTrigger) return;
+
+        hook.destroy();
+        _this.hooks.splice(i, 1);
+        _this.addHook(availableTrigger, list, plugins, config);
+      });
+    },
+
+    addHook: function addHook(hook, list, plugins, config) {
+      var availableHook = typeof hook === 'string' ? document.querySelector(hook) : hook;
+      var availableList = void 0;
+
+      if (typeof list === 'string') {
+        availableList = document.querySelector(list);
+      } else if (list instanceof Element) {
+        availableList = list;
+      } else {
+        availableList = document.querySelector(hook.dataset[_utils2.default.toCamelCase(DATA_TRIGGER)]);
+      }
+
+      availableList.dataset.dropdownActive = true;
+
+      var HookObject = availableHook.tagName === 'INPUT' ? _hook_input2.default : _hook_button2.default;
+      this.hooks.push(new HookObject(availableHook, availableList, plugins, config));
+
+      return this;
+    },
+
+    addHooks: function addHooks(hooks, plugins, config) {
+      var _this2 = this;
+
+      hooks.forEach(function (hook) {
+        return _this2.addHook(hook, null, plugins, config);
+      });
+      return this;
+    },
+
+    setConfig: function setConfig(obj) {
+      this.config = obj;
+    },
+
+    fireReady: function fireReady() {
+      var readyEvent = new CustomEvent('ready.dl', {
+        detail: {
+          dropdown: this
+        }
+      });
+      document.dispatchEvent(readyEvent);
+
+      this.ready = true;
+    },
+
+    init: function init() {
+      var _this3 = this;
+
+      this.addEvents();
+
+      this.fireReady();
+
+      this.queuedData.forEach(function (data) {
+        return _this3.addData(data);
+      });
+      this.queuedData = [];
+
+      return this;
+    }
+  });
+
+  return DropLab;
+};
+
+__webpack_require__(1);
+
+var _hook_button = __webpack_require__(7);
+
+var _hook_button2 = _interopRequireDefault(_hook_button);
+
+var _hook_input = __webpack_require__(8);
+
+var _hook_input2 = _interopRequireDefault(_hook_input);
+
+var _utils = __webpack_require__(3);
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _constants = __webpack_require__(0);
+
+var _constants2 = _interopRequireDefault(_constants);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DATA_TRIGGER = _constants2.default.DATA_TRIGGER;
+
+;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function () {
+  var currentKey;
+  var currentFocus;
+  var isUpArrow = false;
+  var isDownArrow = false;
+  var removeHighlight = function removeHighlight(list) {
+    var itemElements = Array.prototype.slice.call(list.list.querySelectorAll('li:not(.divider)'), 0);
+    var listItems = [];
+    for (var i = 0; i < itemElements.length; i++) {
+      var listItem = itemElements[i];
+      listItem.classList.remove(_constants2.default.ACTIVE_CLASS);
+
+      if (listItem.style.display !== 'none') {
+        listItems.push(listItem);
+      }
+    }
+    return listItems;
+  };
+
+  var setMenuForArrows = function setMenuForArrows(list) {
+    var listItems = removeHighlight(list);
+    if (list.currentIndex > 0) {
+      if (!listItems[list.currentIndex - 1]) {
+        list.currentIndex = list.currentIndex - 1;
+      }
+
+      if (listItems[list.currentIndex - 1]) {
+        var el = listItems[list.currentIndex - 1];
+        var filterDropdownEl = el.closest('.filter-dropdown');
+        el.classList.add(_constants2.default.ACTIVE_CLASS);
+
+        if (filterDropdownEl) {
+          var filterDropdownBottom = filterDropdownEl.offsetHeight;
+          var elOffsetTop = el.offsetTop - 30;
+
+          if (elOffsetTop > filterDropdownBottom) {
+            filterDropdownEl.scrollTop = elOffsetTop - filterDropdownBottom;
+          }
+        }
+      }
+    }
+  };
+
+  var mousedown = function mousedown(e) {
+    var list = e.detail.hook.list;
+    removeHighlight(list);
+    list.show();
+    list.currentIndex = 0;
+    isUpArrow = false;
+    isDownArrow = false;
+  };
+  var selectItem = function selectItem(list) {
+    var listItems = removeHighlight(list);
+    var currentItem = listItems[list.currentIndex - 1];
+    var listEvent = new CustomEvent('click.dl', {
+      detail: {
+        list: list,
+        selected: currentItem,
+        data: currentItem.dataset
+      }
+    });
+    list.list.dispatchEvent(listEvent);
+    list.hide();
+  };
+
+  var keydown = function keydown(e) {
+    var typedOn = e.target;
+    var list = e.detail.hook.list;
+    var currentIndex = list.currentIndex;
+    isUpArrow = false;
+    isDownArrow = false;
+
+    if (e.detail.which) {
+      currentKey = e.detail.which;
+      if (currentKey === 13) {
+        selectItem(e.detail.hook.list);
+        return;
+      }
+      if (currentKey === 38) {
+        isUpArrow = true;
+      }
+      if (currentKey === 40) {
+        isDownArrow = true;
+      }
+    } else if (e.detail.key) {
+      currentKey = e.detail.key;
+      if (currentKey === 'Enter') {
+        selectItem(e.detail.hook.list);
+        return;
+      }
+      if (currentKey === 'ArrowUp') {
+        isUpArrow = true;
+      }
+      if (currentKey === 'ArrowDown') {
+        isDownArrow = true;
+      }
+    }
+    if (isUpArrow) {
+      currentIndex--;
+    }
+    if (isDownArrow) {
+      currentIndex++;
+    }
+    if (currentIndex < 0) {
+      currentIndex = 0;
+    }
+    list.currentIndex = currentIndex;
+    setMenuForArrows(e.detail.hook.list);
+  };
+
+  document.addEventListener('mousedown.dl', mousedown);
+  document.addEventListener('keydown.dl', keydown);
+};
+
+var _constants = __webpack_require__(0);
+
+var _constants2 = _interopRequireDefault(_constants);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Object$assign;
+
+__webpack_require__(1);
+
+var _utils = __webpack_require__(3);
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _constants = __webpack_require__(0);
+
+var _constants2 = _interopRequireDefault(_constants);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var DropDown = function DropDown(list) {
+  this.currentIndex = 0;
+  this.hidden = true;
+  this.list = typeof list === 'string' ? document.querySelector(list) : list;
+  this.items = [];
+
+  this.eventWrapper = {};
+
+  this.getItems();
+  this.initTemplateString();
+  this.addEvents();
+
+  this.initialState = list.innerHTML;
+};
+
+Object.assign(DropDown.prototype, (_Object$assign = {
+  getItems: function getItems() {
+    this.items = [].slice.call(this.list.querySelectorAll('li'));
+    return this.items;
+  },
+
+  initTemplateString: function initTemplateString() {
+    var items = this.items || this.getItems();
+
+    var templateString = '';
+    if (items.length > 0) templateString = items[items.length - 1].outerHTML;
+    this.templateString = templateString;
+
+    return this.templateString;
+  },
+
+  clickEvent: function clickEvent(e) {
+    var selected = _utils2.default.closest(e.target, 'LI');
+    if (!selected) return;
+
+    this.addSelectedClass(selected);
+
+    e.preventDefault();
+    this.hide();
+
+    var listEvent = new CustomEvent('click.dl', {
+      detail: {
+        list: this,
+        selected: selected,
+        data: e.target.dataset
+      }
+    });
+    this.list.dispatchEvent(listEvent);
+  },
+
+  addSelectedClass: function addSelectedClass(selected) {
+    this.removeSelectedClasses();
+    selected.classList.add(_constants2.default.SELECTED_CLASS);
+  },
+
+  removeSelectedClasses: function removeSelectedClasses() {
+    var items = this.items || this.getItems();
+
+    items.forEach(function (item) {
+      item.classList.remove(_constants2.default.SELECTED_CLASS);
+    });
+  },
+
+  addEvents: function addEvents() {
+    this.eventWrapper.clickEvent = this.clickEvent.bind(this);
+    this.list.addEventListener('click', this.eventWrapper.clickEvent);
+  },
+
+  toggle: function toggle() {
+    this.hidden ? this.show() : this.hide();
+  },
+
+  setData: function setData(data) {
+    this.data = data;
+    this.render(data);
+  },
+
+  addData: function addData(data) {
+    this.data = (this.data || []).concat(data);
+    this.render(this.data);
+  },
+
+  render: function render(data) {
+    var children = data ? data.map(this.renderChildren.bind(this)) : [];
+    var renderableList = this.list.querySelector('ul[data-dynamic]') || this.list;
+
+    renderableList.innerHTML = children.join('');
+  },
+
+  renderChildren: function renderChildren(data) {
+    var html = _utils2.default.t(this.templateString, data);
+    var template = document.createElement('div');
+
+    template.innerHTML = html;
+    this.setImagesSrc(template);
+    template.firstChild.style.display = data.droplab_hidden ? 'none' : 'block';
+
+    return template.firstChild.outerHTML;
+  },
+
+  setImagesSrc: function setImagesSrc(template) {
+    var images = [].slice.call(template.querySelectorAll('img[data-src]'));
+
+    images.forEach(function (image) {
+      image.src = image.getAttribute('data-src');
+      image.removeAttribute('data-src');
+    });
+  },
+
+  show: function show() {
+    if (!this.hidden) return;
+    this.list.style.display = 'block';
+    this.currentIndex = 0;
+    this.hidden = false;
+  },
+
+  hide: function hide() {
+    if (this.hidden) return;
+    this.list.style.display = 'none';
+    this.currentIndex = 0;
+    this.hidden = true;
+  }
+
+}, _defineProperty(_Object$assign, 'toggle', function toggle() {
+  this.hidden ? this.show() : this.hide();
+}), _defineProperty(_Object$assign, 'destroy', function destroy() {
+  this.hide();
+  this.list.removeEventListener('click', this.eventWrapper.clickEvent);
+}), _Object$assign));
+
+exports.default = DropDown;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+__webpack_require__(1);
+
+var _hook = __webpack_require__(2);
+
+var _hook2 = _interopRequireDefault(_hook);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var HookButton = function HookButton(trigger, list, plugins, config) {
+  _hook2.default.call(this, trigger, list, plugins, config);
+
   this.type = 'button';
   this.event = 'click';
+
+  this.eventWrapper = {};
+
   this.addEvents();
   this.addPlugins();
 };
 
-HookButton.prototype = Object.create(Hook.prototype);
+HookButton.prototype = Object.create(_hook2.default.prototype);
 
 Object.assign(HookButton.prototype, {
-  addPlugins: function() {
-    for(var i = 0; i < this.plugins.length; i++) {
-      this.plugins[i].init(this);
-    }
+  addPlugins: function addPlugins() {
+    var _this = this;
+
+    this.plugins.forEach(function (plugin) {
+      return plugin.init(_this);
+    });
   },
 
-  clicked: function(e){
+  clicked: function clicked(e) {
     var buttonEvent = new CustomEvent('click.dl', {
       detail: {
-        hook: this,
+        hook: this
       },
       bubbles: true,
       cancelable: true
     });
-    this.list.show();
     e.target.dispatchEvent(buttonEvent);
+
+    this.list.toggle();
   },
 
-  addEvents: function(){
-    this.clickedWrapper = this.clicked.bind(this);
-    this.trigger.addEventListener('click', this.clickedWrapper);
+  addEvents: function addEvents() {
+    this.eventWrapper.clicked = this.clicked.bind(this);
+    this.trigger.addEventListener('click', this.eventWrapper.clicked);
   },
 
-  removeEvents: function(){
-    this.trigger.removeEventListener('click', this.clickedWrapper);
+  removeEvents: function removeEvents() {
+    this.trigger.removeEventListener('click', this.eventWrapper.clicked);
   },
 
-  restoreInitialState: function() {
+  restoreInitialState: function restoreInitialState() {
     this.list.list.innerHTML = this.list.initialState;
   },
 
-  removePlugins: function() {
-    for(var i = 0; i < this.plugins.length; i++) {
-      this.plugins[i].destroy();
-    }
+  removePlugins: function removePlugins() {
+    this.plugins.forEach(function (plugin) {
+      return plugin.destroy();
+    });
   },
 
-  destroy: function() {
+  destroy: function destroy() {
     this.restoreInitialState();
+
     this.removeEvents();
     this.removePlugins();
   },
 
-
-  constructor: HookButton,
+  constructor: HookButton
 });
 
+exports.default = HookButton;
 
-module.exports = HookButton;
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
 
-},{"./custom_event_polyfill":2,"./hook":5}],7:[function(require,module,exports){
-var CustomEvent = require('./custom_event_polyfill');
-var Hook = require('./hook');
+"use strict";
 
-var HookInput = function(trigger, list, plugins, config) {
-  Hook.call(this, trigger, list, plugins, config);
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+__webpack_require__(1);
+
+var _hook = __webpack_require__(2);
+
+var _hook2 = _interopRequireDefault(_hook);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var HookInput = function HookInput(trigger, list, plugins, config) {
+  _hook2.default.call(this, trigger, list, plugins, config);
+
   this.type = 'input';
   this.event = 'input';
-  this.addPlugins();
+
+  this.eventWrapper = {};
+
   this.addEvents();
+  this.addPlugins();
 };
 
 Object.assign(HookInput.prototype, {
-  addPlugins: function() {
-    var self = this;
-    for(var i = 0; i < this.plugins.length; i++) {
-      this.plugins[i].init(self);
-    }
+  addPlugins: function addPlugins() {
+    var _this = this;
+
+    this.plugins.forEach(function (plugin) {
+      return plugin.init(_this);
+    });
   },
 
-  addEvents: function(){
-    var self = this;
+  addEvents: function addEvents() {
+    this.eventWrapper.mousedown = this.mousedown.bind(this);
+    this.eventWrapper.input = this.input.bind(this);
+    this.eventWrapper.keyup = this.keyup.bind(this);
+    this.eventWrapper.keydown = this.keydown.bind(this);
 
-    this.mousedown = function mousedown(e) {
-      if(self.hasRemovedEvents) return;
-
-      var mouseEvent = new CustomEvent('mousedown.dl', {
-        detail: {
-          hook: self,
-          text: e.target.value,
-        },
-        bubbles: true,
-        cancelable: true
-      });
-      e.target.dispatchEvent(mouseEvent);
-    }
-
-    this.input = function input(e) {
-      if(self.hasRemovedEvents) return;
-
-      self.list.show();
-
-      var inputEvent = new CustomEvent('input.dl', {
-        detail: {
-          hook: self,
-          text: e.target.value,
-        },
-        bubbles: true,
-        cancelable: true
-      });
-      e.target.dispatchEvent(inputEvent);
-    }
-
-    this.keyup = function keyup(e) {
-      if(self.hasRemovedEvents) return;
-
-      keyEvent(e, 'keyup.dl');
-    }
-
-    this.keydown = function keydown(e) {
-      if(self.hasRemovedEvents) return;
-
-      keyEvent(e, 'keydown.dl');
-    }
-
-    function keyEvent(e, keyEventName){
-      self.list.show();
-
-      var keyEvent = new CustomEvent(keyEventName, {
-        detail: {
-          hook: self,
-          text: e.target.value,
-          which: e.which,
-          key: e.key,
-        },
-        bubbles: true,
-        cancelable: true
-      });
-      e.target.dispatchEvent(keyEvent);
-    }
-
-    this.events = this.events || {};
-    this.events.mousedown = this.mousedown;
-    this.events.input = this.input;
-    this.events.keyup = this.keyup;
-    this.events.keydown = this.keydown;
-    this.trigger.addEventListener('mousedown', this.mousedown);
-    this.trigger.addEventListener('input', this.input);
-    this.trigger.addEventListener('keyup', this.keyup);
-    this.trigger.addEventListener('keydown', this.keydown);
+    this.trigger.addEventListener('mousedown', this.eventWrapper.mousedown);
+    this.trigger.addEventListener('input', this.eventWrapper.input);
+    this.trigger.addEventListener('keyup', this.eventWrapper.keyup);
+    this.trigger.addEventListener('keydown', this.eventWrapper.keydown);
   },
 
-  removeEvents: function() {
+  removeEvents: function removeEvents() {
     this.hasRemovedEvents = true;
-    this.trigger.removeEventListener('mousedown', this.mousedown);
-    this.trigger.removeEventListener('input', this.input);
-    this.trigger.removeEventListener('keyup', this.keyup);
-    this.trigger.removeEventListener('keydown', this.keydown);
+
+    this.trigger.removeEventListener('mousedown', this.eventWrapper.mousedown);
+    this.trigger.removeEventListener('input', this.eventWrapper.input);
+    this.trigger.removeEventListener('keyup', this.eventWrapper.keyup);
+    this.trigger.removeEventListener('keydown', this.eventWrapper.keydown);
   },
 
-  restoreInitialState: function() {
+  input: function input(e) {
+    if (this.hasRemovedEvents) return;
+
+    this.list.show();
+
+    var inputEvent = new CustomEvent('input.dl', {
+      detail: {
+        hook: this,
+        text: e.target.value
+      },
+      bubbles: true,
+      cancelable: true
+    });
+    e.target.dispatchEvent(inputEvent);
+  },
+
+  mousedown: function mousedown(e) {
+    if (this.hasRemovedEvents) return;
+
+    var mouseEvent = new CustomEvent('mousedown.dl', {
+      detail: {
+        hook: this,
+        text: e.target.value
+      },
+      bubbles: true,
+      cancelable: true
+    });
+    e.target.dispatchEvent(mouseEvent);
+  },
+
+  keyup: function keyup(e) {
+    if (this.hasRemovedEvents) return;
+
+    this.keyEvent(e, 'keyup.dl');
+  },
+
+  keydown: function keydown(e) {
+    if (this.hasRemovedEvents) return;
+
+    this.keyEvent(e, 'keydown.dl');
+  },
+
+  keyEvent: function keyEvent(e, eventName) {
+    this.list.show();
+
+    var keyEvent = new CustomEvent(eventName, {
+      detail: {
+        hook: this,
+        text: e.target.value,
+        which: e.which,
+        key: e.key
+      },
+      bubbles: true,
+      cancelable: true
+    });
+    e.target.dispatchEvent(keyEvent);
+  },
+
+  restoreInitialState: function restoreInitialState() {
     this.list.list.innerHTML = this.list.initialState;
   },
 
-  removePlugins: function() {
-    for(var i = 0; i < this.plugins.length; i++) {
-      this.plugins[i].destroy();
-    }
+  removePlugins: function removePlugins() {
+    this.plugins.forEach(function (plugin) {
+      return plugin.destroy();
+    });
   },
 
-  destroy: function() {
+  destroy: function destroy() {
     this.restoreInitialState();
+
     this.removeEvents();
     this.removePlugins();
+
     this.list.destroy();
   }
 });
 
-module.exports = HookInput;
+exports.default = HookInput;
 
-},{"./custom_event_polyfill":2,"./hook":5}],8:[function(require,module,exports){
-var DropLab = require('./droplab')();
-var DATA_TRIGGER = require('./constants').DATA_TRIGGER;
-var keyboard = require('./keyboard')();
-var setup = function() {
-  window.DropLab = DropLab;
-};
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 
 
-module.exports = setup();
-
-},{"./constants":1,"./droplab":4,"./keyboard":9}],9:[function(require,module,exports){
-require('./window')(function(w){
-  module.exports = function(){
-    var currentKey;
-    var currentFocus;
-    var isUpArrow = false;
-    var isDownArrow = false;
-    var removeHighlight = function removeHighlight(list) {
-      var listItems = Array.prototype.slice.call(list.list.querySelectorAll('li:not(.divider)'), 0);
-      var listItemsTmp = [];
-      for(var i = 0; i < listItems.length; i++) {
-        var listItem = listItems[i];
-        listItem.classList.remove('dropdown-active');
-
-        if (listItem.style.display !== 'none') {
-          listItemsTmp.push(listItem);
-        }
-      }
-      return listItemsTmp;
-    };
-
-    var setMenuForArrows = function setMenuForArrows(list) {
-      var listItems = removeHighlight(list);
-      if(list.currentIndex>0){
-        if(!listItems[list.currentIndex-1]){
-          list.currentIndex = list.currentIndex-1;
-        }
-
-        if (listItems[list.currentIndex-1]) {
-          var el = listItems[list.currentIndex-1];
-          var filterDropdownEl = el.closest('.filter-dropdown');
-          el.classList.add('dropdown-active');
-
-          if (filterDropdownEl) {
-            var filterDropdownBottom = filterDropdownEl.offsetHeight;
-            var elOffsetTop = el.offsetTop - 30;
-
-            if (elOffsetTop > filterDropdownBottom) {
-              filterDropdownEl.scrollTop = elOffsetTop - filterDropdownBottom;
-            }
-          }
-        }
-      }
-    };
-
-    var mousedown = function mousedown(e) {
-      var list = e.detail.hook.list;
-      removeHighlight(list);
-      list.show();
-      list.currentIndex = 0;
-      isUpArrow = false;
-      isDownArrow = false;
-    };
-    var selectItem = function selectItem(list) {
-      var listItems = removeHighlight(list);
-      var currentItem = listItems[list.currentIndex-1];
-      var listEvent = new CustomEvent('click.dl', {
-        detail: {
-          list: list,
-          selected: currentItem,
-          data: currentItem.dataset,
-        },
-      });
-      list.list.dispatchEvent(listEvent);
-      list.hide();
-    }
-
-    var keydown = function keydown(e){
-      var typedOn = e.target;
-      var list = e.detail.hook.list;
-      var currentIndex = list.currentIndex;
-      isUpArrow = false;
-      isDownArrow = false;
-
-      if(e.detail.which){
-        currentKey = e.detail.which;
-        if(currentKey === 13){
-          selectItem(e.detail.hook.list);
-          return;
-        }
-        if(currentKey === 38) {
-          isUpArrow = true;
-        }
-        if(currentKey === 40) {
-          isDownArrow = true;
-        }
-      } else if(e.detail.key) {
-        currentKey = e.detail.key;
-        if(currentKey === 'Enter'){
-          selectItem(e.detail.hook.list);
-          return;
-        }
-        if(currentKey === 'ArrowUp') {
-          isUpArrow = true;
-        }
-        if(currentKey === 'ArrowDown') {
-          isDownArrow = true;
-        }
-      }
-      if(isUpArrow){ currentIndex--; }
-      if(isDownArrow){ currentIndex++; }
-      if(currentIndex < 0){ currentIndex = 0; }
-      list.currentIndex = currentIndex;
-      setMenuForArrows(e.detail.hook.list);
-    };
-
-    w.addEventListener('mousedown.dl', mousedown);
-    w.addEventListener('keydown.dl', keydown);
-  };
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
-},{"./window":11}],10:[function(require,module,exports){
-var DATA_TRIGGER = require('./constants').DATA_TRIGGER;
-var DATA_DROPDOWN = require('./constants').DATA_DROPDOWN;
 
-var toDataCamelCase = function(attr){
-  return this.camelize(attr.split('-').slice(1).join(' '));
+var _droplab = __webpack_require__(4);
+
+var _droplab2 = _interopRequireDefault(_droplab);
+
+var _constants = __webpack_require__(0);
+
+var _constants2 = _interopRequireDefault(_constants);
+
+var _keyboard = __webpack_require__(5);
+
+var _keyboard2 = _interopRequireDefault(_keyboard);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DATA_TRIGGER = _constants2.default.DATA_TRIGGER;
+var keyboard = (0, _keyboard2.default)();
+
+var setup = function setup() {
+  window.DropLab = (0, _droplab2.default)();
 };
 
-// the tiniest damn templating I can do
-var t = function(s,d){
-  for(var p in d)
-    s=s.replace(new RegExp('{{'+p+'}}','g'), d[p]);
-  return s;
-};
+setup();
 
-var camelize = function(str) {
-  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
-    return index == 0 ? letter.toLowerCase() : letter.toUpperCase();
-  }).replace(/\s+/g, '');
-};
+exports.default = setup;
 
-var closest = function(thisTag, stopTag) {
-  while(thisTag && thisTag.tagName !== stopTag && thisTag.tagName !== 'HTML'){
-    thisTag = thisTag.parentNode;
-  }
-  return thisTag;
-};
-
-var isDropDownParts = function(target) {
-  if(!target || target.tagName === 'HTML') { return false; }
-  return (
-    target.hasAttribute(DATA_TRIGGER) ||
-      target.hasAttribute(DATA_DROPDOWN)
-  );
-};
-
-module.exports = {
-  toDataCamelCase: toDataCamelCase,
-  t: t,
-  camelize: camelize,
-  closest: closest,
-  isDropDownParts: isDropDownParts,
-};
-
-},{"./constants":1}],11:[function(require,module,exports){
-module.exports = function(callback) {
-  return (function() {
-    callback(this);
-  }).call(null);
-};
-
-},{}]},{},[8])(8)
-});
+/***/ })
+/******/ ]);

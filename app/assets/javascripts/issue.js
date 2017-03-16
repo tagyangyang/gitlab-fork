@@ -1,6 +1,8 @@
 /* eslint-disable func-names, space-before-function-paren, no-var, prefer-rest-params, wrap-iife, one-var, no-underscore-dangle, one-var-declaration-per-line, object-shorthand, no-unused-vars, no-new, comma-dangle, consistent-return, quotes, dot-notation, quote-props, prefer-arrow-callback, max-len */
 /* global Flash */
 
+import NewMergeRequestDropdown from './create_merge_request_dropdown';
+
 require('./flash');
 require('~/lib/utils/text_utility');
 require('vendor/jquery.waitforimages');
@@ -22,7 +24,11 @@ class Issue {
     }
     Issue.initMergeRequests();
     Issue.initRelatedBranches();
-    Issue.initCanCreateBranch();
+
+    const wrapperEl = document.querySelector('.create-merge-request-dropdown-wrap');
+    if (wrapperEl) {
+      new NewMergeRequestDropdown(wrapperEl);
+    }
   }
 
   static initIssueBtnEventListeners() {
@@ -103,26 +109,6 @@ class Issue {
     }).success(function(data) {
       if ('html' in data) {
         return $container.html(data.html);
-      }
-    });
-  }
-
-  static initCanCreateBranch() {
-    var $container;
-    $container = $('#new-branch');
-    // If the user doesn't have the required permissions the container isn't
-    // rendered at all.
-    if ($container.length === 0) {
-      return;
-    }
-    return $.getJSON($container.data('path')).error(function() {
-      $container.find('.unavailable').show();
-      return new Flash('Failed to check if a new branch can be created.', 'alert');
-    }).success(function(data) {
-      if (data.can_create_branch) {
-        $container.find('.available').show();
-      } else {
-        return $container.find('.unavailable').show();
       }
     });
   }
