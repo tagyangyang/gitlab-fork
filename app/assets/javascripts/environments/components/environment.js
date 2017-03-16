@@ -107,14 +107,14 @@ export default Vue.component('environment-component', {
 
       return this.service.get(scope, pageNumber)
         .then(resp => ({
-          headers: resp.headers,
-          body: resp.json(),
+          headers: resp.Headers,
+          body: resp.body,
         }))
         .then((response) => {
           this.store.storeAvailableCount(response.body.available_count);
           this.store.storeStoppedCount(response.body.stopped_count);
           this.store.storeEnvironments(response.body.environments);
-          this.store.setPagination(response.headers);
+          this.store.setPagination(response.Headers);
         })
         .then(() => {
           this.isLoading = false;

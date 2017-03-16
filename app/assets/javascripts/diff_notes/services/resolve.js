@@ -41,7 +41,7 @@ Vue.use(VueResource);
         discussion.loading = false;
 
         if (response.status === 200) {
-          const data = response.json();
+          const data = response.body;
           const resolved_by = data ? data.resolved_by : null;
 
           if (isResolved) {

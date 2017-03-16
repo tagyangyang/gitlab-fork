@@ -80,7 +80,7 @@ $(() => {
       Store.disabled = this.disabled;
       gl.boardService.all()
         .then((resp) => {
-          resp.json().forEach((board) => {
+          resp.body.forEach((board) => {
             const list = Store.addList(board);
 
             if (list.type === 'closed') {

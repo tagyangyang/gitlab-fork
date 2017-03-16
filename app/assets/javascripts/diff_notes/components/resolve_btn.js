@@ -80,7 +80,7 @@ import Vue from 'vue';
           this.loading = false;
 
           if (response.status === 200) {
-            const data = response.json();
+            const data = response.body;
             const resolved_by = data ? data.resolved_by : null;
 
             CommentsStore.update(this.discussionId, this.noteId, !this.isResolved, resolved_by);

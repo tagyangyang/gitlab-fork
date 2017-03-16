@@ -86,7 +86,7 @@ require('./empty_state');
           page: this.page,
           per: this.perPage,
         })).then((res) => {
-          const data = res.json();
+          const data = res.body;
 
           if (clearIssues) {
             this.issues = [];
