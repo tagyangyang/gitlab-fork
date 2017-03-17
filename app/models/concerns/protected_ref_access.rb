@@ -1,9 +1,9 @@
-module ProtectedBranchAccess
+module ProtectedRefAccess
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :protected_branch
-    delegate :project, to: :protected_branch
+    # belongs_to :protected_branch
+    # delegate :project, to: :protected_branch
 
     scope :master, -> { where(access_level: Gitlab::Access::MASTER) }
     scope :developer, -> { where(access_level: Gitlab::Access::DEVELOPER) }
