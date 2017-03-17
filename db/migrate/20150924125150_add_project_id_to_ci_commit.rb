@@ -1,6 +1,8 @@
 # rubocop:disable all
 class AddProjectIdToCiCommit < ActiveRecord::Migration
-  def up
+  DOWNTIME = false
+
+  def change
     add_column :ci_commits, :gl_project_id, :integer
   end
 end

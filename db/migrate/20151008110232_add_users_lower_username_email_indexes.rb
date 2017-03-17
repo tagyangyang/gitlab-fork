@@ -12,7 +12,7 @@ class AddUsersLowerUsernameEmailIndexes < ActiveRecord::Migration
   def down
     return unless Gitlab::Database.postgresql?
 
-    remove_index :users, :index_on_users_lower_username
-    remove_index :users, :index_on_users_lower_email
+    remove_index :users, name: :index_on_users_lower_username
+    remove_index :users, name: :index_on_users_lower_email
   end
 end

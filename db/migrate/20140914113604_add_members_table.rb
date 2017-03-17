@@ -2,7 +2,7 @@
 class AddMembersTable < ActiveRecord::Migration
   DOWNTIME = false
 
-  def change
+  def up
     create_table :members do |t|
       t.integer :access_level, null: false
       t.integer :source_id,    null: false
@@ -18,5 +18,9 @@ class AddMembersTable < ActiveRecord::Migration
     add_index :members, :user_id
     add_index :members, :access_level
     add_index :members, [:source_id, :source_type]
+  end
+
+  def down
+    drop_table :members
   end
 end

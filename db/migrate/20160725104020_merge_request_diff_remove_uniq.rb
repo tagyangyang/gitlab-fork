@@ -1,6 +1,3 @@
-# See http://doc.gitlab.com/ce/development/migration_style_guide.html
-# for more information on how to write migrations for GitLab.
-
 # rubocop:disable RemoveIndex
 class MergeRequestDiffRemoveUniq < ActiveRecord::Migration
   include Gitlab::Database::MigrationHelpers
@@ -25,9 +22,7 @@ class MergeRequestDiffRemoveUniq < ActiveRecord::Migration
   end
 
   def down
-    unless index_exists?(:merge_request_diffs, :merge_request_id)
-      add_concurrent_index(:merge_request_diffs, :merge_request_id, unique: true)
-    end
+    # no-op since the data would prevent the creation of a unique index
   end
 
   def constraint_exists?(name)

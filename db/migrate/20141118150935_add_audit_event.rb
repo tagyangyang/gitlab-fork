@@ -2,7 +2,7 @@
 class AddAuditEvent < ActiveRecord::Migration
   DOWNTIME = false
 
-  def change
+  def up
     create_table :audit_events do |t|
       t.integer :author_id, null: false
       t.string  :type, null: false
@@ -21,5 +21,9 @@ class AddAuditEvent < ActiveRecord::Migration
     add_index :audit_events, :author_id
     add_index :audit_events, :type
     add_index :audit_events, [:entity_id, :entity_type]
+  end
+
+  def down
+    drop_table :audit_events
   end
 end

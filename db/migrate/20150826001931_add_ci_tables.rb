@@ -1,6 +1,8 @@
 # rubocop:disable all
 class AddCiTables < ActiveRecord::Migration
-  def change
+  DOWNTIME = false
+
+  def up
     create_table "ci_application_settings", force: true do |t|
       t.boolean  "all_broken_builds"
       t.boolean  "add_pusher"
@@ -187,5 +189,22 @@ class AddCiTables < ActiveRecord::Migration
       t.datetime "created_at"
       t.datetime "updated_at"
     end
+  end
+
+  def down
+    drop_table :ci_application_settings
+    drop_table :ci_builds
+    drop_table :ci_commits
+    drop_table :ci_events
+    drop_table :ci_jobs
+    drop_table :ci_projects
+    drop_table :ci_runner_projects
+    drop_table :ci_runners
+    drop_table :ci_services
+    drop_table :ci_sessions
+    drop_table :ci_trigger_requests
+    drop_table :ci_triggers
+    drop_table :ci_variables
+    drop_table :ci_web_hooks
   end
 end

@@ -5,7 +5,13 @@ class AddIndexOnAwardEmojiUserAndName < ActiveRecord::Migration
   include Gitlab::Database::MigrationHelpers
   disable_ddl_transaction!
 
-  def change
+  DOWNTIME = false
+
+  def up
     add_concurrent_index(:award_emoji, [:user_id, :name])
+  end
+
+  def down
+    remove_index :award_emoji, [:user_id, :name]
   end
 end

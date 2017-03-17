@@ -1,6 +1,8 @@
 # rubocop:disable all
 class AddCiTags < ActiveRecord::Migration
-  def change
+  DOWNTIME = false
+
+  def up
     create_table "ci_taggings", force: true do |t|
       t.integer  "tag_id"
       t.integer  "taggable_id"
@@ -20,5 +22,10 @@ class AddCiTags < ActiveRecord::Migration
     end
 
     add_index "ci_tags", ["name"], name: "index_ci_tags_on_name", unique: true, using: :btree
+  end
+
+  def down
+    drop_table :ci_tags
+    drop_table :ci_taggings
   end
 end
