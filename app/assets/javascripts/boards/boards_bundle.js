@@ -1,5 +1,7 @@
-/* eslint-disable one-var, quote-props, comma-dangle, space-before-function-paren */
+/* eslint-disable one-var, quote-props, comma-dangle, space-before-function-paren, no-new */
+/* global Vue */
 /* global BoardService */
+/* global Flash */
 
 import Vue from 'vue';
 import VueResource from 'vue-resource';
@@ -90,7 +92,7 @@ $(() => {
           this.loading = false;
         })
         .catch(() => {
-          this.loading = false;
+          new Flash('An error occurred. Please try again.');
         });
     },
     methods: {
