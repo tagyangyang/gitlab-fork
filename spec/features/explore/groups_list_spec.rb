@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Explore Groups page', js: true, feature: true do
+describe 'Explore Groups page', :js, :feature do
   include WaitForAjax
 
   let!(:user) { create :user }
@@ -42,5 +42,25 @@ describe 'Explore Groups page', js: true, feature: true do
     expect(page).to have_content(public_group.full_name)
     expect(page).not_to have_content(private_group.full_name)
     expect(page.all('.js-groups-list-holder .content-list li').length).to eq 2
+  end
+
+  describe 'landing component' do
+    it 'should show a landing component' do
+      expect(page).to have_content('Below you will find all the groups that are public.')
+    end
+
+    it 'should be dismissable' do
+      find('.dismiss-icon').click
+
+      expect(page).not_to have_content('Below you will find all the groups that are public.')
+    end
+
+    it 'should persistently not show once dismissed' do
+      find('.dismiss-icon').click
+
+      visit explore_groups_path
+
+      expect(page).not_to have_content('Below you will find all the groups that are public.')
+    end
   end
 end

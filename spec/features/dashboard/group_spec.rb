@@ -5,9 +5,9 @@ RSpec.describe 'Dashboard Group', feature: true do
     login_as(:user)
   end
 
-  it 'creates new grpup' do
+  it 'creates new group' do
     visit dashboard_groups_path
-    click_link 'New Group'
+    click_link 'New group'
 
     fill_in 'group_path', with: 'Samurai'
     fill_in 'group_description', with: 'Tokugawa Shogunate'
