@@ -1,6 +1,6 @@
 /* global ace */
 
-import FileTemplateMediator from '../blob/template_selectors/file_template_mediator';
+import FileTemplateMediator from '../blob/file_template_mediator';
 
 export default class EditBlob {
   constructor(assetsPath, aceMode, currentAction) {
