@@ -4,10 +4,8 @@
  *  - look at how the quicklink shortcut to templates work, and how this might change that
  *  - are there cases where we need to iterate over selected dropdowns (multiple of the same type on the same page?)
  *  - Need to write unit tests for FileTemplateMediator and FileTemplateSelector, and integration tests for UX changes
- *  - Add type selector markup to view, and drive from JS
  *  - Get a better name than 'selector' -- review naming modeling throughout
  *  - Make sure type selector label gets updated when there's a pattern match
- *  - Fix the querying arguments. Make sense of it first.
  */
 
 /* eslint-disable class-methods-use-this */
@@ -65,11 +63,13 @@ export default class FileTemplateMediator {
     }
 
     if (this.currentAction === 'edit') {
+      this.typeSelector.init();
+      this.typeSelector.show();
       this.updateTemplateSelectorState($('#file_path').val());
     }
   }
 
-  reportTypeSelection(item, el, e) {
+  reportTypeSelection(item) {
     const selectedTypeSelector = this.findSelectorByKey(item.key);
     this.selectSelector(selectedTypeSelector);
   }
@@ -116,10 +116,15 @@ export default class FileTemplateMediator {
   updateTemplateSelectorState(inputString) {
     this.templateSelectors.forEach((selector) => {
       const match = selector.config.pattern.test(inputString);
-      if (!!match) {
+      if (match) {
         this.reportTypeSelection(selector.config);
+        this.updateTypeSelectorState(selector.config.name);
       }
     });
+  }
+
+  updateTypeSelectorState(name) {
+    this.typeSelector.$dropdown.find('.dropdown-toggle-text').text(name);
   }
 
   fetchFileTemplate(apiCall, query, data) {
