@@ -107,9 +107,6 @@ $(() => {
     mounted () {
       gl.issueBoards.newListDropdownInit();
     },
-    methods: {
-
-    }
   });
 
   gl.IssueBoardsModalAddBtn = new Vue({
