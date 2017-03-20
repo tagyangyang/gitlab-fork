@@ -49,20 +49,6 @@ import { installGlEmojiElement } from './behaviors/gl_emoji';
 installGlEmojiElement();
 
 // blob
-<<<<<<< 255c793671d1f250c35bb8533e65fdc663417955
-=======
-import './blob/template_selectors/blob_ci_yaml_selector';
-import './blob/template_selectors/blob_ci_yaml_selectors';
-import './blob/template_selectors/blob_dockerfile_selector';
-import './blob/template_selectors/blob_dockerfile_selectors';
-import './blob/blob_file_dropzone';
-import './blob/template_selectors/blob_gitignore_selector';
-import './blob/template_selectors/blob_gitignore_selectors';
-import './blob/template_selectors/blob_license_selector';
-import './blob/template_selectors/blob_license_selectors';
-import './blob/template_selectors/template_selector';
-import './blob/template_selectors/file_template_mediator';
->>>>>>> Get MVP for file template mediator running.
 import './blob/create_branch_dropdown';
 import './blob/target_branch_dropdown';
 
