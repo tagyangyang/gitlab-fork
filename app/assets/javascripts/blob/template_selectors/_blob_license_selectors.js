@@ -24,13 +24,13 @@ class BlobLicenseSelector extends FileTemplateSelector {
       search: {
         fields: ['name'],
       },
-      clicked: (item, query, e) => {
+      clicked: (query, el, e) => {
         const data = {
           project: this.$dropdown.data('project'),
           fullname: this.$dropdown.data('fullname'),
         };
-        // TODO: Design this to flow better
-        this.reportSelection(item, query.id, e, data);
+
+        this.reportSelection(query.id, el, e, data);
       },
       text: item => item.name,
     });

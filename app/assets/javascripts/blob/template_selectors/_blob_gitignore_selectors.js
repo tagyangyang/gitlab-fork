@@ -24,7 +24,7 @@ class BlobGitignoreSelector extends FileTemplateSelector {
       search: {
         fields: ['name'],
       },
-      clicked: (item, el, e) => this.reportSelection(item, el, e),
+      clicked: (query, el, e) => this.reportSelection(query.name, el, e),
       text: item => item.name,
     });
   }

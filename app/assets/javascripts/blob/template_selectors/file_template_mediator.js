@@ -7,7 +7,10 @@
  *  - Add type selector markup to view, and drive from JS
  *  - Get a better name than 'selector' -- review naming modeling throughout
  *  - Make sure type selector label gets updated when there's a pattern match
+ *  - Fix the querying arguments. Make sense of it first.
  */
+
+/* eslint-disable class-methods-use-this */
 
 const FileTemplateTypeSelector = require('./_template_type_selector');
 
@@ -71,6 +74,10 @@ export default class FileTemplateMediator {
     this.selectSelector(selectedTypeSelector);
   }
 
+  showTemplateTypeSelector() {
+    this.typeSelector.show();
+  }
+
   selectSelector(selectedTypeSelector) {
     this.templateSelectors.forEach((selector) => {
       if (selector.$dropdown !== null) {
@@ -81,6 +88,10 @@ export default class FileTemplateMediator {
       selectedTypeSelector.init();
     }
     selectedTypeSelector.show();
+  }
+
+  confirmTemplateOverwrite() {
+
   }
 
   reportTemplateSelection(selector, query, data) {
@@ -103,7 +114,7 @@ export default class FileTemplateMediator {
   }
 
   updateTemplateSelectorState(inputString) {
-    this.templateSelectors.forEach((selector, idx) => {
+    this.templateSelectors.forEach((selector) => {
       const match = selector.config.pattern.test(inputString);
       if (!!match) {
         this.reportTypeSelection(selector.config);
@@ -111,15 +122,15 @@ export default class FileTemplateMediator {
     });
   }
 
-  fetchFileTemplate(request, query, data) {
-    return new Promise((resolve, reject) => {
-      request(query, data, (file) => {
-        if (!!file) {
-          resolve(file);
-        } else {
-          reject();
-        }
-      });
+  fetchFileTemplate(apiCall, query, data) {
+    return new Promise((resolve) => {
+      const resolveFile = file => resolve(file);
+
+      if (!data) {
+        apiCall(query, resolveFile);
+      } else {
+        apiCall(query, data, resolveFile);
+      }
     });
   }
 
@@ -154,4 +165,3 @@ export default class FileTemplateMediator {
     });
   }
 }
-

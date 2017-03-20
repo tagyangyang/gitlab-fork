@@ -49,7 +49,7 @@ class FileTemplateSelector {
 
   reportSelection(query, el, e, data) {
     e.preventDefault();
-    return this.mediator.reportTemplateSelection(this, query.name, data);
+    return this.mediator.reportTemplateSelection(this, query, data);
   }
 }
 
