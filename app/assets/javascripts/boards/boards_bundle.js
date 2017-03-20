@@ -28,6 +28,7 @@ $(() => {
   const $boardApp = document.getElementById('board-app');
   const Store = gl.issueBoards.BoardsStore;
   const ModalStore = gl.issueBoards.ModalStore;
+  const issueBoardsContent = document.querySelector('.js-focus-mode-board');
 
   window.gl = window.gl || {};
 
@@ -103,6 +104,12 @@ $(() => {
     },
     mounted () {
       gl.issueBoards.newListDropdownInit();
+    },
+    methods: {
+      toggleFocusMode() {
+        $(this.$refs.toggleFocusModeButton).tooltip('hide');
+        issueBoardsContent.classList.toggle('is-focused');
+      }
     }
   });
 

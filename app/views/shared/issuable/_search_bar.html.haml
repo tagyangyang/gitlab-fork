@@ -101,6 +101,14 @@
                     = render partial: "shared/issuable/label_page_create"
                   = dropdown_loading
               #js-add-issues-btn.prepend-left-10
+              %a.focus-mode-button.pull-left.has-tooltip{ role: "button",
+                href: "#",
+                "aria-label" => "Toggle focus mode",
+                title: "Toggle focus mode",
+                ref: "toggleFocusModeButton",
+                "@click" => "toggleFocusMode" }
+                = icon("expand")
+                = icon("compress")
           - elsif type != :boards_modal
             = render 'shared/sort_dropdown'
 
