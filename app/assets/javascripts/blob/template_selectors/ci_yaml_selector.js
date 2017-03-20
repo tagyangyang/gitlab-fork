@@ -1,21 +1,23 @@
 /* global Api */
 
-const FileTemplateSelector = require('./_file_template_selector');
+import FileTemplateSelector from '../file_template_selector';
 
-class BlobGitignoreSelector extends FileTemplateSelector {
+export default class BlobCiYamlSelector extends FileTemplateSelector {
   constructor({ mediator }) {
     super(mediator);
     this.config = {
-      key: 'gitignore',
-      name: '.gitignore',
-      pattern: /(.gitignore)/,
-      endpoint: Api.gitignoreText,
-      dropdown: '.js-gitignore-selector',
-      wrapper: '.js-gitignore-selector-wrap',
+      key: 'gitlab-ci-yaml',
+      name: 'GitLab CI Yaml',
+      pattern: /(.gitlab-ci.yml)/,
+      endpoint: Api.gitlabCiYml,
+      dropdown: '.js-gitlab-ci-yml-selector',
+      loading: 'fa-chevron-down',
+      wrapper: '.js-gitlab-ci-yml-selector-wrap',
     };
   }
 
   initDropdown() {
+    // maybe move to super class as well
     this.$dropdown.glDropdown({
       data: this.$dropdown.data('data'),
       filterable: true,
@@ -29,5 +31,3 @@ class BlobGitignoreSelector extends FileTemplateSelector {
     });
   }
 }
-
-module.exports = BlobGitignoreSelector;

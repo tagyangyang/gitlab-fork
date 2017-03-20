@@ -8,13 +8,13 @@
     %span.editor-file-name
       - if current_action?(:edit) || current_action?(:update)
         = text_field_tag 'file_path', (params[:file_path] || @path),
-                                      class: 'form-control new-file-path'
+                                      class: 'form-control new-file-path js-file-path-name-input'
 
     - if current_action?(:new) || current_action?(:create)
       %span.editor-file-name
         \/
       = text_field_tag 'file_name', params[:file_name], placeholder: "File name",
-        required: true, class: 'form-control new-file-name'
+        required: true, class: 'form-control new-file-name js-file-path-name-input'
 
     .pull-right.file-buttons
       .template-type-selector.js-template-type-selector-wrap.hidden

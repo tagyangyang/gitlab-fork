@@ -1,8 +1,8 @@
 /* global Api */
 
-const FileTemplateSelector = require('./_file_template_selector');
+import FileTemplateSelector from '../file_template_selector';
 
-class BlobLicenseSelector extends FileTemplateSelector {
+export default class BlobLicenseSelector extends FileTemplateSelector {
   constructor({ mediator }) {
     super(mediator);
     this.config = {
@@ -36,5 +36,3 @@ class BlobLicenseSelector extends FileTemplateSelector {
     });
   }
 }
-
-module.exports = BlobLicenseSelector;

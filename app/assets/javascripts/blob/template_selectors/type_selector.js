@@ -1,27 +1,25 @@
-const FileTemplateSelector = require('./_file_template_selector');
+import FileTemplateSelector from '../file_template_selector';
 
-class TemplateTypeSelector extends FileTemplateSelector {
-  constructor({ mediator, selectors }) {
+export default class FileTemplateTypeSelector extends FileTemplateSelector {
+  constructor({ mediator, dropdownData }) {
     super(mediator);
     this.mediator = mediator;
     this.config = {
       dropdown: '.js-template-type-selector',
       wrapper: '.js-template-type-selector-wrap',
-      selectors: selectors,
+      dropdownData,
     };
   }
 
   initDropdown() {
     this.$dropdown.glDropdown({
-      data: this.config.selectors,
+      data: this.config.dropdownData,
       filterable: false,
       selectable: true,
       toggleLabel: item => item.name,
-      clicked: (item, el, e) => this.mediator.reportTypeSelection(item, el, e),
+      clicked: (item, el, e) => this.mediator.selectTemplateType(item, el, e),
       text: item => item.name,
     });
   }
 
 }
-
-module.exports = TemplateTypeSelector;

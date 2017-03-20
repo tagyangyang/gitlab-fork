@@ -1,11 +1,9 @@
 /* global Api */
 
-const FileTemplateSelector = require('./_file_template_selector');
+import FileTemplateSelector from '../file_template_selector';
 
-class BlobCiYamlSelector extends FileTemplateSelector {
-  constructor({
-    mediator
-  }) {
+export default class BlobCiYamlSelector extends FileTemplateSelector {
+  constructor({ mediator }) {
     super(mediator);
     this.config = {
       key: 'dockerfile',
@@ -32,5 +30,3 @@ class BlobCiYamlSelector extends FileTemplateSelector {
     });
   }
 }
-
-module.exports = BlobCiYamlSelector;

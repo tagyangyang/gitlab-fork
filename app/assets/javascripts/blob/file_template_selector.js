@@ -1,6 +1,6 @@
 /* global Api */
 
-class FileTemplateSelector {
+export default class FileTemplateSelector {
   constructor(mediator) {
     this.mediator = mediator;
     this.$dropdown = null;
@@ -49,8 +49,7 @@ class FileTemplateSelector {
 
   reportSelection(query, el, e, data) {
     e.preventDefault();
-    return this.mediator.reportTemplateSelection(this, query, data);
+    return this.mediator.selectTemplateFile(this, query, data);
   }
 }
 
-module.exports = FileTemplateSelector;
