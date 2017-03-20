@@ -4,6 +4,8 @@
 
 import FilteredSearchBoards from './filtered_search_boards';
 import eventHub from './eventhub';
+import collapseIcon from './icons/fullscreen_collapse.svg';
+import expandIcon from './icons/fullscreen_expand.svg';
 
 window.Vue = require('vue');
 window.Vue.use(require('vue-resource'));
@@ -106,10 +108,7 @@ $(() => {
       gl.issueBoards.newListDropdownInit();
     },
     methods: {
-      toggleFocusMode() {
-        $(this.$refs.toggleFocusModeButton).tooltip('hide');
-        issueBoardsContent.classList.toggle('is-focused');
-      }
+
     }
   });
 
@@ -119,6 +118,7 @@ $(() => {
     data: {
       modal: ModalStore.store,
       store: Store.state,
+      isFullscreen: false,
     },
     watch: {
       disabled() {
@@ -139,7 +139,7 @@ $(() => {
     },
     methods: {
       updateTooltip() {
-        const $tooltip = $(this.$el);
+        const $tooltip = $(this.$refs.addIssuesButton);
 
         this.$nextTick(() => {
           if (this.disabled) {
@@ -154,21 +154,45 @@ $(() => {
           this.toggleModal(true);
         }
       },
+      toggleFocusMode() {
+        $(this.$refs.toggleFocusModeButton).tooltip('hide');
+        issueBoardsContent.classList.toggle('is-focused');
+
+        this.isFullscreen = !this.isFullscreen;
+      },
     },
     mounted() {
       this.updateTooltip();
     },
     template: `
-      <button
-        class="btn btn-create pull-right prepend-left-10"
-        type="button"
-        data-placement="bottom"
-        :class="{ 'disabled': disabled }"
-        :title="tooltipTitle"
-        :aria-disabled="disabled"
-        @click="openModal">
-        Add issues
-      </button>
+      <div class="board-extra-actions">
+        <button
+          class="btn btn-create prepend-left-10"
+          type="button"
+          data-placement="bottom"
+          ref="addIssuesButton"
+          :class="{ 'disabled': disabled }"
+          :title="tooltipTitle"
+          :aria-disabled="disabled"
+          @click="openModal">
+          Add issues
+        </button>
+        <a
+          href="#"
+          class="btn btn-default has-tooltip prepend-left-10"
+          role="button"
+          aria-label="Toggle focus mode"
+          title="Toggle focus mode"
+          ref="toggleFocusModeButton"
+          @click="toggleFocusMode">
+          <span v-show="isFullscreen">
+            ${collapseIcon}
+          </span>
+          <span v-show="!isFullscreen">
+            ${expandIcon}
+          </span>
+        </a>
+      </div>
     `,
   });
 });

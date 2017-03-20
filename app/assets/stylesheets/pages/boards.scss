@@ -51,24 +51,9 @@
   }
 }
 
-.focus-mode-button {
-  margin-right: 10px;
-  color: $gl-text-color-secondary;
-  background: none;
-  border: 0;
-  margin-top: 7px;
-  width: 28px;
-  text-align: center;
-
-  &:hover,
-  &:active {
-    outline: none;
-    color: $filter-value-text-color;
-  }
-
-  .fa-compress {
-    display: none;
-  }
+.board-extra-actions {
+  font-size: 0;
+  white-space: nowrap;
 }
 
 @media (min-width: $screen-sm-min) {
@@ -82,23 +67,6 @@
 
     .boards-list {
       height: calc(100vh - 50px);
-    }
-
-    .focus-mode-button {
-      margin-top: 9px;
-
-      &:hover,
-      &:focus {
-        text-decoration: none;
-      }
-
-      .fa-compress {
-        display: block;
-      }
-
-      .fa-expand {
-        display: none;
-      }
     }
   }
 }
