@@ -1,37 +1,36 @@
-/* eslint-disable func-names, space-before-function-paren, wrap-iife, no-undef, quotes, no-var, padded-blocks, max-len */
-(function() {
-  this.Activities = (function() {
-    function Activities() {
-      Pager.init(20, true, false, this.updateTooltips);
-      $(".event-filter-link").on("click", (function(_this) {
-        return function(event) {
-          event.preventDefault();
-          _this.toggleFilter($(event.currentTarget));
-          return _this.reloadActivities();
-        };
-      })(this));
-    }
+/* eslint-disable no-param-reassign, class-methods-use-this */
+/* global Pager */
+/* global Cookies */
 
-    Activities.prototype.updateTooltips = function() {
-      gl.utils.localTimeAgo($('.js-timeago', '.content_list'));
-    };
+class Activities {
+  constructor() {
+    Pager.init(20, true, false, this.updateTooltips);
+    $('.event-filter-link').on('click', (e) => {
+      e.preventDefault();
+      this.toggleFilter(e.currentTarget);
+      this.reloadActivities();
+    });
+  }
 
-    Activities.prototype.reloadActivities = function() {
-      $(".content_list").html('');
-      Pager.init(20, true, false, this.updateTooltips);
-    };
+  updateTooltips() {
+    gl.utils.localTimeAgo($('.js-timeago', '.content_list'));
+  }
 
-    Activities.prototype.toggleFilter = function(sender) {
-      var filter = sender.attr("id").split("_")[0];
+  reloadActivities() {
+    $('.content_list').html('');
+    Pager.init(20, true, false, this.updateTooltips);
+  }
 
-      $('.event-filter .active').removeClass("active");
-      Cookies.set("event_filter", filter);
+  toggleFilter(sender) {
+    const $sender = $(sender);
+    const filter = $sender.attr('id').split('_')[0];
 
-      sender.closest('li').toggleClass("active");
-    };
+    $('.event-filter .active').removeClass('active');
+    Cookies.set('event_filter', filter);
 
-    return Activities;
+    $sender.closest('li').toggleClass('active');
+  }
+}
 
-  })();
-
-}).call(this);
+window.gl = window.gl || {};
+window.gl.Activities = Activities;

@@ -18,6 +18,7 @@
 - [Frontend guidelines](frontend.md)
 - [SQL guidelines](sql.md) for working with SQL queries
 - [Sidekiq guidelines](sidekiq_style_guide.md) for working with Sidekiq workers
+- [`Gemfile` guidelines](gemfile.md)
 
 ## Process
 
@@ -38,6 +39,7 @@
 - [Rake tasks](rake_tasks.md) for development
 - [Shell commands](shell_commands.md) in the GitLab codebase
 - [Sidekiq debugging](sidekiq_debugging.md)
+- [Object state models](object_state_models.md)
 
 ## Databases
 

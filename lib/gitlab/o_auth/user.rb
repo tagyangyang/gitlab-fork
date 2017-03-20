@@ -5,7 +5,7 @@
 #
 module Gitlab
   module OAuth
-    class SignupDisabledError < StandardError; end
+    SignupDisabledError = Class.new(StandardError)
 
     class User
       attr_accessor :auth_hash, :gl_user
@@ -29,17 +29,16 @@ module Gitlab
       def save(provider = 'OAuth')
         unauthorized_to_create unless gl_user
 
-        if needs_blocking?
-          gl_user.save!
-          gl_user.block
-        else
-          gl_user.save!
-        end
+        block_after_save = needs_blocking?
+
+        gl_user.save!
+
+        gl_user.block if block_after_save
 
         log.info "(#{provider}) saving user #{auth_hash.email} from login with extern_uid => #{auth_hash.uid}"
         gl_user
       rescue ActiveRecord::RecordInvalid => e
-        log.info "(#{provider}) Error saving user: #{gl_user.errors.full_messages}"
+        log.info "(#{provider}) Error saving user #{auth_hash.uid} (#{auth_hash.email}): #{gl_user.errors.full_messages}"
         return self, e.record.errors
       end
 

@@ -119,7 +119,7 @@ module Gitlab
       step("Reseting to latest master", %w[git reset --hard origin/master])
 
       step("Checking if #{patch_path} applies cleanly to EE/master")
-      output, status = Gitlab::Popen.popen(%W[git apply --check #{patch_path}])
+      output, status = Gitlab::Popen.popen(%W[git apply --check --3way #{patch_path}])
 
       unless status.zero?
         failed_files = output.lines.reduce([]) do |memo, line|
@@ -149,7 +149,7 @@ module Gitlab
     end
 
     def ce_patch_name
-      @ce_patch_name ||= "#{ce_branch}.patch"
+      @ce_patch_name ||= patch_name_from_branch(ce_branch)
     end
 
     def ce_patch_full_path
@@ -161,11 +161,15 @@ module Gitlab
     end
 
     def ee_patch_name
-      @ee_patch_name ||= "#{ee_branch}.patch"
+      @ee_patch_name ||= patch_name_from_branch(ee_branch)
     end
 
     def ee_patch_full_path
       @ee_patch_full_path ||= patches_dir.join(ee_patch_name)
+    end
+
+    def patch_name_from_branch(branch_name)
+      branch_name.parameterize << '.patch'
     end
 
     def step(desc, cmd = nil)

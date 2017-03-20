@@ -18,7 +18,7 @@ class ProjectFeature < ActiveRecord::Base
   PRIVATE  = 10
   ENABLED  = 20
 
-  FEATURES = %i(issues merge_requests wiki snippets builds repository)
+  FEATURES = %i(issues merge_requests wiki snippets builds repository).freeze
 
   class << self
     def access_level_attribute(feature)
@@ -58,6 +58,10 @@ class ProjectFeature < ActiveRecord::Base
 
   def merge_requests_enabled?
     merge_requests_access_level > DISABLED
+  end
+
+  def issues_enabled?
+    issues_access_level > DISABLED
   end
 
   private

@@ -8,8 +8,8 @@ header {
 
   &.navbar-empty {
     height: $header-height;
-    background: #fff;
-    border-bottom: 1px solid $btn-gray-hover;
+    background: $white-light;
+    border-bottom: 1px solid $white-normal;
 
     .center-logo {
       margin: 8px 0;
@@ -27,7 +27,7 @@ header {
     z-index: 100;
     margin-bottom: 0;
     height: $header-height;
-    background-color: $background-color;
+    background-color: $gray-light;
     border: none;
     border-bottom: 1px solid $border-color;
 
@@ -45,7 +45,7 @@ header {
       padding: 0;
 
       .nav > li > a {
-        color: $gl-icon-color;
+        color: $gl-text-color-secondary;
         font-size: 18px;
         padding: 0;
         margin: ($header-height - 28) / 2 0;
@@ -57,13 +57,21 @@ header {
 
         &.header-user-dropdown-toggle {
           margin-left: 14px;
+
+          &:hover,
+          &:focus,
+          &:active {
+            .header-user-avatar {
+              border-color: rgba($avatar-border, .2);
+            }
+          }
         }
 
         &:hover,
         &:focus,
         &:active {
-          background-color: $background-color;
-          color: darken($gl-icon-color, 30%);
+          background-color: $gray-light;
+          color: $gl-text-color;
 
           .todos-pending-count {
             background: darken($todo-alert-blue, 10%);
@@ -71,12 +79,12 @@ header {
         }
 
         .fa-caret-down {
-          font-size: 15px;
+          font-size: 14px;
         }
       }
 
       .navbar-toggle {
-        color: #666;
+        color: $nav-toggle-gray;
         margin: 6px 0;
         border-radius: 0;
         position: absolute;
@@ -84,27 +92,45 @@ header {
         padding: 6px 10px;
 
         &:hover {
-          background-color: $btn-gray-hover;
+          background-color: $white-normal;
         }
 
         &.active {
-          color: $gl-icon-color;
+          color: $gl-text-color-secondary;
         }
       }
     }
+  }
 
-    .side-nav-toggle {
-      position: absolute;
-      left: -10px;
-      margin: 7px 0;
-      font-size: 18px;
-      padding: 6px 10px;
-      border: none;
-      background-color: $background-color;
+  .global-dropdown {
+    position: absolute;
+    left: -10px;
 
-      &:hover {
-        background-color: $btn-gray-hover;
+    .badge {
+      font-size: 11px;
+    }
+
+    li {
+      &.active a {
+        font-weight: bold;
       }
+    }
+  }
+
+  .global-dropdown-toggle {
+    margin: 7px 0;
+    font-size: 18px;
+    padding: 6px 10px;
+    border: none;
+    background-color: $gray-light;
+
+    &:hover {
+      background-color: $white-normal;
+    }
+
+    &:focus {
+      outline: none;
+      background-color: $white-normal;
     }
   }
 
@@ -122,32 +148,31 @@ header {
     }
 
     .header-logo {
-      position: absolute;
-      left: 50%;
-      top: 7px;
+      display: inline-block;
+      margin: 0 7px 0 2px;
+      position: relative;
+      top: 10px;
       transition-duration: .3s;
-      z-index: 999;
-
-      #logo {
-        position: relative;
-        left: -50%;
-      }
 
       svg,
       img {
-        height: 36px;
+        height: 28px;
       }
 
       &:hover {
         cursor: pointer;
       }
+    }
 
-      @media (max-width: $screen-xs-max) {
-        right: 20px;
-        left: auto;
+    .group-name-toggle {
+      margin: 0 5px;
+      vertical-align: sub;
+    }
 
-        #logo {
-          left: auto;
+    .group-title {
+      &.is-hidden {
+        .hidable:not(:last-of-type) {
+          display: none;
         }
       }
     }
@@ -156,7 +181,7 @@ header {
       position: relative;
       padding-right: 20px;
       margin: 0;
-      font-size: 19px;
+      font-size: 18px;
       max-width: 385px;
       display: inline-block;
       line-height: $header-height;
@@ -167,6 +192,10 @@ header {
       vertical-align: top;
       white-space: nowrap;
 
+      &.initializing {
+        display: none;
+      }
+
       @media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
         max-width: 300px;
       }
@@ -175,11 +204,20 @@ header {
         max-width: 190px;
       }
 
+      @media (min-width: $screen-sm-min) and (max-width: $screen-md-max) {
+        max-width: 428px;
+      }
+
+      @media (min-width: $screen-lg-min) {
+        max-width: 685px;
+      }
+
       a {
         color: $gl-text-color;
 
         &:hover {
           text-decoration: underline;
+          color: $gl-header-nav-hover-color;
         }
       }
 
@@ -198,7 +236,7 @@ header {
         cursor: pointer;
 
         &:hover {
-          color: darken($color: $gl-text-color, $amount: 30%);
+          color: $gl-header-nav-hover-color;
         }
       }
 
@@ -211,6 +249,10 @@ header {
     .navbar-collapse {
       float: right;
       border-top: none;
+
+      @media (min-width: $screen-md-min) {
+        padding: 0;
+      }
 
       @media (max-width: $screen-xs-max) {
         float: none;
@@ -228,7 +270,7 @@ header {
 }
 
 .page-sidebar-pinned.right-sidebar-expanded {
-  @media (max-width: $screen-lg-min) {
+  @media (max-width: $screen-md-max) {
     .header-content .title {
       width: 300px;
     }
@@ -240,29 +282,39 @@ header {
     font-size: 18px;
 
     .navbar-nav {
+      display: table;
+      table-layout: fixed;
+      width: 100%;
       margin: 0;
-      float: none !important;
-
-      .visible-xs,
-      .visible-sm {
-        display: table-cell !important;
-      }
+      text-align: right;
     }
 
     .navbar-collapse {
       padding-left: 5px;
 
-      .nav > li {
-        display: table-cell;
-        width: 1%;
+      .nav > li:not(.hidden-xs) {
+        display: table-cell!important;
+        width: 25%;
+
+        a {
+          margin-right: 8px;
+        }
       }
     }
+  }
+
+  .header-user-dropdown-toggle {
+    text-align: center;
+  }
+
+  .header-user-avatar {
+    float: none;
   }
 }
 
 .header-user {
   .dropdown-menu-nav {
-    width: 140px;
+    min-width: 140px;
     margin-top: -5px;
   }
 }
@@ -271,4 +323,5 @@ header {
   float: left;
   margin-right: 5px;
   border-radius: 50%;
+  border: 1px solid $avatar-border;
 }

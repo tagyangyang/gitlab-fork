@@ -3,6 +3,20 @@ require 'spec_helper'
 describe Gitlab::Ci::Config::Entry::Job do
   let(:entry) { described_class.new(config, name: :rspec) }
 
+  describe '.nodes' do
+    context 'when filtering all the entry/node names' do
+      subject { described_class.nodes.keys }
+
+      let(:result) do
+        %i[before_script script stage type after_script cache
+           image services only except variables artifacts
+           environment coverage]
+      end
+
+      it { is_expected.to match_array result }
+    end
+  end
+
   describe 'validations' do
     before { entry.compose! }
 
@@ -19,8 +33,7 @@ describe Gitlab::Ci::Config::Entry::Job do
         let(:entry) { described_class.new(config, name: ''.to_sym) }
 
         it 'reports error' do
-          expect(entry.errors)
-            .to include "job name can't be blank"
+          expect(entry.errors).to include "job name can't be blank"
         end
       end
     end
@@ -56,6 +69,15 @@ describe Gitlab::Ci::Config::Entry::Job do
           end
         end
       end
+
+      context 'when script is not provided' do
+        let(:config) { { stage: 'test' } }
+
+        it 'returns error about missing script entry' do
+          expect(entry).not_to be_valid
+          expect(entry.errors).to include "job script can't be blank"
+        end
+      end
     end
   end
 
@@ -78,7 +100,7 @@ describe Gitlab::Ci::Config::Entry::Job do
       before { entry.compose!(deps) }
 
       let(:config) do
-        { image: 'some_image', cache: { key: 'test' } }
+        { script: 'rspec', image: 'some_image', cache: { key: 'test' } }
       end
 
       it 'overrides global config' do
@@ -122,6 +144,7 @@ describe Gitlab::Ci::Config::Entry::Job do
                    script: %w[rspec],
                    commands: "ls\npwd\nrspec",
                    stage: 'test',
+                   ignore: false,
                    after_script: %w[cleanup])
         end
       end
@@ -134,6 +157,84 @@ describe Gitlab::Ci::Config::Entry::Job do
 
       it 'returns a string of commands concatenated with new line character' do
         expect(entry.commands).to eq "ls\npwd\nrspec"
+      end
+    end
+  end
+
+  describe '#manual_action?' do
+    context 'when job is a manual action' do
+      let(:config) { { script: 'deploy', when: 'manual' } }
+
+      it 'is a manual action' do
+        expect(entry).to be_manual_action
+      end
+    end
+
+    context 'when job is not a manual action' do
+      let(:config) { { script: 'deploy' } }
+
+      it 'is not a manual action' do
+        expect(entry).not_to be_manual_action
+      end
+    end
+  end
+
+  describe '#ignored?' do
+    context 'when job is a manual action' do
+      context 'when it is not specified if job is allowed to fail' do
+        let(:config) do
+          { script: 'deploy', when: 'manual' }
+        end
+
+        it 'is an ignored job' do
+          expect(entry).to be_ignored
+        end
+      end
+
+      context 'when job is allowed to fail' do
+        let(:config) do
+          { script: 'deploy', when: 'manual', allow_failure: true }
+        end
+
+        it 'is an ignored job' do
+          expect(entry).to be_ignored
+        end
+      end
+
+      context 'when job is not allowed to fail' do
+        let(:config) do
+          { script: 'deploy', when: 'manual', allow_failure: false }
+        end
+
+        it 'is not an ignored job' do
+          expect(entry).not_to be_ignored
+        end
+      end
+    end
+
+    context 'when job is not a manual action' do
+      context 'when it is not specified if job is allowed to fail' do
+        let(:config) { { script: 'deploy' } }
+
+        it 'is not an ignored job' do
+          expect(entry).not_to be_ignored
+        end
+      end
+
+      context 'when job is allowed to fail' do
+        let(:config) { { script: 'deploy', allow_failure: true } }
+
+        it 'is an ignored job' do
+          expect(entry).to be_ignored
+        end
+      end
+
+      context 'when job is not allowed to fail' do
+        let(:config) { { script: 'deploy', allow_failure: false } }
+
+        it 'is not an ignored job' do
+          expect(entry).not_to be_ignored
+        end
       end
     end
   end

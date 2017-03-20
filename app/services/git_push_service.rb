@@ -3,6 +3,9 @@ class GitPushService < BaseService
   include Gitlab::CurrentSettings
   include Gitlab::Access
 
+  # The N most recent commits to process in a single push payload.
+  PROCESS_COMMIT_LIMIT = 100
+
   # This method will be called after each git update
   # and only if the provided user and project are present in GitLab.
   #
@@ -18,7 +21,7 @@ class GitPushService < BaseService
   #
   def execute
     @project.repository.after_create if @project.empty_repo?
-    @project.repository.after_push_commit(branch_name, params[:newrev])
+    @project.repository.after_push_commit(branch_name)
 
     if push_remove_branch?
       @project.repository.after_remove_branch
@@ -51,10 +54,40 @@ class GitPushService < BaseService
 
     execute_related_hooks
     perform_housekeeping
+
+    update_caches
   end
 
   def update_gitattributes
     @project.repository.copy_gitattributes(params[:ref])
+  end
+
+  def update_caches
+    if is_default_branch?
+      paths = Set.new
+
+      @push_commits.each do |commit|
+        commit.raw_diffs(deltas_only: true).each do |diff|
+          paths << diff.new_path
+        end
+      end
+
+      types = Gitlab::FileDetector.types_in_paths(paths.to_a)
+    else
+      types = []
+    end
+
+    ProjectCacheWorker.perform_async(@project.id, types, [:commit_count, :repository_size])
+  end
+
+  # Schedules processing of commit messages.
+  def process_commit_messages
+    default = is_default_branch?
+
+    push_commits.last(PROCESS_COMMIT_LIMIT).each do |commit|
+      ProcessCommitWorker.
+        perform_async(project.id, current_user.id, commit.to_hash, default)
+    end
   end
 
   protected
@@ -66,11 +99,12 @@ class GitPushService < BaseService
     UpdateMergeRequestsWorker
       .perform_async(@project.id, current_user.id, params[:oldrev], params[:newrev], params[:ref])
 
+    SystemHookPushWorker.perform_async(build_push_data.dup, :push_hooks)
+
     EventCreateService.new.push(@project, current_user, build_push_data)
     @project.execute_hooks(build_push_data.dup, :push_hooks)
     @project.execute_services(build_push_data.dup, :push_hooks)
     Ci::CreatePipelineService.new(@project, current_user, build_push_data).execute
-    ProjectCacheWorker.perform_async(@project.id)
 
     if push_remove_branch?
       AfterBranchDeleteService
@@ -106,17 +140,6 @@ class GitPushService < BaseService
       }
 
       ProtectedBranches::CreateService.new(@project, current_user, params).execute
-    end
-  end
-
-  # Extract any GFM references from the pushed commit messages. If the configured issue-closing regex is matched,
-  # close the referenced Issue. Create cross-reference Notes corresponding to any other referenced Mentionables.
-  def process_commit_messages
-    default = is_default_branch?
-
-    @push_commits.each do |commit|
-      ProcessCommitWorker.
-        perform_async(project.id, current_user.id, commit.id, default)
     end
   end
 

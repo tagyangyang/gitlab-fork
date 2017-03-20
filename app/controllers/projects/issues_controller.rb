@@ -23,11 +23,29 @@ class Projects::IssuesController < Projects::ApplicationController
   respond_to :html
 
   def index
-    @issues = issues_collection
-    @issues = @issues.page(params[:page])
+    @collection_type    = "Issue"
+    @issues             = issues_collection
+    @issues             = @issues.page(params[:page])
+    @issuable_meta_data = issuable_meta_data(@issues, @collection_type)
+
+    if @issues.out_of_range? && @issues.total_pages != 0
+      return redirect_to url_for(params.merge(page: @issues.total_pages))
+    end
 
     if params[:label_name].present?
       @labels = LabelsFinder.new(current_user, project_id: @project.id, title: params[:label_name]).execute
+    end
+
+    @users = []
+
+    if params[:assignee_id].present?
+      assignee = User.find_by_id(params[:assignee_id])
+      @users.push(assignee) if assignee
+    end
+
+    if params[:author_id].present?
+      author = User.find_by_id(params[:author_id])
+      @users.push(author) if author
     end
 
     respond_to do |format|
@@ -46,8 +64,16 @@ class Projects::IssuesController < Projects::ApplicationController
     params[:issue] ||= ActionController::Parameters.new(
       assignee_id: ""
     )
+    build_params = issue_params.merge(
+      merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
+      discussion_to_resolve: params[:discussion_to_resolve]
+    )
+    service = Issues::BuildService.new(project, current_user, build_params)
 
-    @issue = @noteable = @project.issues.new(issue_params)
+    @issue = @noteable = service.execute
+    @merge_request_to_resolve_discussions_of = service.merge_request_to_resolve_discussions_of
+    @discussion_to_resolve = service.discussions_to_resolve.first if params[:discussion_to_resolve]
+
     respond_with(@issue)
   end
 
@@ -69,21 +95,31 @@ class Projects::IssuesController < Projects::ApplicationController
     respond_to do |format|
       format.html
       format.json do
-        render json: @issue.to_json(include: [:milestone, :labels])
+        render json: IssueSerializer.new.represent(@issue)
       end
     end
   end
 
   def create
-    @issue = Issues::CreateService.new(project, current_user, issue_params.merge(request: request)).execute
+    create_params = issue_params.merge(spammable_params).merge(
+      merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
+      discussion_to_resolve: params[:discussion_to_resolve]
+    )
+
+    service = Issues::CreateService.new(project, current_user, create_params)
+    @issue = service.execute
+
+    if service.discussions_to_resolve.count(&:resolved?) > 0
+      flash[:notice] = if service.discussion_to_resolve_id
+                         "Resolved 1 discussion."
+                       else
+                         "Resolved all discussions."
+                       end
+    end
 
     respond_to do |format|
       format.html do
-        if @issue.valid?
-          redirect_to issue_path(@issue)
-        else
-          render :new
-        end
+        recaptcha_check_with_fallback { render :new }
       end
       format.js do
         @link = @issue.attachment.url.to_js
@@ -92,7 +128,9 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def update
-    @issue = Issues::UpdateService.new(project, current_user, issue_params).execute(issue)
+    update_params = issue_params.merge(spammable_params)
+
+    @issue = Issues::UpdateService.new(project, current_user, update_params).execute(issue)
 
     if params[:move_to_project_id].to_i > 0
       new_project = Project.find(params[:move_to_project_id])
@@ -104,11 +142,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
     respond_to do |format|
       format.html do
-        if @issue.valid?
-          redirect_to issue_path(@issue)
-        else
-          render :edit
-        end
+        recaptcha_check_with_fallback { render :edit }
       end
 
       format.json do
@@ -117,8 +151,7 @@ class Projects::IssuesController < Projects::ApplicationController
     end
 
   rescue ActiveRecord::StaleObjectError
-    @conflict = true
-    render :edit
+    render_conflict_response
   end
 
   def referenced_merge_requests

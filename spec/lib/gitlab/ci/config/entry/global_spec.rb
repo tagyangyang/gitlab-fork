@@ -4,24 +4,29 @@ describe Gitlab::Ci::Config::Entry::Global do
   let(:global) { described_class.new(hash) }
 
   describe '.nodes' do
-    it 'can contain global config keys' do
-      expect(described_class.nodes).to include :before_script
+    it 'returns a hash' do
+      expect(described_class.nodes).to be_a(Hash)
     end
 
-    it 'returns a hash' do
-      expect(described_class.nodes).to be_a Hash
+    context 'when filtering all the entry/node names' do
+      it 'contains the expected node names' do
+        expect(described_class.nodes.keys)
+          .to match_array(%i[before_script image services
+                             after_script variables stages
+                             types cache])
+      end
     end
   end
 
-  context 'when hash is valid' do
+  context 'when configuration is valid' do
     context 'when some entries defined' do
       let(:hash) do
-        { before_script: ['ls', 'pwd'],
+        { before_script: %w(ls pwd),
           image: 'ruby:2.2',
           services: ['postgres:9.1', 'mysql:5.5'],
           variables: { VAR: 'value' },
           after_script: ['make clean'],
-          stages: ['build', 'pages'],
+          stages: %w(build pages),
           cache: { key: 'k', untracked: true, paths: ['public/'] },
           rspec: { script: %w[rspec ls] },
           spinach: { before_script: [], variables: {}, script: 'spinach' } }
@@ -60,9 +65,9 @@ describe Gitlab::Ci::Config::Entry::Global do
       end
 
       context 'when not composed' do
-        describe '#before_script' do
+        describe '#before_script_value' do
           it 'returns nil' do
-            expect(global.before_script).to be nil
+            expect(global.before_script_value).to be nil
           end
         end
 
@@ -82,74 +87,75 @@ describe Gitlab::Ci::Config::Entry::Global do
           end
         end
 
-        describe '#before_script' do
+        describe '#before_script_value' do
           it 'returns correct script' do
-            expect(global.before_script).to eq ['ls', 'pwd']
+            expect(global.before_script_value).to eq %w(ls pwd)
           end
         end
 
-        describe '#image' do
+        describe '#image_value' do
           it 'returns valid image' do
-            expect(global.image).to eq 'ruby:2.2'
+            expect(global.image_value).to eq 'ruby:2.2'
           end
         end
 
-        describe '#services' do
+        describe '#services_value' do
           it 'returns array of services' do
-            expect(global.services).to eq ['postgres:9.1', 'mysql:5.5']
+            expect(global.services_value).to eq ['postgres:9.1', 'mysql:5.5']
           end
         end
 
-        describe '#after_script' do
+        describe '#after_script_value' do
           it 'returns after script' do
-            expect(global.after_script).to eq ['make clean']
+            expect(global.after_script_value).to eq ['make clean']
           end
         end
 
-        describe '#variables' do
+        describe '#variables_value' do
           it 'returns variables' do
-            expect(global.variables).to eq(VAR: 'value')
+            expect(global.variables_value).to eq(VAR: 'value')
           end
         end
 
-        describe '#stages' do
+        describe '#stages_value' do
           context 'when stages key defined' do
             it 'returns array of stages' do
-              expect(global.stages).to eq %w[build pages]
+              expect(global.stages_value).to eq %w[build pages]
             end
           end
 
           context 'when deprecated types key defined' do
             let(:hash) do
-              { types: ['test', 'deploy'],
+              { types: %w(test deploy),
                 rspec: { script: 'rspec' } }
             end
 
             it 'returns array of types as stages' do
-              expect(global.stages).to eq %w[test deploy]
+              expect(global.stages_value).to eq %w[test deploy]
             end
           end
         end
 
-        describe '#cache' do
+        describe '#cache_value' do
           it 'returns cache configuration' do
-            expect(global.cache)
+            expect(global.cache_value)
               .to eq(key: 'k', untracked: true, paths: ['public/'])
           end
         end
 
-        describe '#jobs' do
+        describe '#jobs_value' do
           it 'returns jobs configuration' do
-            expect(global.jobs).to eq(
+            expect(global.jobs_value).to eq(
               rspec: { name: :rspec,
                        script: %w[rspec ls],
-                       before_script: ['ls', 'pwd'],
+                       before_script: %w(ls pwd),
                        commands: "ls\npwd\nrspec\nls",
                        image: 'ruby:2.2',
                        services: ['postgres:9.1', 'mysql:5.5'],
                        stage: 'test',
                        cache: { key: 'k', untracked: true, paths: ['public/'] },
                        variables: { VAR: 'value' },
+                       ignore: false,
                        after_script: ['make clean'] },
               spinach: { name: :spinach,
                          before_script: [],
@@ -160,6 +166,7 @@ describe Gitlab::Ci::Config::Entry::Global do
                          stage: 'test',
                          cache: { key: 'k', untracked: true, paths: ['public/'] },
                          variables: {},
+                         ignore: false,
                          after_script: ['make clean'] },
             )
           end
@@ -181,25 +188,25 @@ describe Gitlab::Ci::Config::Entry::Global do
 
         it 'contains unspecified nodes' do
           expect(global.descendants.first)
-            .to be_an_instance_of Gitlab::Ci::Config::Entry::Unspecified
+            .not_to be_specified
         end
       end
 
-      describe '#variables' do
+      describe '#variables_value' do
         it 'returns default value for variables' do
-          expect(global.variables).to eq({})
+          expect(global.variables_value).to eq({})
         end
       end
 
-      describe '#stages' do
+      describe '#stages_value' do
         it 'returns an array of default stages' do
-          expect(global.stages).to eq %w[build test deploy]
+          expect(global.stages_value).to eq %w[build test deploy]
         end
       end
 
-      describe '#cache' do
+      describe '#cache_value' do
         it 'returns correct cache definition' do
-          expect(global.cache).to eq(key: 'a')
+          expect(global.cache_value).to eq(key: 'a')
         end
       end
     end
@@ -217,37 +224,52 @@ describe Gitlab::Ci::Config::Entry::Global do
         { variables: nil, rspec: { script: 'rspec' } }
       end
 
-      describe '#variables' do
+      describe '#variables_value' do
         it 'undefined entry returns a default value' do
-          expect(global.variables).to eq({})
+          expect(global.variables_value).to eq({})
         end
       end
     end
   end
 
-  context 'when hash is not valid' do
+  context 'when configuration is not valid' do
     before { global.compose! }
 
-    let(:hash) do
-      { before_script: 'ls' }
-    end
+    context 'when before script is not an array' do
+      let(:hash) do
+        { before_script: 'ls' }
+      end
 
-    describe '#valid?' do
-      it 'is not valid' do
-        expect(global).not_to be_valid
+      describe '#valid?' do
+        it 'is not valid' do
+          expect(global).not_to be_valid
+        end
+      end
+
+      describe '#errors' do
+        it 'reports errors from child nodes' do
+          expect(global.errors)
+            .to include 'before_script config should be an array of strings'
+        end
+      end
+
+      describe '#before_script_value' do
+        it 'returns nil' do
+          expect(global.before_script_value).to be_nil
+        end
       end
     end
 
-    describe '#errors' do
-      it 'reports errors from child nodes' do
-        expect(global.errors)
-          .to include 'before_script config should be an array of strings'
+    context 'when job does not have commands' do
+      let(:hash) do
+        { before_script: ['echo 123'], rspec: { stage: 'test' } }
       end
-    end
 
-    describe '#before_script' do
-      it 'returns nil' do
-        expect(global.before_script).to be_nil
+      describe '#errors' do
+        it 'reports errors about missing script' do
+          expect(global.errors)
+            .to include "jobs:rspec script can't be blank"
+        end
       end
     end
   end
@@ -281,7 +303,7 @@ describe Gitlab::Ci::Config::Entry::Global do
       { cache: { key: 'a' }, rspec: { script: 'ls' } }
     end
 
-    context 'when node exists' do
+    context 'when entry exists' do
       it 'returns correct entry' do
         expect(global[:cache])
           .to be_an_instance_of Gitlab::Ci::Config::Entry::Cache
@@ -289,7 +311,7 @@ describe Gitlab::Ci::Config::Entry::Global do
       end
     end
 
-    context 'when node does not exist' do
+    context 'when entry does not exist' do
       it 'always return unspecified node' do
         expect(global[:some][:unknown][:node])
           .not_to be_specified

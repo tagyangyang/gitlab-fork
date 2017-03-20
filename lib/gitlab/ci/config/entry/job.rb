@@ -11,14 +11,12 @@ module Gitlab
 
           ALLOWED_KEYS = %i[tags script only except type image services allow_failure
                             type stage when artifacts cache dependencies before_script
-                            after_script variables environment]
-
-          attributes :tags, :allow_failure, :when, :dependencies
+                            after_script variables environment coverage].freeze
 
           validations do
             validates :config, allowed_keys: ALLOWED_KEYS
-
             validates :config, presence: true
+            validates :script, presence: true
             validates :name, presence: true
             validates :name, type: Symbol
 
@@ -73,9 +71,14 @@ module Gitlab
           entry :environment, Entry::Environment,
                description: 'Environment configuration for this job.'
 
+          entry :coverage, Entry::Coverage,
+               description: 'Coverage configuration for this job.'
+
           helpers :before_script, :script, :stage, :type, :after_script,
                   :cache, :image, :services, :only, :except, :variables,
-                  :artifacts, :commands, :environment
+                  :artifacts, :commands, :environment, :coverage
+
+          attributes :script, :tags, :allow_failure, :when, :dependencies
 
           def compose!(deps = nil)
             super do
@@ -101,6 +104,14 @@ module Gitlab
             (before_script_value.to_a + script_value.to_a).join("\n")
           end
 
+          def manual_action?
+            self.when == 'manual'
+          end
+
+          def ignored?
+            allow_failure.nil? ? manual_action? : allow_failure
+          end
+
           private
 
           def inherit!(deps)
@@ -108,7 +119,7 @@ module Gitlab
 
             self.class.nodes.each_key do |key|
               global_entry = deps[key]
-              job_entry = @entries[key]
+              job_entry = self[key]
 
               if global_entry.specified? && !job_entry.specified?
                 @entries[key] = global_entry
@@ -118,20 +129,22 @@ module Gitlab
 
           def to_hash
             { name: name,
-              before_script: before_script,
-              script: script,
+              before_script: before_script_value,
+              script: script_value,
               commands: commands,
-              image: image,
-              services: services,
-              stage: stage,
-              cache: cache,
-              only: only,
-              except: except,
-              variables: variables_defined? ? variables : nil,
-              environment: environment_defined? ? environment : nil,
-              environment_name: environment_defined? ? environment[:name] : nil,
-              artifacts: artifacts,
-              after_script: after_script }
+              image: image_value,
+              services: services_value,
+              stage: stage_value,
+              cache: cache_value,
+              only: only_value,
+              except: except_value,
+              variables: variables_defined? ? variables_value : nil,
+              environment: environment_defined? ? environment_value : nil,
+              environment_name: environment_defined? ? environment_value[:name] : nil,
+              coverage: coverage_defined? ? coverage_value : nil,
+              artifacts: artifacts_value,
+              after_script: after_script_value,
+              ignore: ignored? }
           end
         end
       end

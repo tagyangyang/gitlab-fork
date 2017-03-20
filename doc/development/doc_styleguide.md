@@ -113,6 +113,77 @@ merge request.
   add an alternative text: `[identifier]: https://example.com "Alternative text"`
   that appears when hovering your mouse on a link
 
+### Linking to inline docs
+
+Sometimes it's needed to link to the built-in documentation that GitLab provides
+under `/help`. This is normally done in files inside the `app/views/` directory
+with the help of the `help_page_path` helper method.
+
+In its simplest form, the HAML code to generate a link to the `/help` page is:
+
+```haml
+= link_to 'Help page', help_page_path('user/permissions')
+```
+
+The `help_page_path` contains the path to the document you want to link to with
+the following conventions:
+
+- it is relative to the `doc/` directory in the GitLab repository
+- the `.md` extension must be omitted
+- it must not end with a slash (`/`)
+
+Below are some special cases where should be used depending on the context.
+You can combine one or more of the following:
+
+1. **Linking to an anchor link.** Use `anchor` as part of the `help_page_path`
+   method:
+
+    ```haml
+    = link_to 'Help page', help_page_path('user/permissions', anchor: 'anchor-link')
+    ```
+
+1. **Opening links in a new tab.** This should be the default behavior:
+
+    ```haml
+    = link_to 'Help page', help_page_path('user/permissions'), target: '_blank'
+    ```
+
+1. **Linking to a circle icon.** Usually used in settings where a long
+   description cannot be used, like near checkboxes. You can basically use
+   any font awesome icon, but prefer the `question-circle`:
+
+    ```haml
+    = link_to icon('question-circle'), help_page_path('user/permissions')
+    ```
+
+1. **Using a button link.** Useful in places where text would be out of context
+   with the rest of the page layout:
+
+    ```haml
+    = link_to 'Help page', help_page_path('user/permissions'),  class: 'btn btn-info'
+    ```
+
+1. **Underlining a link.**
+
+    ```haml
+    = link_to 'Help page', help_page_path('user/permissions'), class: 'underlined-link'
+    ```
+
+1. **Using links inline of some text.**
+
+    ```haml
+    Description to #{link_to 'Help page', help_page_path('user/permissions')}.
+    ```
+
+1. **Adding a period at the end of the sentence.** Useful when you don't want
+   the period to be part of the link:
+
+    ```haml
+    = succeed '.' do
+      Learn more in the
+      = link_to 'Help page', help_page_path('user/permissions')
+    ```
+
 ## Images
 
 - Place images in a separate directory named `img/` in the same directory where
@@ -373,7 +444,7 @@ Rendered example:
 
 ### cURL commands
 
-- Use `https://gitlab.example.com/api/v3/` as an endpoint.
+- Use `https://gitlab.example.com/api/v4/` as an endpoint.
 - Wherever needed use this private token: `9koXpg98eAheJpvBs5tK`.
 - Always put the request first. `GET` is the default so you don't have to
   include it.
@@ -397,7 +468,7 @@ Below is a set of [cURL][] examples that you can use in the API documentation.
 Get the details of a group:
 
 ```bash
-curl --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" https://gitlab.example.com/api/v3/groups/gitlab-org
+curl --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" https://gitlab.example.com/api/v4/groups/gitlab-org
 ```
 
 #### cURL example with parameters passed in the URL
@@ -405,7 +476,7 @@ curl --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" https://gitlab.example.com/a
 Create a new project under the authenticated user's namespace:
 
 ```bash
-curl --request POST --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://gitlab.example.com/api/v3/projects?name=foo"
+curl --request POST --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://gitlab.example.com/api/v4/projects?name=foo"
 ```
 
 #### Post data using cURL's --data
@@ -415,7 +486,7 @@ cURL's `--data` option. The example below will create a new project `foo` under
 the authenticated user's namespace.
 
 ```bash
-curl --data "name=foo" --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://gitlab.example.com/api/v3/projects"
+curl --data "name=foo" --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://gitlab.example.com/api/v4/projects"
 ```
 
 #### Post data using JSON content
@@ -424,7 +495,7 @@ curl --data "name=foo" --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://g
 and double quotes.
 
 ```bash
-curl --request POST --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" --header "Content-Type: application/json" --data '{"path": "my-group", "name": "My group"}' https://gitlab.example.com/api/v3/groups
+curl --request POST --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" --header "Content-Type: application/json" --data '{"path": "my-group", "name": "My group"}' https://gitlab.example.com/api/v4/groups
 ```
 
 #### Post data using form-data
@@ -433,7 +504,7 @@ Instead of using JSON or urlencode you can use multipart/form-data which
 properly handles data encoding:
 
 ```bash
-curl --request POST --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" --form "title=ssh-key" --form "key=ssh-rsa AAAAB3NzaC1yc2EA..." https://gitlab.example.com/api/v3/users/25/keys
+curl --request POST --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" --form "title=ssh-key" --form "key=ssh-rsa AAAAB3NzaC1yc2EA..." https://gitlab.example.com/api/v4/users/25/keys
 ```
 
 The above example is run by and administrator and will add an SSH public key
@@ -447,7 +518,7 @@ contains spaces in its title. Observe how spaces are escaped using the `%20`
 ASCII code.
 
 ```bash
-curl --request POST --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://gitlab.example.com/api/v3/projects/42/issues?title=Hello%20Dude"
+curl --request POST --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://gitlab.example.com/api/v4/projects/42/issues?title=Hello%20Dude"
 ```
 
 Use `%2F` for slashes (`/`).
@@ -459,7 +530,7 @@ restrict the sign-up e-mail domains of a GitLab instance to `*.example.com` and
 `example.net`, you would do something like this:
 
 ```bash
-curl --request PUT --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" --data "domain_whitelist[]=*.example.com" --data "domain_whitelist[]=example.net" https://gitlab.example.com/api/v3/application/settings
+curl --request PUT --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" --data "domain_whitelist[]=*.example.com" --data "domain_whitelist[]=example.net" https://gitlab.example.com/api/v4/application/settings
 ```
 
 [cURL]: http://curl.haxx.se/ "cURL website"

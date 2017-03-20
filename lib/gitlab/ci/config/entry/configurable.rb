@@ -58,7 +58,7 @@ module Gitlab
             def helpers(*nodes)
               nodes.each do |symbol|
                 define_method("#{symbol}_defined?") do
-                  @entries[symbol].specified? if @entries[symbol]
+                  @entries[symbol]&.specified?
                 end
 
                 define_method("#{symbol}_value") do
@@ -66,8 +66,6 @@ module Gitlab
 
                   @entries[symbol].value
                 end
-
-                alias_method symbol.to_sym, "#{symbol}_value".to_sym
               end
             end
           end

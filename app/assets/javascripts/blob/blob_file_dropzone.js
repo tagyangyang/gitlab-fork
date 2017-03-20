@@ -1,4 +1,6 @@
-/* eslint-disable func-names, space-before-function-paren, wrap-iife, one-var, no-var, one-var-declaration-per-line, camelcase, no-undef, object-shorthand, quotes, comma-dangle, prefer-arrow-callback, no-unused-vars, prefer-template, no-useless-escape, no-alert, padded-blocks, max-len */
+/* eslint-disable func-names, space-before-function-paren, wrap-iife, one-var, no-var, one-var-declaration-per-line, camelcase, object-shorthand, quotes, comma-dangle, prefer-arrow-callback, no-unused-vars, prefer-template, no-useless-escape, no-alert, max-len */
+/* global Dropzone */
+
 (function() {
   this.BlobFileDropzone = (function() {
     function BlobFileDropzone(form, method) {
@@ -34,7 +36,7 @@
             this.removeFile(file);
           });
           return this.on('sending', function(file, xhr, formData) {
-            formData.append('target_branch', form.find('.js-target-branch').val());
+            formData.append('target_branch', form.find('input[name="target_branch"]').val());
             formData.append('create_merge_request', form.find('.js-create-merge-request').val());
             formData.append('commit_message', form.find('.js-commit-message').val());
           });
@@ -60,7 +62,5 @@
     }
 
     return BlobFileDropzone;
-
   })();
-
-}).call(this);
+}).call(window);
