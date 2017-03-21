@@ -6,6 +6,7 @@ import BlobCiYamlSelector from './template_selectors/ci_yaml_selector';
 import DockerfileSelector from './template_selectors/dockerfile_selector';
 import GitignoreSelector from './template_selectors/gitignore_selector';
 import LicenseSelector from './template_selectors/license_selector';
+import FileTemplatePreview from './file_template_preview';
 
 export default class FileTemplateMediator {
   constructor({ editor, currentAction }) {
@@ -18,6 +19,7 @@ export default class FileTemplateMediator {
 
     this.initDropdowns();
     this.initPageEvents();
+    this.initPreview();
   }
 
   initDropdowns() {
@@ -37,15 +39,22 @@ export default class FileTemplateMediator {
     this.initAutosizeUpdateEvent();
   }
 
+  initPreview() {
+    this.templatePreview = new FileTemplatePreview();
+  }
+
   registerTemplateTypeSelector() {
     return new FileTemplateTypeSelector({
       mediator: this,
-      dropdownData: this.templateSelectors.map((templateSelector) => {
-        return {
-          name: templateSelector.config.name,
-          key: templateSelector.config.key,
-        };
-      }),
+      dropdownData: this.templateSelectors
+        .map((templateSelector) => {
+          const cfg = templateSelector.config;
+
+          return {
+            name: cfg.name,
+            key: cfg.key,
+          };
+        }),
     });
   }
 
@@ -64,7 +73,7 @@ export default class FileTemplateMediator {
     });
 
     selectedTemplateSelector.show();
-    
+
     this.typeSelector.$dropdown
       .find('.dropdown-toggle-text')
       .text(item.name);
@@ -75,7 +84,14 @@ export default class FileTemplateMediator {
 
     this.fetchFileTemplate(selector.config.endpoint, query, data)
       .then((file) => {
-        this.setEditorContent(file);
+        if (this.currentAction === 'create') {
+          this.setEditorContent(file);
+        } else {
+          const currentFile = this.editor.getValue();
+          const unconfirmedFile = file;
+          this.templatePreview.confirm({ unconfirmedFile, currentFile });
+        }
+
         selector.loaded();
       })
       .catch((err) => {
@@ -89,7 +105,9 @@ export default class FileTemplateMediator {
       const match = selector.config.pattern.test(currentInput);
 
       if (match) {
+        // Need to handle when filename changes after having matched
         this.selectTemplateType(selector.config);
+        this.selectTemplateFile(selector);
       }
     });
   }
