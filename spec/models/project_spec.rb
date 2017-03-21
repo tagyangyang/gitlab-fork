@@ -218,6 +218,20 @@ describe Project, models: true do
       expect(project2.import_data).to be_nil
     end
 
+    it "does not allow blocked import_url localhost" do
+      project2 = build(:empty_project, import_url: 'http://localhost:9000/t.git')
+
+      expect(project2).to be_invalid
+      expect(project2.errors[:import_url]).to include('imports are not allowed from that URL')
+    end
+
+    it "does not allow blocked import_url port" do
+      project2 = build(:empty_project, import_url: 'http://github.com:25/t.git')
+
+      expect(project2).to be_invalid
+      expect(project2.errors[:import_url]).to include('imports are not allowed from that URL')
+    end
+
     describe 'project pending deletion' do
       let!(:project_pending_deletion) do
         create(:empty_project,
@@ -1900,10 +1914,8 @@ describe Project, models: true do
 
     context 'when no user is given' do
       it 'returns the url to the repo without a username' do
-        url = project.http_url_to_repo
-
-        expect(url).to eq(project.http_url_to_repo)
-        expect(url).not_to include('@')
+        expect(project.http_url_to_repo).to eq("#{project.web_url}.git")
+        expect(project.http_url_to_repo).not_to include('@')
       end
     end
 
@@ -1911,7 +1923,7 @@ describe Project, models: true do
       it 'returns the url to the repo with the username' do
         user = build_stubbed(:user)
 
-        expect(project.http_url_to_repo(user)).to match(%r{https?:\/\/#{user.username}@})
+        expect(project.http_url_to_repo(user)).to start_with("http://#{user.username}@")
       end
     end
   end

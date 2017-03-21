@@ -196,6 +196,7 @@ class Project < ActiveRecord::Base
   validates :name, uniqueness: { scope: :namespace_id }
   validates :path, uniqueness: { scope: :namespace_id }
   validates :import_url, addressable_url: true, if: :external_import?
+  validates :import_url, importable_url: true, if: [:external_import?, :import_url_changed?]
   validates :star_count, numericality: { greater_than_or_equal_to: 0 }
   validate :check_limit, on: :create
   validate :avatar_type,
@@ -880,13 +881,9 @@ class Project < ActiveRecord::Base
   end
 
   def http_url_to_repo(user = nil)
-    url = web_url
+    credentials = Gitlab::UrlSanitizer.http_credentials_for_user(user)
 
-    if user
-      url.sub!(%r{\Ahttps?://}) { |protocol| "#{protocol}#{user.username}@" }
-    end
-
-    "#{url}.git"
+    Gitlab::UrlSanitizer.new("#{web_url}.git", credentials: credentials).full_url
   end
 
   # Check if current branch name is marked as protected in the system
