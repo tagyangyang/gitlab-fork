@@ -180,4 +180,7 @@ export default class FileTemplateMediator {
  *  - Need to write unit tests for FileTemplateMediator and FileTemplateSelector, and integration tests for UX changes
  *  - Get a better name than 'selector' -- review naming modeling throughout
  *  - Make sure type selector label gets updated when there's a pattern match
+ *  - On template selection, update filename
+ *  - See if you can improve the logic ^^
+ *  - Update dropdown value if preview is not selected
  */

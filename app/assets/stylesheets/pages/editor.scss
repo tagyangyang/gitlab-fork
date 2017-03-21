@@ -16,9 +16,7 @@
     background-color: $gray-light;
   }
 
-  .ace_content.preview-mode {
-    background-color: $gray-dark;
-  }
+
 
   .cancel-btn {
     color: $editor-cancel-color;
@@ -178,12 +176,13 @@
   padding-top: 5px;
   margin-left: 10px;
   border-left: 1px solid $gray-light;
-  & > div {
+  &>div {
     display: inline-block;
     font-family: $regular_font;
     margin-right: 15px;
   }
 }
+
 .apply-template-preview {
   background: $orange-transparent;
   padding: 15px 10px;
@@ -191,7 +190,6 @@
   color: $orange-normal;
   border: 1px solid $orange-normal;
   border-radius: 2px;
-
   .apply-template-warning-message {
     margin-right: 15px;
   }
@@ -206,4 +204,8 @@
 .templates-title {
   display: inline-block;
   margin-left: 10px;
+}
+
+.ace_content.preview-mode {
+  // background-color: $gray-dark;
 }
