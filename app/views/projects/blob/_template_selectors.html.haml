@@ -10,5 +10,6 @@
   = dropdown_tag("Choose a Dockerfile template", options: { toggle_class: 'btn js-dockerfile-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: dockerfile_names } } )
 
 %div.apply-template-preview.hidden
-  %button Cancel
-  %button Apply
+  %span Applying a template replaces the file contents and name. Preview the changes below.
+  %button.cancel-template Cancel
+  %button.apply-template Apply

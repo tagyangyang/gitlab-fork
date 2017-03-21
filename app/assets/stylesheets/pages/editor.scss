@@ -16,6 +16,10 @@
     background-color: $gray-light;
   }
 
+  .ace_content.preview-mode {
+    background-color: $gray-dark;
+  }
+
   .cancel-btn {
     color: $editor-cancel-color;
 

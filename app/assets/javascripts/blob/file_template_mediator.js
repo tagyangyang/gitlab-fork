@@ -40,7 +40,9 @@ export default class FileTemplateMediator {
   }
 
   initPreview() {
-    this.templatePreview = new FileTemplatePreview();
+    if (this.currentAction === 'edit') {
+      this.templatePreview = new FileTemplatePreview(this);
+    }
   }
 
   registerTemplateTypeSelector() {
@@ -77,6 +79,7 @@ export default class FileTemplateMediator {
     this.typeSelector.$dropdown
       .find('.dropdown-toggle-text')
       .text(item.name);
+
   }
 
   selectTemplateFile(selector, query, data) {
@@ -89,13 +92,16 @@ export default class FileTemplateMediator {
         } else {
           const currentFile = this.editor.getValue();
           const unconfirmedFile = file;
-          this.templatePreview.confirm({ unconfirmedFile, currentFile });
+          this.templatePreview.confirm({ unconfirmedFile, currentFile, callback: () => {
+            debugger;
+          }});
         }
 
         selector.loaded();
       })
       .catch((err) => {
         new Flash(`An error occurred while fetching the template: ${err}`);
+        console.error(err);
       });
   }
 
@@ -107,7 +113,6 @@ export default class FileTemplateMediator {
       if (match) {
         // Need to handle when filename changes after having matched
         this.selectTemplateType(selector.config);
-        this.selectTemplateFile(selector);
       }
     });
   }
@@ -127,7 +132,7 @@ export default class FileTemplateMediator {
   setEditorContent(file, { skipFocus } = {}) {
     if (!file) return;
 
-    const newValue = file.content;
+    const newValue = file.content || file;
 
     this.editor.setValue(newValue, 1);
 

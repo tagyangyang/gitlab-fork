@@ -1,50 +1,57 @@
+const PREVIEW_CLASS = 'preview-mode';
+const HIDDEN_CLASS = 'hidden';
+
 export default class FileTemplatePreview {
-  constructor(mediator, file) {
+  constructor(mediator) {
     this.mediator = mediator;
-    this.$applyBtn = $('apply-btn');
-    this.$cancelBtn = $('cancel-btn');
-    this.$confirmBox = $('.confirm-message-box');
-    this.$submitBtn = $('the form submit btn');
-    this.$editBtns = $('any buttons you can edit with');
-    this.editorPane = $('.editor-pane');
     this.cachedFile = null;
     this.unconfirmedFile = null;
+    this.storeDomReferences();
+  }
+
+  storeDomReferences() {
+    this.$confirmBox = $('.apply-template-preview');
+    this.$applyBtn = this.$confirmBox.find('.apply-template');
+    this.$cancelBtn = this.$confirmBox.find('.cancel-template');
+    this.$submitBtn = $('.js-commit-button');
+    this.$editorPane = $('.ace_content');
   }
 
   enablePreviewMode() {
-    // disable all buttons
-    // style editor pane background
-    // set editor content to confirmedFile
-    // all your dom stuff
+    this.$submitBtn.prop('disabled', true);
+    this.$editorPane.addClass(PREVIEW_CLASS);
+    this.$confirmBox.removeClass(HIDDEN_CLASS);
+
+    this.$applyBtn.on('click', () => this.apply());
+    this.$cancelBtn.on('click', () => this.cancel());
   }
 
   disablePreviewMode() {
-   // renable buttons
-   // unstyle editor
+    this.$submitBtn.prop('disabled', false);
+    this.$editorPane.removeClass(PREVIEW_CLASS);
+    this.$confirmBox.addClass(HIDDEN_CLASS);
   }
 
-  confirm(unconfirmedFile, currentFile, callback) {
+  confirm({ unconfirmedFile, currentFile }) {
     this.cachedFile = currentFile;
     this.unconfirmedFile = unconfirmedFile;
 
     this.enablePreviewMode();
-
-    $('apply-btn').on('click', () => this.apply(callback));
-    $('cancel-btn').on('click', () => this.cancel(callback));
+    this.mediator.setEditorContent(this.unconfirmedFile);
   }
 
-  cancel(callback) {
-    callback(false);
+  cancel() {
+    this.mediator.setEditorContent(this.cachedFile);
     this.disablePreviewMode();
   }
 
-  apply(callback) {
-    // tell mediator to apply template
-    callback(true);
+  apply() {
     this.disablePreviewMode();
- }
+  }
 
   destroy() {
-
+    this.$applyBtn.off();
+    this.$cancelBtn.off();
   }
 }
+
