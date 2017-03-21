@@ -43,6 +43,7 @@ $blue-light-transparent: rgba(44, 159, 216, 0.05);
 $orange-light: #fc8a51;
 $orange-normal: darken($orange-light, $darken-normal-factor);
 $orange-dark: darken($orange-light, $darken-dark-factor);
+$orange-transparent: rgba(255, 239, 233, .7);
 
 $red-light: #e52c5a;
 $red-normal: darken($red-light, $darken-normal-factor);

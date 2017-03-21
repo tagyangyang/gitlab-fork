@@ -133,6 +133,7 @@
   }
 }
 
+
 @media(max-width: $screen-xs-max){
   .file-editor {
     .file-title {
@@ -170,4 +171,39 @@
       }
     }
   }
+}
+
+.template-selectors-wrap {
+  display: inline-block;
+  padding-top: 5px;
+  margin-left: 10px;
+  border-left: 1px solid $gray-light;
+  & > div {
+    display: inline-block;
+    font-family: $regular_font;
+    margin-right: 15px;
+  }
+}
+.apply-template-preview {
+  background: $orange-transparent;
+  padding: 15px 10px;
+  margin: 10px 0;
+  color: $orange-normal;
+  border: 1px solid $orange-normal;
+  border-radius: 2px;
+
+  .apply-template-warning-message {
+    margin-right: 15px;
+  }
+}
+
+.page-title.near-template-selectors {
+  display: inline-block;
+  border-right: 1px solid $border-color;
+  padding-right: 15px;
+}
+
+.templates-title {
+  display: inline-block;
+  margin-left: 10px;
 }

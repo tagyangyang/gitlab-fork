@@ -79,7 +79,6 @@ export default class FileTemplateMediator {
     this.typeSelector.$dropdown
       .find('.dropdown-toggle-text')
       .text(item.name);
-
   }
 
   selectTemplateFile(selector, query, data) {
@@ -92,9 +91,10 @@ export default class FileTemplateMediator {
         } else {
           const currentFile = this.editor.getValue();
           const unconfirmedFile = file;
-          this.templatePreview.confirm({ unconfirmedFile, currentFile, callback: () => {
-            debugger;
-          }});
+          this.templatePreview.confirm({
+            unconfirmedFile,
+            currentFile,
+          });
         }
 
         selector.loaded();
@@ -129,6 +129,10 @@ export default class FileTemplateMediator {
     });
   }
 
+  setFilename(name) {
+    this.$filenameInput.val(name);
+  }
+
   setEditorContent(file, { skipFocus } = {}) {
     if (!file) return;
 
@@ -141,6 +145,8 @@ export default class FileTemplateMediator {
     if (this.editor instanceof jQuery) {
       this.editor.get(0).dispatchEvent(this.autosizeUpdateEvent);
     }
+
+    this.editor.navigateFileStart();
   }
 
   findSelectorByKey(key) {

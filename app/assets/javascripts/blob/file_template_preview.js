@@ -15,12 +15,21 @@ export default class FileTemplatePreview {
     this.$cancelBtn = this.$confirmBox.find('.cancel-template');
     this.$submitBtn = $('.js-commit-button');
     this.$editorPane = $('.ace_content');
+    this.$editorTextArea = $('ace_text-input');
+    this.$dropdownToggleBtns = $('.dropdown-menu-toggle');
+    this.$filenameInput = $('.js-file-path-name-input');
+    this.$fileButtons = $('.file-buttons');
   }
 
   enablePreviewMode() {
     this.$submitBtn.prop('disabled', true);
+    this.mediator.editor.setReadOnly(true);
     this.$editorPane.addClass(PREVIEW_CLASS);
     this.$confirmBox.removeClass(HIDDEN_CLASS);
+
+    this.$dropdownToggleBtns.prop('disabled', true);
+    this.$filenameInput.prop('disabled', true);
+    this.$fileButtons.addClass(HIDDEN_CLASS);
 
     this.$applyBtn.on('click', () => this.apply());
     this.$cancelBtn.on('click', () => this.cancel());
@@ -28,8 +37,13 @@ export default class FileTemplatePreview {
 
   disablePreviewMode() {
     this.$submitBtn.prop('disabled', false);
+    this.mediator.editor.setReadOnly(false);
     this.$editorPane.removeClass(PREVIEW_CLASS);
     this.$confirmBox.addClass(HIDDEN_CLASS);
+    this.$dropdownToggleBtns.prop('disabled', false);
+    this.$filenameInput.prop('disabled', false);
+    this.$fileButtons.removeClass(HIDDEN_CLASS);
+    this.destroy();
   }
 
   confirm({ unconfirmedFile, currentFile }) {
@@ -41,8 +55,8 @@ export default class FileTemplatePreview {
   }
 
   cancel() {
-    this.mediator.setEditorContent(this.cachedFile);
     this.disablePreviewMode();
+    this.mediator.setEditorContent(this.cachedFile);
   }
 
   apply() {

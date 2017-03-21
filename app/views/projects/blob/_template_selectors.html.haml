@@ -1,15 +1,18 @@
-.template-type-selector.js-template-type-selector-wrap.hidden
-  = dropdown_tag("Choose type", options: { toggle_class: 'btn js-template-type-selector', title: "Choose a template type" } )
-.license-selector.js-license-selector-wrap.hidden
-  = dropdown_tag("Choose a License template", options: { toggle_class: 'btn js-license-selector', title: "Choose a license", filter: true, placeholder: "Filter", data: { data: licenses_for_select, project: @project.name, fullname: @project.namespace.human_name } } )
-.gitignore-selector.js-gitignore-selector-wrap.hidden
-  = dropdown_tag("Choose a .gitignore template", options: { toggle_class: 'btn js-gitignore-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: gitignore_names } } )
-.gitlab-ci-yml-selector.js-gitlab-ci-yml-selector-wrap.hidden
-  = dropdown_tag("Choose a GitLab CI Yaml template", options: { toggle_class: 'btn js-gitlab-ci-yml-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: gitlab_ci_ymls } } )
-.dockerfile-selector.js-dockerfile-selector-wrap.hidden
-  = dropdown_tag("Choose a Dockerfile template", options: { toggle_class: 'btn js-dockerfile-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: dockerfile_names } } )
+%span.templates-title
+  Template
+.template-selectors-wrap
+  .template-type-selector.js-template-type-selector-wrap.hidden
+    = dropdown_tag("Choose type", options: { toggle_class: 'btn js-template-type-selector', title: "Choose a template type" } )
+  .license-selector.js-license-selector-wrap.hidden
+    = dropdown_tag("Choose a License template", options: { toggle_class: 'btn js-license-selector', title: "Choose a license", filter: true, placeholder: "Filter", data: { data: licenses_for_select, project: @project.name, fullname: @project.namespace.human_name } } )
+  .gitignore-selector.js-gitignore-selector-wrap.hidden
+    = dropdown_tag("Choose a .gitignore template", options: { toggle_class: 'btn js-gitignore-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: gitignore_names } } )
+  .gitlab-ci-yml-selector.js-gitlab-ci-yml-selector-wrap.hidden
+    = dropdown_tag("Choose a GitLab CI Yaml template", options: { toggle_class: 'btn js-gitlab-ci-yml-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: gitlab_ci_ymls } } )
+  .dockerfile-selector.js-dockerfile-selector-wrap.hidden
+    = dropdown_tag("Choose a Dockerfile template", options: { toggle_class: 'btn js-dockerfile-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: dockerfile_names } } )
 
 %div.apply-template-preview.hidden
-  %span Applying a template replaces the file contents and name. Preview the changes below.
-  %button.cancel-template Cancel
-  %button.apply-template Apply
+  %span.apply-template-warning-message Applying a template replaces the file contents and name. Preview the changes below.
+  %button.cancel-template.btn.btn-sm Cancel
+  %button.apply-template.btn.btn-sm.btn-warning Apply
