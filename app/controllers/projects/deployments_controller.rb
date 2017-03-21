@@ -3,6 +3,9 @@ class Projects::DeploymentsController < Projects::ApplicationController
 
   def metrics
     @metrics = deployment.metrics(1.hour) || {}
+    if @metrics.any?
+      @metrics.merge!({ deployment_time: deployment.created_at })
+    end
     render json: @metrics, status: @metrics.any? ? :ok : :no_content
   end
 
