@@ -1,6 +1,6 @@
 /* global Api */
 
-import FileTemplateSelector from '../file_template_selector';
+import FileTemplateSelector from '../_template_selector';
 
 export default class BlobCiYamlSelector extends FileTemplateSelector {
   constructor({ mediator }) {

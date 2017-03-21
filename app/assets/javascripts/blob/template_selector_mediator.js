@@ -6,7 +6,7 @@ import BlobCiYamlSelector from './template_selectors/ci_yaml_selector';
 import DockerfileSelector from './template_selectors/dockerfile_selector';
 import GitignoreSelector from './template_selectors/gitignore_selector';
 import LicenseSelector from './template_selectors/license_selector';
-import FileTemplatePreview from './file_template_preview';
+import FileTemplatePreview from './template_preview';
 
 export default class FileTemplateMediator {
   constructor({ editor, currentAction }) {
@@ -101,7 +101,6 @@ export default class FileTemplateMediator {
       })
       .catch((err) => {
         new Flash(`An error occurred while fetching the template: ${err}`);
-        console.error(err);
       });
   }
 
@@ -172,15 +171,3 @@ export default class FileTemplateMediator {
     });
   }
 }
-// re: mediator pattern https://addyosmani.com/resources/essentialjsdesignpatterns/book/#mediatorpatternjavascript
-/**
- *  TODO:
- *  - look at how the quicklink shortcut to templates work, and how this might change that
- *  - are there cases where we need to iterate over selected dropdowns (multiple of the same type on the same page?)
- *  - Need to write unit tests for FileTemplateMediator and FileTemplateSelector, and integration tests for UX changes
- *  - Get a better name than 'selector' -- review naming modeling throughout
- *  - Make sure type selector label gets updated when there's a pattern match
- *  - On template selection, update filename
- *  - See if you can improve the logic ^^
- *  - Update dropdown value if preview is not selected
- */

@@ -1,4 +1,4 @@
-import FileTemplateSelector from '../file_template_selector';
+import FileTemplateSelector from '../_template_selector';
 
 export default class FileTemplateTypeSelector extends FileTemplateSelector {
   constructor({ mediator, dropdownData }) {

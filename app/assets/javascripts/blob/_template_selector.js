@@ -1,6 +1,6 @@
 /* global Api */
 
-export default class FileTemplateSelector {
+export default class TemplateSelector {
   constructor(mediator) {
     this.mediator = mediator;
     this.$dropdown = null;

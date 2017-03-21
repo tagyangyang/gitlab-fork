@@ -1,7 +1,7 @@
 const PREVIEW_CLASS = 'preview-mode';
 const HIDDEN_CLASS = 'hidden';
 
-export default class FileTemplatePreview {
+export default class TemplatePreview {
   constructor(mediator) {
     this.mediator = mediator;
     this.cachedFile = null;
@@ -43,7 +43,6 @@ export default class FileTemplatePreview {
     this.$dropdownToggleBtns.prop('disabled', false);
     this.$filenameInput.prop('disabled', false);
     this.$fileButtons.removeClass(HIDDEN_CLASS);
-    this.destroy();
   }
 
   confirm({ unconfirmedFile, currentFile }) {
@@ -57,13 +56,17 @@ export default class FileTemplatePreview {
   cancel() {
     this.disablePreviewMode();
     this.mediator.setEditorContent(this.cachedFile);
+    this.destroy();
   }
 
   apply() {
     this.disablePreviewMode();
+    this.destroy();
   }
 
   destroy() {
+    this.cachedFile = null;
+    this.unconfirmedFile = null;
     this.$applyBtn.off();
     this.$cancelBtn.off();
   }
