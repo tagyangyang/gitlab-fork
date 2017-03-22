@@ -51,7 +51,9 @@ describe 'issuable list', feature: true do
         if issuable_type == :issue
           create(:issue, project: project, author: user)
         else
-          create(:merge_request, title: FFaker::Lorem.sentence, source_project: project, source_branch: FFaker::Name.name)
+          source_branch = FFaker::Name.name
+          pipeline = create(:ci_empty_pipeline, project: project, ref: source_branch, status: %w(running failed success).sample, sha: 'any')
+          create(:merge_request, title: FFaker::Lorem.sentence, source_project: project, source_branch: source_branch, head_pipeline: pipeline)
         end
 
       2.times do

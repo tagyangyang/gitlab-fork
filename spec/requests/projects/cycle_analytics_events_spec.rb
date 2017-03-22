@@ -126,6 +126,7 @@ describe 'cycle analytics events' do
     mr = create_merge_request_closing_issue(issue)
 
     pipeline = create(:ci_empty_pipeline, status: 'created', project: project, ref: mr.source_branch, sha: mr.source_branch_sha)
+    mr.update(head_pipeline_id: pipeline.id)
     pipeline.run
 
     create(:ci_build, pipeline: pipeline, status: :success, author: user)
