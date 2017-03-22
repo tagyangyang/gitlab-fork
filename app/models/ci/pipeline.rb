@@ -11,6 +11,7 @@ module Ci
     has_many :statuses, class_name: 'CommitStatus', foreign_key: :commit_id
     has_many :builds, foreign_key: :commit_id
     has_many :trigger_requests, dependent: :destroy, foreign_key: :commit_id
+    has_many :merge_requests, foreign_key: "head_pipeline_id"
 
     delegate :id, to: :project, prefix: true
 
@@ -359,14 +360,6 @@ module Ci
       data = pipeline_data
       project.execute_hooks(data, :pipeline_hooks)
       project.execute_services(data, :pipeline_hooks)
-    end
-
-    # Merge requests for which the current pipeline is running against
-    # the merge request's latest commit.
-    def merge_requests
-      @merge_requests ||= project.merge_requests
-        .where(source_branch: self.ref)
-        .select { |merge_request| merge_request.head_pipeline.try(:id) == self.id }
     end
 
     def detailed_status(current_user)
