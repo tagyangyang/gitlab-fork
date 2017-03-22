@@ -16,8 +16,6 @@
     background-color: $gray-light;
   }
 
-
-
   .cancel-btn {
     color: $editor-cancel-color;
 
@@ -77,12 +75,7 @@
   }
 
   .encoding-selector,
-  .soft-wrap-toggle,
-  .license-selector,
-  .gitignore-selector,
-  .gitlab-ci-yml-selector,
-  .dockerfile-selector,
-  .template-type-selector {
+  .soft-wrap-toggle {
     display: inline-block;
     vertical-align: top;
     font-family: $regular_font;
@@ -107,26 +100,6 @@
       .no-wrap {
         display: block;
       }
-    }
-  }
-
-  .gitignore-selector,
-  .license-selector,
-  .gitlab-ci-yml-selector,
-  .dockerfile-selector {
-    .dropdown {
-      line-height: 21px;
-    }
-
-    .dropdown-menu-toggle {
-      vertical-align: top;
-      width: 220px;
-    }
-  }
-
-  .gitlab-ci-yml-selector {
-    .dropdown-menu-toggle {
-      width: 250px;
     }
   }
 }
@@ -173,25 +146,36 @@
 
 .template-selectors-wrap {
   display: inline-block;
-  padding-top: 5px;
   margin-left: 10px;
-  border-left: 1px solid $gray-light;
-  &>div {
-    display: inline-block;
-    font-family: $regular_font;
-    margin-right: 15px;
-  }
-}
 
-.apply-template-preview {
-  background: $orange-transparent;
-  padding: 15px 10px;
-  margin: 10px 0;
-  color: $orange-normal;
-  border: 1px solid $orange-normal;
-  border-radius: 2px;
-  .apply-template-warning-message {
-    margin-right: 15px;
+  .license-selector,
+  .gitignore-selector,
+  .gitlab-ci-yml-selector,
+  .dockerfile-selector,
+  .template-type-selector {
+    display: inline-block;
+    vertical-align: top;
+    font-family: $regular_font;
+    margin-top: -5px;
+  }
+  
+  .gitignore-selector,
+  .license-selector,
+  .gitlab-ci-yml-selector,
+  .dockerfile-selector {
+    .dropdown {
+      line-height: 21px;
+    }
+    .dropdown-menu-toggle {
+      vertical-align: top;
+      width: 270px;
+    }
+  }
+  
+  .gitlab-ci-yml-selector {
+    .dropdown-menu-toggle {
+      width: 250px;
+    }
   }
 }
 
@@ -199,7 +183,6 @@
   display: inline-block;
   border-right: 1px solid $border-color;
   padding-right: 15px;
-  margin-bottom: 30px;
 }
 
 .templates-title {
@@ -207,6 +190,10 @@
   margin-left: 10px;
 }
 
-.ace_content.preview-mode {
-  // background-color: $gray-dark;
+.template-undo {
+  display: inline-block;
+  margin-left: 10px;
+  .btn {
+    margin-left: 15px;
+  }
 }

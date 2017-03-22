@@ -49,6 +49,7 @@ export default class FileTemplateMediator {
     $('.template-undo button').on('click', (e) => {
       this.setEditorContent(this.initialContent);
       this.setFilename(this.initialTitle);
+      $('.template-undo').addClass('hidden');
     });
   }
 

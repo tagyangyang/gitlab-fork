@@ -11,7 +11,6 @@
     = dropdown_tag("Choose a GitLab CI Yaml template", options: { toggle_class: 'btn js-gitlab-ci-yml-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: gitlab_ci_ymls } } )
   .dockerfile-selector.js-dockerfile-selector-wrap.hidden
     = dropdown_tag("Choose a Dockerfile template", options: { toggle_class: 'btn js-dockerfile-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: dockerfile_names } } )
-
 %div.template-undo.hidden
-  %span.apply-template-warning-message Template applied
-  %button.btn.btn-sm.btn-warning Undo
+  %span.text-info Template applied
+  %button.btn.btn-sm.btn-info Undo
