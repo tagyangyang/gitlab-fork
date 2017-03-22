@@ -5,7 +5,9 @@ export default class TemplatePreview {
   constructor(mediator) {
     this.mediator = mediator;
     this.cachedFile = null;
+    this.cachedFilename = null;
     this.unconfirmedFile = null;
+    this.unconfirmedFilename = null;
     this.storeDomReferences();
   }
 
@@ -45,18 +47,20 @@ export default class TemplatePreview {
     this.$fileButtons.removeClass(HIDDEN_CLASS);
   }
 
-  confirm({ unconfirmedFile, currentFile, defaultFilename }) {
+  confirm({ unconfirmedFile, currentFile, unconfirmedFilename, currentFilename }) {
     this.cachedFile = currentFile;
     this.unconfirmedFile = unconfirmedFile;
-
+    this.cachedFilename = currentFilename;
+    this.unconfirmedFilename = unconfirmedFilename;
     this.enablePreviewMode();
-    this.mediator.setFilename(defaultFilename);
+    this.mediator.setFilename(unconfirmedFilename);
     this.mediator.setEditorContent(this.unconfirmedFile);
   }
 
   cancel() {
     this.disablePreviewMode();
     this.mediator.setEditorContent(this.cachedFile);
+    this.mediator.setFilename(this.cachedFilename);
     this.destroy();
   }
 

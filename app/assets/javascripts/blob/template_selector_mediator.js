@@ -91,13 +91,15 @@ export default class FileTemplateMediator {
           this.setEditorContent(file);
           this.setFilename(selector.config.name);
         } else {
-          const defaultFilename = selector.config.name;
+          const unconfirmedFilename = selector.config.name;
+          const currentFilename = this.getFilename();
           const currentFile = this.editor.getValue();
           const unconfirmedFile = file;
           this.templatePreview.confirm({
             unconfirmedFile,
             currentFile,
-            defaultFilename,
+            unconfirmedFilename,
+            currentFilename,
           });
         }
 
@@ -130,6 +132,10 @@ export default class FileTemplateMediator {
         apiCall(query, data, resolveFile);
       }
     });
+  }
+
+  getFilename() {
+    return this.$filenameInput.val();
   }
 
   setFilename(name) {
