@@ -20,7 +20,7 @@ $(() => {
   }
 
   if (uploadBlobForm.length) {
-    const method = uploadBlobForm.attr('method');
+    const method = uploadBlobForm.data('method');
 
     new BlobFileDropzone(uploadBlobForm, method);
     new NewCommitForm(uploadBlobForm);
