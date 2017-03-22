@@ -47,15 +47,30 @@ describe PrometheusService, models: true, caching: true do
 
   describe '#metrics' do
     let(:environment) { build_stubbed(:environment, slug: 'env-slug') }
-    subject { service.metrics(environment) }
 
     around do |example|
       Timecop.freeze { example.run }
     end
 
-    context 'with valid data' do
+    context 'with valid data without time range' do
+      subject { service.metrics(environment) }
+
       before do
         stub_reactive_cache(service, prometheus_data, 'env-slug', nil, nil)
+      end
+
+      it 'returns reactive data' do
+        is_expected.to eq(prometheus_data)
+      end
+    end
+
+    context 'with valid data with time range' do
+      let(:t_start) { 1.hour.ago.utc }
+      let(:t_end) { Time.now.utc }
+      subject { service.metrics(environment, timeframe_start: t_start, timeframe_end: t_end) }
+
+      before do
+        stub_reactive_cache(service, prometheus_data, 'env-slug', t_start, t_end)
       end
 
       it 'returns reactive data' do
