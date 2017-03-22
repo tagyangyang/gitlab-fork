@@ -25,6 +25,7 @@ export default class FileTemplateMediator {
   initDropdowns() {
     if (this.currentAction === 'create') {
       this.typeSelector.show();
+      this.checkForMatchingTemplate();
     }
 
     if (this.currentAction === 'edit') {
@@ -88,12 +89,15 @@ export default class FileTemplateMediator {
       .then((file) => {
         if (this.currentAction === 'create') {
           this.setEditorContent(file);
+          this.setFilename(selector.config.name);
         } else {
+          const defaultFilename = selector.config.name;
           const currentFile = this.editor.getValue();
           const unconfirmedFile = file;
           this.templatePreview.confirm({
             unconfirmedFile,
             currentFile,
+            defaultFilename,
           });
         }
 

@@ -45,11 +45,12 @@ export default class TemplatePreview {
     this.$fileButtons.removeClass(HIDDEN_CLASS);
   }
 
-  confirm({ unconfirmedFile, currentFile }) {
+  confirm({ unconfirmedFile, currentFile, defaultFilename }) {
     this.cachedFile = currentFile;
     this.unconfirmedFile = unconfirmedFile;
 
     this.enablePreviewMode();
+    this.mediator.setFilename(defaultFilename);
     this.mediator.setEditorContent(this.unconfirmedFile);
   }
 

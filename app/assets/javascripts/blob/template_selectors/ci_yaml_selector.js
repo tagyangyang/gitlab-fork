@@ -7,11 +7,10 @@ export default class BlobCiYamlSelector extends FileTemplateSelector {
     super(mediator);
     this.config = {
       key: 'gitlab-ci-yaml',
-      name: 'GitLab CI Yaml',
+      name: '.gitlab-ci.yml',
       pattern: /(.gitlab-ci.yml)/,
       endpoint: Api.gitlabCiYml,
       dropdown: '.js-gitlab-ci-yml-selector',
-      loading: 'fa-chevron-down',
       wrapper: '.js-gitlab-ci-yml-selector-wrap',
     };
   }

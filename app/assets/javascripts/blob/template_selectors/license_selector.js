@@ -7,7 +7,7 @@ export default class BlobLicenseSelector extends FileTemplateSelector {
     super(mediator);
     this.config = {
       key: 'license',
-      name: 'License',
+      name: 'LICENSE',
       pattern: /^(.+\/)?(licen[sc]e|copying)($|\.)/,
       endpoint: Api.licenseText,
       dropdown: '.js-license-selector',

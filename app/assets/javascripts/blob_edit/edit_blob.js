@@ -1,6 +1,6 @@
 /* global ace */
 
-import FileTemplateMediator from '../blob/file_template_mediator';
+import TemplateSelectorMediator from '../blob/template_selector_mediator';
 
 export default class EditBlob {
   constructor(assetsPath, aceMode, currentAction) {
@@ -23,7 +23,7 @@ export default class EditBlob {
   }
 
   initFileSelectors(currentAction) {
-    this.fileTemplateMediator = new FileTemplateMediator({ editor: this.editor, currentAction });
+    this.fileTemplateMediator = new TemplateSelectorMediator({ editor: this.editor, currentAction });
   }
 
   initModePanesAndLinks() {
