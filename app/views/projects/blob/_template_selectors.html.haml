@@ -12,7 +12,6 @@
   .dockerfile-selector.js-dockerfile-selector-wrap.hidden
     = dropdown_tag("Choose a Dockerfile template", options: { toggle_class: 'btn js-dockerfile-selector', title: "Choose a template", filter: true, placeholder: "Filter", data: { data: dockerfile_names } } )
 
-%div.apply-template-preview.hidden
-  %span.apply-template-warning-message Applying a template replaces the file contents and name. Preview the changes below.
-  %button.cancel-template.btn.btn-sm Cancel
-  %button.apply-template.btn.btn-sm.btn-warning Apply
+%div.template-undo.hidden
+  %span.apply-template-warning-message Template applied
+  %button.btn.btn-sm.btn-warning Undo

@@ -6,7 +6,6 @@ import BlobCiYamlSelector from './template_selectors/ci_yaml_selector';
 import DockerfileSelector from './template_selectors/dockerfile_selector';
 import GitignoreSelector from './template_selectors/gitignore_selector';
 import LicenseSelector from './template_selectors/license_selector';
-import FileTemplatePreview from './template_preview';
 
 export default class FileTemplateMediator {
   constructor({ editor, currentAction }) {
@@ -19,7 +18,7 @@ export default class FileTemplateMediator {
 
     this.initDropdowns();
     this.initPageEvents();
-    this.initPreview();
+    this.cacheFileContent();
   }
 
   initDropdowns() {
@@ -40,10 +39,17 @@ export default class FileTemplateMediator {
     this.initAutosizeUpdateEvent();
   }
 
-  initPreview() {
-    if (this.currentAction === 'edit') {
-      this.templatePreview = new FileTemplatePreview(this);
-    }
+  cacheFileContent() {
+    this.initialContent = this.editor.getValue();
+    this.initialTitle = this.$filenameInput.val();
+  }
+
+  enableUndoTemplate() {
+    $('.template-undo').removeClass('hidden');
+    $('.template-undo button').on('click', (e) => {
+      this.setEditorContent(this.initialContent);
+      this.setFilename(this.initialTitle);
+    });
   }
 
   registerTemplateTypeSelector() {
@@ -87,27 +93,14 @@ export default class FileTemplateMediator {
 
     this.fetchFileTemplate(selector.config.endpoint, query, data)
       .then((file) => {
-        if (this.currentAction === 'create') {
-          this.setEditorContent(file);
-          this.setFilename(selector.config.name);
-        } else {
-          const unconfirmedFilename = selector.config.name;
-          const currentFilename = this.getFilename();
-          const currentFile = this.editor.getValue();
-          const unconfirmedFile = file;
-          this.templatePreview.confirm({
-            unconfirmedFile,
-            currentFile,
-            unconfirmedFilename,
-            currentFilename,
-          });
+        if (this.currentAction === 'edit') {
+          this.enableUndoTemplate();
         }
-
+        this.setEditorContent(file);
+        this.setFilename(selector.config.name);
         selector.loaded();
       })
-      .catch((err) => {
-        new Flash(`An error occurred while fetching the template: ${err}`);
-      });
+      .catch(err => new Flash(`An error occurred while fetching the template: ${err}`));
   }
 
   checkForMatchingTemplate() {
