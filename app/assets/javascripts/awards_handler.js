@@ -231,9 +231,9 @@ AwardsHandler
       if (menu) {
         menu.dispatchEvent(new CustomEvent('build-emoji-menu-finish'));
       }
-    }).catch((err) => {
-      console.error('Error while `addRemainingEmojiMenuCategories`', err, err.stack);
+    }).catch(() => {
       emojiContentElement.insertAdjacentHTML('beforeend', '<p>We encountered an error while adding the remaining categories</p>');
+      throw new Error('Error occurred in addRemainingEmojiMenuCategories');
     });
   };
 
