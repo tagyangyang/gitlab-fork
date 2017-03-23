@@ -47,7 +47,7 @@ class PrometheusGraph {
         this.createGraph();
       }
     }).catch(() => {
-      new Flash('An error occurred when trying to load metrics. Please try again.', 'alert');
+      new Flash('An error occurred when trying to load metrics. Please try again.');
     });
   }
 
@@ -316,7 +316,7 @@ class PrometheusGraph {
       }
       return resp.metrics;
     })
-    .catch(() => new Flash('An error occurred while fetching metrics.', 'alert'));
+    .catch(() => new Flash('An error occurred while fetching metrics.'));
   }
 
   transformData(metricsResponse) {

@@ -86,12 +86,12 @@ import Vue from 'vue';
             CommentsStore.update(this.discussionId, this.noteId, !this.isResolved, resolved_by);
             this.discussion.updateHeadline(data);
           } else {
-            new Flash('An error occurred when trying to resolve a comment. Please try again.', 'alert');
+            new Flash('An error occurred when trying to resolve a comment. Please try again.');
           }
 
           this.updateTooltip();
         }).catch(() => {
-          new Flash('An error occurred when trying to resolve a comment. Please try again.', 'alert');
+          new Flash('An error occurred when trying to resolve a comment. Please try again.');
         });
       }
     },

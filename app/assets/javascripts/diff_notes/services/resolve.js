@@ -52,10 +52,10 @@ Vue.use(VueResource);
 
           discussion.updateHeadline(data);
         } else {
-          new Flash('An error occurred when trying to resolve a discussion. Please try again.', 'alert');
+          new Flash('An error occurred when trying to resolve a discussion. Please try again.');
         }
       }).catch(() => {
-        new Flash('An error occurred when trying to resolve a discussion. Please try again.', 'alert');
+        new Flash('An error occurred when trying to resolve a discussion. Please try again.');
       });
     }
 
