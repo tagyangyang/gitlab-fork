@@ -1,6 +1,9 @@
 .file-editor {
   .nav-links {
-    display: inline-block;
+    // border-top: 1px solid $border-color;
+    // border-right: 1px solid $border-color;
+    // border-top: 1px solid $border-color;
+
   }
   #editor {
     border: none;
@@ -144,6 +147,22 @@
   }
 }
 
+.page-title.blob-new {
+  margin: 16px 0;
+}
+
+.template-selectors-menu {
+  display: inline-block;
+  margin-left: 12px;
+  border-left: 1px solid $border-color;
+  padding-left: 12px;
+  padding-top: 8px;
+}
+
+.templates-selectors-label {
+  display: inline-block;
+}
+
 .template-selectors-wrap {
   display: inline-block;
   margin-left: 10px;
@@ -179,18 +198,7 @@
   }
 }
 
-.page-title.near-template-selectors {
-  display: inline-block;
-  border-right: 1px solid $border-color;
-  padding-right: 15px;
-}
-
-.templates-title {
-  display: inline-block;
-  margin-left: 10px;
-}
-
-.template-undo {
+.template-selectors-undo-menu {
   display: inline-block;
   margin-left: 10px;
   .btn {

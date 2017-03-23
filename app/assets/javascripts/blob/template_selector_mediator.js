@@ -69,7 +69,8 @@ export default class FileTemplateMediator {
   }
 
   registerFileTemplateSelectors() {
-    return [BlobCiYamlSelector, DockerfileSelector, GitignoreSelector, LicenseSelector]
+    // Order dictates template type dropdown item order
+    return [GitignoreSelector, BlobCiYamlSelector, DockerfileSelector, LicenseSelector]
       .map(TemplateSelectorClass => new TemplateSelectorClass({ mediator: this }));
   }
 
