@@ -84,19 +84,19 @@
       }
     };
 
-    MarkdownPreview.prototype.hideReferencedCommands = function($form) {
+    MarkdownPreview.prototype.hideReferencedCommands = function ($form) {
       var referencedCommands;
       referencedCommands = $form.find('.referenced-commands');
       referencedCommands.hide();
     };
 
-    MarkdownPreview.prototype.showReferencedCommands = function($form) {
+    MarkdownPreview.prototype.showReferencedCommands = function ($form) {
       var referencedCommands;
       referencedCommands = $form.find('.referenced-commands');
       referencedCommands.show();
     };
 
-    MarkdownPreview.prototype.renderReferencedCommands = function(commands, $form) {
+    MarkdownPreview.prototype.renderReferencedCommands = function (commands, $form) {
       var referencedCommands;
       referencedCommands = $form.find('.referenced-commands');
       if (commands.length > 0) {
