@@ -103,7 +103,7 @@ export default class FileTemplateMediator {
   selectTemplateFile(selector, query, data) {
     selector.loading();
     this.disableUndoTemplate();
-    
+
     this.fetchFileTemplate(selector.config.endpoint, query, data)
       .then((file) => {
         this.enableUndoTemplate();
@@ -147,7 +147,7 @@ export default class FileTemplateMediator {
   }
 
   setEditorContent(file, { skipFocus } = {}) {
-    if (!file) return;
+    if (!file && file !== '') return;
 
     const newValue = file.content || file;
 
