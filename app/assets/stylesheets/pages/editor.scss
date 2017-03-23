@@ -132,13 +132,9 @@
         margin: 3px 0;
       }
 
-      .encoding-selector,
-      .license-selector,
-      .gitignore-selector,
-      .gitlab-ci-yml-selector {
+      .encoding-selector {
         display: block;
         margin: 3px 0;
-
         button {
           width: 100%;
         }
@@ -158,16 +154,34 @@
   padding-left: 12px;
   padding-top: 8px;
   margin-top: -4px;
+  @media(max-width: $screen-xs-max) {
+    display: block;
+    margin: 5px 0;
+    border-left: none;
+    margin-left: 0;
+    padding-top: 0;
+    padding-left: 0;
+
+  }
 }
 
 .templates-selectors-label {
   display: inline-block;
+  @media(max-width: $screen-xs-max) {
+    display: block;
+    margin: 5px 0;
+  }
 }
 
 .template-selectors-wrap {
   display: inline-block;
   margin-left: 10px;
-
+  @media(max-width: $screen-xs-max) {
+    margin-left: 0;
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+  }
   .license-selector,
   .gitignore-selector,
   .gitlab-ci-yml-selector,
@@ -177,8 +191,15 @@
     vertical-align: top;
     font-family: $regular_font;
     margin-top: -5px;
+    @media(max-width: $screen-xs-max) {
+      display: block;
+      width: 100%;
+      margin: 5px 0;
+      button {
+        width: 100%;
+      }
+    }
   }
-  
   .gitignore-selector,
   .license-selector,
   .gitlab-ci-yml-selector,
@@ -186,15 +207,14 @@
     .dropdown {
       line-height: 21px;
     }
-    .dropdown-menu-toggle {
+        .dropdown-menu-toggle {
       vertical-align: top;
       width: 250px;
-    }
-  }
-  
-  .gitlab-ci-yml-selector {
-    .dropdown-menu-toggle {
-      width: 250px;
+      @media(max-width: $screen-xs-max) {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+      }
     }
   }
 }
