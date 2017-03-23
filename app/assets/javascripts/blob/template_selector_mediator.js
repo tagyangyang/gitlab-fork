@@ -45,12 +45,22 @@ export default class FileTemplateMediator {
   }
 
   enableUndoTemplate() {
-    $('.template-undo').removeClass('hidden');
-    $('.template-undo button').on('click', (e) => {
-      this.setEditorContent(this.initialContent);
-      this.setFilename(this.initialTitle);
-      $('.template-undo').addClass('hidden');
+    this.cachedFileContent = this.editor.getValue();
+    this.cachedFilename = this.getFilename();
+
+    $('.template-selectors-undo-menu').removeClass('hidden');
+    $('.template-selectors-undo-menu button').on('click', () => {
+      this.setEditorContent(this.cachedFileContent);
+      this.setFilename(this.cachedFilename);
+      this.disableUndoTemplate();
     });
+  }
+
+  disableUndoTemplate() {
+    $('.template-selectors-undo-menu').addClass('hidden');
+    this.cachedFileContent = null;
+    this.cachedFileContent = null;
+    $('.template-selectors-undo-menu button').off('click');
   }
 
   registerTemplateTypeSelector() {
@@ -92,12 +102,11 @@ export default class FileTemplateMediator {
 
   selectTemplateFile(selector, query, data) {
     selector.loading();
-
+    this.disableUndoTemplate();
+    
     this.fetchFileTemplate(selector.config.endpoint, query, data)
       .then((file) => {
-        if (this.currentAction === 'edit') {
-          this.enableUndoTemplate();
-        }
+        this.enableUndoTemplate();
         this.setEditorContent(file);
         this.setFilename(selector.config.name);
         selector.loaded();
