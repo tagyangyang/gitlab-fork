@@ -15,6 +15,10 @@ export default class EditBlob {
     ace.config.loadModule('ace/ext/searchbox');
 
     this.editor = ace.edit('editor');
+
+    // This prevents warnings re: automatic scrolling being logged
+    this.editor.$blockScrolling = Infinity;
+    
     this.editor.focus();
 
     if (aceMode) {
