@@ -88,7 +88,7 @@ module SlashCommands
 
     desc 'Change title'
     humanized do |title_param|
-      "Changes the title to **#{title_param}**."
+      "Changes the title to #{title_param}."
     end
     params '<New title>'
     condition do
@@ -101,7 +101,7 @@ module SlashCommands
 
     desc 'Assign'
     humanized do |assignee_param|
-      "Assigns user #{assignee_param}."
+      "Assigns #{assignee_param}."
     end
     params '@user'
     condition do
@@ -186,11 +186,10 @@ module SlashCommands
       if labels_param.present?
         labels = find_label_references(labels_param)
         label_count = labels.count
+        "Removes #{labels.join(' ')} #{'label'.pluralize(label_count)}."
       else
-        labels = 'all'
-        label_count = 2
+        'Removes all labels.'
       end
-      "Removes #{labels.join(' ')} #{'label'.pluralize(label_count)}."
     end
     params '~label1 ~"label 2"'
     condition do
@@ -236,7 +235,7 @@ module SlashCommands
     end
 
     desc 'Add a todo'
-    humanized 'Adds a todo event.'
+    humanized 'Adds a todo.'
     condition do
       issuable.persisted? &&
         !TodoService.new.todo_exist?(issuable, current_user)

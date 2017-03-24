@@ -30,7 +30,8 @@ module Gitlab
       end
 
       def humanize(context, opts, arg)
-        return if !available?(opts)
+        return unless available?(opts)
+
         if humanized.respond_to?(:call)
           execute_block(humanized, context, opts, arg)
         else
