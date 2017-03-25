@@ -26,7 +26,7 @@ RSpec.describe 'Dashboard Archived Project', feature: true do
     expect(page).to have_link(archived_project.name)
   end
 
-  it 'searchs archived projects', :js do
+  it 'searches archived projects', :js do
     click_button 'Last updated'
     click_link 'Show archived projects'
 
@@ -35,9 +35,19 @@ RSpec.describe 'Dashboard Archived Project', feature: true do
 
     fill_in 'project-filter-form-field', with: archived_project.name
 
+    click_button 'Last updated'
+    expect(find_link('Show archived projects')[:href]).to end_with "/dashboard/projects?archived=true&sort=updated_desc&name=#{archived_project.name}"
+
     find('#project-filter-form-field').native.send_keys :return
 
     expect(page).not_to have_link(project.name)
     expect(page).to have_link(archived_project.name)
+
+    fill_in 'project-filter-form-field', with: ''
+    click_button 'Last updated'
+    click_link 'Hide archived projects'
+
+    expect(page).not_to have_link(archived_project.name)
+    expect(page).to have_link(project.name)
   end
 end
