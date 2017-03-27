@@ -49,6 +49,16 @@
       }
       return newUrl;
     };
+    w.gl.utils.updateParamQueryString = function(url, paramName, newValue) {
+      // match the current key/value pair for a particular query param
+      const re = new RegExp(`([?&])${paramName}=.*?(&|$)`, 'i');
+      if (re.test(url)) {
+        return url.replace(re, `$1${paramName}=${newValue}$2`);
+      }
+
+      const sep = url.indexOf('?') !== -1 ? '&' : '?';
+      return `${url}${sep}${paramName}=${newValue}`;
+    };
     // removes parameter query string from url. returns the modified url
     w.gl.utils.removeParamQueryString = function(url, param) {
       var urlVariables, variables;

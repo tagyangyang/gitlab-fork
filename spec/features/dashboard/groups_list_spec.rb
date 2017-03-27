@@ -14,7 +14,7 @@ describe 'Dashboard Groups page', js: true, feature: true do
 
     login_as(user)
 
-    visit dashboard_groups_path
+    page.visit dashboard_groups_path
   end
 
   it 'shows groups user is member of' do
@@ -43,5 +43,14 @@ describe 'Dashboard Groups page', js: true, feature: true do
     expect(page).to have_content(nested_group.full_name)
     expect(page).not_to have_content(another_group.full_name)
     expect(page.all('.js-groups-list-holder .content-list li').length).to eq 2
+  end
+
+  it 'sorts groups' do
+    click_button 'Last created'
+    click_link 'Oldest updated'
+
+    expect(page).to have_current_path('/dashboard/groups?sort=updated_asc')
+    expect(page).to have_content(group.full_name)
+    expect(page).to have_content(nested_group.full_name)
   end
 end

@@ -18,6 +18,12 @@ module ExploreHelper
   end
 
   def filter_groups_path(options = {})
+    exist_opts = {
+      sort: params[:sort] || @sort,
+      filter_groups: params[:filter_groups],
+    }
+
+    options = exist_opts.merge(options).delete_if { |key, value| value.blank? }
     request_path_with_options(options)
   end
 
