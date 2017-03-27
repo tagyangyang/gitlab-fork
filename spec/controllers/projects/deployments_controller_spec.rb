@@ -31,13 +31,13 @@ describe Projects::DeploymentsController do
     end
 
     context 'when environment has some metrics' do
-      let(:empty_metrics) {
+      let(:empty_metrics) do
         {
           success: true,
           metrics: {},
           last_update: 42
         }
-      }
+      end
 
       before do
         expect(deployment).to receive(:metrics).and_return(empty_metrics)
@@ -62,4 +62,3 @@ describe Projects::DeploymentsController do
                        id: deployment.id)
   end
 end
-
