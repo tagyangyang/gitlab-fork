@@ -160,15 +160,15 @@ import MiniPipelineGraph from './mini_pipeline_graph_dropdown';
           _this.status = data.status;
           _this.hasCi = data.has_ci;
           _this.updateMergeButton(_this.status, _this.hasCi);
+          if (data.coverage) {
+            _this.showCICoverage(data.coverage);
+          }
           if (data.environments && data.environments.length) _this.renderEnvironments(data.environments);
           if (data.status !== _this.opts.ci_status ||
               data.sha !== _this.opts.ci_sha ||
               data.pipeline !== _this.opts.ci_pipeline) {
             _this.opts.ci_status = data.status;
             _this.showCIStatus(data.status);
-            if (data.coverage) {
-              _this.showCICoverage(data.coverage);
-            }
             if (data.pipeline) {
               _this.opts.ci_pipeline = data.pipeline;
               _this.updatePipelineUrls(data.pipeline);
