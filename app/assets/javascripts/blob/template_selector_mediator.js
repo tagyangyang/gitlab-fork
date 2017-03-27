@@ -48,6 +48,7 @@ export default class FileTemplateMediator {
     $('.template-selectors-undo-menu button').on('click', () => {
       this.setEditorContent(this.cachedFileContent);
       this.setFilename(this.cachedFilename);
+      this.selectedTemplateSelector.$dropdown.find('.dropdown-toggle-text').text(this.cachedDropdownToggleText);
       this.disableUndoTemplate();
     });
   }
@@ -81,7 +82,7 @@ export default class FileTemplateMediator {
   }
 
   selectTemplateType(item) {
-    const selectedTemplateSelector = this.findSelectorByKey(item.key);
+    this.selectedTemplateSelector = this.findSelectorByKey(item.key);
 
     this.templateSelectors.forEach((selector) => {
       if (selector.$dropdown !== null) {
@@ -89,7 +90,12 @@ export default class FileTemplateMediator {
       }
     });
 
-    selectedTemplateSelector.show();
+    this.selectedTemplateSelector.show();
+
+    this.cachedDropdownToggleText = this.selectedTemplateSelector
+      .$dropdown
+      .find('.dropdown-toggle-text')
+      .text();
 
     this.typeSelector.$dropdown
       .find('.dropdown-toggle-text')

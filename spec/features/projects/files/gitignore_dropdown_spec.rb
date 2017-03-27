@@ -28,4 +28,19 @@ feature 'User wants to add a .gitignore file', feature: true do
     expect(page).to have_content('/.bundle')
     expect(page).to have_content('# Gemfile.lock, .ruby-version, .ruby-gemset')
   end
+
+  scenario 'user can undo applying the .gitignore template', js: true, focus: true do
+    find('.js-gitignore-selector').click
+    wait_for_ajax
+    within '.gitignore-selector' do
+      find('.dropdown-input-field').set('rails')
+      find('.dropdown-content li', text: 'Rails').click
+    end
+    wait_for_ajax
+    
+    find('.template-selectors-undo-menu button').click
+
+    expect(page).not_to have_content('/.bundle')
+    expect(page).not_to have_content('# Gemfile.lock, .ruby-version, .ruby-gemset')
+  end
 end
