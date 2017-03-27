@@ -31,18 +31,20 @@ describe Projects::DeploymentsController do
     end
 
     context 'when environment has some metrics' do
-      let(:empty_metrics) { {
-        success: true,
-        metrics: {},
-        last_update: 42
-      } }
+      let(:empty_metrics) {
+        {
+          success: true,
+          metrics: {},
+          last_update: 42
+        }
+      }
 
       before do
         expect(deployment).to receive(:metrics).and_return(empty_metrics)
       end
 
       it 'returns a metrics JSON document' do
-        get :metrics, :environment_id => environment, :id => deployment, :namespace_id => project.namespace, :project_id => project
+        get :metrics, deployment_params
 
         expect(response).to be_ok
         expect(json_response['success']).to be(true)
