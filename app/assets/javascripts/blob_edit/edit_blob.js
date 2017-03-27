@@ -18,7 +18,7 @@ export default class EditBlob {
 
     // This prevents warnings re: automatic scrolling being logged
     this.editor.$blockScrolling = Infinity;
-    
+
     this.editor.focus();
 
     if (aceMode) {
@@ -27,7 +27,10 @@ export default class EditBlob {
   }
 
   initFileSelectors(currentAction) {
-    this.fileTemplateMediator = new TemplateSelectorMediator({ editor: this.editor, currentAction });
+    this.fileTemplateMediator = new TemplateSelectorMediator({
+      currentAction,
+      editor: this.editor,
+    });
   }
 
   initModePanesAndLinks() {

@@ -24,13 +24,9 @@ export default class FileTemplateMediator {
   initDropdowns() {
     if (this.currentAction === 'create') {
       this.typeSelector.show();
-      this.checkForMatchingTemplate();
     }
 
-    if (this.currentAction === 'edit') {
-      this.typeSelector.show();
-      this.checkForMatchingTemplate();
-    }
+    this.checkForMatchingTemplate();
   }
 
   initPageEvents() {
@@ -59,7 +55,7 @@ export default class FileTemplateMediator {
   disableUndoTemplate() {
     $('.template-selectors-undo-menu').addClass('hidden');
     this.cachedFileContent = null;
-    this.cachedFileContent = null;
+    this.cachedFilename = null;
     $('.template-selectors-undo-menu button').off('click');
   }
 
@@ -120,6 +116,7 @@ export default class FileTemplateMediator {
       const match = selector.config.pattern.test(currentInput);
 
       if (match) {
+        this.typeSelector.show();
         // Need to handle when filename changes after having matched
         this.selectTemplateType(selector.config);
       }
