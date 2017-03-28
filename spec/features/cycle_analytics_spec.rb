@@ -17,8 +17,9 @@ feature 'Cycle Analytics', feature: true, js: true do
     context 'when project is new' do
       before  do
         project.add_master(user)
-        mr.update(head_pipeline_id: pipeline.id)
+
         login_as(user)
+
         visit namespace_project_cycle_analytics_path(project.namespace, project)
         wait_for_ajax
       end
@@ -35,7 +36,7 @@ feature 'Cycle Analytics', feature: true, js: true do
 
     context "when there's cycle analytics data" do
       before do
-        project.team << [user, :master]
+        project.add_master(user)
 
         allow_any_instance_of(Gitlab::ReferenceExtractor).to receive(:issues).and_return([issue])
         create_cycle
@@ -71,7 +72,7 @@ feature 'Cycle Analytics', feature: true, js: true do
 
   context "as a guest" do
     before do
-      project.team << [guest, :guest]
+      project.add_guest(guest)
 
       allow_any_instance_of(Gitlab::ReferenceExtractor).to receive(:issues).and_return([issue])
       create_cycle
