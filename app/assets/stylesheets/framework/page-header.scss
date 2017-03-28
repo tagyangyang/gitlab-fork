@@ -1,5 +1,4 @@
 .page-content-header {
-  line-height: 34px;
   padding: 10px 0;
   margin-bottom: 0;
 
@@ -59,4 +58,9 @@
       margin: 0 2px 0 3px;
     }
   }
+}
+
+.header-main-content-flex {
+  display: flex;
+  align-items: center;
 }

@@ -1,12 +1,16 @@
+- status = @pipeline.detailed_status(current_user)
 .page-content-header
-  .header-main-content
-    = render 'ci/status/badge', status: @pipeline.detailed_status(current_user)
-    %strong Pipeline ##{@pipeline.id}
-    triggered #{time_ago_with_tooltip(@pipeline.created_at)}
-    - if @pipeline.user
-      by
-      = user_avatar(user: @pipeline.user, size: 24)
-      = user_link(@pipeline.user)
+  .header-main-content.header-main-content-flex
+    = render 'ci/status/badge', status: status, css_class: 'hidden-xs'
+    .visible-xs.pipeline-status-icon.ci-status-icon{ class: "ci-status-icon-#{status.group}" }
+      = custom_icon(@pipeline.detailed_status(current_user).icon)
+    .header-title
+      %strong Pipeline ##{@pipeline.id}
+      triggered #{time_ago_with_tooltip(@pipeline.created_at)}
+      - if @pipeline.user
+        by
+        = user_avatar(user: @pipeline.user, size: 24)
+        = user_link(@pipeline.user)
   .header-action-buttons
     - if can?(current_user, :update_pipeline, @pipeline.project)
       - if @pipeline.retryable?
