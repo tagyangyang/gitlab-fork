@@ -6,8 +6,8 @@ This page gathers all the resources for the topic "Authentication" within GitLab
 
 ### General documentation
 
-- [SSH](../ssh/README.md)
-- [Two-Factor Authentication (2FA)](../user/profile/account/two_factor_authentication.md#two-factor-authentication)
+- [SSH](../../ssh/README.md)
+- [Two-Factor Authentication (2FA)](../../user/profile/account/two_factor_authentication.md#two-factor-authentication)
 
 ### Articles
 
@@ -18,13 +18,13 @@ This page gathers all the resources for the topic "Authentication" within GitLab
 
 - [GitLab as OAuth2 authentication service provider](../integration/oauth_provider.md#introduction-to-oauth)
 
-## GitLab administrator
+## GitLab administrators
 
 ### General documentation
 
-- [LDAP (Community Edition)](../administration/auth/ldap.md)
-- [LDAP (Enterprise Edition)](../../ee/administration/auth/ldap-ee.md)
-- [Enforce Two-factor Authentication (2FA)](../security/two_factor_authentication.md#enforce-two-factor-authentication-2fa)
+- [LDAP (Community Edition)](../../administration/auth/ldap.md)
+- [LDAP (Enterprise Edition)](https://docs.gitlab.com/ee/administration/auth/ldap-ee.md)
+- [Enforce Two-factor Authentication (2FA)](../../security/two_factor_authentication.md#enforce-two-factor-authentication-2fa)
 
 ### Articles
 
@@ -36,19 +36,20 @@ This page gathers all the resources for the topic "Authentication" within GitLab
 ### Integrations
 
 - [OmniAuth](../../integration/omniauth.md)
-- [Authentiq OmniAuth Provider](../administration/auth/authentiq.md#authentiq-omniauth-provider)
-- [Atlassian Crowd OmniAuth Provider](../administration/auth/crowd.html)
+- [Authentiq OmniAuth Provider](../../administration/auth/authentiq.md#authentiq-omniauth-provider)
+- [Atlassian Crowd OmniAuth Provider](../../administration/auth/crowd.html)
 - [CAS OmniAuth Provider](../../integration/cas.md)
 - [SAML OmniAuth Provider](../../integration/saml.md)
-- [Okta SSO provider](https://docs.gitlab.com/ce/administration/auth/okta.md)
+- [Okta SSO provider](../../administration/auth/okta.md)
 - [Kerberos integration (GitLab EE)](https://docs.gitlab.com/ee/integration/kerberos.html)
 
 ## API
 
-- [OAuth 2 Tokens](../api/README.md#oauth-2-tokens)
-- [Private Tokens](../api/README.html#private-tokens)
+- [OAuth 2 Tokens](../../api/README.md#oauth-2-tokens)
+- [Private Tokens](../../api/README.html#private-tokens)
 - [Impersonation tokens](../api/README.html#impersonation-tokens)
-- [GitLab as an OAuth2 provider](../api/oauth2.html#gitlab-as-an-oauth2-provider)
+- [GitLab as an OAuth2 provider](../../api/oauth2.html#gitlab-as-an-oauth2-provider)
+- [GitLab Runner API - Authentication](../../api/ci/runners.html#authentication)
 
 ## Thirdy-part resources
 
