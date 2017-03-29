@@ -1,8 +1,8 @@
 # How to Configure LDAP with GitLab CE
 
-> Type: admin guide ||
-> Level: intermediary ||
-> Author: [Chris Wilson](https://gitlab.com/MrChrisW)
+> **Type:** admin guide ||
+> **Level:** intermediary ||
+> **Author:** [Chris Wilson](https://gitlab.com/MrChrisW)
 
 ## Introduction
 
@@ -28,7 +28,7 @@ For example, [Active Directory](https://technet.microsoft.com/en-us/library/hh83
 - [OpenDJ](https://forgerock.org/opendj/)
 - [ApacheDS](https://directory.apache.org/)
 
->GitLab uses the [Net::LDAP](https://rubygems.org/gems/net-ldap) library under the hood. This means it supports all [IETF](https://tools.ietf.org/html/rfc2251) compliant LDAPv3 servers.
+> GitLab uses the [Net::LDAP](https://rubygems.org/gems/net-ldap) library under the hood. This means it supports all [IETF](https://tools.ietf.org/html/rfc2251) compliant LDAPv3 servers.
 
 ### Active Directory (AD)
 
@@ -38,16 +38,19 @@ We won't cover the installation and configuration of Windows Server or Active Di
 
 - Install Active Directory Domain Services (AD DS) (_technet.microsoft.com_)- [Install Active Directory Domain Services](https://technet.microsoft.com/windows-server-docs/identity/ad-ds/deploy/install-active-directory-domain-services--level-100-#BKMK_PS)
 
->**Shortcut:** You can quickly install AD DS via PowerShell using
+> **Shortcut:** You can quickly install AD DS via PowerShell using
 `Install-WindowsFeature AD-Domain-Services -IncludeManagementTools`
 
 ### Creating an AD **OU** structure
 
 Configuring organizational units (**OU**s) is an important part of setting up Active Directory. **OU**s form the base for an entire organizational structure. Using GitLab as an example we have designed the **OU** structure below using the geographic **OU** model. In the Geographic Model we separate **OU**s for different geographic regions.
 
-GitLab **OU** Design            |  GitLab AD Structure
-:-------------------------:|:-------------------------:
-![GitLab OU Design][gitlab_ou]  |  ![GitLab AD Structure][ldap_ou]
+| GitLab **OU** Design           |  GitLab AD Structure             |
+| :----------------------------: | :------------------------------: |
+| ![GitLab OU Design][gitlab_ou] |  ![GitLab AD Structure][ldap_ou] |
+
+[gitlab_ou]: img/how_to_configure_ldap_gitlab_ce/gitlab_ou.png
+[ldap_ou]: img/how_to_configure_ldap_gitlab_ce/ldap_ou.gif
 
 Using PowerShell you can output the **OU** structure as a table (_all names are examples only_):
 
@@ -96,15 +99,15 @@ People Ops US     GitLab.org/GitLab INT/Global Groups/People Ops US
 Global Admins     GitLab.org/GitLab INT/Global Groups/Global Admins
 ```
 
->See [more information](https://technet.microsoft.com/en-us/library/ff730967.aspx) on searching Active Directory with Windows PowerShell from [The Scripting Guys](https://technet.microsoft.com/en-us/scriptcenter/dd901334.aspx)
+> See [more information](https://technet.microsoft.com/en-us/library/ff730967.aspx) on searching Active Directory with Windows PowerShell from [The Scripting Guys](https://technet.microsoft.com/en-us/scriptcenter/dd901334.aspx)
 
 ## GitLab LDAP Configuration
 
 The initial configuration of LDAP in GitLab requires changes to the `gitlab.rb` configuration file. Below is an example of a complete configuration using an Active Directory.
 
-The two Active Directory specific values are `active_directory: true` and `uid: 'sAMAccountName'`. `sAMAccountName` is an attribute returned by Active Directory used for GitLab usernames. See the example output from `ldapsearch` for a full list of attributes a "person" object (user) has in **AD** - [ldapsearch example](#using-ldapsearch-unix)
+The two Active Directory specific values are `active_directory: true` and `uid: 'sAMAccountName'`. `sAMAccountName` is an attribute returned by Active Directory used for GitLab usernames. See the example output from `ldapsearch` for a full list of attributes a "person" object (user) has in **AD** - [`ldapsearch` example](#using-ldapsearch-unix)
 
->Both group_base and admin_group configuration options are only available in GitLab Enterprise Edition. See [GitLab EE - LDAP Features](#gitlab-enterprise-edition---ldap-features)
+> Both group_base and admin_group configuration options are only available in GitLab Enterprise Edition. See [GitLab EE - LDAP Features](#gitlab-enterprise-edition---ldap-features)
 
 ### Example `gitlab.rb` LDAP
 
@@ -135,7 +138,7 @@ Security is an important aspect when deploying an LDAP server. By default, LDAP 
 
 Securing LDAP (enabling LDAPS) on Windows Server 2012 involves installing a valid SSL certificate. For full details see Microsoft's guide [How to enable LDAP over SSL with a third-party certification authority](https://support.microsoft.com/en-us/help/321051/how-to-enable-ldap-over-ssl-with-a-third-party-certification-authority)
 
->By default a LDAP service listens for connections on TCP and UDP port 389. LDAPS (LDAP over SSL) listens on port 636
+> By default a LDAP service listens for connections on TCP and UDP port 389. LDAPS (LDAP over SSL) listens on port 636
 
 ### Testing you AD Server
 
@@ -243,7 +246,7 @@ result: 0 Success
 
 After configuring LDAP, basic authentication will be available. Users can then login using their directory credentials. An extra tab is added to the GitLab login screen for the configured LDAP server (e.g "**GitLab AD**").
 
-![GitLab OU Structure](/images/blogimages/gitlab-ldap/user_auth.gif)
+![GitLab OU Structure](img/how_to_configure_ldap_gitlab_ce/user_auth.gif)
 
 Users that are removed from the LDAP base group (e.g `OU=GitLab INT,DC=GitLab,DC=org`) will be **blocked** in GitLab. [More information](https://docs.gitlab.com/ee/administration/auth/ldap.html#security) on LDAP security.
 
