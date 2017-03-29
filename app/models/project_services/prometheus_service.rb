@@ -72,11 +72,11 @@ class PrometheusService < MonitoringService
   def calculate_reactive_cache(environment_slug, timeframe_start, timeframe_end)
     return unless active? && project && !project.pending_delete?
 
-    timeframe_start = Time.parse(timeframe_start) unless timeframe_start.nil?
-    timeframe_end = Time.parse(timeframe_end) unless timeframe_end.nil?
+    timeframe_start = Time.parse(timeframe_start) if timeframe_start
+    timeframe_end = Time.parse(timeframe_end) if timeframe_end
 
-    timeframe_start = 8.hours.ago if timeframe_start.nil?
-    timeframe_end = Time.now.utc if timeframe_end.nil?
+    timeframe_start ||= 8.hours.ago
+    timeframe_end ||= Time.now.utc
 
     memory_query = %{(sum(container_memory_usage_bytes{container_name="app",environment="#{environment_slug}"}) / count(container_memory_usage_bytes{container_name="app",environment="#{environment_slug}"})) /1024/1024}
     cpu_query = %{sum(rate(container_cpu_usage_seconds_total{container_name="app",environment="#{environment_slug}"}[2m])) / count(container_cpu_usage_seconds_total{container_name="app",environment="#{environment_slug}"}) * 100}
