@@ -20,7 +20,7 @@ tutorials, technical overviews, blog posts) and videos.
     - Staging
     - Production
     - Feedback
-- Authentication
+- [Authentication](authentication/)
 - [Continuous Integration (GitLab CI)](../ci/)
 - GitLab Flow (branching strategy)
 - [GitLab Pages](../user/project/pages/)
