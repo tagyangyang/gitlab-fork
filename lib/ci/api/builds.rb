@@ -92,16 +92,18 @@ module Ci
           content_range = request.headers['Content-Range']
           content_range = content_range.split('-')
 
-          current_length = build.trace_length
-          unless current_length == content_range[0].to_i
-            return error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{current_length}" })
+          build.writeable_trace.use do |trace|
+            current_length = trace.size
+            unless current_length == content_range[0].to_i
+              return error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{current_length}" })
+            end
+
+            trace.append(request.body.read, content_range[0].to_i)
+
+            status 202
+            header 'Build-Status', build.status
+            header 'Range', "0-#{trace.size}"
           end
-
-          build.append_trace(request.body.read, content_range[0].to_i)
-
-          status 202
-          header 'Build-Status', build.status
-          header 'Range', "0-#{build.trace_length}"
         end
 
         # Authorize artifacts uploading for build - Runners only

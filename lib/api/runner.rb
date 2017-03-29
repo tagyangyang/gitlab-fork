@@ -145,16 +145,18 @@ module API
         content_range = request.headers['Content-Range']
         content_range = content_range.split('-')
 
-        current_length = job.trace_length
-        unless current_length == content_range[0].to_i
-          return error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{current_length}" })
+        job.writeable_trace.use do |trace|
+          current_length = trace.size
+          unless current_length == content_range[0].to_i
+            return error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{current_length}" })
+          end
+
+          trace.append(request.body.read, content_range[0].to_i)
+
+          status 202
+          header 'Job-Status', job.status
+          header 'Range', "0-#{trace.size}"
         end
-
-        job.append_trace(request.body.read, content_range[0].to_i)
-
-        status 202
-        header 'Job-Status', job.status
-        header 'Range', "0-#{job.trace_length}"
       end
 
       desc 'Authorize artifacts uploading for job' do
