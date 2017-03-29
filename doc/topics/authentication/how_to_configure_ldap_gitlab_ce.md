@@ -262,5 +262,4 @@ have extended functionalities with LDAP, such as:
 - Updating user permissions
 - Multiple LDAP servers
 
-Read through the article on [LDAP for GitLab EE]() for an overview.
-
+Read through the article on [LDAP for GitLab EE](https://docs.gitlab.com/ee/topics/authentication/how_to_configure_ldap_gitlab_ee.html) for an overview.
