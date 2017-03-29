@@ -8,9 +8,7 @@ function Autosave(field, key) {
   this.key = "autosave/" + key;
   this.field.data("autosave", this);
   this.restore();
-  this.field.on("input", () => {
-    return this.save();
-  });
+  this.field.on("input", () => this.save);
 }
 
 Autosave.prototype.restore = function() {
