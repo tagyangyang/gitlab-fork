@@ -436,4 +436,8 @@ module ProjectsHelper
     end
     options_for_select(levels_options_array, selected_level)
   end
+
+  def load_pipeline_status(projects)
+    Ci::PipelineStatus.load_in_batch_for_projects(projects)
+  end
 end
