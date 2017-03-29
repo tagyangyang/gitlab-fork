@@ -85,6 +85,7 @@ window.DropzoneInput = (function() {
           "opacity": 0.7,
           "display": "inherit"
         });
+        form_textarea.focus();
       },
       queuecomplete: function() {
         uploadProgress.text("");
@@ -126,13 +127,15 @@ window.DropzoneInput = (function() {
     pasteText = function(text) {
       var afterSelection, beforeSelection, caretEnd, caretStart, textEnd;
       var formattedText = text + "\n\n";
-      caretStart = $(child)[0].selectionStart;
-      caretEnd = $(child)[0].selectionEnd;
+      const textarea = child.get(0);
+      caretStart = textarea.selectionStart;
+      caretEnd = textarea.selectionEnd;
       textEnd = $(child).val().length;
       beforeSelection = $(child).val().substring(0, caretStart);
       afterSelection = $(child).val().substring(caretEnd, textEnd);
       $(child).val(beforeSelection + formattedText + afterSelection);
-      child.get(0).setSelectionRange(caretStart + formattedText.length, caretEnd + formattedText.length);
+      textarea.setSelectionRange(caretStart + formattedText.length, caretEnd + formattedText.length);
+      textarea.style.height = `${textarea.scrollHeight}px`;
       return form_textarea.trigger("input");
     };
     getFilename = function(e) {
@@ -176,7 +179,7 @@ window.DropzoneInput = (function() {
     };
     insertToTextArea = function(filename, url) {
       return $(child).val(function(index, val) {
-        return val.replace("{{" + filename + "}}", url + "\n");
+        return val.replace("{{" + filename + "}}", url);
       });
     };
     appendToTextArea = function(url) {
