@@ -28,7 +28,7 @@ This page gathers all the resources for the topic "Authentication" within GitLab
 
 ### Articles
 
-- [How to Configure LDAP with GitLab CE/EE](how_to_configure_ldap_gitlab_ce.md)
+- [How to Configure LDAP with GitLab CE](how_to_configure_ldap_gitlab_ce.md)
 - [How to Configure LDAP with GitLab EE](https://docs.gitlab.com/ee/topics/authentication/how_to_configure_ldap_gitlab_ee.md)
 - [Feature Highlight: LDAP Integration](https://about.gitlab.com/2014/07/10/feature-highlight-ldap-sync/)
 - [Debugging LDAP](https://about.gitlab.com/handbook/support/workflows/ldap/debugging_ldap.html)
