@@ -74,6 +74,7 @@ class Project < ActiveRecord::Base
 
   attr_accessor :new_default_branch
   attr_accessor :old_path_with_namespace
+  attr_accessor :pipeline_status
 
   alias_attribute :title, :name
 
@@ -1200,6 +1201,7 @@ class Project < ActiveRecord::Base
     end
   end
 
+  # Lazy loading of the `pipeline_status` attribute
   def pipeline_status
     @pipeline_status ||= Ci::PipelineStatus.load_for_project(self)
   end

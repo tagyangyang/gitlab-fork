@@ -5,10 +5,69 @@ describe Ci::PipelineStatus do
   let(:pipeline_status) { described_class.new(project) }
 
   describe '.load_for_project' do
-    it "loads the status" do
+    it 'loads the status' do
       expect_any_instance_of(described_class).to receive(:load_status)
 
       described_class.load_for_project(project)
+    end
+  end
+
+  describe 'loading in batches' do
+    let(:status) { 'success' }
+    let(:sha) { '424d1b73bc0d3cb726eb7dc4ce17a4d48552f8c6' }
+    let(:project_without_status) { create(:project) }
+
+    describe '.load_in_batch_for_projects' do
+      it 'preloads pipeline_status on projects' do
+        described_class.load_in_batch_for_projects [project]
+
+        # Don't call the accessor that would lazy load the variable
+        expect(project.instance_variable_get('@pipeline_status')).to be_a(Ci::PipelineStatus)
+      end
+
+      it 'loads the status from a commit when it was not in redis' do
+        fake_pipeline = Ci::PipelineStatus.new(project_without_status, { sha: nil, status: nil, loaded_from_cache: false })
+        expect(Ci::PipelineStatus).to receive(:new).
+                                        with(project_without_status, { sha: nil, status: nil, loaded_from_cache: false }).
+                                        and_return(fake_pipeline)
+        expect(Gitlab::Redis).to receive(:with).exactly(1).and_call_original
+        expect(fake_pipeline).to receive(:load_from_commit)
+        expect(fake_pipeline).to receive(:store_in_cache)
+
+        described_class.load_in_batch_for_projects [project_without_status]
+      end
+
+      describe 'when a status was cached in redis' do
+        before do
+          Gitlab::Redis.with { |redis| redis.mapped_hmset("projects/#{project.id}/build_status", { sha: sha, status: status }) }
+        end
+
+        it 'loads the correct status' do
+          described_class.load_in_batch_for_projects [project]
+
+          pipeline_status = project.instance_variable_get('@pipeline_status')
+
+          expect(pipeline_status.sha).to eq(sha)
+          expect(pipeline_status.status).to eq(status)
+        end
+
+        it "doesn't load the status separatly" do
+          expect_any_instance_of(described_class).not_to receive(:load_status)
+
+          described_class.load_in_batch_for_projects [project]
+        end
+      end
+    end
+
+    describe '.cached_results_for_projects' do
+      it 'loads a status from redis for all projects' do
+        Gitlab::Redis.with { |redis| redis.mapped_hmset("projects/#{project.id}/build_status", { sha: sha, status: status }) }
+
+        result = [{ loaded_from_cache: false, sha: nil, status: nil },
+                  { loaded_from_cache: true, sha: sha, status: status }]
+
+        expect(described_class.cached_results_for_projects([project_without_status, project])).to eq(result)
+      end
     end
   end
 
@@ -157,6 +216,12 @@ describe Ci::PipelineStatus do
     describe '#has_cache?' do
       it 'knows the status is cached' do
         expect(pipeline_status.has_cache?).to be_truthy
+      end
+
+      it "only queries redis once" do
+        expect(Gitlab::Redis).to receive(:with).exactly(1).and_call_original
+
+        2.times { pipeline_status.has_cache? }
       end
     end
 

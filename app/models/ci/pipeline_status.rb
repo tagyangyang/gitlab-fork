@@ -7,16 +7,44 @@ module Ci
 
     delegate :commit, to: :project
 
+    def self.load_in_batch_for_projects(projects)
+      cached_results_for_projects(projects).zip(projects).each do |result, project|
+        project.pipeline_status = Ci::PipelineStatus.new(project, result)
+        project.pipeline_status.load_status unless project.pipeline_status.loaded?
+      end
+    end
+
+    def self.cached_results_for_projects(projects)
+      result = Gitlab::Redis.with do |redis|
+        redis.multi do
+          projects.each do |project|
+            cache_key = cache_key_for_project(project)
+            redis.exists(cache_key)
+            redis.hmget(cache_key, :sha, :status)
+          end
+        end
+      end
+      result.each_slice(2).map do |(cache_key_exists, (sha, status))|
+        loaded = (cache_key_exists == true)
+        { loaded_from_cache: loaded, sha: sha, status: status }
+      end
+    end
+
     def self.load_for_project(project)
       new(project).tap do |status|
         status.load_status
       end
     end
 
-    def initialize(project, sha: nil, status: nil)
+    def self.cache_key_for_project(project)
+      "projects/#{project.id}/build_status"
+    end
+
+    def initialize(project, sha: nil, status: nil, loaded_from_cache: nil)
       @project = project
       @sha = sha
       @status = status
+      @has_cache = @loaded = loaded_from_cache
     end
 
     def has_status?
@@ -70,7 +98,9 @@ module Ci
     end
 
     def has_cache?
-      Gitlab::Redis.with do |redis|
+      return @has_cache unless @has_cache.nil?
+
+      @has_cache = Gitlab::Redis.with do |redis|
         redis.exists(cache_key)
       end
     end
@@ -80,7 +110,7 @@ module Ci
     end
 
     def cache_key
-      "projects/#{project.id}/build_status"
+      self.class.cache_key_for_project(project)
     end
   end
 end
