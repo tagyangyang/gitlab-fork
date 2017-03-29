@@ -75,6 +75,9 @@ require('./empty_state');
             this.loadIssues(true)
               .then(() => {
                 this.filterLoading = false;
+              })
+              .catch(() => {
+                // an empty catch!
               });
           }
         },

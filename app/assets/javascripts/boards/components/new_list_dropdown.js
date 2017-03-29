@@ -1,4 +1,5 @@
-/* eslint-disable comma-dangle, func-names, no-new, space-before-function-paren, one-var */
+/* eslint-disable comma-dangle, func-names, no-new, space-before-function-paren, one-var,
+   promise/catch-or-return */
 
 (() => {
   window.gl = window.gl || {};
@@ -30,8 +31,8 @@
             .then((resp) => {
               callback(resp);
             })
-            .catch(() => {
-              // An empty catch!
+            .fail(() => {
+              // an empty catch!
             });
         },
         renderRow (label) {
