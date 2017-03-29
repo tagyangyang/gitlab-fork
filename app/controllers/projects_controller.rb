@@ -220,18 +220,12 @@ class ProjectsController < Projects::ApplicationController
     text = params[:text]
     commands = []
 
-    # Process slash commands
-    if params[:noteable_type]
-      noteable_association = params[:noteable_type].tableize
-      noteables = @project.public_send(noteable_association)
-      noteable = params[:noteable_id] ? noteables.find(params[:noteable_id]) : noteables.new(author: current_user)
+    if # is issuable
+      issuble = # find issuable
+      
+      slash_commands_service = SlashCommands::InterpretService.new(project, current_user)
 
-      note = noteable.notes.new(note: text, author: current_user)
-      slash_commands_service = Notes::SlashCommandsService.new(project, current_user)
-
-      if slash_commands_service.supported?(note)
-        text, commands = slash_commands_service.explain_commands(note)
-      end
+      text, commands = slash_commands_service.explain(text, issuable)
     end
 
     ext = Gitlab::ReferenceExtractor.new(@project, current_user)
