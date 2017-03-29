@@ -62,7 +62,7 @@ The table below shows what kind of documentation goes where.
 1. The `doc/topics/` directory holds topic-related technical content. Create
    `doc/topics/topic-name/subtopic-name/index.md` when subtopics become necessary.
    Note that `topics` holds the index page per topic, and technical articles. General
-   user- and admin- related documentation, should be placed accordingly.
+   user- and admin- related documentation should be placed accordingly.
 
 ---
 
