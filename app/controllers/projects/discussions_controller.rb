@@ -1,8 +1,24 @@
 class Projects::DiscussionsController < Projects::ApplicationController
   before_action :module_enabled
   before_action :merge_request
-  before_action :discussion
-  before_action :authorize_resolve_discussion!
+  before_action :discussion, only: [:resolve, :unresolve]
+  before_action :authorize_resolve_discussion!, only: [:resolve, :unresolve]
+
+  def index
+    commit = Discussions::CommitWithUnresolvedDiscussionsService.new(project, current_user).execute(merge_request)
+
+    return render_404 unless commit
+
+    respond_to do |format|
+      format.patch  do
+        send_git_patch @project.repository, commit.diff_refs
+      end
+
+      format.diff do
+        send_git_diff @project.repository, commit.diff_refs
+      end
+    end
+  end
 
   def resolve
     Discussions::ResolveService.new(project, current_user, merge_request: merge_request).execute(discussion)

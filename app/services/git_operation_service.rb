@@ -85,6 +85,8 @@ class GitOperationService
       raise Repository::CommitError.new('Failed to create commit')
     end
 
+    return newrev unless branch_name
+
     branch = repository.find_branch(branch_name)
     oldrev = find_oldrev_from_branch(newrev, branch)
 

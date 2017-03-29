@@ -530,6 +530,12 @@ ul.notes {
     border-bottom-left-radius: 0;
   }
 
+  // Position correctly when not all 3 buttons are displayed
+  .btn.download-discussions-as-patch-btn a {
+    padding: 0;
+    line-height: 0;
+  }
+
   .btn.discussion-create-issue-btn {
     margin-left: -4px;
     border-radius: 0;

@@ -1,0 +1,50 @@
+#modal_download_as_patch.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %a.close{ href: "#", "data-dismiss" => "modal" } ×
+        %h3 Download patch with code comments for unresolved discussions
+      .modal-body
+        %p
+          %strong Step 1.
+          Fetch and check out the branch for this merge request
+        = clipboard_button(clipboard_target: "pre#download-as-patch-1", title: "Copy commands to clipboard")
+        %pre.dark#download-as-patch-1
+          - if @merge_request.for_fork?
+            :preserve
+              git fetch #{h default_url_to_repo(@merge_request.source_project)} #{h @merge_request.source_branch}
+              git checkout -b #{h @merge_request.source_project_path}-#{h @merge_request.source_branch} FETCH_HEAD
+          - else
+            :preserve
+              git fetch origin
+              git checkout -b #{h @merge_request.source_branch} origin/#{h @merge_request.source_branch}
+
+        %p
+          %strong Step 2.
+          Download and apply patch that adds code comments for unresolved discussions
+        = clipboard_button(clipboard_target: "pre#download-as-patch-2", title: "Copy commands to clipboard")
+        %pre.dark#download-as-patch-2
+          - url = namespace_project_merge_request_discussions_url(@merge_request.target_project.namespace, @merge_request.target_project, @merge_request, format: :patch)
+          :preserve
+            PATCH_URL="#{h url}"
+
+            # To apply patch as a new commit
+            curl $PATCH_URL | git am
+
+            # To apply patch to your staging area without creating a new commit
+            curl $PATCH_URL | git apply-patch
+
+        %p
+          %strong Step 3.
+          Make changes based on the new 'FIXME' comments
+
+:javascript
+  $(function(){
+    var modal = $('#modal_download_as_patch').modal({modal: true, show:false});
+    $('.download-discussions-as-patch').bind("click", function(){
+      modal.show();
+    });
+    $('.modal-header .close').bind("click", function(){
+      modal.hide();
+    })
+  })

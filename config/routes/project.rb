@@ -120,7 +120,7 @@ constraints(ProjectUrlConstrainer.new) do
           get :new_diffs, path: 'new/diffs'
         end
 
-        resources :discussions, only: [], constraints: { id: /\h{40}/ } do
+        resources :discussions, only: [:index], constraints: { id: /\h{40}/ } do
           member do
             post :resolve
             delete :resolve, action: :unresolve
