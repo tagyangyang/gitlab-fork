@@ -8,7 +8,7 @@ module MergeRequests
 
       SystemNoteService.new_issue_branch(issue, project, current_user, branch_name)
 
-      new_merge_request = create(merge_request)
+      new_merge_request = create(build_merge_request)
 
       if new_merge_request.valid?
         success(new_merge_request)
@@ -35,7 +35,7 @@ module MergeRequests
       project.default_branch || 'master'
     end
 
-    def merge_request
+    def build_merge_request
       MergeRequests::BuildService.new(project, current_user, merge_request_params).execute
     end
 
