@@ -125,12 +125,15 @@ content on the Users#show page.
     }
 
     loadTab(source, action) {
+      // Ensure we are requesting a .json endpoint
+      const endpoint = gl.text.endsWith(source, '.json') ? source : `${source}.json`;
+
       return $.ajax({
         beforeSend: () => this.toggleLoading(true),
         complete: () => this.toggleLoading(false),
         dataType: 'json',
         type: 'GET',
-        url: source,
+        url: endpoint,
         success: (data) => {
           const tabSelector = `div#${action}`;
           this.$parentEl.find(tabSelector).html(data.html);

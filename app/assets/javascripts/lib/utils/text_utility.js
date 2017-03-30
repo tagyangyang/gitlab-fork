@@ -188,5 +188,9 @@ require('vendor/latinise');
     gl.text.slugify = function(str) {
       return str.trim().toLowerCase().latinise();
     };
+    // We can replace this with a String.endsWith polyfill in the future
+    gl.text.endsWith = function(str, suffix) {
+      return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    };
   })(window);
 }).call(window);
