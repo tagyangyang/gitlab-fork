@@ -19,7 +19,9 @@ module Gitlab
           settings = ::ApplicationSetting.last
         end
 
-        settings ||= ::ApplicationSetting.create_from_defaults unless ActiveRecord::Migrator.needs_migration?
+        settings ||= begin
+          ::ApplicationSetting.create_from_defaults unless ActiveRecord::Migrator.needs_migration?
+        end
       end
 
       settings || in_memory_application_settings
