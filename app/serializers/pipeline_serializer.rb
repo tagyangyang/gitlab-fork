@@ -38,16 +38,26 @@ class PipelineSerializer < BaseSerializer
   private
 
   def preload_commit_authors(resource)
-    emails = resource.map(&:git_author_email).compact.map(&:downcase).uniq
-    commit_authors = find_users_by_emails(emails)
-    author_map = index_users_by_emails(commit_authors)
+    emails = find_unique_author_emails(resource)
+    authors = find_authors_by_emails(emails)
+    author_map = index_authors_by_emails(authors)
 
     resource.each do |pipeline|
       pipeline.commit.author = author_map[pipeline.git_author_email]
     end
   end
 
-  def find_users_by_emails(emails)
+  def find_unique_author_emails(resource)
+    emails = Set.new
+
+    resource.each do |r|
+      emails << r.git_author_email.downcase if r.git_author_email
+    end
+
+    emails.to_a
+  end
+
+  def find_authors_by_emails(emails)
     sql = <<-SQL.strip_heredoc
       SELECT users.*, emails.email AS alternative_email
         FROM users LEFT OUTER JOIN emails ON emails.user_id = users.id
@@ -58,9 +68,9 @@ class PipelineSerializer < BaseSerializer
     User.find_by_sql([sql, emails, emails])
   end
 
-  def index_users_by_emails(commit_authors)
-    commit_authors.index_by do |author|
-      author.alternative_email || author.email
+  def index_authors_by_emails(authors)
+    authors.index_by do |a|
+      a.alternative_email || a.email
     end
   end
 end
