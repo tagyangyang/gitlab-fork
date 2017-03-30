@@ -437,10 +437,20 @@ module Ci
     end
 
     def latest_builds_with_status(*scopes)
-      builds_with_status(*scopes).inject({}) do |result, build|
-        result[build.name] = [result[build.name], build].compact.max_by(&:id)
-        result
-      end.values
+      array_or_relation = builds_with_status(*scopes)
+
+      case array_or_relation
+      when ActiveRecord::Relation
+        array_or_relation.latest
+      when Array
+        array_or_relation.each_with_object({}) do |build, result|
+          result[build.name] =
+            [result[build.name], build].compact.max_by(&:id)
+        end.values
+      else
+        raise TypeError
+          .new("It should be a relation or array: #{array_or_relation}")
+      end
     end
   end
 end
