@@ -129,7 +129,7 @@ feature 'Issue Sidebar', feature: true do
 
     context 'mobile sidebar' do
       it 'collapses the sidebar for small screens' do
-        expect(page).to_not have_css('aside.right-sidebar.right-sidebar-collapsed')
+        expect(page).not_to have_css('aside.right-sidebar.right-sidebar-collapsed')
       end
     end
   end
