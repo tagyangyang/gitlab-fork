@@ -214,7 +214,7 @@ module Ci
     end
 
     def retryable?
-      builds.latest.failed_or_canceled.any?(&:retryable?)
+      latest_builds_with_status(:failed, :canceled).any?(&:retryable?)
     end
 
     def cancelable?
@@ -403,18 +403,32 @@ module Ci
     # collection of pipelines, we don't want to do N+1 queries to get
     # the information we want. We just want to use Ruby to find the
     # information we want from the fully preloaded data.
-    def builds_with_status(scope)
+    def builds_with_status(*scopes)
+      scopes.map!(&:to_s)
+
+      loaded_builds&.select do |build|
+        scopes.include?(build.status)
+      end || builds.where(status: scopes) # Fallback to use a plain query
+    end
+
+    def loaded_builds
       if builds.loaded?
-        builds.select(&:"#{scope}?")
+        builds
       elsif statuses.loaded?
-        builds_from_statuses.select(&:"#{scope}?")
-      else # Fallback to use a plain query
-        builds.public_send(scope)
+        builds_from_statuses
       end
     end
 
     def builds_from_statuses
-      statuses.select { |status| status.is_a?(Ci::Build) }
+      @builds_from_statuses ||=
+        statuses.select { |status| status.is_a?(Ci::Build) }
+    end
+
+    def latest_builds_with_status(*scopes)
+      builds_with_status(*scopes).inject({}) do |result, build|
+        result[build.name] = [result[build.name], build].compact.max_by(&:id)
+        result
+      end.values
     end
   end
 end
