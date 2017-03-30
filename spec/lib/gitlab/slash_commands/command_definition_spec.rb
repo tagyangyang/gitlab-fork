@@ -170,4 +170,43 @@ describe Gitlab::SlashCommands::CommandDefinition do
       end
     end
   end
+
+  describe '#humanize' do
+    context 'when the command is not available' do
+      before do
+        subject.condition_block = proc { false }
+        subject.humanized = 'Explanation'
+      end
+
+      it 'returns nil' do
+        result = subject.humanize({}, {}, nil)
+
+        expect(result).to eq nil
+      end
+    end
+
+    context 'when the explanation is a static string' do
+      before do
+        subject.humanized = 'Explanation'
+      end
+
+      it 'returns this static string' do
+        result = subject.humanize({}, {}, nil)
+
+        expect(result).to eq 'Explanation'
+      end
+    end
+
+    context 'when the explanation is dynamic' do
+      before do
+        subject.humanized = proc { |arg| "Dynamic #{arg}" }
+      end
+
+      it 'invokes the proc' do
+        result = subject.humanize({}, {}, 'explanation')
+
+        expect(result).to eq 'Dynamic explanation'
+      end
+    end
+  end
 end

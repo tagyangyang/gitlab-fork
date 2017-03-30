@@ -33,7 +33,7 @@ module Gitlab
         return unless available?(opts)
 
         if humanized.respond_to?(:call)
-          execute_block(humanized, context, opts, arg)
+          execute_block(humanized, context, arg)
         else
           humanized
         end
@@ -41,15 +41,7 @@ module Gitlab
 
       def execute(context, opts, arg)
         return if noop? || !available?(opts)
-        execute_block(action_block, context, opts, arg)
-      end
-
-      def execute_block(block, context, opts, arg)
-        if arg.present?
-          context.instance_exec(arg, &block)
-        elsif block.arity == 0
-          context.instance_exec(&block)
-        end
+        execute_block(action_block, context, arg)
       end
 
       def to_h(opts)
@@ -65,6 +57,16 @@ module Gitlab
           description: desc,
           params: params
         }
+      end
+
+      private
+
+      def execute_block(block, context, arg)
+        if arg.present?
+          context.instance_exec(arg, &block)
+        elsif block.arity == 0
+          context.instance_exec(&block)
+        end
       end
     end
   end
