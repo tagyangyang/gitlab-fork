@@ -102,13 +102,12 @@ ul.notes {
 
     .note-awards {
       .js-awards-block {
-        padding: 2px;
-        margin-top: 10px;
+        margin-bottom: 16px;
       }
     }
 
     .note-header {
-      padding-bottom: 3px;
+      padding-bottom: 8px;
       padding-right: 20px;
 
       @media (min-width: $screen-sm-min) {
@@ -143,6 +142,10 @@ ul.notes {
     font-size: 14px;
     padding: 0;
     clear: both;
+
+    .note-header {
+      padding-bottom: 0;
+    }
 
     &.timeline-entry::after {
       clear: none;
@@ -237,6 +240,18 @@ ul.notes {
               background: transparent;
             }
           }
+        }
+      }
+    }
+
+    .timeline-icon {
+      display: none;
+
+      .avatar {
+        visibility: hidden;
+
+        .discussion-body & {
+          visibility: visible;
         }
       }
     }
