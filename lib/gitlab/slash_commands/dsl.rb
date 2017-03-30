@@ -44,7 +44,9 @@ module Gitlab
           @params = params
         end
 
-        # Allows to give an explanation of what the next slash command does.
+        # Allows to give an explanation of what the command will do when
+        # executed. This explanation is shown when rendering the Markdown
+        # preview.
         #
         # Example:
         #

@@ -8,7 +8,7 @@ module Gitlab
 
         @aliases         = attributes[:aliases] || []
         @description     = attributes[:description] || ''
-        @humanized       = attributes[:humanized]
+        @humanized       = attributes[:humanized] || ''
         @params          = attributes[:params] || []
         @condition_block = attributes[:condition_block]
         @action_block    = attributes[:action_block]
