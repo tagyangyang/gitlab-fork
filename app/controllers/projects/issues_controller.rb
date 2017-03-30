@@ -206,12 +206,10 @@ class Projects::IssuesController < Projects::ApplicationController
   def create_merge_request
     result = MergeRequests::CreateFromIssueService.new(project, current_user, issue_iid: issue.iid).execute
 
-    respond_to do |format|
-      if result[:status] == :success
-        format.json { render json: MergeRequestCreateSerializer.new.represent(result[:merge_request]) }
-      else
-        format.json { render json: result[:messsage], status: :unprocessable_entity }
-      end
+    if result[:status] == :success
+      render json: MergeRequestCreateSerializer.new.represent(result[:merge_request])
+    else
+      render json: result[:messsage], status: :unprocessable_entity
     end
   end
 
