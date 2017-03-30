@@ -220,10 +220,23 @@ class ProjectsController < Projects::ApplicationController
     text = params[:text]
     commands = []
 
-    if # is issuable
-      issuble = # find issuable
-      
-      slash_commands_service = SlashCommands::InterpretService.new(project, current_user)
+    if %w(Issue MergeRequest).include?(params[:slash_commands_target_type])
+      issuable =
+        if params[:slash_commands_target_id].present?
+          if params[:slash_commands_target_type] == 'Issue'
+            IssuesFinder.new(current_user, project_id: @project.id).find(params[:slash_commands_target_id])
+          else
+            MergeRequestsFinder.new(current_user, project_id: @project.id).find(params[:slash_commands_target_id])
+          end
+        else
+          if params[:slash_commands_target_type] == 'Issue'
+            project.issues.build
+          else
+            project.merge_requests.build
+          end
+        end
+
+      slash_commands_service = SlashCommands::InterpretService.new(@project, current_user)
 
       text, commands = slash_commands_service.explain(text, issuable)
     end

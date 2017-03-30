@@ -23,6 +23,7 @@
     MarkdownPreview.prototype.showPreview = function ($form) {
       var mdText;
       var preview = $form.find('.js-md-preview');
+      var url = preview.data('url');
       if (preview.hasClass('md-preview-loading')) {
         return;
       }
@@ -33,8 +34,16 @@
         this.hideReferencedUsers($form);
       } else {
         preview.addClass('md-preview-loading').text('Loading...');
-        this.fetchMarkdownPreview(mdText, (function (response) {
-          preview.removeClass('md-preview-loading').html(response.body);
+        this.fetchMarkdownPreview(mdText, url, (function (response) {
+          var body;
+          if (response.body.length > 0) {
+            body = response.body;
+          }
+          else {
+            body = 'Nothing to preview.';
+          }
+
+          preview.removeClass('md-preview-loading').html(body);
           preview.renderGFM();
           this.renderReferencedUsers(response.references.users, $form);
           this.renderReferencedCommands(response.references.commands, $form);
@@ -42,8 +51,8 @@
       }
     };
 
-    MarkdownPreview.prototype.fetchMarkdownPreview = function (text, success) {
-      if (!window.preview_markdown_path) {
+    MarkdownPreview.prototype.fetchMarkdownPreview = function (text, url, success) {
+      if (!url) {
         return;
       }
       if (text === this.ajaxCache.text) {
@@ -52,7 +61,7 @@
       }
       $.ajax({
         type: 'POST',
-        url: window.preview_markdown_path,
+        url: url,
         data: {
           text: text
         },
@@ -85,15 +94,7 @@
     };
 
     MarkdownPreview.prototype.hideReferencedCommands = function ($form) {
-      var referencedCommands;
-      referencedCommands = $form.find('.referenced-commands');
-      referencedCommands.hide();
-    };
-
-    MarkdownPreview.prototype.showReferencedCommands = function ($form) {
-      var referencedCommands;
-      referencedCommands = $form.find('.referenced-commands');
-      referencedCommands.show();
+      $form.find('.referenced-commands').hide();
     };
 
     MarkdownPreview.prototype.renderReferencedCommands = function (commands, $form) {
@@ -101,8 +102,10 @@
       referencedCommands = $form.find('.referenced-commands');
       if (commands.length > 0) {
         referencedCommands.html(commands);
+        referencedCommands.show();
       } else {
         referencedCommands.html('');
+        referencedCommands.hide();
       }
     };
 
@@ -140,7 +143,6 @@
     $form.find('.md-write-holder').hide();
     $form.find('.md-preview-holder').show();
     markdownPreview.showPreview($form);
-    markdownPreview.showReferencedCommands($form);
   });
 
   $(document).on('markdown-preview:hide', function (e, $form) {
@@ -161,6 +163,7 @@
     $form.find('.md-write-holder').show();
     $form.find('textarea.markdown-area').focus();
     $form.find('.md-preview-holder').hide();
+
     markdownPreview.hideReferencedCommands($form);
   });
 

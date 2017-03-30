@@ -99,6 +99,7 @@ module SlashCommands
       @updates[:title] = title_param
     end
 
+    # does not handle additional stuff in the line well
     desc 'Assign'
     humanized do |assignee_param|
       "Assigns #{assignee_param}."
@@ -127,6 +128,7 @@ module SlashCommands
       @updates[:assignee_id] = nil
     end
 
+    # fails when no such milestone
     desc 'Set milestone'
     humanized do |milestone_param|
       milestone = extract_references(milestone_param, :milestone).first
@@ -157,6 +159,7 @@ module SlashCommands
       @updates[:milestone_id] = nil
     end
 
+    # not super nice when labels missing
     desc 'Add label(s)'
     humanized do |labels_param|
       labels = find_label_references(labels_param)
@@ -317,6 +320,7 @@ module SlashCommands
       @updates[:wip_event] = issuable.work_in_progress? ? 'unwip' : 'wip'
     end
 
+    # fix it
     desc 'Toggle emoji award'
     humanized 'Toggles XXXXX emoji award.'
     params ':emoji:'
@@ -330,6 +334,7 @@ module SlashCommands
       end
     end
 
+    # display something better here
     desc 'Set time estimate'
     humanized 'Sets time estimate.'
     params '<1w 3d 2h 14m>'
@@ -344,6 +349,7 @@ module SlashCommands
       end
     end
 
+    # todo
     desc 'Add or substract spent time'
     humanized 'Adds / substracts XXXXX time.'
     params '<1h 30m | -1h 30m>'
@@ -383,6 +389,7 @@ module SlashCommands
     params '@user'
     command :cc
 
+    # todo
     desc 'Define target branch for MR'
     humanized 'Sets target branch to XXXXX'
     params '<Local branch name>'

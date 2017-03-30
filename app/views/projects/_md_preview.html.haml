@@ -28,9 +28,8 @@
 
   .md-write-holder
     = yield
-  .md.md-preview-holder.js-md-preview.hide.md-preview
-  - if local_assigns[:referenced_commands]
-    %div.referenced-commands.hide
+  .md.md-preview-holder.js-md-preview.hide.md-preview{ data: { url: url } }
+  .referenced-commands.hide
 
   - if local_assigns[:referenced_users]
     .referenced-users.hide
