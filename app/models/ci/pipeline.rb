@@ -404,11 +404,24 @@ module Ci
     # the information we want. We just want to use Ruby to find the
     # information we want from the fully preloaded data.
     def builds_with_status(*scopes)
-      scopes.map!(&:to_s)
+      records_with_status_for(:builds, scopes)
+    end
 
-      loaded_builds&.select do |build|
-        scopes.include?(build.status)
-      end || builds.where(status: scopes) # Fallback to use a plain query
+    def statuses_with_status(*scopes)
+      records_with_status_for(:statuses, scopes)
+    end
+
+    def records_with_status_for(relation, scopes)
+      if scopes.empty?
+        __send__("loaded_#{relation}") || public_send(relation)
+      else
+        scopes.map!(&:to_s)
+
+        __send__("loaded_#{relation}")&.select do |record|
+          scopes.include?(record.status)
+        end || # Fallback to use a plain query
+          public_send(relation).where(status: scopes)
+      end
     end
 
     def loaded_builds
@@ -417,14 +430,6 @@ module Ci
       elsif statuses.loaded?
         builds_from_statuses
       end
-    end
-
-    def statuses_with_status(*scopes)
-      scopes.map!(&:to_s)
-
-      loaded_statuses&.select do |status|
-        scopes.include?(status.status)
-      end || status.where(status: scopes) # Fallback to use a plain query
     end
 
     def loaded_statuses
