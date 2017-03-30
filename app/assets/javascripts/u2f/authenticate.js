@@ -111,4 +111,4 @@ U2FAuthenticate.prototype.switchToFallbackUI = function() {
   this.fallbackUI.classList.remove('hidden');
 };
 
-global.gl.U2FAuthenticate = U2FAuthenticate;
+global.U2FAuthenticate = U2FAuthenticate;
