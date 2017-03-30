@@ -416,14 +416,16 @@
 
 .page-with-layout-nav {
   .right-sidebar {
-    top: ($header-height * 2) + 2;
+    top: ($header-height + 1) * 2;
   }
 
-  .build-sidebar {
-    top: ($header-height * 3) + 3;
+  &.page-with-sub-nav {
+    .right-sidebar {
+      top: ($header-height + 1) * 3;
 
-    &.affix {
-      top: 0;
+      &.affix {
+        top: 0;
+      }
     }
   }
 }
@@ -471,6 +473,43 @@
       .controls-item-full {
         flex: 1 1 100%;
       }
+    }
+  }
+}
+
+.inner-page-scroll-tabs {
+  position: relative;
+
+  .fade-right {
+    @include fade(left, $white-light);
+    right: 0;
+    text-align: right;
+
+    .fa {
+      right: 5px;
+    }
+  }
+
+  .fade-left {
+    @include fade(right, $white-light);
+    left: 0;
+    text-align: left;
+
+    .fa {
+      left: 5px;
+    }
+  }
+
+  .fade-right,
+  .fade-left {
+    top: 16px;
+    bottom: auto;
+  }
+
+  &.is-smaller {
+    .fade-right,
+    .fade-left {
+      top: 11px;
     }
   }
 }

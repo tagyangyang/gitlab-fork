@@ -21,7 +21,7 @@ var config = {
     common_vue:           ['vue', './vue_shared/common_vue.js'],
     common_d3:            ['d3'],
     main:                 './main.js',
-    blob_edit:            './blob_edit/blob_edit_bundle.js',
+    blob:                 './blob_edit/blob_bundle.js',
     boards:               './boards/boards_bundle.js',
     simulate_drag:        './test_utils/simulate_drag.js',
     cycle_analytics:      './cycle_analytics/cycle_analytics_bundle.js',
@@ -37,6 +37,7 @@ var config = {
     merge_request_widget: './merge_request_widget/ci_bundle.js',
     monitoring:           './monitoring/monitoring_bundle.js',
     network:              './network/network_bundle.js',
+    notebook_viewer:      './blob/notebook_viewer.js',
     profile:              './profile/profile_bundle.js',
     protected_branches:   './protected_branches/protected_branches_bundle.js',
     snippet:              './snippet/snippet_bundle.js',
@@ -105,6 +106,7 @@ var config = {
         'environments_folder',
         'issuable',
         'merge_conflicts',
+        'notebook_viewer',
         'vue_pipelines',
       ],
       minChunks: function(module, count) {
@@ -115,7 +117,11 @@ var config = {
     // create cacheable common library bundle for all d3 chunks
     new webpack.optimize.CommonsChunkPlugin({
       name: 'common_d3',
-      chunks: ['graphs', 'users', 'monitoring'],
+      chunks: [
+        'graphs',
+        'users',
+        'monitoring',
+      ],
     }),
 
     // create cacheable common library bundles

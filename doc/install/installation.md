@@ -109,7 +109,8 @@ Then select 'Internet Site' and press enter to confirm the hostname.
 
 ## 2. Ruby
 
-**Note:** The current supported Ruby versions are 2.1.x and 2.3.x. 2.3.x is preferred, and support for 2.1.x will be dropped in the future.
+**Note:** The current supported Ruby version is 2.3.x. GitLab 9.0 dropped support
+for Ruby 2.1.x.
 
 The use of Ruby version managers such as [RVM], [rbenv] or [chruby] with GitLab
 in production, frequently leads to hard to diagnose problems. For example,
@@ -476,12 +477,12 @@ with setting up Gitaly until you upgrade to GitLab 9.1 or later.
     # Enable Gitaly in the init script
     echo 'gitaly_enabled=true' | sudo tee -a /etc/default/gitlab
 
-Next, edit `/home/git/gitlab/config/gitlab.yml` and make sure `socket_path` in
+Next, edit `/home/git/gitlab/config/gitlab.yml` and make sure `enabled: true` in
 the `gitaly:` section is uncommented.
 
     # <- gitlab.yml indentation starts here
       gitaly:
-        socket_path: tmp/sockets/private/gitaly.socket
+        enabled: true
 
 For more information about configuring Gitaly see
 [doc/administration/gitaly](../administration/gitaly).
