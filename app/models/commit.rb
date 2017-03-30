@@ -173,17 +173,14 @@ class Commit
   end
 
   def author
+    @author ||= load_author
+  end
+
+  def author=(user)
+    @author = user
+
     if RequestStore.active?
-      key = "commit_author:#{author_email.downcase}"
-      # nil is a valid value since no author may exist in the system
-      if RequestStore.store.has_key?(key)
-        @author = RequestStore.store[key]
-      else
-        @author = find_author_by_any_email
-        RequestStore.store[key] = @author
-      end
-    else
-      @author ||= find_author_by_any_email
+      RequestStore.store[commit_author_cache_key] = @author
     end
   end
 
@@ -359,6 +356,24 @@ class Commit
     else
       referable_commit_id
     end
+  end
+
+  def load_author
+    if RequestStore.active?
+      key = commit_author_cache_key
+      # nil is a valid value since no author may exist in the system
+      if RequestStore.store.has_key?(key)
+        RequestStore.store[key]
+      else
+        RequestStore.store[key] = find_author_by_any_email
+      end
+    else
+      find_author_by_any_email
+    end
+  end
+
+  def commit_author_cache_key
+    "commit_author:#{author_email.downcase}"
   end
 
   def find_author_by_any_email
