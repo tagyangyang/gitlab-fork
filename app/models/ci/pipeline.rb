@@ -210,7 +210,7 @@ module Ci
     end
 
     def stuck?
-      builds.pending.any?(&:stuck?)
+      builds_with_status(:pending).any?(&:stuck?)
     end
 
     def retryable?
@@ -396,6 +396,25 @@ module Ci
 
       project.repository.keep_around(self.sha)
       project.repository.keep_around(self.before_sha)
+    end
+
+    # This is an optimization to utilize preloaded data.
+    # If we already load the data via `preload` or `include` for a given
+    # collection of pipelines, we don't want to do N+1 queries to get
+    # the information we want. We just want to use Ruby to find the
+    # information we want from the fully preloaded data.
+    def builds_with_status(scope)
+      if builds.loaded?
+        builds.select(&:"#{scope}?")
+      elsif statuses.loaded?
+        builds_from_statuses.select(&:"#{scope}?")
+      else # Fallback to use a plain query
+        builds.public_send(scope)
+      end
+    end
+
+    def builds_from_statuses
+      statuses.select { |status| status.is_a?(Ci::Build) }
     end
   end
 end
