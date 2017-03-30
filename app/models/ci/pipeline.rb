@@ -218,7 +218,7 @@ module Ci
     end
 
     def cancelable?
-      statuses.cancelable.any?
+      statuses_with_status(*HasStatus::CANCELABLE_STATUSES).any?
     end
 
     def cancel_running
@@ -417,6 +417,18 @@ module Ci
       elsif statuses.loaded?
         builds_from_statuses
       end
+    end
+
+    def statuses_with_status(*scopes)
+      scopes.map!(&:to_s)
+
+      loaded_statuses&.select do |status|
+        scopes.include?(status.status)
+      end || status.where(status: scopes) # Fallback to use a plain query
+    end
+
+    def loaded_statuses
+      statuses if statuses.loaded?
     end
 
     def builds_from_statuses

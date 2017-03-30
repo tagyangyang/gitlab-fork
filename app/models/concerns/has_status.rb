@@ -8,6 +8,7 @@ module HasStatus
   ACTIVE_STATUSES = %w[pending running].freeze
   COMPLETED_STATUSES = %w[success failed canceled skipped].freeze
   ORDERED_STATUSES = %w[failed pending running manual canceled success skipped created].freeze
+  CANCELABLE_STATUSES = %w[running pending created manual]
 
   class_methods do
     def status_sql
@@ -81,7 +82,7 @@ module HasStatus
     scope :failed_or_canceled, -> { where(status: [:failed, :canceled]) }
 
     scope :cancelable, -> do
-      where(status: [:running, :pending, :created, :manual])
+      where(status: CANCELABLE_STATUSES)
     end
   end
 
