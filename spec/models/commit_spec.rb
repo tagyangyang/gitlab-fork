@@ -28,7 +28,7 @@ describe Commit, models: true do
       key = "commit_author:#{commit.author_email}"
       expect(RequestStore.store[key]).to eq(user)
 
-      expect(commit.author).to eq(user)
+      expect(project.commit.author).to eq(user)
       RequestStore.store.clear
     end
   end

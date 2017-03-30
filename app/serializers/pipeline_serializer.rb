@@ -38,7 +38,7 @@ class PipelineSerializer < BaseSerializer
   private
 
   def preload_commit_authors(resource)
-    emails = resource.map(&:git_author_email).map(&:downcase).uniq
+    emails = resource.map(&:git_author_email).compact.map(&:downcase).uniq
     commit_authors = find_users_by_emails(emails)
     author_map = index_users_by_emails(commit_authors)
 
