@@ -43,7 +43,9 @@ class PipelineSerializer < BaseSerializer
     author_map = index_authors_by_emails(authors)
 
     resource.each do |pipeline|
-      pipeline.commit.author = author_map[pipeline.git_author_email]
+      if pipeline.commit
+        pipeline.commit.author = author_map[pipeline.git_author_email]
+      end
     end
   end
 
