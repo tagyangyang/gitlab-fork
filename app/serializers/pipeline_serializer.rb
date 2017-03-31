@@ -23,7 +23,7 @@ class PipelineSerializer < BaseSerializer
       resource = @paginator.paginate(resource)
     end
 
-    preload_commit_authors(resource)
+    preload_commit_authors(resource) if resource
 
     super(resource, opts)
   end

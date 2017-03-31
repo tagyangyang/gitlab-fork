@@ -161,7 +161,7 @@ module Ci
     end
 
     def artifacts
-      array_or_relation = latest_builds_with_status
+      array_or_relation = latest_builds_with
 
       case array_or_relation
       when ActiveRecord::Relation
@@ -220,7 +220,7 @@ module Ci
     end
 
     def manual_actions
-      array_or_relation = latest_builds_with_status
+      array_or_relation = latest_builds_with
 
       case array_or_relation
       when ActiveRecord::Relation
@@ -236,15 +236,15 @@ module Ci
     end
 
     def stuck?
-      builds_with_status(:pending).any?(&:stuck?)
+      builds_with(status: :pending).any?(&:stuck?)
     end
 
     def retryable?
-      latest_builds_with_status(:failed, :canceled).any?(&:retryable?)
+      latest_builds_with(status: [:failed, :canceled]).any?(&:retryable?)
     end
 
     def cancelable?
-      statuses_with_status(*HasStatus::CANCELABLE_STATUSES).any?
+      statuses_with(status: HasStatus::CANCELABLE_STATUSES).any?
     end
 
     def cancel_running
@@ -429,37 +429,50 @@ module Ci
     # collection of pipelines, we don't want to do N+1 queries to get
     # the information we want. We just want to use Ruby to find the
     # information we want from the fully preloaded data.
-    def builds_with_status(*scopes)
-      records_with_status_for(:builds, scopes)
+    def builds_with(status: [], records: nil)
+      records ||= loaded_builds || builds
+      records_with_status_for(Array(status), records)
     end
 
-    def statuses_with_status(*scopes)
-      records_with_status_for(:statuses, scopes)
+    def statuses_with(status: [], records: nil)
+      records ||= loaded_statuses || statuses
+      records_with_status_for(Array(status), records)
     end
 
-    def records_with_status_for(relation, scopes)
-      if scopes.empty?
-        __send__("loaded_#{relation}") || public_send(relation)
+    def latest_builds_with(status: [])
+      array_or_relation = latest_records(loaded_builds || builds)
+
+      builds_with(status: status, records: array_or_relation)
+    end
+
+    def records_with_status_for(status, array_or_relation)
+      return array_or_relation if status.empty?
+
+      status = status.map(&:to_s) # Can't map! because it could be frozen
+
+      case array_or_relation
+      when ActiveRecord::Relation
+        array_or_relation.where(status: status)
+      when Array
+        array_or_relation.select do |record|
+          status.include?(record.status)
+        end
       else
-        scopes.map!(&:to_s)
-
-        __send__("loaded_#{relation}")&.select do |record|
-          scopes.include?(record.status)
-        end || # Fallback to use a plain query
-          public_send(relation).where(status: scopes)
+        raise TypeError
+          .new("It should be a relation or array: #{array_or_relation}")
       end
     end
 
     def loaded_builds
       if builds.loaded?
-        builds
+        builds.to_a
       elsif statuses.loaded?
         builds_from_statuses
       end
     end
 
     def loaded_statuses
-      statuses if statuses.loaded?
+      statuses.to_a if statuses.loaded?
     end
 
     def builds_from_statuses
@@ -467,9 +480,7 @@ module Ci
         statuses.select { |status| status.is_a?(Ci::Build) }
     end
 
-    def latest_builds_with_status(*scopes)
-      array_or_relation = builds_with_status(*scopes)
-
+    def latest_records(array_or_relation)
       case array_or_relation
       when ActiveRecord::Relation
         array_or_relation.latest
