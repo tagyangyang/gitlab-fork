@@ -161,7 +161,23 @@ module Ci
     end
 
     def artifacts
-      builds.latest.with_artifacts_not_expired.includes(project: [:namespace])
+      array_or_relation = latest_builds_with_status
+
+      case array_or_relation
+      when ActiveRecord::Relation
+        array_or_relation.
+          with_artifacts_not_expired.includes(project: :namespace)
+      when Array
+        now = Time.now.utc
+        array_or_relation.select do |build|
+          build.artifacts_file.present? &&
+            (build.artifacts_expire_at.nil? ||
+              build.artifacts_expire_at > now)
+        end
+      else
+        raise TypeError
+          .new("It should be a relation or array: #{array_or_relation}")
+      end
     end
 
     # For now the only user who participates is the user who triggered
