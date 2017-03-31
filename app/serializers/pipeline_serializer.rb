@@ -15,7 +15,7 @@ class PipelineSerializer < BaseSerializer
     if resource.is_a?(ActiveRecord::Relation)
       resource = resource.preload(
         :user,
-        statuses: {project: :project_feature},
+        statuses: { project: [:project_feature, :namespace] },
         project: :namespace)
 
       if paginated?
@@ -43,6 +43,8 @@ class PipelineSerializer < BaseSerializer
     author_map = index_authors_by_emails(authors)
 
     resource.each do |pipeline|
+      # rubocop:disable: Style/SafeNavigation
+      # Using safe navigator would always construct the arguments, bad.
       if pipeline.commit
         pipeline.commit.author = author_map[pipeline.git_author_email]
       end
