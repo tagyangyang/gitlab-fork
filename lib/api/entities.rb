@@ -14,7 +14,6 @@ module API
 
     class User < UserBasic
       expose :created_at
-      expose :is_admin?, as: :is_admin
       expose :bio, :location, :skype, :linkedin, :twitter, :website_url, :organization
     end
 
@@ -34,7 +33,8 @@ module API
       expose :external
     end
 
-    class UserWithPrivateToken < UserPublic
+    class UserWithPrivateInfo < UserPublic
+      expose :is_admin?, as: :is_admin
       expose :private_token
     end
 
