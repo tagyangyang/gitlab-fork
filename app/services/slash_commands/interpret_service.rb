@@ -88,7 +88,7 @@ module SlashCommands
 
     desc 'Change title'
     humanized do |title_param|
-      "Changes the title to #{title_param}."
+      "Changes the title to \"#{title_param}\"."
     end
     params '<New title>'
     condition do
@@ -99,10 +99,12 @@ module SlashCommands
       @updates[:title] = title_param
     end
 
-    # does not handle additional stuff in the line well
     desc 'Assign'
     humanized do |assignee_param|
-      "Assigns #{assignee_param}."
+      user = extract_references(assignee_param, :user).first
+      user ||= User.find_by(username: assignee_param)
+
+      "Assigns #{user.to_reference}." if user
     end
     params '@user'
     condition do
@@ -128,11 +130,11 @@ module SlashCommands
       @updates[:assignee_id] = nil
     end
 
-    # fails when no such milestone
     desc 'Set milestone'
     humanized do |milestone_param|
       milestone = extract_references(milestone_param, :milestone).first
-      "Sets the milestone to #{milestone.to_reference}."
+      milestone ||= project.milestones.find_by(title: milestone_param.strip)
+      "Sets the milestone to #{milestone.to_reference}." if milestone
     end
     params '%"milestone"'
     condition do
@@ -148,7 +150,7 @@ module SlashCommands
 
     desc 'Remove milestone'
     humanized do
-      "Removes #{issuable.milestone.to_reference} milestone."
+      "Removes #{issuable.milestone.to_reference(format: :name)} milestone."
     end
     condition do
       issuable.persisted? &&
@@ -164,7 +166,7 @@ module SlashCommands
     humanized do |labels_param|
       labels = find_label_references(labels_param)
 
-      "Adds #{labels.join(' ')} #{'label'.pluralize(labels.count)}."
+      "Adds #{labels.join(' ')} #{'label'.pluralize(labels.count)}." if labels.any?
     end
     params '~label1 ~"label 2"'
     condition do
@@ -188,8 +190,7 @@ module SlashCommands
     humanized do |labels_param = nil|
       if labels_param.present?
         labels = find_label_references(labels_param)
-        label_count = labels.count
-        "Removes #{labels.join(' ')} #{'label'.pluralize(label_count)}."
+        "Removes #{labels.join(' ')} #{'label'.pluralize(labels.count)}." if labels.any?
       else
         'Removes all labels.'
       end
@@ -218,7 +219,7 @@ module SlashCommands
     desc 'Replace all label(s)'
     humanized do |labels_param|
       labels = find_label_references(labels_param)
-      "Replaces all labels with #{labels.join(' ')} #{'label'.pluralize(labels.count)}."
+      "Replaces all labels with #{labels.join(' ')} #{'label'.pluralize(labels.count)}." if labels.any?
     end
     params '~label1 ~"label 2"'
     condition do
@@ -284,7 +285,7 @@ module SlashCommands
     desc 'Set due date'
     humanized do |due_date_param|
       due_date = Chronic.parse(due_date_param).try(:to_date)
-      "Sets the due date to #{due_date}." if due_date
+      "Sets the due date to #{due_date.to_s(:medium)}." if due_date
     end
     params '<in 2 days | this Friday | December 31st>'
     condition do
@@ -403,6 +404,7 @@ module SlashCommands
       @updates[:target_branch] = branch_name if project.repository.branch_names.include?(branch_name)
     end
 
+    # this stopped returning labels by name
     def find_labels(labels_param)
       extract_references(labels_param, :label)
     end
