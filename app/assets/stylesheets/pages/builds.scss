@@ -57,6 +57,42 @@
       margin-right: 5px;
     }
   }
+
+  .truncated-info {
+    text-align: center;
+    border-bottom: 1px solid;
+    background: rgba(0, 0, 0, 0.75);
+
+    p {
+      margin: 0;
+    }
+
+    // with sidebar
+    &-fixed.sidebar-expanded {
+      position: fixed;
+      top: 0;
+      right: 312px;
+      left: 22px;
+    }
+
+    // without sidebar
+    &-fixed.sidebar-collapsed {
+      position: fixed;
+      top: 0;
+      margin: 0;
+      right: 20px;
+      left: 20px;
+    }
+
+    &-absolute {
+      position: absolute;
+      top: 0;
+      margin: 0 auto;
+      right: 5px;
+      left: 5px;
+    }
+  }
+
 }
 
 .scroll-controls {
@@ -186,6 +222,7 @@
   white-space: pre;
   overflow-x: auto;
   font-size: 12px;
+  position: relative;
 
   .fa-refresh {
     font-size: 24px;
