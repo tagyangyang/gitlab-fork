@@ -136,7 +136,7 @@ module Ci
 
       def convert(stream, new_state)
         reset_state
-        restore_state(new_state) if new_state.present?
+        restore_state(new_state, stream) if new_state.present?
 
         append = false
         truncated = false
@@ -255,10 +255,10 @@ module Ci
         Base64.urlsafe_encode64(state.to_json)
       end
 
-      def restore_state(new_state)
+      def restore_state(new_state, stream)
         state = Base64.urlsafe_decode64(new_state)
         state = JSON.parse(state, symbolize_names: true)
-        return if state[:offset].to_i > raw.length
+        return if state[:offset].to_i > stream.size
 
         STATE_PARAMS.each do |param|
           send("#{param}=".to_sym, state[param])
