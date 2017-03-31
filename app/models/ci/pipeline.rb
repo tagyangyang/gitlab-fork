@@ -170,9 +170,7 @@ module Ci
       when Array
         now = Time.now.utc
         array_or_relation.select do |build|
-          build.artifacts_file.present? &&
-            (build.artifacts_expire_at.nil? ||
-              build.artifacts_expire_at > now)
+          build.artifacts_file.present? && !build.artifacts_expired?(now)
         end
       else
         raise TypeError
@@ -222,7 +220,19 @@ module Ci
     end
 
     def manual_actions
-      builds.latest.manual_actions.includes(project: [:namespace])
+      array_or_relation = latest_builds_with_status
+
+      case array_or_relation
+      when ActiveRecord::Relation
+        array_or_relation.manual_actions.includes(project: :namespace)
+      when Array
+        array_or_relation.select do |build|
+          !build.created? && build.action?
+        end
+      else
+        raise TypeError
+          .new("It should be a relation or array: #{array_or_relation}")
+      end
     end
 
     def stuck?

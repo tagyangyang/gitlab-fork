@@ -470,8 +470,8 @@ module Ci
       !self.erased_at.nil?
     end
 
-    def artifacts_expired?
-      artifacts_expire_at && artifacts_expire_at < Time.now
+    def artifacts_expired?(time = Time.now)
+      artifacts_expire_at && artifacts_expire_at < time
     end
 
     def artifacts_expire_in
