@@ -17,13 +17,13 @@ class PipelineSerializer < BaseSerializer
         :user,
         statuses: { project: [:project_feature, :namespace] },
         project: :namespace)
-
-      if paginated?
-        resource = @paginator.paginate(resource)
-      end
-
-      preload_commit_authors(resource)
     end
+
+    if paginated?
+      resource = @paginator.paginate(resource)
+    end
+
+    preload_commit_authors(resource)
 
     super(resource, opts)
   end
