@@ -43,8 +43,8 @@ class PipelineSerializer < BaseSerializer
     author_map = index_authors_by_emails(authors)
 
     resource.each do |pipeline|
-      # rubocop:disable: Style/SafeNavigation
       # Using safe navigator would always construct the arguments, bad.
+      # rubocop:disable Style/SafeNavigation
       if pipeline.commit
         pipeline.commit.author = author_map[pipeline.git_author_email]
       end
