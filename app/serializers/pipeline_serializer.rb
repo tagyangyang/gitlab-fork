@@ -17,13 +17,15 @@ class PipelineSerializer < BaseSerializer
         :user,
         statuses: { project: [:project_feature, :namespace] },
         project: :namespace)
-    end
 
-    if paginated?
-      resource = @paginator.paginate(resource)
-    end
+      if paginated?
+        resource = @paginator.paginate(resource)
+      end
 
-    preload_commit_authors(resource) if resource
+      preload_commit_authors(resource)
+    elsif paginated?
+      raise Gitlab::Serializer::Pagination::InvalidResourceError
+    end
 
     super(resource, opts)
   end
