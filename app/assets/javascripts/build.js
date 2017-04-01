@@ -1,11 +1,10 @@
-/* eslint-disable func-names, space-before-function-paren, no-var, prefer-rest-params, wrap-iife, no-use-before-define, no-param-reassign, quotes, yoda, no-else-return, consistent-return, comma-dangle, object-shorthand, prefer-template, one-var, one-var-declaration-per-line, no-unused-vars, max-len, vars-on-top */
+/* eslint-disable func-names, wrap-iife, no-use-before-define, consistent-return */
 /* global Breakpoints */
 $(() => {
-  var bind = function(fn, me) { return function() { return fn.apply(me, arguments); }; };
-  var AUTO_SCROLL_OFFSET = 75;
-  var DOWN_BUILD_TRACE = '#down-build-trace';
+  const AUTO_SCROLL_OFFSET = 75;
+  const DOWN_BUILD_TRACE = '#down-build-trace';
 
-  window.Build = (function() {
+  window.Build = (function () {
     Build.timeout = null;
 
     Build.state = null;
@@ -18,8 +17,8 @@ $(() => {
       this.buildStatus = this.options.buildStatus;
       this.state = this.options.logState;
       this.buildStage = this.options.buildStage;
-      this.updateDropdown = bind(this.updateDropdown, this);
       this.$document = $(document);
+
       this.$body = $('body');
       this.$buildTrace = $('#build-trace');
       this.$autoScrollContainer = $('.autoscroll-container');
@@ -30,15 +29,14 @@ $(() => {
       this.$scrollTopBtn = $('#scroll-top');
       this.$scrollBottomBtn = $('#scroll-bottom');
       this.$buildRefreshAnimation = $('.js-build-refresh');
+      this.$buildScroll = $('#js-build-scroll');
+      this.$truncatedInfo = $('.js-truncated-info');
 
       clearTimeout(Build.timeout);
       // Init breakpoint checker
       this.bp = Breakpoints.get();
 
       this.initSidebar();
-      this.$buildScroll = $('#js-build-scroll');
-      this.$truncatedInfo = $('.js-truncated-info');
-
       this.populateJobs(this.buildStage);
       this.updateStageDropdownText(this.buildStage);
       this.sidebarOnResize();
@@ -49,7 +47,7 @@ $(() => {
 
       this.$document
         .off('click', '.stage-item')
-        .on('click', '.stage-item', this.updateDropdown);
+        .on('click', '.stage-item', this.updateDropdown.bind(this));
 
       this.$document.on('scroll', this.initScrollMonitor.bind(this));
 
@@ -66,28 +64,30 @@ $(() => {
       this.invokeBuildTrace();
     }
 
-    Build.prototype.initSidebar = function() {
+    Build.prototype.initSidebar = function () {
       this.$sidebar = $('.js-build-sidebar');
       this.$sidebar.niceScroll();
-      this.$document.off('click', '.js-sidebar-build-toggle').on('click', '.js-sidebar-build-toggle', this.toggleSidebar);
+      this.$document
+        .off('click', '.js-sidebar-build-toggle')
+        .on('click', '.js-sidebar-build-toggle', this.toggleSidebar);
     };
 
-    Build.prototype.location = function() {
-      return window.location.href.split("#")[0];
+    Build.prototype.location = function () {
+      return window.location.href.split('#')[0];
     };
 
-    Build.prototype.invokeBuildTrace = function() {
+    Build.prototype.invokeBuildTrace = function () {
       if (this.location() === this.pageUrl) {
         return this.getBuildTrace();
       }
     };
 
-    Build.prototype.getBuildTrace = function() {
+    Build.prototype.getBuildTrace = function () {
       return $.ajax({
-        url: this.pageUrl + '/trace.json',
+        url: `${this.pageUrl}/trace.json`,
         dataType: 'json',
         data: {
-          state: this.state
+          state: this.state,
         },
         success: ((log) => {
           const $buildContainer = $('.js-build-output');
@@ -111,7 +111,7 @@ $(() => {
               pageUrl += DOWN_BUILD_TRACE;
             }
 
-            return gl.utils.visitUrl(pageUrl);
+            gl.utils.visitUrl(pageUrl);
           } else {
             this.checkAutoscroll();
           }
@@ -129,13 +129,13 @@ $(() => {
         error: () => {
           this.$buildRefreshAnimation.remove();
           return this.initScrollMonitor();
-        }
+        },
       });
     };
 
-    Build.prototype.checkAutoscroll = function() {
-      if (this.$autoScrollStatus.data("state") === "enabled") {
-        return $("html,body").scrollTop(this.$buildTrace.height());
+    Build.prototype.checkAutoscroll = function () {
+      if (this.$autoScrollStatus.data('state') === 'enabled') {
+        return $('html,body').scrollTop(this.$buildTrace.height());
       }
 
       // Handle a situation where user started new build
@@ -147,7 +147,7 @@ $(() => {
       }
     };
 
-    Build.prototype.initScrollButtonAffix = function() {
+    Build.prototype.initScrollButtonAffix = function () {
       // Hide everything initially
       this.$scrollTopBtn.hide();
       this.$scrollBottomBtn.hide();
@@ -168,7 +168,7 @@ $(() => {
     //      - Show Top Arrow button
     //      - Show Bottom Arrow button
     //      - Disable Autoscroll and hide indicator (when build is running)
-    Build.prototype.initScrollMonitor = function() {
+    Build.prototype.initScrollMonitor = function () {
       if (!gl.utils.isInViewport(this.$upBuildTrace.get(0)) &&
         !gl.utils.isInViewport(this.$downBuildTrace.get(0))) {
         // User is somewhere in middle of Build Log
@@ -178,7 +178,8 @@ $(() => {
 
         if (this.buildStatus === 'success' || this.buildStatus === 'failed') { // Check if Build is completed
           this.$scrollBottomBtn.show();
-        } else if (this.$buildRefreshAnimation.is(':visible') && !gl.utils.isInViewport(this.$buildRefreshAnimation.get(0))) {
+        } else if (this.$buildRefreshAnimation.is(':visible') &&
+          !gl.utils.isInViewport(this.$buildRefreshAnimation.get(0))) {
           this.$scrollBottomBtn.show();
         } else {
           this.$scrollBottomBtn.hide();
@@ -189,7 +190,9 @@ $(() => {
           this.$autoScrollContainer.hide();
           this.$autoScrollStatusText.removeClass('animate');
         } else {
-          this.$autoScrollContainer.css({ top: this.$body.outerHeight() - AUTO_SCROLL_OFFSET }).show();
+          this.$autoScrollContainer.css(
+            { top: this.$body.outerHeight() - AUTO_SCROLL_OFFSET },
+          ).show();
           this.$autoScrollStatusText.addClass('animate');
         }
       } else if (gl.utils.isInViewport(this.$upBuildTrace.get(0)) &&
@@ -202,8 +205,10 @@ $(() => {
 
         this.$autoScrollContainer.hide();
         this.$autoScrollStatusText.removeClass('animate');
-      } else if ((!gl.utils.isInViewport(this.$upBuildTrace.get(0)) && gl.utils.isInViewport(this.$downBuildTrace.get(0))) ||
-                 (this.$buildRefreshAnimation.is(':visible') && gl.utils.isInViewport(this.$buildRefreshAnimation.get(0)))) {
+      } else if ((!gl.utils.isInViewport(this.$upBuildTrace.get(0)) &&
+        gl.utils.isInViewport(this.$downBuildTrace.get(0))) ||
+        (this.$buildRefreshAnimation.is(':visible') &&
+        gl.utils.isInViewport(this.$buildRefreshAnimation.get(0)))) {
         // User is at Bottom of Build Log
 
         this.$scrollTopBtn.show();
@@ -211,9 +216,12 @@ $(() => {
         this.fixTruncatedInfo();
 
         // Show and Reposition Autoscroll Status Indicator
-        this.$autoScrollContainer.css({ top: this.$body.outerHeight() - AUTO_SCROLL_OFFSET }).show();
+        this.$autoScrollContainer.css(
+          { top: this.$body.outerHeight() - AUTO_SCROLL_OFFSET },
+        ).show();
         this.$autoScrollStatusText.addClass('animate');
-      } else if (gl.utils.isInViewport(this.$upBuildTrace.get(0)) && gl.utils.isInViewport(this.$downBuildTrace.get(0))) {
+      } else if (gl.utils.isInViewport(this.$upBuildTrace.get(0)) &&
+        gl.utils.isInViewport(this.$downBuildTrace.get(0))) {
         // Build Log height is small
 
         this.$scrollTopBtn.hide();
@@ -225,20 +233,23 @@ $(() => {
         this.$autoScrollStatusText.removeClass('animate');
       }
 
-      if (this.buildStatus === "running" || this.buildStatus === "pending") {
+      if (this.buildStatus === 'running' || this.buildStatus === 'pending') {
         // Check if Refresh Animation is in Viewport and enable Autoscroll, disable otherwise.
-        this.$autoScrollStatus.data("state", gl.utils.isInViewport(this.$buildRefreshAnimation.get(0)) ? 'enabled' : 'disabled');
+        this.$autoScrollStatus.data(
+          'state',
+          gl.utils.isInViewport(this.$buildRefreshAnimation.get(0)) ? 'enabled' : 'disabled',
+        );
       }
     };
 
-    Build.prototype.shouldHideSidebarForViewport = function() {
-      var bootstrapBreakpoint;
-      bootstrapBreakpoint = this.bp.getBreakpointSize();
+    Build.prototype.shouldHideSidebarForViewport = function () {
+      const bootstrapBreakpoint = this.bp.getBreakpointSize();
       return bootstrapBreakpoint === 'xs' || bootstrapBreakpoint === 'sm';
     };
 
-    Build.prototype.toggleSidebar = function(shouldHide) {
-      var shouldShow = typeof shouldHide === 'boolean' ? !shouldHide : undefined;
+    Build.prototype.toggleSidebar = function (shouldHide) {
+      const shouldShow = typeof shouldHide === 'boolean' ? !shouldHide : undefined;
+
       this.$buildScroll.toggleClass('sidebar-expanded', shouldShow)
         .toggleClass('sidebar-collapsed', shouldHide);
       this.$truncatedInfo.toggleClass('sidebar-expanded', shouldShow)
@@ -247,45 +258,46 @@ $(() => {
         .toggleClass('right-sidebar-collapsed', shouldHide);
     };
 
-    Build.prototype.sidebarOnResize = function() {
+    Build.prototype.sidebarOnResize = function () {
       this.toggleSidebar(this.shouldHideSidebarForViewport());
     };
 
-    Build.prototype.sidebarOnClick = function() {
+    Build.prototype.sidebarOnClick = function () {
       if (this.shouldHideSidebarForViewport()) this.toggleSidebar();
     };
 
-    Build.prototype.updateArtifactRemoveDate = function() {
-      var $date, date;
-      $date = $('.js-artifacts-remove');
+    Build.prototype.updateArtifactRemoveDate = function () {
+      const $date = $('.js-artifacts-remove');
       if ($date.length) {
-        date = $date.text();
-        return $date.text(gl.utils.timeFor(new Date(date.replace(/([0-9]+)-([0-9]+)-([0-9]+)/g, '$1/$2/$3')), ' '));
+        const date = $date.text();
+        return $date.text(
+          gl.utils.timeFor(new Date(date.replace(/([0-9]+)-([0-9]+)-([0-9]+)/g, '$1/$2/$3')), ' '),
+        );
       }
     };
 
-    Build.prototype.populateJobs = function(stage) {
+    Build.prototype.populateJobs = function (stage) {
       $('.build-job').hide();
-      $('.build-job[data-stage="' + stage + '"]').show();
+      $(`.build-job[data-stage="${stage}"`).show();
     };
 
-    Build.prototype.updateStageDropdownText = function(stage) {
+    Build.prototype.updateStageDropdownText = function (stage) {
       $('.stage-selection').text(stage);
     };
 
-    Build.prototype.updateDropdown = function(e) {
+    Build.prototype.updateDropdown = function (e) {
       e.preventDefault();
-      var stage = e.currentTarget.text;
+      const stage = e.currentTarget.text;
       this.updateStageDropdownText(stage);
       this.populateJobs(stage);
     };
 
-    Build.prototype.stepTrace = function(e) {
-      var $currentTarget;
+    Build.prototype.stepTrace = function (e) {
       e.preventDefault();
-      $currentTarget = $(e.currentTarget);
+
+      const $currentTarget = $(e.currentTarget);
       $.scrollTo($currentTarget.attr('href'), {
-        offset: 0
+        offset: 0,
       });
     };
 
@@ -303,5 +315,4 @@ $(() => {
 
     return Build;
   })();
-
 });
