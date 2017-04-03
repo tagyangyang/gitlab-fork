@@ -98,7 +98,8 @@ module Ci
               return error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{current_length}" })
             end
 
-            trace.append(request.body.read, content_range[0].to_i)
+            trace_part = build.hide_secrets(request.body.read)
+            trace.append(trace_part, content_range[0].to_i)
 
             status 202
             header 'Build-Status', build.status

@@ -4,6 +4,8 @@ module Ci
     include AfterCommitQueue
     include Presentable
 
+    alias_attribute :old_trace, :trace
+
     belongs_to :runner
     belongs_to :trigger_request
     belongs_to :erased_by, class_name: 'User'
@@ -231,66 +233,28 @@ module Ci
     end
 
     def update_coverage
-      coverage = trace_data.transaction do
-        coverage(coverage_regex)
+      coverage = trace.use do |trace_stream|
+        trace_stream.extract_coverage(coverage_regex)
       end
       update_attributes(coverage: coverage) if coverage.present?
     end
 
-    def trace_paths
-      [
-        File.join(
-          Settings.gitlab_ci.builds_path,
-          created_at.utc.strftime("%Y_%m"),
-          project_id.to_s,
-          "#{id}.log"
-        ),
-        project&.ci_id && File.join(
-          Settings.gitlab_ci.builds_path,
-          created_at.utc.strftime("%Y_%m"),
-          project.ci_id.to_s,
-          "#{id}.log"
-        )
-      ].compact
-    end
-
-    def current_trace_path
-      @current_trace_path ||= trace_paths.find do |trace_path|
-        File.exist?(trace_path)
-      end
-    end
-
     def has_trace?
-      current_trace_path.present? || read_attribute(:trace).present?
-    end
-
-    def db_trace_stream
-      trace = read_attribute(:trace)
-      StringIO.new(trace) if trace
+      Gitlab::Ci::Trace.new(self).has_trace?
     end
 
     def trace
-      Gitlab::Ci::Trace.new do
-        if current_trace_path
-          File.open(current_trace_path, "rb")
-        else
-          db_trace_stream
-        end
-      end
-    end
-
-    def trace=(new_trace)
-      writeable_trace.use do |trace|
-        trace.replace(new_trace)
-      end
+      Gitlab::Ci::Trace.new(self).stream
     end
 
     def writeable_trace
-      Gitlab::Ci::Trace.new do
-        trace_path = current_trace_path || trace_paths.first
-        FileUtils.mkdir_p(trace_dir) unless Dir.exist?(trace_dir)
+      Gitlab::Ci::Trace.new(self).writeable_stream
+    end
 
-        File.open(trace_path, "wb")
+    def trace=(new_trace)
+      writeable_trace.use do |trace_stream|
+        new_trace = hide_secrets(new_trace)
+        trace_stream.set(new_trace)
       end
     end
 

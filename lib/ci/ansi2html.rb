@@ -147,7 +147,7 @@ module Ci
           truncated = true
         else
           stream.seek(@offset)
-          append = true
+          append = @offset > 0
         end
         start_offset = @offset
 

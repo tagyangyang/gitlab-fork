@@ -1,110 +1,89 @@
 module Gitlab
   module Ci
-    # This was inspired from: http://stackoverflow.com/a/10219411/1520132
     class Trace
-      BUFFER_SIZE = 4096
-      LIMIT_SIZE = 60
+      attr_reader :job
 
-      attr_accessor :stream
+      delegate :old_trace, to: :job
 
-      delegate :close, :tell, :seek, :size, :path, :truncate, to: :stream, allow_nil: true
-
-      def initialize()
-        self.stream = yield
+      def initialize(job)
+        @job = job
       end
 
-      def use
-        yield self
-      ensure
-        close if valid?
+      def has_trace?
+        current_trace_path.present? || old_trace.present?
       end
 
-      def valid?
-        self.stream&.ready?
-      end
-
-      def file?
-        self.path.present?
-      end
-
-      def limit(max_bytes = LIMIT_SIZE)
-        stream_size = size
-        if stream_size < max_bytes
-          max_bytes = stream_size
+      def stream
+        Gitlab::Ci::TraceStream.new do
+          if current_trace_path
+            File.open(current_trace_path, "rb")
+          elsif old_trace
+            StringIO.new(old_trace)
+          end
         end
-        stream.seek(-max_bytes, IO::SEEK_END)
       end
 
-      def append(data, offset)
-        stream.truncate(offset)
-        stream.seek(0, IO::SEEK_END)
-        stream.write(data)
-        stream.flush()
+      def writeable_stream
+        Gitlab::Ci::TraceStream.new do
+          File.open(ensure_trace_path, "a+b")
+        end
       end
 
-      def set(data)
-        truncate(0)
-        stream.write(data)
-        stream.flush()
+      def ensure_trace_path
+        return current_trace_path if current_trace_path
+
+        ensure_trace_directory
+        default_trace_path
       end
 
-      def read_last_lines(max_lines)
-        chunks = []
-        pos = lines = 0
-        max = file.size
+      def ensure_trace_directory
+        unless Dir.exist?(default_trace_directory)
+          FileUtils.mkdir_p(default_trace_directory)
+        end
+      end
 
-        # We want an extra line to make sure fist line has full contents
-        while lines <= max_lines && pos < max
-          pos += BUFFER_SIZE
+      def current_trace_path
+        @current_trace_path ||= trace_paths.find do |trace_path|
+          File.exist?(trace_path)
+        end
+      end
 
-          buf =
-            if pos <= max
-              stream.seek(-pos, IO::SEEK_END)
-              stream.read(BUFFER_SIZE)
-            else # Reached the head, read only left
-              stream.seek(0)
-              stream.read(BUFFER_SIZE - (pos - max))
-            end
-
-          lines += buf.count("\n")
-          chunks.unshift(buf)
+      def erase_trace
+        trace_paths.find do |trace_path|
+          File.rm(trace_path, force: true)
         end
 
-        chunks.join.lines.last(max_lines).join
-          .force_encoding(Encoding.default_external)
+        job.update(old_trace: nil)
       end
 
-      def html_with_state(state = nil)
-        ::Ci::Ansi2html.convert(stream, state)
+      private
+
+      def trace_paths
+        [
+          default_trace_path,
+          deprecated_trace_path
+        ].compact
       end
 
-      def html_last_lines(max_lines)
-        text = read_last_lines(max_lines)
-        stream = StringIO.new(text)
-        ::Ci::Ansi2html.convert(stream).html
+      def default_trace_directory
+        File.join(
+          Settings.gitlab_ci.builds_path,
+          job.created_at.utc.strftime("%Y_%m"),
+          job.project_id.to_s
+        )
       end
 
-      def coverage(regex)
-        return unless valid?
-        return unless regex
+      def default_trace_path
+        File.join(default_trace_directory, "#{job.id}.log")
+      end
 
-        regex = Regexp.new(regex)
-
-        match = ""
-
-        stream.each_line do |line|
-          matches = line.scan(regex).last
-          match = matches.last if matches.is_a?(Array)
-        end
-
-        coverage = match.gsub(/\d+(\.\d+)?/).first
-
-        if coverage.present?
-          coverage.to_f
-        end
-      rescue
-        # if bad regex or something goes wrong we dont want to interrupt transition
-        # so we just silentrly ignore error for now
+      def deprecated_trace_path
+        File.join(
+          Settings.gitlab_ci.builds_path,
+          job.created_at.utc.strftime("%Y_%m"),
+          job.project.ci_id.to_s,
+          "#{job.id}.log"
+        ) if job.project&.ci_id
       end
     end
   end
