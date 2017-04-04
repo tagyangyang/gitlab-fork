@@ -162,16 +162,16 @@ setup-test-env:
 # rspec 18 20: *rspec-knapsack
 # rspec 19 20: *rspec-knapsack
 
-# spinach 0 10: *spinach-knapsack
-# spinach 1 10: *spinach-knapsack
-# spinach 2 10: *spinach-knapsack
-# spinach 3 10: *spinach-knapsack
-# spinach 4 10: *spinach-knapsack
-# spinach 5 10: *spinach-knapsack
-# spinach 6 10: *spinach-knapsack
+spinach 0 10: *spinach-knapsack
+spinach 1 10: *spinach-knapsack
+spinach 2 10: *spinach-knapsack
+spinach 3 10: *spinach-knapsack
+spinach 4 10: *spinach-knapsack
+spinach 5 10: *spinach-knapsack
+spinach 6 10: *spinach-knapsack
 spinach 7 10: *spinach-knapsack
-# spinach 8 10: *spinach-knapsack
-# spinach 9 10: *spinach-knapsack
+spinach 8 10: *spinach-knapsack
+spinach 9 10: *spinach-knapsack
 
 # Other generic tests
 .ruby-static-analysis: &ruby-static-analysis
