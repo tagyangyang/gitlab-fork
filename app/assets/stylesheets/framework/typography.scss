@@ -2,21 +2,19 @@
   color: $gl-text-color;
   word-wrap: break-word;
 
-  p {
-    a:last-child {
-      img {
-        margin-bottom: 0;
-      }
-    }
-  }
-
   a {
     color: $md-link-color;
   }
 
   img {
     max-width: 100%;
-    margin: 0 0 16px;
+    margin: 0 0 $gl-padding;
+  }
+
+  p img {
+    // Remove bottom padding because
+    // <p> already has $gl-padding bottom
+    margin-bottom: 0;
   }
 
   *:first-child:not(.katex-display) {
