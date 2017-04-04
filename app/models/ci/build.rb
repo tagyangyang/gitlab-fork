@@ -4,8 +4,6 @@ module Ci
     include AfterCommitQueue
     include Presentable
 
-    alias_attribute :old_trace, :trace
-
     belongs_to :runner
     belongs_to :trigger_request
     belongs_to :erased_by, class_name: 'User'
@@ -240,22 +238,24 @@ module Ci
     end
 
     def has_trace?
-      Gitlab::Ci::Trace.new(self).has_trace?
+      trace.has_trace?
     end
 
     def trace
-      Gitlab::Ci::Trace.new(self).stream
+      Gitlab::Ci::Trace.new(self)
     end
 
-    def writeable_trace
-      Gitlab::Ci::Trace.new(self).writeable_stream
+    def trace=(data)
+      raise NotImplementedError
     end
 
-    def trace=(new_trace)
-      writeable_trace.use do |trace_stream|
-        new_trace = hide_secrets(new_trace)
-        trace_stream.set(new_trace)
-      end
+    def old_trace
+      read_attribute(:trace)
+    end
+
+    def erase_old_trace!
+      write_attribute(:trace, nil)
+      save
     end
 
     def needs_touch?
@@ -448,8 +448,7 @@ module Ci
     end
 
     def erase_trace!
-      self.write_attribute(trace: nil)
-      File.rm(current_trace_path) if current_trace_path
+      trace.erase_trace!
     end
 
     def update_erased!(user = nil)

@@ -34,16 +34,21 @@ class Projects::BuildsController < Projects::ApplicationController
   end
 
   def trace
-    build.trace.use do |trace|
-      return render_404 unless trace.valid?
+    build.trace.read do |stream|
+      state = if stream.valid?
+        stream.limit
+        stream.html_with_state(state)
+      end
 
-      trace.limit
+      result = {
+        id: @build.id, status: @build.status, complete: @build.complete?
+      }
 
       respond_to do |format|
         format.json do
           state = params[:state].presence
-          render json: trace.html_with_state(state).to_h.
-            merge!(id: @build.id, status: @build.status, complete: @build.complete?)
+          render json: .to_h.
+            merge!()
         end
       end
     end
@@ -79,9 +84,9 @@ class Projects::BuildsController < Projects::ApplicationController
   end
 
   def raw
-    build.trace.use do |trace|
-      if trace.file?
-        send_file trace.path, type: 'text/plain; charset=utf-8', disposition: 'inline'
+    build.trace.read do |stream|
+      if stream.file?
+        send_file stream.path, type: 'text/plain; charset=utf-8', disposition: 'inline'
       else
         render_404
       end

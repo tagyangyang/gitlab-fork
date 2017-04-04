@@ -13,21 +13,63 @@ module Gitlab
         current_trace_path.present? || old_trace.present?
       end
 
-      def stream
-        Gitlab::Ci::TraceStream.new do
+      def html(max_lines: nil)
+        read do |stream|
+          stream.html(max_lines: max_lines)
+        end
+      end
+
+      def raw(max_lines: nil)
+        read do |stream|
+          stream.raw(max_lines: max_lines)
+        end
+      end
+
+      def extract_coverage(regex)
+        read do |stream|
+          stream.extract_coverage(regex)
+        end
+      end
+
+      def set(data)
+        write do |stream|
+          stream.set(data)
+        end
+      end
+
+      def erase_trace!
+        trace_paths.find do |trace_path|
+          File.rm(trace_path, force: true)
+        end
+
+        job.erase_old_trace!
+      end
+
+      def read
+        stream = Gitlab::Ci::Trace::Stream.new do
           if current_trace_path
             File.open(current_trace_path, "rb")
           elsif old_trace
             StringIO.new(old_trace)
           end
         end
+
+        yield stream
+      ensure
+        stream&.close
       end
 
-      def writeable_stream
-        Gitlab::Ci::TraceStream.new do
+      def write
+        stream = Gitlab::Ci::Trace::Stream.new do
           File.open(ensure_trace_path, "a+b")
         end
+
+        yield stream
+      ensure
+        stream&.close
       end
+
+      private
 
       def ensure_trace_path
         return current_trace_path if current_trace_path
@@ -47,16 +89,6 @@ module Gitlab
           File.exist?(trace_path)
         end
       end
-
-      def erase_trace
-        trace_paths.find do |trace_path|
-          File.rm(trace_path, force: true)
-        end
-
-        job.update(old_trace: nil)
-      end
-
-      private
 
       def trace_paths
         [

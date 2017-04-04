@@ -145,14 +145,14 @@ module API
         content_range = request.headers['Content-Range']
         content_range = content_range.split('-')
 
-        job.writeable_trace.use do |trace|
-          current_length = trace.size
+        job.trace.write do |stream|
+          current_length = stream.size
           unless current_length == content_range[0].to_i
             return error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{current_length}" })
           end
 
           trace_part = job.hide_secrets(request.body.read)
-          trace.append(trace_part, content_range[0].to_i)
+          stream.append(trace_part, content_range[0].to_i)
 
           status 202
           header 'Job-Status', job.status
