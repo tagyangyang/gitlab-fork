@@ -38,8 +38,7 @@
           var body;
           if (response.body.length > 0) {
             body = response.body;
-          }
-          else {
+          } else {
             body = 'Nothing to preview.';
           }
 
