@@ -33,6 +33,7 @@ module Gitlab
 
       def set(data)
         write do |stream|
+          data = job.hide_secrets(data)
           stream.set(data)
         end
       end
