@@ -84,7 +84,7 @@ module Gitlab
         ::Ci::Ansi2html.convert(stream).html
       end
 
-      def coverage(regex)
+      def extract_coverage(regex)
         return unless valid?
         return unless regex
 
