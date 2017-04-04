@@ -41,6 +41,8 @@ $(() => {
       this.updateStageDropdownText(this.buildStage);
       this.sidebarOnResize();
 
+      // this.initAffixTruncatedInfo = _.bind(this.initAffixTruncatedInfo, this);
+
       this.$document
         .off('click', '.js-sidebar-build-toggle')
         .on('click', '.js-sidebar-build-toggle', this.sidebarOnClick.bind(this));
@@ -100,9 +102,15 @@ $(() => {
             $buildContainer.append(log.html);
           } else {
             $buildContainer.html(log.html);
-          }
 
-          this.$truncatedInfo.toggleClass('hidden', !log.truncated);
+            if (log.truncated) {
+              $('.js-truncated-info-size').html(` ${log.size} `);
+              this.$truncatedInfo.removeClass('hidden');
+              this.initAffixTruncatedInfo();
+            } else {
+              this.$truncatedInfo.addClass('hidden');
+            }
+          }
 
           if (log.status !== this.buildStatus) {
             let pageUrl = this.pageUrl;
@@ -174,7 +182,6 @@ $(() => {
         // User is somewhere in middle of Build Log
 
         this.$scrollTopBtn.show();
-        this.fixTruncatedInfo();
 
         if (this.buildStatus === 'success' || this.buildStatus === 'failed') { // Check if Build is completed
           this.$scrollBottomBtn.show();
@@ -201,7 +208,6 @@ $(() => {
 
         this.$scrollTopBtn.hide();
         this.$scrollBottomBtn.show();
-        this.unFixTruncatedInfo();
 
         this.$autoScrollContainer.hide();
         this.$autoScrollStatusText.removeClass('animate');
@@ -213,7 +219,6 @@ $(() => {
 
         this.$scrollTopBtn.show();
         this.$scrollBottomBtn.hide();
-        this.fixTruncatedInfo();
 
         // Show and Reposition Autoscroll Status Indicator
         this.$autoScrollContainer.css(
@@ -226,7 +231,6 @@ $(() => {
 
         this.$scrollTopBtn.hide();
         this.$scrollBottomBtn.hide();
-        this.unFixTruncatedInfo();
 
         // Hide Autoscroll Status Indicator
         this.$autoScrollContainer.hide();
@@ -301,16 +305,10 @@ $(() => {
       });
     };
 
-    Build.prototype.fixTruncatedInfo = () => {
-      $('.js-truncated-info')
-        .removeClass('truncated-info-absolute')
-        .addClass('truncated-info-fixed');
-    };
+    Build.prototype.initAffixTruncatedInfo = function () {
+      const offsetTop = this.$buildTrace.offset().top;
 
-    Build.prototype.unFixTruncatedInfo = () => {
-      $('.js-truncated-info')
-        .removeClass('truncated-info-fixed')
-        .addClass('truncated-info-absolute');
+      this.$truncatedInfo.affix({ offset: { top: offsetTop } });
     };
 
     return Build;

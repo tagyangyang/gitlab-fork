@@ -70,7 +70,7 @@
     }
 
     // with sidebar
-    &-fixed.sidebar-expanded {
+    &.affix.sidebar-expanded {
       position: fixed;
       top: 0;
       right: 312px;
@@ -78,7 +78,7 @@
     }
 
     // without sidebar
-    &-fixed.sidebar-collapsed {
+    &.affix.sidebar-collapsed {
       position: fixed;
       top: 0;
       margin: 0;
@@ -86,7 +86,7 @@
       left: 20px;
     }
 
-    &-absolute {
+    &.affix-top {
       position: absolute;
       top: 0;
       margin: 0 auto;

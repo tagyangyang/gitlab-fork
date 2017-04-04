@@ -72,7 +72,10 @@
         #up-build-trace
         %pre.build-trace#build-trace
           .js-truncated-info.truncated-info.hidden
-            %p Showing last 50 Kb of log
+            %span<
+              Showing last
+              %span.js-truncated-info-size>
+              Kb of log
           %code.bash.js-build-output
           .build-loader-animation.js-build-refresh
 
