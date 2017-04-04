@@ -231,9 +231,7 @@ module Ci
     end
 
     def update_coverage
-      coverage = trace.use do |trace_stream|
-        trace_stream.extract_coverage(coverage_regex)
-      end
+      coverage = trace.extract_coverage(coverage_regex)
       update_attributes(coverage: coverage) if coverage.present?
     end
 
@@ -437,6 +435,15 @@ module Ci
       end
     end
 
+    def hide_secrets(trace)
+      return unless trace
+
+      trace = trace.dup
+      Ci::MaskSecret.mask!(trace, project.runners_token) if project
+      Ci::MaskSecret.mask!(trace, token)
+      trace
+    end
+
     private
 
     def update_artifacts_size
@@ -508,15 +515,6 @@ module Ci
       return {} unless pipeline.config_processor
 
       pipeline.config_processor.build_attributes(name)
-    end
-
-    def hide_secrets(trace)
-      return unless trace
-
-      trace = trace.dup
-      Ci::MaskSecret.mask!(trace, project.runners_token) if project
-      Ci::MaskSecret.mask!(trace, token)
-      trace
     end
 
     def update_project_statistics

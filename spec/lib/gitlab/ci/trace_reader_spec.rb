@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Gitlab::Ci::TraceReader do
+describe Gitlab::Ci::Trace do
   let(:path) { __FILE__ }
   let(:lines) { File.readlines(path) }
   let(:bytesize) { lines.sum(&:bytesize) }

@@ -35,20 +35,20 @@ class Projects::BuildsController < Projects::ApplicationController
 
   def trace
     build.trace.read do |stream|
-      state = if stream.valid?
-        stream.limit
-        stream.html_with_state(state)
-      end
-
-      result = {
-        id: @build.id, status: @build.status, complete: @build.complete?
-      }
-
       respond_to do |format|
         format.json do
-          state = params[:state].presence
-          render json: .to_h.
-            merge!()
+          result = {
+            id: @build.id, status: @build.status, complete: @build.complete?
+          }
+
+          if stream.valid?
+            stream.limit
+            state = params[:state].presence
+            trace = stream.html_with_state(state)
+            result.merge!(trace.to_h)
+          end
+
+          render json: result
         end
       end
     end
