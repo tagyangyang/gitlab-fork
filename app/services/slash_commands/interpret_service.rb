@@ -73,9 +73,7 @@ module SlashCommands
     end
 
     desc 'Merge (when the pipeline succeeds)'
-    humanized do
-      'Merges this merge request when the pipeline succeeds.'
-    end
+    humanized 'Merges this merge request when the pipeline succeeds.'
     condition do
       last_diff_sha = params && params[:merge_request_diff_head_sha]
       issuable.is_a?(MergeRequest) &&
@@ -161,7 +159,6 @@ module SlashCommands
       @updates[:milestone_id] = nil
     end
 
-    # not super nice when labels missing
     desc 'Add label(s)'
     humanized do |labels_param|
       labels = find_label_references(labels_param)
@@ -311,7 +308,11 @@ module SlashCommands
     end
 
     desc 'Toggle the Work In Progress status'
-    humanized 'Toggles the Work In Progress status.'
+    humanized do
+      verb = issuable.work_in_progress? ? 'Unmarks' : 'Marks'
+      noun = issuable.to_ability_name.humanize(capitalize: false)
+      "#{verb} this #{noun} as Work In Progress."
+    end
     condition do
       issuable.persisted? &&
         issuable.respond_to?(:work_in_progress?) &&
@@ -321,9 +322,12 @@ module SlashCommands
       @updates[:wip_event] = issuable.work_in_progress? ? 'unwip' : 'wip'
     end
 
-    # fix it
+
     desc 'Toggle emoji award'
-    humanized 'Toggles XXXXX emoji award.'
+    humanized do |emoji|
+      name = award_emoji_name(emoji)
+      "Toggles :#{name}: emoji award."
+    end
     params ':emoji:'
     condition do
       issuable.persisted?
@@ -335,9 +339,14 @@ module SlashCommands
       end
     end
 
-    # display something better here
     desc 'Set time estimate'
-    humanized 'Sets time estimate.'
+    humanized do |raw_duration|
+      time_estimate = Gitlab::TimeTrackingFormatter.output(
+        Gitlab::TimeTrackingFormatter.parse(raw_duration)
+      )
+
+      "Sets time estimate to #{time_estimate}." if time_estimate
+    end
     params '<1w 3d 2h 14m>'
     condition do
       current_user.can?(:"admin_#{issuable.to_ability_name}", project)
@@ -350,9 +359,22 @@ module SlashCommands
       end
     end
 
-    # todo
     desc 'Add or substract spent time'
-    humanized 'Adds / substracts XXXXX time.'
+    humanized do |raw_duration|
+      time_spent = Gitlab::TimeTrackingFormatter.parse(raw_duration)
+
+      if time_spent
+        if time_spent > 0
+          verb = 'Adds'
+          value = time_spent
+        else
+          verb = 'Substracts'
+          value = -time_spent
+        end
+
+        "#{verb} #{Gitlab::TimeTrackingFormatter.output(value)} spent time."
+      end
+    end
     params '<1h 30m | -1h 30m>'
     condition do
       current_user.can?(:"admin_#{issuable.to_ability_name}", issuable)
@@ -390,9 +412,10 @@ module SlashCommands
     params '@user'
     command :cc
 
-    # todo
     desc 'Define target branch for MR'
-    humanized 'Sets target branch to XXXXX'
+    humanized do |target_branch_param|
+      "Sets target branch to #{target_branch_param.strip}."
+    end
     params '<Local branch name>'
     condition do
       issuable.respond_to?(:target_branch) &&

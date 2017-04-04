@@ -854,9 +854,54 @@ describe SlashCommands::InterpretService, services: true do
     describe 'due command' do
       let(:content) { '/due April 1st 2016' }
 
-      it 'includes issuable name' do
+      it 'includes the date' do
         _, explanations = service.explain(content, issue)
         expect(explanations).to eq(['Sets the due date to Apr 1, 2016.'])
+      end
+    end
+
+    describe 'wip command' do
+      let(:content) { '/wip' }
+
+      it 'includes the new status' do
+        _, explanations = service.explain(content, merge_request)
+        expect(explanations).to eq(['Marks this merge request as Work In Progress.'])
+      end
+    end
+
+    describe 'award command' do
+      let(:content) { '/award :confetti_ball: ' }
+
+      it 'includes the emoji' do
+        _, explanations = service.explain(content, issue)
+        expect(explanations).to eq(['Toggles :confetti_ball: emoji award.'])
+      end
+    end
+
+    describe 'estimate command' do
+      let(:content) { '/estimate 79d' }
+
+      it 'includes the formatted duration' do
+        _, explanations = service.explain(content, merge_request)
+        expect(explanations).to eq(['Sets time estimate to 3mo 3w 4d.'])
+      end
+    end
+
+    describe 'spend command' do
+      let(:content) { '/spend -120m' }
+
+      it 'includes the formatted duration and proper verb' do
+        _, explanations = service.explain(content, issue)
+        expect(explanations).to eq(['Substracts 2h spent time.'])
+      end
+    end
+
+    describe 'target branch command' do
+      let(:content) { '/target_branch my-feature ' }
+
+      it 'includes the branch name' do
+        _, explanations = service.explain(content, merge_request)
+        expect(explanations).to eq(['Sets target branch to my-feature.'])
       end
     end
   end
