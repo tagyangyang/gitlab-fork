@@ -11,7 +11,7 @@
     margin: 0 0 $gl-padding;
   }
 
-  p img {
+  p a:not(.no-attachment-icon) img {
     // Remove bottom padding because
     // <p> already has $gl-padding bottom
     margin-bottom: 0;
