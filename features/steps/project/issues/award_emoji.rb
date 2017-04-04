@@ -20,12 +20,16 @@ class Spinach::Features::AwardEmoji < Spinach::FeatureSteps
     page.within '.awards' do
       page.find('.js-add-award').click
     end
+    page.save_screenshot('tmp/capybara/1 I click to emoji-picker.png')
+    File.write('tmp/capybara/I click to emoji-picker.html', page.html)
   end
 
   step 'I click to emoji in the picker' do
     page.within '.emoji-menu-content' do
       page.first('.js-emoji-btn').click
     end
+    page.save_screenshot('tmp/capybara/4 I click to emoji in the picker.png')
+    File.write('tmp/capybara/4 I click to emoji in the picker.html', page.html)
   end
 
   step 'I can remove it by clicking to icon' do
@@ -54,6 +58,8 @@ class Spinach::Features::AwardEmoji < Spinach::FeatureSteps
       expect(page.find('.js-emoji-btn.active .js-counter')).to have_content '1'
       expect(page).to have_css(".js-emoji-btn.active[data-original-title='You']")
     end
+    page.save_screenshot('tmp/capybara/5 I have award added.png')
+    File.write('tmp/capybara/5 I have award added.html', page.html)
   end
 
   step 'I have no awards added' do
@@ -96,10 +102,14 @@ class Spinach::Features::AwardEmoji < Spinach::FeatureSteps
 
   step 'The emoji menu is visible' do
     page.find(".emoji-menu.is-visible")
+    page.save_screenshot('tmp/capybara/2 The emoji menu is visible.png')
+    File.write('tmp/capybara/2 The emoji menu is visible.html', page.html)
   end
 
   step 'The search field is focused' do
     expect(page).to have_selector('#emoji_search')
     expect(page.evaluate_script('document.activeElement.id')).to eq('emoji_search')
+    page.save_screenshot('tmp/capybara/3 The search field is focused.png')
+    File.write('tmp/capybara/3 The search field is focused.html', page.html)
   end
 end
