@@ -34,13 +34,15 @@ module API
 
         access =
           if wiki?
-            Gitlab::GitAccessWiki.new(actor, project, protocol, authentication_abilities: ssh_authentication_abilities)
+            Gitlab::GitAccessWiki.new(actor,
+                                      project,
+                                      protocol,
+                                      authentication_abilities: ssh_authentication_abilities)
           else
             Gitlab::GitAccess.new(actor,
                                   project,
                                   protocol,
-                                  authentication_abilities: ssh_authentication_abilities,
-                                  env: parse_allowed_environment_variables)
+                                  authentication_abilities: ssh_authentication_abilities)
           end
 
         access_status = access.check(params[:action], params[:changes])
