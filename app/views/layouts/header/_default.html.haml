@@ -66,7 +66,8 @@
               .dropdown-menu-nav.dropdown-menu-align-right
                 %ul
                   %li.current-user
-                    %span #{current_user.name}
+                    %span
+                      = current_user.name
                     @#{current_user.username}
                   %li.divider
                   %li
