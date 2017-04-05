@@ -27,7 +27,7 @@ module Gitlab
           if stream_size < last_bytes
             last_bytes = stream_size
           end
-          stream.seek(-max_bytes, IO::SEEK_END)
+          stream.seek(-last_bytes, IO::SEEK_END)
         end
 
         def append(data, offset)
@@ -56,7 +56,7 @@ module Gitlab
         def html_with_state(state = nil)
           ::Ci::Ansi2html.convert(stream, state)
         end
-        
+
         def html(last_lines: nil)
           text = raw(last_lines: last_lines)
           stream = StringIO.new(text)
