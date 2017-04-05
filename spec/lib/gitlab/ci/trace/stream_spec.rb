@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Gitlab::Ci::Trace::Stream do
-
   describe '#raw' do
     context 'limit max lines' do
       let(:path) { __FILE__ }
@@ -45,7 +44,7 @@ describe Gitlab::Ci::Trace::Stream do
 
       it 'raises an error if not passing an integer for last_lines' do
         expect do
-          subject.raw(max_lines: lines)
+          subject.raw(last_lines: lines)
         end.to raise_error(ArgumentError)
       end
 

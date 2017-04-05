@@ -13,15 +13,15 @@ module Gitlab
         current_path.present? || old_trace.present?
       end
 
-      def html(max_lines: nil)
+      def html(last_lines: nil)
         read do |stream|
-          stream.html(max_lines: max_lines)
+          stream.html(last_lines: last_lines)
         end
       end
 
-      def raw(max_lines: nil)
+      def raw(last_lines: nil)
         read do |stream|
-          stream.raw(max_lines: max_lines)
+          stream.raw(last_lines: last_lines)
         end
       end
 
