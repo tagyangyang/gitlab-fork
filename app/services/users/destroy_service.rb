@@ -39,16 +39,18 @@ module Users
     private
 
     def move_issues_to_ghost_user(user)
-      # Block the user before moving issues to prevent a data race.
-      # If the user creates an issue after `move_issues_to_ghost_user`
-      # runs and before the user is destroyed, the destroy will fail with
-      # an exception. We block the user so that issues can't be created
-      # after `move_issues_to_ghost_user` runs and before the destroy happens.
-      user.block
+      user.transaction do
+        # Block the user before moving issues to prevent a data race.
+        # If the user creates an issue after `move_issues_to_ghost_user`
+        # runs and before the user is destroyed, the destroy will fail with
+        # an exception. We block the user so that issues can't be created
+        # after `move_issues_to_ghost_user` runs and before the destroy happens.
+        user.block
 
-      ghost_user = User.ghost
+        ghost_user = User.ghost
 
-      user.issues.update_all(author_id: ghost_user.id)
+        user.issues.update_all(author_id: ghost_user.id)
+      end
 
       user.reload
     end

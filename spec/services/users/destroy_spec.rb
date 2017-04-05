@@ -49,22 +49,34 @@ describe Users::DestroyService, services: true do
       context "for an issue the user has created" do
         let!(:issue) { create(:issue, project: project, author: user) }
 
-        before do
-          service.execute(user)
-        end
-
         it 'does not delete the issue' do
+          service.execute(user)
+
           expect(Issue.find_by_id(issue.id)).to be_present
         end
 
         it 'migrates the issue so that the "Ghost User" is the issue owner' do
+          service.execute(user)
+
           migrated_issue = Issue.find_by_id(issue.id)
 
           expect(migrated_issue.author).to eq(User.ghost)
         end
 
         it 'blocks the user before migrating issues to the "Ghost User' do
+          service.execute(user)
+
           expect(user).to be_blocked
+        end
+
+        it 'rolls back the user block if the issue migration fails' do
+          expect_any_instance_of(Issue::ActiveRecord_Associations_CollectionProxy)
+            .to receive(:update_all)
+            .and_raise(ActiveRecord::Rollback)
+
+          service.execute(user) rescue nil
+
+          expect(user).not_to be_blocked
         end
       end
 
