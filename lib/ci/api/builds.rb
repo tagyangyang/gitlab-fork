@@ -98,7 +98,7 @@ module Ci
           end
 
           status 202
-          header 'Job-Status', build.status
+          header 'Build-Status', build.status
           header 'Range', "0-#{stream_size}"
         end
 

@@ -76,9 +76,9 @@ module Gitlab
           File.open(ensure_path, "a+b")
         end
 
-        yield stream
-
-        job.touch if job.needs_touch?
+        yield(stream).tap do
+          job.touch if job.needs_touch?
+        end
       ensure
         stream&.close
       end
