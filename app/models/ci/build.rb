@@ -235,12 +235,12 @@ module Ci
       update_attributes(coverage: coverage) if coverage.present?
     end
 
-    def has_trace?
-      trace.has_trace?
-    end
-
     def trace
       Gitlab::Ci::Trace.new(self)
+    end
+
+    def has_trace?
+      trace.exist?
     end
 
     def trace=(data)

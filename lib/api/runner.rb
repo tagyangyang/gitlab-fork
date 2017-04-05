@@ -115,7 +115,7 @@ module API
       put '/:id' do
         job = authenticate_job!
 
-        job.update_attributes(trace: params[:trace]) if params[:trace]
+        job.trace.set(params[:trace]) if params[:trace]
 
         Gitlab::Metrics.add_event(:update_build,
                                   project: job.project.path_with_namespace)
@@ -145,19 +145,14 @@ module API
         content_range = request.headers['Content-Range']
         content_range = content_range.split('-')
 
-        job.trace.write do |stream|
-          current_length = stream.size
-          unless current_length == content_range[0].to_i
-            return error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{current_length}" })
-          end
-
-          trace_part = job.hide_secrets(request.body.read)
-          stream.append(trace_part, content_range[0].to_i)
-
-          status 202
-          header 'Job-Status', job.status
-          header 'Range', "0-#{trace.size}"
+        stream_size = job.trace.append(request.body.read, content_range[0].to_i)
+        if stream_size < 0
+          return error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{-stream_size}" })
         end
+
+        status 202
+        header 'Job-Status', job.status
+        header 'Range', "0-#{stream_size}"
       end
 
       desc 'Authorize artifacts uploading for job' do

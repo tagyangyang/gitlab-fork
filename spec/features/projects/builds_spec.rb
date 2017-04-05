@@ -205,7 +205,9 @@ feature 'Builds', :feature do
         it 'loads job trace' do
           expect(page).to have_content 'BUILD TRACE'
 
-          build.append_trace(' and more trace', 11)
+          build.trace.write do |stream|
+            stream.append(' and more trace', 11)
+          end
 
           expect(page).to have_content 'BUILD TRACE and more trace'
         end
@@ -390,7 +392,7 @@ feature 'Builds', :feature do
         it 'sends the right headers' do
           expect(page.status_code).to eq(200)
           expect(page.response_headers['Content-Type']).to eq('text/plain; charset=utf-8')
-          expect(page.response_headers['X-Sendfile']).to eq(build.path_to_trace)
+          expect(page.response_headers['X-Sendfile']).to eq(build.trace.current_path)
         end
       end
 

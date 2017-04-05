@@ -9,8 +9,8 @@ module Gitlab
         @job = job
       end
 
-      def has_trace?
-        current_trace_path.present? || old_trace.present?
+      def exist?
+        current_path.present? || old_trace.present?
       end
 
       def html(max_lines: nil)
@@ -38,9 +38,20 @@ module Gitlab
         end
       end
 
+      def append(data, offset)
+        write do |stream|
+          current_length = stream.size
+          return -current_length unless current_length == offset
+
+          data = job.hide_secrets(data)
+          stream.append(data, offset)
+          stream.size
+        end
+      end
+
       def erase_trace!
-        trace_paths.find do |trace_path|
-          File.rm(trace_path, force: true)
+        paths.find do |trace_path|
+          FileUtils.rm(trace_path, force: true)
         end
 
         job.erase_old_trace!
@@ -48,8 +59,8 @@ module Gitlab
 
       def read
         stream = Gitlab::Ci::Trace::Stream.new do
-          if current_trace_path
-            File.open(current_trace_path, "rb")
+          if current_path
+            File.open(current_path, "rb")
           elsif old_trace
             StringIO.new(old_trace)
           end
@@ -62,43 +73,45 @@ module Gitlab
 
       def write
         stream = Gitlab::Ci::Trace::Stream.new do
-          File.open(ensure_trace_path, "a+b")
+          File.open(ensure_path, "a+b")
         end
 
         yield stream
+
+        job.touch if job.needs_touch?
       ensure
         stream&.close
       end
 
       private
 
-      def ensure_trace_path
-        return current_trace_path if current_trace_path
+      def ensure_path
+        return current_path if current_path
 
-        ensure_trace_directory
-        default_trace_path
+        ensure_directory
+        default_path
       end
 
-      def ensure_trace_directory
-        unless Dir.exist?(default_trace_directory)
-          FileUtils.mkdir_p(default_trace_directory)
+      def ensure_directory
+        unless Dir.exist?(default_directory)
+          FileUtils.mkdir_p(default_directory)
         end
       end
 
-      def current_trace_path
-        @current_trace_path ||= trace_paths.find do |trace_path|
+      def current_path
+        @current_path ||= paths.find do |trace_path|
           File.exist?(trace_path)
         end
       end
 
-      def trace_paths
+      def paths
         [
-          default_trace_path,
-          deprecated_trace_path
+          default_path,
+          deprecated_path
         ].compact
       end
 
-      def default_trace_directory
+      def default_directory
         File.join(
           Settings.gitlab_ci.builds_path,
           job.created_at.utc.strftime("%Y_%m"),
@@ -106,11 +119,11 @@ module Gitlab
         )
       end
 
-      def default_trace_path
-        File.join(default_trace_directory, "#{job.id}.log")
+      def default_path
+        File.join(default_directory, "#{job.id}.log")
       end
 
-      def deprecated_trace_path
+      def deprecated_path
         File.join(
           Settings.gitlab_ci.builds_path,
           job.created_at.utc.strftime("%Y_%m"),

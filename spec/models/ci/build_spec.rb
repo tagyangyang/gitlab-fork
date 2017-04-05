@@ -17,8 +17,9 @@ describe Ci::Build, :models do
   it { is_expected.to belong_to(:trigger_request) }
   it { is_expected.to belong_to(:erased_by) }
   it { is_expected.to have_many(:deployments) }
-  it { is_expected.to validate_presence_of :ref }
-  it { is_expected.to respond_to :trace_html }
+  it { is_expected.to validate_presence_of(:ref) }
+  it { is_expected.to respond_to(:has_trace?) }
+  it { is_expected.to respond_to(:trace) }
 
   describe '#actionize' do
     context 'when build is a created' do
@@ -79,14 +80,14 @@ describe Ci::Build, :models do
   end
 
   describe '#append_trace' do
-    subject { build.trace_html }
+    subject { build.trace.html }
 
     context 'when build.trace hides runners token' do
       let(:token) { 'my_secret_token' }
 
       before do
         build.project.update(runners_token: token)
-        build.append_trace(token, 0)
+        build.trace.append(token, 0)
       end
 
       it { is_expected.not_to include(token) }
@@ -97,7 +98,7 @@ describe Ci::Build, :models do
 
       before do
         build.update(token: token)
-        build.append_trace(token, 0)
+        build.trace.append(token, 0)
       end
 
       it { is_expected.not_to include(token) }
@@ -272,11 +273,14 @@ describe Ci::Build, :models do
 
   describe '#update_coverage' do
     context "regarding coverage_regex's value," do
-      it "saves the correct extracted coverage value" do
+      before do
         build.coverage_regex = '\(\d+.\d+\%\) covered'
-        allow(build).to receive(:trace) { 'Coverage 1033 / 1051 LOC (98.29%) covered' }
-        expect(build).to receive(:update_attributes).with(coverage: 98.29) { true }
-        expect(build.update_coverage).to be true
+        build.trace.set('Coverage 1033 / 1051 LOC (98.29%) covered')
+      end
+
+      it "saves the correct extracted coverage value" do
+        expect(build.update_coverage).to be(true)
+        expect(build.coverage).to eq(98.29)
       end
     end
   end
@@ -438,7 +442,7 @@ describe Ci::Build, :models do
       end
 
       it 'erases build trace in trace file' do
-        expect(build.trace).to be_empty
+        expect(build).not_to have_trace
       end
 
       it 'sets erased to true' do
@@ -1078,7 +1082,7 @@ describe Ci::Build, :models do
     it 'obfuscates project runners token' do
       allow(build).to receive(:raw_trace).and_return("Test: #{build.project.runners_token}")
 
-      expect(build.trace).to eq("Test: xxxxxxxxxxxxxxxxxxxx")
+      expect(build.trace.raw).to eq("Test: xxxxxxxxxxxxxxxxxxxx")
     end
 
     it 'empty project runners token' do
@@ -1086,12 +1090,12 @@ describe Ci::Build, :models do
       # runners_token can't normally be set to nil
       allow(build.project).to receive(:runners_token).and_return(nil)
 
-      expect(build.trace).to eq(test_trace)
+      expect(build.trace.raw).to eq(test_trace)
     end
 
     context 'when build does not have trace' do
       it 'is is empty' do
-        expect(build.trace).to be_nil
+        expect(build.trace.raw).to be_nil
       end
     end
 
@@ -1101,7 +1105,7 @@ describe Ci::Build, :models do
         build.trace = text
       end
 
-      it { expect(build.trace).to eq(text) }
+      it { expect(build.trace.raw).to eq(text) }
     end
 
     context 'when trace hides runners token' do
@@ -1112,7 +1116,7 @@ describe Ci::Build, :models do
         build.project.update(runners_token: token)
       end
 
-      it { expect(build.trace).not_to include(token) }
+      it { expect(build.trace.raw).not_to include(token) }
       it { expect(build.raw_trace).to include(token) }
     end
 
@@ -1124,7 +1128,7 @@ describe Ci::Build, :models do
         build.update(token: token)
       end
 
-      it { expect(build.trace).not_to include(token) }
+      it { expect(build.trace.raw).not_to include(token) }
       it { expect(build.raw_trace).to include(token) }
     end
   end
@@ -1150,7 +1154,7 @@ describe Ci::Build, :models do
   describe '#has_trace_file?' do
     context 'when there is no trace' do
       it { expect(build.has_trace_file?).to be_falsey }
-      it { expect(build.trace).to be_nil }
+      it { expect(build.trace.raw).to be_nil }
     end
 
     context 'when there is a trace' do
@@ -1158,7 +1162,7 @@ describe Ci::Build, :models do
         let(:build_with_trace) { create(:ci_build, :trace) }
 
         it { expect(build_with_trace.has_trace_file?).to be_truthy }
-        it { expect(build_with_trace.trace).to eq('BUILD TRACE') }
+        it { expect(build_with_trace.trace.raw).to eq('BUILD TRACE') }
       end
 
       context 'when trace is stored in old file' do
@@ -1170,7 +1174,7 @@ describe Ci::Build, :models do
         end
 
         it { expect(build.has_trace_file?).to be_truthy }
-        it { expect(build.trace).to eq(test_trace) }
+        it { expect(build.trace.raw).to eq(test_trace) }
       end
 
       context 'when trace is stored in DB' do
@@ -1182,7 +1186,7 @@ describe Ci::Build, :models do
         end
 
         it { expect(build.has_trace_file?).to be_falsey }
-        it { expect(build.trace).to eq(test_trace) }
+        it { expect(build.trace.raw).to eq(test_trace) }
       end
     end
   end

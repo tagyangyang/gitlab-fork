@@ -4,7 +4,7 @@ module Gitlab
       # This was inspired from: http://stackoverflow.com/a/10219411/1520132
       class Stream
         BUFFER_SIZE = 4096
-        LIMIT_SIZE = 60
+        LIMIT_SIZE = 50.kilobytes
 
         attr_reader :stream
 
@@ -22,10 +22,10 @@ module Gitlab
           self.path.present?
         end
 
-        def limit(max_bytes = LIMIT_SIZE)
+        def limit(last_bytes = LIMIT_SIZE)
           stream_size = size
-          if stream_size < max_bytes
-            max_bytes = stream_size
+          if stream_size < last_bytes
+            last_bytes = stream_size
           end
           stream.seek(-max_bytes, IO::SEEK_END)
         end
@@ -43,22 +43,22 @@ module Gitlab
           stream.flush()
         end
 
-        def html_with_state(state = nil)
-          ::Ci::Ansi2html.convert(stream, state)
-        end
-
-        def raw(max_lines: nil)
+        def raw(last_lines: nil)
           return unless valid?
 
-          if max_lines
-            read_last_lines(max_lines)
+          if last_lines
+            read_last_lines(last_lines)
           else
             stream.read
           end
         end
 
-        def html(max_lines: nil)
-          text = raw(max_lines: max_lines)
+        def html_with_state(state = nil)
+          ::Ci::Ansi2html.convert(stream, state)
+        end
+        
+        def html(last_lines: nil)
+          text = raw(last_lines: last_lines)
           stream = StringIO.new(text)
           ::Ci::Ansi2html.convert(stream).html
         end
@@ -88,13 +88,13 @@ module Gitlab
 
         private
 
-        def read_last_lines(max_lines)
+        def read_last_lines(last_lines)
           chunks = []
           pos = lines = 0
           max = stream.size
 
           # We want an extra line to make sure fist line has full contents
-          while lines <= max_lines && pos < max
+          while lines <= last_lines && pos < max
             pos += BUFFER_SIZE
 
             buf =
@@ -110,7 +110,7 @@ module Gitlab
             chunks.unshift(buf)
           end
 
-          chunks.join.lines.last(max_lines).join
+          chunks.join.lines.last(last_lines).join
             .force_encoding(Encoding.default_external)
         end
       end
