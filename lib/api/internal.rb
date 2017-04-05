@@ -11,13 +11,15 @@ module API
       # Params:
       #   key_id - ssh key id for Git over SSH
       #   user_id - user id for Git over HTTP
+      #   protocol - Git access protocol being used, e.g. HTTP or SSH
       #   project - project path with namespace
       #   action - git action (git-upload-pack or git-receive-pack)
-      #   ref - branch name
-      #   forced_push - forced_push
-      #   protocol - Git access protocol being used, e.g. HTTP or SSH
+      #   changes - changes as "oldrev newrev ref", see Gitlab::ChangesList
       post "/allowed" do
         status 200
+
+        # Stores some Git-specific env thread-safely
+        Gitlab::Git::Env.set(parse_env)
 
         actor =
           if params[:key_id]
