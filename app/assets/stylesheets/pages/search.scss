@@ -125,7 +125,7 @@ input[type="checkbox"]:hover {
     // Custom dropdown positioning
     .dropdown-menu {
       transition-property: opacity, transform;
-      transition-duration: 0ms, 70ms;
+      transition-duration: 250ms, 250ms;
       transition-delay: 0ms, 25ms;
       transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
       transform: translateY(0);
