@@ -440,14 +440,10 @@ feature 'Builds', :feature do
       end
 
       context 'when build has trace in DB' do
-        let(:paths) { }
-
-        before do
-          page.within('.js-build-sidebar') { click_link 'Raw' }
-        end
+        let(:paths) { [] }
 
         it 'sends the right headers' do
-          expect(page.status_code).to eq(404)
+          expect(page.status_code).not_to have_link('Raw')
         end
       end
     end

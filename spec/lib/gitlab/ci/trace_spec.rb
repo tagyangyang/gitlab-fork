@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Gitlab::Ci::Trace do
   let(:build) { create(:ci_build) }
-  let(:trace) { described_class.new(job) }
+  let(:trace) { described_class.new(build) }
 
   describe '#append' do
     subject { trace.html }
@@ -45,29 +45,29 @@ describe Gitlab::Ci::Trace do
     end
 
     context 'valid content & bad regex' do
-      let(:data) { 'Coverage 1033 / 1051 LOC (98.29%) covered' }
-      let(:regex) { 'very covered') }
+      let(:data) { 'Coverage 1033 / 1051 LOC (98.29%) covered\n' }
+      let(:regex) { 'very covered' }
 
       it { is_expected.to be_nil }
     end
 
     context 'no coverage content & regex' do
       let(:data) { 'No coverage for today :sad:' }
-      let(:regex) { '\(\d+.\d+\%\) covered') }
+      let(:regex) { '\(\d+.\d+\%\) covered' }
 
       it { is_expected.to be_nil }
     end
 
     context 'multiple results in content & regex' do
       let(:data) { ' (98.39%) covered. (98.29%) covered' }
-      let(:regex) { '\(\d+.\d+\%\) covered') }
+      let(:regex) { '\(\d+.\d+\%\) covered' }
 
       it { is_expected.to eq(98.29) }
     end
 
     context 'using a regex capture' do
       let(:data) { 'TOTAL      9926   3489    65%' }
-      let(:regex) { 'TOTAL\s+\d+\s+\d+\s+(\d{1,3}\%)') }
+      let(:regex) { 'TOTAL\s+\d+\s+\d+\s+(\d{1,3}\%)' }
 
       it { is_expected.to eq(65) }
     end

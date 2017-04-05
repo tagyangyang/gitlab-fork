@@ -72,7 +72,7 @@ module Gitlab
           match = ""
 
           stream.each_line do |line|
-            matches = line.scan(regex).last
+            matches = line.scan(regex)
             match = matches.last if matches.is_a?(Array)
           end
 
