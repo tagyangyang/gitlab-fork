@@ -5,6 +5,15 @@
 # Values are checked for formatting and exclusion from a list of reserved path
 # names.
 class NamespaceValidator < ActiveModel::EachValidator
+  # All routes that appear on the top level must be listed here.
+  # This will make sure that groups cannot be created with these names
+  # as these routes would be masked by the paths already in place.
+  #
+  # Example:
+  #   /api/api-project
+  #
+  #  the path `api` shouldn't be allowed because it would be masked by `api/*`
+  #
   RESERVED = %w[
     .well-known
     admin
@@ -51,6 +60,15 @@ class NamespaceValidator < ActiveModel::EachValidator
     sent_notifications
   ].freeze
 
+  # All project routes with wildcard argument must be listed here.
+  # Otherwise it can lead to routing issues when route considered as project name.
+  #
+  # Example:
+  #  /group/project/tree/deploy_keys
+  #
+  #  without tree as reserved name routing can match 'group/project' as group name,
+  #  'tree' as project name and 'deploy_keys' as route.
+  #
   WILDCARD_ROUTES = %w[tree commits wikis new edit create update logs_tree
                        preview blob blame raw files create_dir find_file
                        artifacts graphs refs badges info git-upload-pack
@@ -67,17 +85,29 @@ class NamespaceValidator < ActiveModel::EachValidator
                        generate_new_export download_export activity
                        new_issue_address registry].freeze
 
-  STRICT_RESERVED = (RESERVED + WILDCARD_ROUTES).freeze
+  STRICT_RESERVED = (RESERVED + WILDCARD_ROUTES).uniq.freeze
 
-  def self.valid?(value)
-    !reserved?(value) && follow_format?(value)
+  def self.valid_full_path?(full_path)
+    pieces = full_path.split('/')
+    first_part = pieces.first
+    pieces.all? do |namespace|
+      type = first_part == namespace ? :top_level : :wildcard
+      valid?(namespace, type: type)
+    end
   end
 
-  def self.reserved?(value, strict: false)
-    if strict
-      STRICT_RESERVED.include?(value)
-    else
+  def self.valid?(value, type: :strict)
+    !reserved?(value, type: type) && follow_format?(value)
+  end
+
+  def self.reserved?(value, type: :strict)
+    case type
+    when :wildcard
+      WILDCARD_ROUTES.include?(value)
+    when :top_level
       RESERVED.include?(value)
+    else
+      STRICT_RESERVED.include?(value)
     end
   end
 
@@ -92,10 +122,19 @@ class NamespaceValidator < ActiveModel::EachValidator
       record.errors.add(attribute, Gitlab::Regex.namespace_regex_message)
     end
 
-    strict = record.is_a?(Group) && record.parent_id
-
-    if reserved?(value, strict: strict)
+    if reserved?(value, type: validation_type(record))
       record.errors.add(attribute, "#{value} is a reserved name")
+    end
+  end
+
+  def validation_type(record)
+    case record
+    when Group
+      record.parent_id ? :wildcard : :top_level
+    when Project
+      :wildcard
+    else
+      :strict
     end
   end
 end

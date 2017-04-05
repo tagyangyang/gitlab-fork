@@ -1,7 +1,14 @@
 module Gitlab
   module EtagCaching
     class Middleware
-      RESERVED_WORDS = NamespaceValidator::WILDCARD_ROUTES.map { |word| "/#{word}/" }.join('|')
+      # We enable an ETag for every request matching the regex.
+      # To match a regex the path needs to match the following:
+      #   - Don't contain a reserved word (expect for the words used in the regex itself)
+      #   - Ending in for the `noteable/issue/<id>/notes` for the `issue_notes` route
+      #   - Ending in `issues/id`/rendered_title` for the `issue_title` route
+      RESERVED_WORDS = NamespaceValidator::WILDCARD_ROUTES.
+                         reject { |word| %w[noteable issue notes issues rendered_title].include?(word) }.
+                         map { |word| "/#{word}/" }.join('|')
       ROUTES = [
         {
           regexp: %r(^(?!.*(#{RESERVED_WORDS})).*/noteable/issue/\d+/notes\z),
