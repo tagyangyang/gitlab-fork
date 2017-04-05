@@ -455,7 +455,7 @@ module Ci
     end
 
     def erase_trace!
-      trace.erase_trace!
+      trace.erase!
     end
 
     def update_erased!(user = nil)

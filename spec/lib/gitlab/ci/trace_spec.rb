@@ -4,10 +4,120 @@ describe Gitlab::Ci::Trace do
   let(:build) { create(:ci_build) }
   let(:trace) { described_class.new(build) }
 
-  describe '#append' do
-    subject { trace.html }
+  describe "associations" do
+    it { expect(trace).to respond_to(:job) }
+    it { expect(trace).to delegate_method(:old_trace).to(:job) }
+  end
 
-    context 'when build.trace hides runners token' do
+  describe '#html' do
+    before do
+      trace.set("12\n34")
+    end
+
+    it "returns formatted html" do
+      expect(trace.html).to eq("12<br>34")
+    end
+
+    it "returns last line of formatted html" do
+      expect(trace.html(last_lines: 1)).to eq("34")
+    end
+  end
+
+  describe '#raw' do
+    before do
+      trace.set("12\n34")
+    end
+
+    it "returns raw output" do
+      expect(trace.raw).to eq("12\n34")
+    end
+
+    it "returns last line of raw output" do
+      expect(trace.raw(last_lines: 1)).to eq("34")
+    end
+  end
+
+  describe '#extract_coverage' do
+    let(:regex) { '\(\d+.\d+\%\) covered' }
+
+    before do
+      trace.set('Coverage 1033 / 1051 LOC (98.29%) covered')
+    end
+
+    it "returns valid coverage" do
+      expect(trace.extract_coverage(regex)).to eq(98.29)
+    end
+  end
+
+  describe '#set' do
+    before do
+      trace.set("12")
+    end
+
+    it "returns trace" do
+      expect(trace.raw).to eq("12")
+    end
+
+    context 'overwrite trace' do
+      before do
+        trace.set("34")
+      end
+
+      it "returns new trace" do
+        expect(trace.raw).to eq("34")
+      end
+    end
+
+    context 'runners token' do
+      let(:token) { 'my_secret_token' }
+
+      before do
+        build.project.update(runners_token: token)
+        trace.set(token)
+      end
+
+      it "hides token" do
+        expect(trace.raw).not_to include(token)
+      end
+    end
+
+    context 'hides build token' do
+      let(:token) { 'my_secret_token' }
+
+      before do
+        build.update(token: token)
+        trace.set(token)
+      end
+
+      it "hides token" do
+        expect(trace.raw).not_to include(token)
+      end
+    end
+  end
+
+  describe '#append' do
+    before do
+      trace.set("1234")
+    end
+
+    context 'append trace' do
+      before do
+      end
+
+      it "returns correct trace" do
+        expect(trace.append("56", 4)).to eq(6)
+        expect(trace.raw).to eq("123456")
+      end
+    end
+
+    context 'tries to append trace at different offset' do
+      it "fails with append" do
+        expect(trace.append("56", 2)).to eq(-4)
+        expect(trace.raw).to eq("1234")
+      end
+    end
+
+    context 'runners token' do
       let(:token) { 'my_secret_token' }
 
       before do
@@ -15,10 +125,12 @@ describe Gitlab::Ci::Trace do
         trace.append(token, 0)
       end
 
-      it { is_expected.not_to include(token) }
+      it "hides token" do
+        expect(trace.raw).not_to include(token)
+      end
     end
 
-    context 'when build.trace hides build token' do
+    context 'build token' do
       let(:token) { 'my_secret_token' }
 
       before do
@@ -26,110 +138,84 @@ describe Gitlab::Ci::Trace do
         trace.append(token, 0)
       end
 
-      it { is_expected.not_to include(token) }
+      it "hides token" do
+        expect(trace.raw).not_to include(token)
+      end
     end
   end
 
-  describe '#extract_coverage' do
-    subject { trace.extract_coverage(regex) }
-
-    before do
-      trace.set(data)
+  describe 'trace handling' do
+    context 'trace does not exist' do
+      it { expect(trace.exist?).to be(false) }
     end
 
-    context 'valid content & regex' do
-      let(:data) { 'Coverage 1033 / 1051 LOC (98.29%) covered' }
-      let(:regex) { '\(\d+.\d+\%\) covered' }
+    context 'new trace path is used' do
+      before do
+        trace.send(:ensure_directory)
 
-      it { is_expected.to eq(98.29) }
-    end
-
-    context 'valid content & bad regex' do
-      let(:data) { 'Coverage 1033 / 1051 LOC (98.29%) covered\n' }
-      let(:regex) { 'very covered' }
-
-      it { is_expected.to be_nil }
-    end
-
-    context 'no coverage content & regex' do
-      let(:data) { 'No coverage for today :sad:' }
-      let(:regex) { '\(\d+.\d+\%\) covered' }
-
-      it { is_expected.to be_nil }
-    end
-
-    context 'multiple results in content & regex' do
-      let(:data) { ' (98.39%) covered. (98.29%) covered' }
-      let(:regex) { '\(\d+.\d+\%\) covered' }
-
-      it { is_expected.to eq(98.29) }
-    end
-
-    context 'using a regex capture' do
-      let(:data) { 'TOTAL      9926   3489    65%' }
-      let(:regex) { 'TOTAL\s+\d+\s+\d+\s+(\d{1,3}\%)' }
-
-      it { is_expected.to eq(65) }
-    end
-  end
-
-  describe '#has_trace_file?' do
-    context 'when there is no trace' do
-      it { expect(build.has_trace_file?).to be_falsey }
-      it { expect(build.trace.raw).to be_nil }
-    end
-
-    context 'when there is a trace' do
-      context 'when trace is stored in file' do
-        let(:build_with_trace) { create(:ci_build, :trace) }
-
-        it { expect(build_with_trace.has_trace_file?).to be_truthy }
-        it { expect(build_with_trace.trace.raw).to eq('BUILD TRACE') }
+        File.open(trace.send(:default_path), "w") do |file|
+          file.write("data")
+        end
       end
 
-      context 'when trace is stored in old file' do
+      it "trace exist" do
+        expect(trace.exist?).to be(true)
+      end
+
+      it "can be erased" do
+        trace.erase!
+        expect(trace.exist?).to be(false)
+      end
+    end
+
+    context 'deprecated path' do
+      let(:path) { trace.send(:deprecated_path) }
+
+      context 'with valid ci_id' do
         before do
-          allow(build.project).to receive(:ci_id).and_return(999)
-          allow(File).to receive(:exist?).with(build.path_to_trace).and_return(false)
-          allow(File).to receive(:exist?).with(build.old_path_to_trace).and_return(true)
-          allow(File).to receive(:read).with(build.old_path_to_trace).and_return(test_trace)
+          build.project.update(ci_id: 1000)
+
+          FileUtils.mkdir_p(File.dirname(path))
+
+          File.open(path, "w") do |file|
+            file.write("data")
+          end
         end
 
-        it { expect(build.has_trace_file?).to be_truthy }
-        it { expect(build.trace.raw).to eq(test_trace) }
-      end
-
-      context 'when trace is stored in DB' do
-        before do
-          allow(build.project).to receive(:ci_id).and_return(nil)
-          allow(build).to receive(:read_attribute).with(:trace).and_return(test_trace)
-          allow(File).to receive(:exist?).with(build.path_to_trace).and_return(false)
-          allow(File).to receive(:exist?).with(build.old_path_to_trace).and_return(false)
+        it "trace exist" do
+          expect(trace.exist?).to be(true)
         end
 
-        it { expect(build.has_trace_file?).to be_falsey }
-        it { expect(build.trace.raw).to eq(test_trace) }
+        it "can be erased" do
+          trace.erase!
+          expect(trace.exist?).to be(false)
+        end
+      end
+
+      context 'without valid ci_id' do
+        it "does not return deprecated path" do
+          expect(path).to be_nil
+        end
       end
     end
-  end
 
-  describe '#trace_file_path' do
-    context 'when trace is stored in file' do
+    context 'stored in database' do
       before do
-        allow(build).to receive(:has_trace_file?).and_return(true)
-        allow(build).to receive(:has_old_trace_file?).and_return(false)
+        build.send(:write_attribute, :trace, "data")
       end
 
-      it { expect(build.trace_file_path).to eq(build.path_to_trace) }
-    end
-
-    context 'when trace is stored in old file' do
-      before do
-        allow(build).to receive(:has_trace_file?).and_return(true)
-        allow(build).to receive(:has_old_trace_file?).and_return(true)
+      it "trace exist" do
+        expect(trace.exist?).to be(true)
       end
 
-      it { expect(build.trace_file_path).to eq(build.old_path_to_trace) }
+      it "can be erased" do
+        trace.erase!
+        expect(trace.exist?).to be(false)
+      end
+
+      it "returns database data" do
+        expect(trace.raw).to eq("data")
+      end
     end
   end
 end

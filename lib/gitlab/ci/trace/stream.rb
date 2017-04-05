@@ -10,12 +10,14 @@ module Gitlab
 
         delegate :close, :tell, :seek, :size, :path, :truncate, to: :stream, allow_nil: true
 
+        delegate :valid?, to: :stream, as: :present?, allow_nil: true
+
         def initialize
           @stream = yield
         end
 
         def valid?
-          self.stream&.ready?
+          self.stream.present?
         end
 
         def file?
@@ -46,7 +48,7 @@ module Gitlab
         def raw(last_lines: nil)
           return unless valid?
 
-          if last_lines
+          if last_lines.to_i > 0
             read_last_lines(last_lines)
           else
             stream.read
@@ -73,13 +75,11 @@ module Gitlab
 
           stream.each_line do |line|
             matches = line.scan(regex)
-            match = matches.last if matches.is_a?(Array)
-          end
+            next unless matches.is_a?(Array)
 
-          coverage = match.gsub(/\d+(\.\d+)?/).first
-
-          if coverage.present?
-            coverage.to_f
+            match = matches.flatten.last
+            coverage = match.gsub(/\d+(\.\d+)?/).first
+            return coverage.to_f if coverage.present?
           end
         rescue
           # if bad regex or something goes wrong we dont want to interrupt transition

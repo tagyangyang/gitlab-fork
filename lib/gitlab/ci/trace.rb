@@ -9,10 +9,6 @@ module Gitlab
         @job = job
       end
 
-      def exist?
-        current_path.present? || old_trace.present?
-      end
-
       def html(last_lines: nil)
         read do |stream|
           stream.html(last_lines: last_lines)
@@ -49,12 +45,8 @@ module Gitlab
         end
       end
 
-      def erase_trace!
-        paths.find do |trace_path|
-          FileUtils.rm(trace_path, force: true)
-        end
-
-        job.erase_old_trace!
+      def exist?
+        current_path.present? || old_trace.present?
       end
 
       def read
@@ -81,6 +73,14 @@ module Gitlab
         end
       ensure
         stream&.close
+      end
+
+      def erase!
+        paths.each do |trace_path|
+          FileUtils.rm(trace_path, force: true)
+        end
+
+        job.erase_old_trace!
       end
 
       private

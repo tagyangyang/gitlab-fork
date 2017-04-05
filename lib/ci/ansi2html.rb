@@ -23,8 +23,6 @@ module Ci
       cross:      0x10,
     }.freeze
 
-    Result = Struct.new(:html, :state, :append, :truncated, :offset, :size, :total_size)
-
     def self.convert(ansi, state = nil)
       Converter.new.convert(ansi, state)
     end
@@ -173,8 +171,15 @@ module Ci
 
         close_open_tags()
 
-        Result.new(@out, state, append, truncated,
-          start_offset, stream.tell - start_offset, stream.size)
+        OpenStruct.new(
+          html: @out,
+          state: state,
+          append: append,
+          truncated: truncated,
+          offset: start_offset,
+          size: stream.tell - start_offset,
+          total: stream.size
+        )
       end
 
       def handle_sequence(s)
