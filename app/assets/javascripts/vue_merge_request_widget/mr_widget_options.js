@@ -97,6 +97,7 @@ export default {
         });
     },
     fetchDeployments() {
+      // TODO: Error handling
       this.service.fetchDeployments()
         .then(res => res.json())
         .then((res) => {

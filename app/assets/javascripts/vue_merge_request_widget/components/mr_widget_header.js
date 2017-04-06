@@ -14,7 +14,7 @@ export default {
     },
   },
   methods: {
-    isLongBranchTitle(branchTitle) {
+    isBranchTitleLong(branchTitle) {
       return branchTitle.length > 32;
     },
   },
@@ -23,7 +23,7 @@ export default {
       <div class="pull-right" v-if="mr.isOpen">
         <a href="#modal_merge_info" data-toggle="modal" class="btn inline btn-grouped btn-sm">Check out branch</a>
         <span class="dropdown inline prepend-left-5">
-          <a class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-label="Download as">
+          <a class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-label="Download as" role="button">
             <i class="fa fa-download" aria-hidden="true"></i>
             <i class="fa fa-caret-down" aria-hidden="true"></i>
           </a>
@@ -40,9 +40,9 @@ export default {
       <div class="normal">
         <b>Request to merge</b>
         <span class="label-branch"
-          data-placement="bottom"
-          :class="{'label-truncated has-tooltip': isLongBranchTitle(mr.sourceBranch)}"
-          :title="isLongBranchTitle(mr.sourceBranch) ? mr.sourceBranch : null">
+          :class="{'label-truncated has-tooltip': isBranchTitleLong(mr.sourceBranch)}"
+          :title="isBranchTitleLong(mr.sourceBranch) ? mr.sourceBranch : ''"
+          data-placement="bottom">
           <a :href="mr.sourceBranchPath">{{mr.sourceBranch}}</a>
         </span>
         <button class="btn btn-transparent btn-clipboard has-tooltip"
@@ -52,8 +52,9 @@ export default {
         </button>
         <b>into</b>
         <span class="label-branch"
-          :class="{'label-truncated has-tooltip': isLongBranchTitle(mr.targetBranch)}"
-          :title="isLongBranchTitle(mr.targetBranch) ? mr.targetBranch : null">
+          :class="{'label-truncated has-tooltip': isBranchTitleLong(mr.targetBranch)}"
+          :title="isBranchTitleLong(mr.targetBranch) ? mr.targetBranch : ''"
+          data-placement="bottom">
           <a :href="mr.targetBranchPath">{{mr.targetBranch}}</a>
         </span>
         <span
