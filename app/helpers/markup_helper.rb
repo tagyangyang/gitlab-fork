@@ -113,15 +113,16 @@ module MarkupHelper
   end
 
   def render_wiki_content(wiki_page)
+    context = { pipeline: :wiki, project_wiki: @project_wiki, page_slug: wiki_page.slug }
     html = case wiki_page.format
            when :markdown
-             markdown_render(wiki_page.content, pipeline: :wiki, project_wiki: @project_wiki, page_slug: wiki_page.slug)
+             markdown_render(wiki_page.content, context)
            when :asciidoc
              asciidoc_render(wiki_page.content)
            else
-             wiki_page.formatted_content.html_safe
+             return wiki_page.formatted_content.html_safe
            end
-    markup_postprocess(html)
+    markup_postprocess(html, context)
   end
 
   def render_markup(file_name, file_content)
