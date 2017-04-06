@@ -390,42 +390,6 @@ class Projects::MergeRequestsController < Projects::ApplicationController
     end
   end
 
-  def merge!
-    # Disable the CI check if merge_when_pipeline_succeeds is enabled since we have
-    # to wait until CI completes to know
-    unless @merge_request.mergeable?(skip_ci_check: merge_when_pipeline_succeeds_active?)
-      return :failed
-    end
-
-    return :sha_mismatch if params[:sha] != @merge_request.diff_head_sha
-
-    @merge_request.update(merge_error: nil)
-
-    if params[:merge_when_pipeline_succeeds].present?
-      return :failed unless @merge_request.head_pipeline
-
-      if @merge_request.head_pipeline.active?
-        MergeRequests::MergeWhenPipelineSucceedsService
-          .new(@project, current_user, merge_params)
-          .execute(@merge_request)
-
-        :merge_when_pipeline_succeeds
-      elsif @merge_request.head_pipeline.success?
-        # This can be triggered when a user clicks the auto merge button while
-        # the tests finish at about the same time
-        MergeWorker.perform_async(@merge_request.id, current_user.id, params)
-
-        :success
-      else
-        :failed
-      end
-    else
-      MergeWorker.perform_async(@merge_request.id, current_user.id, params)
-
-      :success
-    end
-  end
-
   def merge_widget_refresh
     @status =
       if merge_request.merge_when_pipeline_succeeds
@@ -754,11 +718,49 @@ class Projects::MergeRequestsController < Projects::ApplicationController
     end
   end
 
+  private
+
   def serializer
     if params[:basic]
       MergeRequestBasicSerializer.new
     else
       MergeRequestSerializer.new(current_user: current_user, project: merge_request.project)
+    end
+  end
+
+  def merge!
+    # Disable the CI check if merge_when_pipeline_succeeds is enabled since we have
+    # to wait until CI completes to know
+    unless @merge_request.mergeable?(skip_ci_check: merge_when_pipeline_succeeds_active?)
+      return :failed
+    end
+
+    return :sha_mismatch if params[:sha] != @merge_request.diff_head_sha
+
+    @merge_request.update(merge_error: nil)
+
+    if params[:merge_when_pipeline_succeeds].present?
+      return :failed unless @merge_request.head_pipeline
+
+      if @merge_request.head_pipeline.active?
+        MergeRequests::MergeWhenPipelineSucceedsService
+          .new(@project, current_user, merge_params)
+          .execute(@merge_request)
+
+        :merge_when_pipeline_succeeds
+      elsif @merge_request.head_pipeline.success?
+        # This can be triggered when a user clicks the auto merge button while
+        # the tests finish at about the same time
+        MergeWorker.perform_async(@merge_request.id, current_user.id, params)
+
+        :success
+      else
+        :failed
+      end
+    else
+      MergeWorker.perform_async(@merge_request.id, current_user.id, params)
+
+      :success
     end
   end
 end
