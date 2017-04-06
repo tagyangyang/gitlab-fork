@@ -173,6 +173,8 @@ module DeclarativePolicy
           else [simplified]
           end
         end
+
+        Or.new(simplified_rules)
       end
 
       def cached_pass?(context)
