@@ -58,7 +58,6 @@
       margin: auto 20px;
     }
 
-    .go-home,
     .go-back {
       display: none;
     }
@@ -83,12 +82,9 @@
   <script>
     (function () {
       var goBack = document.querySelector('.js-go-back');
-      var goHome = document.querySelector('.js-go-home');
 
       if (history.length > 1) {
         goBack.style.display = 'inline';
-      } else {
-        goHome.style.display = 'inline';
       }
     })();
   </script>
