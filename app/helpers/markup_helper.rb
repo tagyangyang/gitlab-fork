@@ -46,12 +46,17 @@ module MarkupHelper
   end
 
   def markdown(text, context = {})
+    html = markdown_render(text, context)
+
+    markup_postprocess(html, context)
+  end
+
+  def markdown_render(text, context = {})
     return "" unless text.present?
 
     context[:project] ||= @project
 
-    html = Banzai.render(text, context)
-    banzai_postprocess(html, context)
+    Banzai.render(text, context)
   end
 
   def markdown_field(object, field)
@@ -62,7 +67,7 @@ module MarkupHelper
     banzai_postprocess(html, object.banzai_render_context(field))
   end
 
-  def asciidoc(text)
+  def asciidoc_render(text)
     Gitlab::Asciidoc.render(
       text,
       project:      @project,
@@ -76,7 +81,7 @@ module MarkupHelper
     )
   end
 
-  def other_markup(file_name, text)
+  def other_markup_render(file_name, text)
     Gitlab::OtherMarkup.render(
       file_name,
       text,
@@ -91,6 +96,12 @@ module MarkupHelper
     )
   end
 
+  def markup_postprocess(html, context = {})
+    context[:project] ||= @project
+
+    banzai_postprocess(html, context)
+  end
+
   # Return the first line of +text+, up to +max_chars+, after parsing the line
   # as Markdown.  HTML tags in the parsed output are not counted toward the
   # +max_chars+ limit.  If the length limit falls within a tag's contents, then
@@ -102,27 +113,33 @@ module MarkupHelper
   end
 
   def render_wiki_content(wiki_page)
-    case wiki_page.format
-    when :markdown
-      markdown(wiki_page.content, pipeline: :wiki, project_wiki: @project_wiki, page_slug: wiki_page.slug)
-    when :asciidoc
-      asciidoc(wiki_page.content)
-    else
-      wiki_page.formatted_content.html_safe
-    end
+    html = case wiki_page.format
+           when :markdown
+             markdown_render(wiki_page.content, pipeline: :wiki, project_wiki: @project_wiki, page_slug: wiki_page.slug)
+           when :asciidoc
+             asciidoc_render(wiki_page.content)
+           else
+             wiki_page.formatted_content.html_safe
+           end
+    markup_postprocess(html)
   end
 
   def render_markup(file_name, file_content)
+    html = markup_render(file_name, file_content)
+    markup_postprocess(html)
+  end
+
+  def markup_render(file_name, file_content)
     if gitlab_markdown?(file_name)
-      Hamlit::RailsHelpers.preserve(markdown(file_content))
+      Hamlit::RailsHelpers.preserve(markdown_render(file_content))
     elsif asciidoc?(file_name)
-      asciidoc(file_content)
+      asciidoc_render(file_content)
     elsif plain?(file_name)
       content_tag :pre, class: 'plain-readme' do
         file_content
       end
     else
-      other_markup(file_name, file_content)
+      other_markup_render(file_name, file_content)
     end
   rescue RuntimeError
     simple_format(file_content)
