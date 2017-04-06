@@ -12,7 +12,7 @@ module DeclarativePolicy
       # since they are more likely to short-circuit
       case @action
       when :prevent
-        @rule.score(@context) * (7.0/8)
+        @rule.score(@context) * (7.0 / 8)
       when :enable
         @rule.score(@context)
       end

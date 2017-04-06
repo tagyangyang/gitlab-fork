@@ -13,6 +13,7 @@ module DeclarativePolicy
       end
 
       private
+
       def id_for(obj)
         obj.respond_to?(:id) ? obj.id.to_s : "##{obj.object_id}"
       end

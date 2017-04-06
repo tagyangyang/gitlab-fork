@@ -2,14 +2,13 @@ module DeclarativePolicy
   class Base
     class AbilityMap
       attr_reader :map
-      def initialize(map={})
+      def initialize(map = {})
         @map = map
       end
 
       def merge(other)
-        AbilityMap.new(@map.merge(other.map) { |key, my_val, other_val|
-          my_val + other_val
-        })
+        conflict_proc = proc { |key, my_val, other_val| my_val + other_val }
+        AbilityMap.new(@map.merge(other.map, &conflict_proc))
       end
 
       def actions(key)
@@ -107,7 +106,7 @@ module DeclarativePolicy
         @last_description = description
       end
 
-      def condition(name, opts={}, &value)
+      def condition(name, opts = {}, &value)
         name = name.to_sym
         description, @last_description = @last_description, nil
         condition = Condition.new(name, description, opts, &value)
@@ -119,7 +118,7 @@ module DeclarativePolicy
       end
     end
 
-    def can?(ability, new_subject=:_self)
+    def can?(ability, new_subject = :_self)
       return Ability.can?(user, ability, new_subject) unless new_subject == :_self
 
       allowed?(ability)
@@ -134,7 +133,7 @@ module DeclarativePolicy
     end
 
     attr_reader :user, :subject
-    def initialize(user, subject, opts={})
+    def initialize(user, subject, opts = {})
       @user = user
       @subject = subject
       @cache = opts[:cache] || {}
@@ -179,12 +178,11 @@ module DeclarativePolicy
         end
     end
 
-
     # NOTE we can't use ||= here because the value might be the
     # boolean `false`
     def cache(key, &b)
       return @cache[key] if cached?(key)
-      @cache[key] = b.call
+      @cache[key] = yield
     end
 
     def cached?(key)
@@ -207,6 +205,7 @@ module DeclarativePolicy
     end
 
     protected
+
     def own_steps(ability)
       rules = self.class.configuration_for(ability)
       rules.map { |(action, rule)| Step.new(self, rule, action) }

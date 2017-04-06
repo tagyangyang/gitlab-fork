@@ -1,7 +1,7 @@
 module DeclarativePolicy
   class Condition
     attr_reader :name, :description, :scope, :manual_score
-    def initialize(name, description, opts={}, &compute)
+    def initialize(name, description, opts = {}, &compute)
       @name = name
       @description = description
       @compute = compute

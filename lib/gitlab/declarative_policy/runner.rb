@@ -51,13 +51,13 @@ module DeclarativePolicy
       @state.pass?
     end
 
-    def debug(out=$stderr)
+    def debug(out = $stderr)
       run(out)
     end
 
     private
 
-    def run(debug=nil)
+    def run(debug = nil)
       scored = @steps.map { |s| [s.score, s] }.sort_by { |(s, _)| s }
       @steps = scored.map { |(_, s)| s }
 
