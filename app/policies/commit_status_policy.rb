@@ -1,5 +1,3 @@
 class CommitStatusPolicy < BasePolicy
-  def rules
-    delegate! @subject.project
-  end
+  delegate { @subject.project }
 end

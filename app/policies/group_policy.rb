@@ -1,46 +1,38 @@
 class GroupPolicy < BasePolicy
-  def rules
-    can! :read_group if @subject.public?
-    return unless @user
-
-    globally_viewable = @subject.public? || (@subject.internal? && !@user.external?)
-    member = @subject.users_with_parents.include?(@user)
-    owner = @user.admin? || @subject.has_owner?(@user)
-    master = owner || @subject.has_master?(@user)
-
-    can_read = false
-    can_read ||= globally_viewable
-    can_read ||= member
-    can_read ||= @user.admin?
-    can_read ||= GroupProjectsFinder.new(group: @subject, current_user: @user).execute.any?
-    can! :read_group if can_read
-
-    # Only group masters and group owners can create new projects
-    if master
-      can! :create_projects
-      can! :admin_milestones
-      can! :admin_label
-    end
-
-    # Only group owner and administrators can admin group
-    if owner
-      can! :admin_group
-      can! :admin_namespace
-      can! :admin_group_member
-      can! :change_visibility_level
-    end
-
-    if globally_viewable && @subject.request_access_enabled && !member
-      can! :request_access
-    end
+  desc "Group is public"
+  condition(:public_group, scope: :subject) { @subject.public? }
+  condition(:logged_in_viewable) { @user && @subject.internal? && !@user.external? }
+  condition(:member) { @user && @subject.users_with_parents.include?(@user) }
+  condition(:owner) { admin? || @subject.has_owner?(@user) }
+  condition(:master) { owner? || @subject.has_master?(@user) }
+  condition(:has_projects) do
+    GroupProjectsFinder.new(group: @subject, current_user: @user).execute.any?
   end
 
-  def can_read_group?
-    return true if @subject.public?
-    return true if @user.admin?
-    return true if @subject.internal? && !@user.external?
-    return true if @subject.users.include?(@user)
+  condition(:request_access_enabled, scope: :subject) { @subject.request_access_enabled }
 
-    GroupProjectsFinder.new(group: @subject, current_user: @user).execute.any?
+  rule { public_group }      .enable :read_group
+  rule { logged_in_viewable }.enable :read_group
+  rule { member }            .enable :read_group
+  rule { admin }             .enable :read_group
+  rule { has_projects }      .enable :read_group
+
+  rule { master }.policy do
+    enable :create_projects
+    enable :admin_milestones
+    enable :admin_label
+  end
+
+  rule { owner }.policy do
+    enable :admin_group
+    enable :admin_namespace
+    enable :admin_group_member
+    enable :change_visibility_level
+  end
+
+  rule { public_group | logged_in_viewable }.enable :view_globally
+
+  rule { request_access_enabled & can?(:view_globally) & ~member }.policy do
+    enable :request_access
   end
 end

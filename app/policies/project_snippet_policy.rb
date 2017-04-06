@@ -1,20 +1,22 @@
 class ProjectSnippetPolicy < BasePolicy
-  def rules
-    can! :read_project_snippet if @subject.public?
-    return unless @user
+  desc "Snippet is public"
+  condition(:public_snippet, scope: :subject) { @subject.public? }
 
-    if @user && (@subject.author == @user || @user.admin?)
-      can! :read_project_snippet
-      can! :update_project_snippet
-      can! :admin_project_snippet
-    end
+  condition(:is_author) { @user && @subject.author == @user }
 
-    if @subject.internal? && !@user.external?
-      can! :read_project_snippet
-    end
+  condition(:team_member) { @subject.project.team.member?(@user) }
 
-    if @subject.private? && @subject.project.team.member?(@user)
-      can! :read_project_snippet
-    end
+  condition(:internal, scope: :subject) { @subject.internal? }
+
+  rule { internal & ~external_user }.enable :read_project_snippet
+
+  rule { public_snippet }.enable :read_project_snippet
+
+  rule { is_author | admin }.policy do
+    enable :read_project_snippet
+    enable :update_project_snippet
+    enable :admin_project_snippet
   end
+
+  rule { team_member }.enable :read_project_snippet
 end
