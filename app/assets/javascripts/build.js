@@ -1,6 +1,8 @@
-/* eslint-disable func-names, wrap-iife, no-use-before-define, consistent-return */
+/* eslint-disable func-names, wrap-iife, no-use-before-define,
+consistent-return, prefer-rest-params */
 /* global Breakpoints */
 $(() => {
+  const bind = function (fn, me) { return function () { return fn.apply(me, arguments); }; };
   const AUTO_SCROLL_OFFSET = 75;
   const DOWN_BUILD_TRACE = '#down-build-trace';
 
@@ -18,6 +20,8 @@ $(() => {
       this.state = this.options.logState;
       this.buildStage = this.options.buildStage;
       this.$document = $(document);
+
+      this.updateDropdown = bind(this.updateDropdown, this);
 
       this.$body = $('body');
       this.$buildTrace = $('#build-trace');
@@ -41,15 +45,13 @@ $(() => {
       this.updateStageDropdownText(this.buildStage);
       this.sidebarOnResize();
 
-      // this.initAffixTruncatedInfo = _.bind(this.initAffixTruncatedInfo, this);
-
       this.$document
         .off('click', '.js-sidebar-build-toggle')
         .on('click', '.js-sidebar-build-toggle', this.sidebarOnClick.bind(this));
 
       this.$document
         .off('click', '.stage-item')
-        .on('click', '.stage-item', this.updateDropdown.bind(this));
+        .on('click', '.stage-item', this.updateDropdown);
 
       this.$document.on('scroll', this.initScrollMonitor.bind(this));
 
@@ -74,14 +76,8 @@ $(() => {
         .on('click', '.js-sidebar-build-toggle', this.toggleSidebar);
     };
 
-    Build.prototype.location = function () {
-      return window.location.href.split('#')[0];
-    };
-
     Build.prototype.invokeBuildTrace = function () {
-      if (this.location() === this.pageUrl) {
-        return this.getBuildTrace();
-      }
+      return this.getBuildTrace();
     };
 
     Build.prototype.getBuildTrace = function () {
@@ -102,7 +98,6 @@ $(() => {
             $buildContainer.append(log.html);
           } else {
             $buildContainer.html(log.html);
-
             if (log.truncated) {
               $('.js-truncated-info-size').html(` ${log.size} `);
               this.$truncatedInfo.removeClass('hidden');
@@ -110,6 +105,16 @@ $(() => {
             } else {
               this.$truncatedInfo.addClass('hidden');
             }
+          }
+
+          this.checkAutoscroll();
+
+          if (!log.complete) {
+            Build.timeout = setTimeout(() => {
+              this.invokeBuildTrace();
+            }, 4000);
+          } else {
+            this.$buildRefreshAnimation.remove();
           }
 
           if (log.status !== this.buildStatus) {
@@ -120,19 +125,7 @@ $(() => {
             }
 
             gl.utils.visitUrl(pageUrl);
-          } else {
-            this.checkAutoscroll();
           }
-
-          if (!log.complete) {
-            Build.timeout = setTimeout(() => {
-              this.invokeBuildTrace();
-            }, 4000);
-          } else {
-            this.$buildRefreshAnimation.remove();
-          }
-
-          return this.initScrollMonitor();
         }),
         error: () => {
           this.$buildRefreshAnimation.remove();
@@ -197,9 +190,9 @@ $(() => {
           this.$autoScrollContainer.hide();
           this.$autoScrollStatusText.removeClass('animate');
         } else {
-          this.$autoScrollContainer.css(
-            { top: this.$body.outerHeight() - AUTO_SCROLL_OFFSET },
-          ).show();
+          this.$autoScrollContainer.css({
+            top: this.$body.outerHeight() - AUTO_SCROLL_OFFSET,
+          }).show();
           this.$autoScrollStatusText.addClass('animate');
         }
       } else if (gl.utils.isInViewport(this.$upBuildTrace.get(0)) &&
@@ -221,9 +214,9 @@ $(() => {
         this.$scrollBottomBtn.hide();
 
         // Show and Reposition Autoscroll Status Indicator
-        this.$autoScrollContainer.css(
-          { top: this.$body.outerHeight() - AUTO_SCROLL_OFFSET },
-        ).show();
+        this.$autoScrollContainer.css({
+          top: this.$body.outerHeight() - AUTO_SCROLL_OFFSET,
+        }).show();
         this.$autoScrollStatusText.addClass('animate');
       } else if (gl.utils.isInViewport(this.$upBuildTrace.get(0)) &&
         gl.utils.isInViewport(this.$downBuildTrace.get(0))) {
@@ -282,7 +275,7 @@ $(() => {
 
     Build.prototype.populateJobs = function (stage) {
       $('.build-job').hide();
-      $(`.build-job[data-stage="${stage}"`).show();
+      $(`.build-job[data-stage="${stage}"]`).show();
     };
 
     Build.prototype.updateStageDropdownText = function (stage) {
@@ -308,7 +301,11 @@ $(() => {
     Build.prototype.initAffixTruncatedInfo = function () {
       const offsetTop = this.$buildTrace.offset().top;
 
-      this.$truncatedInfo.affix({ offset: { top: offsetTop } });
+      this.$truncatedInfo.affix({
+        offset: {
+          top: offsetTop,
+        },
+      });
     };
 
     return Build;

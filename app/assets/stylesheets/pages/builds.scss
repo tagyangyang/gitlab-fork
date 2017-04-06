@@ -64,24 +64,18 @@
     background-color: $black-transparent;
     height: 45px;
 
-    p {
-      margin: 0;
-      padding: 0;
+    &.affix {
+      top: 0;
     }
 
     // with sidebar
     &.affix.sidebar-expanded {
-      position: fixed;
-      top: 0;
       right: 312px;
       left: 22px;
     }
 
     // without sidebar
     &.affix.sidebar-collapsed {
-      position: fixed;
-      top: 0;
-      margin: 0;
       right: 20px;
       left: 20px;
     }
