@@ -213,8 +213,8 @@ module DeclarativePolicy
 
       def simplify
         case @rule
-        when And then Or.new(@rule.rules.map { |r| (~r) }).simplify
-        when Or then And.new(@rule.rules.map { |r| (~r) }).simplify
+        when And then Or.new(@rule.rules.map { |r| ~r }).simplify
+        when Or then And.new(@rule.rules.map { |r| ~r }).simplify
         when Not then @rule.simplify
         else Not.new(@rule.simplify)
         end
