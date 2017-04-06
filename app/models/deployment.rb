@@ -105,10 +105,13 @@ class Deployment < ActiveRecord::Base
 
   def metrics(timeframe)
     return {} unless has_metrics?
+
     half_timeframe = timeframe / 2
     timeframe_start = created_at - half_timeframe
     timeframe_end = created_at + half_timeframe
-    project.monitoring_service.metrics(environment, timeframe_start: timeframe_start, timeframe_end: timeframe_end)
+
+    metrics = project.monitoring_service.metrics(environment, timeframe_start: timeframe_start, timeframe_end: timeframe_end)
+    metrics&.merge(deployment_time: created_at.to_i) || {}
   end
 
   private

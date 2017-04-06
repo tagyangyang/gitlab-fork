@@ -5,7 +5,6 @@ class Projects::DeploymentsController < Projects::ApplicationController
     @metrics = deployment.metrics(1.hour)
 
     if @metrics&.any?
-      @metrics[:deployment_time] = deployment.created_at.utc.to_i
       render json: @metrics, status: :ok
     else
       head :no_content

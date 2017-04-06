@@ -23,7 +23,8 @@ describe Projects::DeploymentsController do
       before do
         expect(deployment).to receive(:metrics).and_return(nil)
       end
-      it 'returns a metrics JSON document' do
+
+      it 'returns a empty response 204 resposne' do
         get :metrics, deployment_params
         expect(response).to have_http_status(204)
         expect(response.body).to eq('')
@@ -49,7 +50,6 @@ describe Projects::DeploymentsController do
         expect(response).to be_ok
         expect(json_response['success']).to be(true)
         expect(json_response['metrics']).to eq({})
-        expect(json_response['deployment_time']).to eq(deployment.created_at.utc.to_i)
         expect(json_response['last_update']).to eq(42)
       end
     end
