@@ -10,7 +10,15 @@ describe ProjectSnippetPolicy, models: true do
     ]
   end
 
-  subject { described_class.abilities(current_user, project_snippet).to_set }
+  def expect_allowed(*permissions)
+    permissions.each { |p| is_expected.to be_allowed(p) }
+  end
+
+  def expect_disallowed(*permissions)
+    permissions.each { |p| is_expected.not_to be_allowed(p) }
+  end
+
+  subject { described_class.new(current_user, project_snippet) }
 
   context 'public snippet' do
     let(:project_snippet) { create(:project_snippet, :public) }
@@ -19,15 +27,15 @@ describe ProjectSnippetPolicy, models: true do
       let(:current_user) { nil }
 
       it do
-        is_expected.to include(:read_project_snippet)
-        is_expected.not_to include(*author_permissions)
+        expect_allowed(:read_project_snippet)
+        expect_disallowed(*author_permissions)
       end
     end
 
     context 'regular user' do
       it do
-        is_expected.to include(:read_project_snippet)
-        is_expected.not_to include(*author_permissions)
+        expect_allowed(:read_project_snippet)
+        expect_disallowed(*author_permissions)
       end
     end
   end
@@ -39,15 +47,15 @@ describe ProjectSnippetPolicy, models: true do
       let(:current_user) { nil }
 
       it do
-        is_expected.not_to include(:read_project_snippet)
-        is_expected.not_to include(*author_permissions)
+        expect_disallowed(:read_project_snippet)
+        expect_disallowed(*author_permissions)
       end
     end
 
     context 'regular user' do
       it do
-        is_expected.to include(:read_project_snippet)
-        is_expected.not_to include(*author_permissions)
+        expect_allowed(:read_project_snippet)
+        expect_disallowed(*author_permissions)
       end
     end
   end
@@ -59,15 +67,15 @@ describe ProjectSnippetPolicy, models: true do
       let(:current_user) { nil }
 
       it do
-        is_expected.not_to include(:read_project_snippet)
-        is_expected.not_to include(*author_permissions)
+        expect_disallowed(:read_project_snippet)
+        expect_disallowed(*author_permissions)
       end
     end
 
     context 'regular user' do
       it do
-        is_expected.not_to include(:read_project_snippet)
-        is_expected.not_to include(*author_permissions)
+        expect_disallowed(:read_project_snippet)
+        expect_disallowed(*author_permissions)
       end
     end
 
@@ -75,8 +83,8 @@ describe ProjectSnippetPolicy, models: true do
       let(:project_snippet) { create(:project_snippet, :private, author: current_user) }
 
       it do
-        is_expected.to include(:read_project_snippet)
-        is_expected.to include(*author_permissions)
+        expect_allowed(:read_project_snippet)
+        expect_allowed(*author_permissions)
       end
     end
 
@@ -84,8 +92,8 @@ describe ProjectSnippetPolicy, models: true do
       before { project_snippet.project.team << [current_user, :developer] }
 
       it do
-        is_expected.to include(:read_project_snippet)
-        is_expected.not_to include(*author_permissions)
+        expect_allowed(:read_project_snippet)
+        expect_disallowed(*author_permissions)
       end
     end
 
@@ -93,8 +101,8 @@ describe ProjectSnippetPolicy, models: true do
       let(:current_user) { create(:admin) }
 
       it do
-        is_expected.to include(:read_project_snippet)
-        is_expected.to include(*author_permissions)
+        expect_allowed(:read_project_snippet)
+        expect_allowed(*author_permissions)
       end
     end
   end

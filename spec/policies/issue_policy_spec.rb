@@ -7,19 +7,19 @@ describe IssuePolicy, models: true do
     context 'using a regular issue' do
       let(:project) { create(:empty_project, :public) }
       let(:issue) { create(:issue, project: project) }
-      let(:policies) { described_class.abilities(user, issue).to_set }
+      let(:policy) { described_class.new(user, issue) }
 
       context 'with a regular user' do
         it 'includes the read_issue permission' do
-          expect(policies).to include(:read_issue)
+          expect(policy).to be_allowed(:read_issue)
         end
 
         it 'does not include the admin_issue permission' do
-          expect(policies).not_to include(:admin_issue)
+          expect(policy).not_to be_allowed(:admin_issue)
         end
 
         it 'does not include the update_issue permission' do
-          expect(policies).not_to include(:update_issue)
+          expect(policy).not_to be_allowed(:update_issue)
         end
       end
 
@@ -29,15 +29,15 @@ describe IssuePolicy, models: true do
         end
 
         it 'includes the read_issue permission' do
-          expect(policies).to include(:read_issue)
+          expect(policy).to be_allowed(:read_issue)
         end
 
         it 'includes the admin_issue permission' do
-          expect(policies).to include(:admin_issue)
+          expect(policy).to be_allowed(:admin_issue)
         end
 
         it 'includes the update_issue permission' do
-          expect(policies).to include(:update_issue)
+          expect(policy).to be_allowed(:update_issue)
         end
       end
 
@@ -47,15 +47,15 @@ describe IssuePolicy, models: true do
         end
 
         it 'includes the read_issue permission' do
-          expect(policies).to include(:read_issue)
+          expect(policy).to be_allowed(:read_issue)
         end
 
         it 'does not include the admin_issue permission' do
-          expect(policies).not_to include(:admin_issue)
+          expect(policy).not_to be_allowed(:admin_issue)
         end
 
         it 'does not include the update_issue permission' do
-          expect(policies).not_to include(:update_issue)
+          expect(policy).not_to be_allowed(:update_issue)
         end
       end
     end
@@ -64,54 +64,54 @@ describe IssuePolicy, models: true do
       let(:issue) { create(:issue, :confidential) }
 
       context 'with a regular user' do
-        let(:policies) { described_class.abilities(user, issue).to_set }
+        let(:policy) { described_class.new(user, issue) }
 
         it 'does not include the read_issue permission' do
-          expect(policies).not_to include(:read_issue)
+          expect(policy).not_to be_allowed(:read_issue)
         end
 
         it 'does not include the admin_issue permission' do
-          expect(policies).not_to include(:admin_issue)
+          expect(policy).not_to be_allowed(:admin_issue)
         end
 
         it 'does not include the update_issue permission' do
-          expect(policies).not_to include(:update_issue)
+          expect(policy).not_to be_allowed(:update_issue)
         end
       end
 
       context 'with a user that is a project member' do
-        let(:policies) { described_class.abilities(user, issue).to_set }
+        let(:policy) { described_class.new(user, issue) }
 
         before do
           issue.project.team << [user, :reporter]
         end
 
         it 'includes the read_issue permission' do
-          expect(policies).to include(:read_issue)
+          expect(policy).to be_allowed(:read_issue)
         end
 
         it 'includes the admin_issue permission' do
-          expect(policies).to include(:admin_issue)
+          expect(policy).to be_allowed(:admin_issue)
         end
 
         it 'includes the update_issue permission' do
-          expect(policies).to include(:update_issue)
+          expect(policy).to be_allowed(:update_issue)
         end
       end
 
       context 'without a user' do
-        let(:policies) { described_class.abilities(nil, issue).to_set }
+        let(:policy) { described_class.new(nil, issue) }
 
         it 'does not include the read_issue permission' do
-          expect(policies).not_to include(:read_issue)
+          expect(policy).not_to be_allowed(:read_issue)
         end
 
         it 'does not include the admin_issue permission' do
-          expect(policies).not_to include(:admin_issue)
+          expect(policy).not_to be_allowed(:admin_issue)
         end
 
         it 'does not include the update_issue permission' do
-          expect(policies).not_to include(:update_issue)
+          expect(policy).not_to be_allowed(:update_issue)
         end
       end
     end

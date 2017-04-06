@@ -5,8 +5,8 @@ describe Ci::BuildPolicy, :models do
   let(:build) { create(:ci_build, pipeline: pipeline) }
   let(:pipeline) { create(:ci_empty_pipeline, project: project) }
 
-  let(:policies) do
-    described_class.abilities(user, build).to_set
+  let(:policy) do
+    described_class.new(user, build)
   end
 
   shared_context 'public pipelines disabled' do
@@ -19,7 +19,7 @@ describe Ci::BuildPolicy, :models do
 
       context 'when public builds are enabled' do
         it 'does not include ability to read build' do
-          expect(policies).not_to include :read_build
+          expect(policy).not_to be_allowed :read_build
         end
       end
 
@@ -27,7 +27,7 @@ describe Ci::BuildPolicy, :models do
         include_context 'public pipelines disabled'
 
         it 'does not include ability to read build' do
-          expect(policies).not_to include :read_build
+          expect(policy).not_to be_allowed :read_build
         end
       end
     end
@@ -37,7 +37,7 @@ describe Ci::BuildPolicy, :models do
 
       context 'when public builds are enabled' do
         it 'includes ability to read build' do
-          expect(policies).to include :read_build
+          expect(policy).to be_allowed :read_build
         end
       end
 
@@ -45,7 +45,7 @@ describe Ci::BuildPolicy, :models do
         include_context 'public pipelines disabled'
 
         it 'does not include ability to read build' do
-          expect(policies).not_to include :read_build
+          expect(policy).not_to be_allowed :read_build
         end
       end
     end
@@ -58,7 +58,7 @@ describe Ci::BuildPolicy, :models do
 
         context 'when public builds are enabled' do
           it 'includes ability to read build' do
-            expect(policies).to include :read_build
+            expect(policy).to be_allowed :read_build
           end
         end
 
@@ -66,7 +66,7 @@ describe Ci::BuildPolicy, :models do
           include_context 'public pipelines disabled'
 
           it 'does not include ability to read build' do
-            expect(policies).not_to include :read_build
+            expect(policy).not_to be_allowed :read_build
           end
         end
       end
@@ -76,7 +76,7 @@ describe Ci::BuildPolicy, :models do
 
         context 'when public builds are enabled' do
           it 'includes ability to read build' do
-            expect(policies).to include :read_build
+            expect(policy).to be_allowed :read_build
           end
         end
 
@@ -84,7 +84,7 @@ describe Ci::BuildPolicy, :models do
           include_context 'public pipelines disabled'
 
           it 'does not include ability to read build' do
-            expect(policies).to include :read_build
+            expect(policy).to be_allowed :read_build
           end
         end
       end
