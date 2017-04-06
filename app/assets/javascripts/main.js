@@ -218,7 +218,11 @@ $(function () {
   });
 
   if (bootstrapBreakpoint === 'xs') {
-    Cookies.set('collapsed_gutter', true);
+    const $rightSidebar = $('aside.right-sidebar, .page-with-sidebar');
+
+    $rightSidebar
+      .removeClass('right-sidebar-expanded')
+      .addClass('right-sidebar-collapsed');
   }
 
   // prevent default action for disabled buttons
@@ -354,9 +358,6 @@ $(function () {
       if ($gutterIcon.hasClass('fa-angle-double-right')) {
         return $sidebarGutterToggle.trigger('click');
       }
-    }
-    if (breakpoint === 'xs') {
-      Cookies.set('collapsed_gutter', true);
     }
   });
   fitSidebarForSize = function () {
