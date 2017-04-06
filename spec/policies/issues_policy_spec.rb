@@ -47,7 +47,6 @@ describe IssuePolicy, models: true do
     end
 
     it 'allows guests to read issues' do
-      binding.pry
       expect_allowed(guest, issue, :read_issue)
       expect_disallowed(guest, issue, :update_issue, :admin_issue)
 
