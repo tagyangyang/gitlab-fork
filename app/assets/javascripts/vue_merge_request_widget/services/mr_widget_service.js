@@ -42,12 +42,16 @@ export default class MRWidgetService {
     return this.ciStatusResorce.get();
   }
 
+  poll() {
+    return this.pollResource.get();
+  }
+
   checkStatus() {
     return this.mergeCheckResource.get();
   }
 
   fetchMergeActionsContent() {
-    return this.mergeActionsContentResource.get()
+    return this.mergeActionsContentResource.get();
   }
 
   stopEnvironment(url) {

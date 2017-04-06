@@ -119,48 +119,54 @@ export default {
     },
     initiateMergePolling() {
       simplePoll((continuePolling, stopPolling) => {
-        this.service.pollResource.get()
-          .then(res => res.json())
-          .then((res) => {
-            if (res.state === 'merged') {
-              // If state is merged we should update the widget and stop the polling
-              eventHub.$emit('MRWidgetUpdateRequested');
-              eventHub.$emit('FetchActionsContent');
-              stopPolling();
-
-              // If user checked remove source branch and we didn't remove the branch yet
-              // we should start another polling for source branch remove process
-              if (this.removeSourceBranch && res.source_branch_exists) {
-                this.initiateRemoveSourceBranchPolling();
-              }
-            } else {
-              // MR is not merged yet, continue polling until the state becomes 'merged'
-              continuePolling();
-            }
-          });
+        this.handleMergePolling(continuePolling, stopPolling);
       });
+    },
+    handleMergePolling(continuePolling, stopPolling) {
+      this.service.poll()
+        .then(res => res.json())
+        .then((res) => {
+          if (res.state === 'merged') {
+            // If state is merged we should update the widget and stop the polling
+            eventHub.$emit('MRWidgetUpdateRequested');
+            eventHub.$emit('FetchActionsContent');
+            stopPolling();
+
+            // If user checked remove source branch and we didn't remove the branch yet
+            // we should start another polling for source branch remove process
+            if (this.removeSourceBranch && res.source_branch_exists) {
+              this.initiateRemoveSourceBranchPolling();
+            }
+          } else {
+            // MR is not merged yet, continue polling until the state becomes 'merged'
+            continuePolling();
+          }
+        });
     },
     initiateRemoveSourceBranchPolling() {
       // We need to show source branch is being removed spinner in another component
       eventHub.$emit('SetBranchRemoveFlag', [true]);
 
       simplePoll((continuePolling, stopPolling) => {
-        this.service.pollResource.get()
-          .then(res => res.json())
-          .then((res) => {
-            // If source branch exists then we should continue polling
-            // because removing a source branch is a background task and takes time
-            if (res.source_branch_exists) {
-              continuePolling();
-            } else {
-              // Branch is removed. Update widget, stop polling and hide the spinner
-              eventHub.$emit('MRWidgetUpdateRequested', () => {
-                eventHub.$emit('SetBranchRemoveFlag', [false]);
-              });
-              stopPolling();
-            }
-          });
+        this.handleRemoveBranchPolling(continuePolling, stopPolling);
       });
+    },
+    handleRemoveBranchPolling(continuePolling, stopPolling) {
+      this.service.poll()
+        .then(res => res.json())
+        .then((res) => {
+          // If source branch exists then we should continue polling
+          // because removing a source branch is a background task and takes time
+          if (res.source_branch_exists) {
+            continuePolling();
+          } else {
+            // Branch is removed. Update widget, stop polling and hide the spinner
+            eventHub.$emit('MRWidgetUpdateRequested', () => {
+              eventHub.$emit('SetBranchRemoveFlag', [false]);
+            });
+            stopPolling();
+          }
+        });
     },
   },
   template: `
