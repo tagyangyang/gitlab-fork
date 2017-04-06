@@ -114,6 +114,8 @@ class Project < ActiveRecord::Base
   has_one :kubernetes_service, dependent: :destroy, inverse_of: :project
   has_one :prometheus_service, dependent: :destroy, inverse_of: :project
   has_one :mock_ci_service, dependent: :destroy
+  has_one :mock_deployment_service, dependent: :destroy
+  has_one :mock_monitoring_service, dependent: :destroy
 
   has_one  :forked_project_link,  dependent: :destroy, foreign_key: "forked_to_project_id"
   has_one  :forked_from_project,  through:   :forked_project_link
@@ -238,7 +240,7 @@ class Project < ActiveRecord::Base
     # We need routes alias rs for JOIN so it does not conflict with
     # includes(:route) which we use in ProjectsFinder.
     joins("INNER JOIN routes rs ON rs.source_id = projects.id AND rs.source_type = 'Project'").
-      where('rs.path LIKE ?', "#{path}/%")
+      where('rs.path LIKE ?', "#{sanitize_sql_like(path)}/%")
   end
 
   # "enabled" here means "not disabled". It includes private features!
@@ -314,20 +316,15 @@ class Project < ActiveRecord::Base
       ntable  = Namespace.arel_table
       pattern = "%#{query}%"
 
-      projects = select(:id).where(
+      # unscoping unnecessary conditions that'll be applied
+      # when executing `where("projects.id IN (#{union.to_sql})")`
+      projects = unscoped.select(:id).where(
         ptable[:path].matches(pattern).
           or(ptable[:name].matches(pattern)).
           or(ptable[:description].matches(pattern))
       )
 
-      # We explicitly remove any eager loading clauses as they're:
-      #
-      # 1. Not needed by this query
-      # 2. Combined with .joins(:namespace) lead to all columns from the
-      #    projects & namespaces tables being selected, leading to a SQL error
-      #    due to the columns of all UNION'd queries no longer being the same.
-      namespaces = select(:id).
-        except(:includes).
+      namespaces = unscoped.select(:id).
         joins(:namespace).
         where(ntable[:name].matches(pattern))
 
@@ -352,10 +349,15 @@ class Project < ActiveRecord::Base
     end
 
     def sort(method)
-      if method == 'storage_size_desc'
+      case method.to_s
+      when 'storage_size_desc'
         # storage_size is a joined column so we need to
         # pass a string to avoid AR adding the table name
         reorder('project_statistics.storage_size DESC, projects.id DESC')
+      when 'latest_activity_desc'
+        reorder(last_activity_at: :desc)
+      when 'latest_activity_asc'
+        reorder(last_activity_at: :asc)
       else
         order_by(method)
       end
@@ -554,6 +556,10 @@ class Project < ActiveRecord::Base
 
   def gitea_import?
     import_type == 'gitea'
+  end
+
+  def github_import?
+    import_type == 'github'
   end
 
   def check_limit

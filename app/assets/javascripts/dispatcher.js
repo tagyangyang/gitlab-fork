@@ -33,6 +33,8 @@
 /* global ProjectShow */
 /* global Labels */
 /* global Shortcuts */
+/* global Sidebar */
+
 import Issue from './issue';
 
 import BindInOut from './behaviors/bind_in_out';
@@ -41,9 +43,9 @@ import GroupsList from './groups_list';
 import ProjectsList from './projects_list';
 import MiniPipelineGraph from './mini_pipeline_graph_dropdown';
 import BlobLinePermalinkUpdater from './blob/blob_line_permalink_updater';
+import UserCallout from './user_callout';
 
 const ShortcutsBlob = require('./shortcuts_blob');
-const UserCallout = require('./user_callout');
 
 (function() {
   var Dispatcher;
@@ -118,6 +120,7 @@ const UserCallout = require('./user_callout');
         case 'groups:milestones:show':
         case 'dashboard:milestones:show':
           new Milestone();
+          new Sidebar();
           break;
         case 'dashboard:todos:index':
           new gl.Todos();
@@ -223,9 +226,11 @@ const UserCallout = require('./user_callout');
         case 'projects:pipelines:builds':
         case 'projects:pipelines:show':
           const { controllerAction } = document.querySelector('.js-pipeline-container').dataset;
+          const pipelineStatusUrl = `${document.querySelector('.js-pipeline-tab-link a').getAttribute('href')}/status.json`;
 
           new gl.Pipelines({
             initTabs: true,
+            pipelineStatusUrl,
             tabsOptions: {
               action: controllerAction,
               defaultAction: 'pipelines',
