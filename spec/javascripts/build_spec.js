@@ -70,18 +70,22 @@ describe('Build', () => {
       });
 
       it('updates the build trace on an interval', function () {
+        spyOn(gl.utils, 'visitUrl');
+
         jasmine.clock().tick(4001);
 
         expect($.ajax.calls.count()).toBe(1);
 
-        let [{ url, dataType, success, context, data }] = $.ajax.calls.argsFor(0);
-        expect(url).toBe(
-          `${BUILD_URL}/trace.json`,
-        );
-        expect(dataType).toBe('json');
-        expect(success).toEqual(jasmine.any(Function));
+        // We have to do it this way to prevent Webpack to fail to compile
+        // when destructuring assignments and reusing
+        // the same variables names inside the same scope
+        let args = $.ajax.calls.argsFor(0)[0];
 
-        success.call(context, {
+        expect(args.url).toBe(`${BUILD_URL}/trace.json`);
+        expect(args.dataType).toBe('json');
+        expect(args.success).toEqual(jasmine.any(Function));
+
+        args.success.call($, {
           html: '<span>Update<span>',
           status: 'running',
           state: 'newstate',
@@ -96,13 +100,13 @@ describe('Build', () => {
 
         expect($.ajax.calls.count()).toBe(2);
 
-        [{ url, dataType, success, context, data }] = $.ajax.calls.argsFor(1);
-        expect(url).toBe(`${BUILD_URL}/trace.json`);
-        expect(dataType).toBe('json');
-        expect(data.state).toBe('newstate');
-        expect(success).toEqual(jasmine.any(Function));
+        args = $.ajax.calls.argsFor(1)[0];
+        expect(args.url).toBe(`${BUILD_URL}/trace.json`);
+        expect(args.dataType).toBe('json');
+        expect(args.data.state).toBe('newstate');
+        expect(args.success).toEqual(jasmine.any(Function));
 
-        success.call(context, {
+        args.success.call($, {
           html: '<span>More</span>',
           status: 'running',
           state: 'finalstate',
@@ -115,9 +119,11 @@ describe('Build', () => {
       });
 
       it('replaces the entire build trace', () => {
+        spyOn(gl.utils, 'visitUrl');
+
         jasmine.clock().tick(4001);
-        let [{ success, context }] = $.ajax.calls.argsFor(0);
-        success.call(context, {
+        let args = $.ajax.calls.argsFor(0)[0];
+        args.success.call($, {
           html: '<span>Update</span>',
           status: 'running',
           append: false,
@@ -127,8 +133,8 @@ describe('Build', () => {
         expect($('#build-trace .js-build-output').text()).toMatch(/Update/);
 
         jasmine.clock().tick(4001);
-        [{ success, context }] = $.ajax.calls.argsFor(1);
-        success.call(context, {
+        args = $.ajax.calls.argsFor(1)[0];
+        args.success.call($, {
           html: '<span>Different</span>',
           status: 'running',
           append: false,
@@ -140,9 +146,9 @@ describe('Build', () => {
 
       it('shows information about truncated log', () => {
         jasmine.clock().tick(4001);
-        const [{ success, context }] = $.ajax.calls.argsFor(0);
+        const [{ success }] = $.ajax.calls.argsFor(0);
 
-        success.call(context, {
+        success.call($, {
           html: '<span>Update</span>',
           status: 'success',
           append: false,
@@ -160,8 +166,8 @@ describe('Build', () => {
         spyOn(gl.utils, 'visitUrl');
 
         jasmine.clock().tick(4001);
-        const [{ success, context }] = $.ajax.calls.argsFor(0);
-        success.call(context, {
+        const [{ success }] = $.ajax.calls.argsFor(0);
+        success.call($, {
           html: '<span>Final</span>',
           status: 'passed',
           append: true,
