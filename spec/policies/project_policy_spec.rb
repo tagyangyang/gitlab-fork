@@ -153,13 +153,13 @@ describe ProjectPolicy, models: true do
       let(:current_user) { reporter }
 
       it do
-        expect_allowed *guest_permissions
-        expect_allowed *reporter_permissions
-        expect_allowed *reporter_permissions
-        expect_allowed *team_member_reporter_permissions
-        expect_disallowed *developer_permissions
-        expect_disallowed *master_permissions
-        expect_disallowed *owner_permissions
+        expect_allowed(*guest_permissions)
+        expect_allowed(*reporter_permissions)
+        expect_allowed(*reporter_permissions)
+        expect_allowed(*team_member_reporter_permissions)
+        expect_disallowed(*developer_permissions)
+        expect_disallowed(*master_permissions)
+        expect_disallowed(*owner_permissions)
       end
     end
 
