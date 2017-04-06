@@ -116,7 +116,7 @@ export default {
             document.body.appendChild(el);
           }
         });
-    }
+    },
   },
   created() {
     eventHub.$on('MRWidgetUpdateRequested', (cb) => {
