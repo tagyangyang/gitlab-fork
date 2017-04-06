@@ -30,6 +30,10 @@ module NoteOnDiff
     raise NotImplementedError
   end
 
+  def originally_active?(diff_refs)
+    false
+  end
+
   private
 
   def noteable_diff_refs

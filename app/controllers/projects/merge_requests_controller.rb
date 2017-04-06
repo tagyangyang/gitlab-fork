@@ -596,7 +596,7 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       noteable_id: @merge_request.id
     }
 
-    @diff_notes_disabled = !@merge_request_diff.latest? || @start_sha
+    @diff_notes_disabled = @start_sha.present?
 
     @use_legacy_diff_notes = !@merge_request.has_complete_diff_refs?
 

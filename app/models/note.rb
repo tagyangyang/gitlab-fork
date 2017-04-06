@@ -114,11 +114,17 @@ class Note < ActiveRecord::Base
     end
 
     def grouped_diff_discussions(diff_refs = nil)
-      diff_notes.
-        fresh.
-        discussions.
-        select { |n| n.active?(diff_refs) }.
-        group_by(&:line_code)
+      grouped_diff_discussions = Hash.new { |h, k| h[k] = [] }
+
+      diff_notes.fresh.discussions.each do |discussion|
+        if discussion.active?(diff_refs)
+          grouped_diff_discussions[discussion.line_code] << discussion
+        elsif diff_refs && discussion.originally_active?(diff_refs)
+          grouped_diff_discussions[discussion.original_line_code] << discussion
+        end
+      end
+
+      grouped_diff_discussions
     end
 
     def count_for_collection(ids, type)

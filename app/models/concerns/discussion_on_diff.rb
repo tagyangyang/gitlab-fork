@@ -11,6 +11,7 @@ module DiscussionOnDiff
               :diff_line,
               :for_line?,
               :active?,
+              :originally_active?,
 
               to: :first_note
 
