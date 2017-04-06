@@ -15,6 +15,7 @@ export default class MRWidgetService {
     this.ciStatusResorce = Vue.resource(mr.ciStatusPath);
     this.deploymentsResource = Vue.resource(mr.ciEnvironmentsStatusPath);
     this.pollResource = Vue.resource(`${mr.statusPath}?basic=true`);
+    this.mergeActionsContentResource = Vue.resource(mr.mergeActionsContentPath);
   }
 
   merge(data) {
@@ -43,6 +44,10 @@ export default class MRWidgetService {
 
   checkStatus() {
     return this.mergeCheckResource.get();
+  }
+
+  fetchMergeActionsContent() {
+    return this.mergeActionsContentResource.get()
   }
 
   stopEnvironment(url) {

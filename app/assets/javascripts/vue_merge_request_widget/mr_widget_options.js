@@ -107,6 +107,16 @@ export default {
           }
         });
     },
+    fetchActionsContent() {
+      this.service.fetchMergeActionsContent()
+        .then((res) => {
+          if (res.body) {
+            const el = document.createElement('div');
+            el.innerHTML = res.body;
+            document.body.appendChild(el);
+          }
+        });
+    }
   },
   created() {
     eventHub.$on('MRWidgetUpdateRequested', (cb) => {
@@ -125,6 +135,10 @@ export default {
 
     eventHub.$on('UpdateWidgetData', (data) => {
       this.mr.setData(data);
+    });
+
+    eventHub.$on('FetchActionsContent', () => {
+      this.fetchActionsContent();
     });
   },
   mounted() {

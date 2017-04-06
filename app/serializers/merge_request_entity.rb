@@ -253,6 +253,12 @@ class MergeRequestEntity < IssuableEntity
     merge_request.project.only_allow_merge_if_pipeline_succeeds?
   end
 
+  expose :commit_change_content_path do |merge_request|
+    commit_change_content_namespace_project_merge_request_path(merge_request.project.namespace,
+                                                               merge_request.project,
+                                                               merge_request)
+  end
+
   private
 
   def mr_path(merge_request)

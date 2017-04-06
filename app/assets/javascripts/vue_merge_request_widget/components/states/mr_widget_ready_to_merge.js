@@ -125,6 +125,7 @@ export default {
             if (res.state === 'merged') {
               // If state is merged we should update the widget and stop the polling
               eventHub.$emit('MRWidgetUpdateRequested');
+              eventHub.$emit('FetchActionsContent');
               stopPolling();
 
               // If user checked remove source branch and we didn't remove the branch yet
