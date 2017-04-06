@@ -51,6 +51,12 @@ class MergeRequestEntity < IssuableEntity
     MergeRequestPresenter.new(merge_request).ci_status
   end
 
+  expose :pipeline_status_path do |merge_request|
+    pipeline_status_namespace_project_merge_request_path(merge_request.project.namespace,
+                                                         merge_request.project,
+                                                         merge_request)
+  end
+
   expose :issues_links do
     expose :closing do |merge_request|
       closes_issues = merge_request.closes_issues(current_user)

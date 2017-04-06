@@ -60,6 +60,7 @@ export default class MergeRequestStore {
     this.ciEnvironmentsStatusPath = data.ci_environments_status_url;
     this.ciStatusPath = data.ci_status_path;
     this.mergeCheckPath = data.merge_check_path;
+    this.pipelineStatusPath = data.pipeline_status_path;
     this.isRemovingSourceBranch = this.isRemovingSourceBranch || false;
 
     this.canRemoveSourceBranch = currentUser.can_remove_source_branch || false;

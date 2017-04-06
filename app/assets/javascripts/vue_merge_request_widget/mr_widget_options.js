@@ -88,6 +88,7 @@ export default {
     },
     fetchCIStatus() {
       // TODO: Error handling
+      gl.utils.setCiStatusFavicon(this.mr.pipelineStatusPath);
       this.service.ciStatusResorce.get()
         .then(res => res.json())
         .then((res) => {
