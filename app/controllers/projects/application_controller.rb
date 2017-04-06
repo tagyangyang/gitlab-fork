@@ -4,7 +4,7 @@ class Projects::ApplicationController < ApplicationController
   before_action :repository
   layout 'project'
 
-  helper_method :repository, :can_collaborate_with_project?
+  helper_method :repository, :can_collaborate_with_project?, :project_view_files_allowed?
 
   private
 
@@ -93,5 +93,9 @@ class Projects::ApplicationController < ApplicationController
   def update_ref
     branch_exists = @repository.find_branch(@target_branch)
     @ref = @target_branch if branch_exists
+  end
+
+  def project_view_files_allowed?
+    !@project.empty_repo? && can?(current_user, :download_code, @project)
   end
 end
