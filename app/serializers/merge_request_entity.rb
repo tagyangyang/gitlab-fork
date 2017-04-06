@@ -145,9 +145,11 @@ class MergeRequestEntity < IssuableEntity
     end
   end
 
+  # Paths
+  #
   expose :target_branch_path do |merge_request|
-    namespace_project_branch_path(merge_request.target_project.namespace,
-                                  merge_request.target_project,
+    namespace_project_branch_path(merge_request.project.namespace,
+                                  merge_request.project,
                                   merge_request.target_branch)
   end
 
@@ -155,10 +157,6 @@ class MergeRequestEntity < IssuableEntity
     namespace_project_branch_path(merge_request.source_project.namespace,
                                   merge_request.source_project,
                                   merge_request.source_branch)
-  end
-
-  expose :project_archived do |merge_request|
-    merge_request.project.archived?
   end
 
   expose :conflict_resolution_ui_path do |merge_request|
@@ -181,59 +179,42 @@ class MergeRequestEntity < IssuableEntity
 
   expose :cancel_merge_when_pipeline_succeeds_path do |merge_request|
     cancel_merge_when_pipeline_succeeds_namespace_project_merge_request_path(
-      merge_request.target_project.namespace,
-      merge_request.target_project,
+      merge_request.project.namespace,
+      merge_request.project,
       merge_request)
   end
 
-  expose :merge_commit_message_with_description do |merge_request|
-    merge_request.merge_commit_message(include_description: true)
-  end
-
-  expose :diverged_commits_count do |merge_request|
-    merge_request.open? &&
-      merge_request.diverged_from_target_branch? ?
-      merge_request.diverged_commits_count : 0
-  end
-
   expose :email_patches_path do |merge_request|
-    namespace_project_merge_request_path(merge_request.target_project.namespace,
-                                         merge_request.target_project,
+    namespace_project_merge_request_path(merge_request.project.namespace,
+                                         merge_request.project,
                                          merge_request,
                                          format: :patch)
   end
 
   expose :plain_diff_path do |merge_request|
-    namespace_project_merge_request_path(merge_request.target_project.namespace,
-                                         merge_request.target_project,
+    namespace_project_merge_request_path(merge_request.project.namespace,
+                                         merge_request.project,
                                          merge_request,
                                          format: :diff)
   end
 
   expose :ci_status_path do |merge_request|
-    ci_status_namespace_project_merge_request_path(merge_request.target_project.namespace,
-                                         merge_request.target_project,
-                                         merge_request)
+    ci_status_namespace_project_merge_request_path(merge_request.project.namespace,
+                                                   merge_request.project,
+                                                   merge_request)
   end
 
-  # FIXME: @oswaldo, please implement this
   expose :status_path do |merge_request|
-    path = namespace_project_merge_request_path(merge_request.target_project.namespace,
+    namespace_project_merge_request_path(merge_request.target_project.namespace,
                                          merge_request.target_project,
                                          merge_request,
-                                         format: :diff)
-    path.sub! 'diff', 'json'
+                                         format: :json)
   end
 
-  # TODO: @oswaldo, please verify this
   expose :merge_check_path do |merge_request|
-    merge_check_namespace_project_merge_request_path(merge_request.target_project.namespace,
-                                         merge_request.target_project,
-                                         merge_request)
-  end
-
-  expose :only_allow_merge_if_pipeline_succeeds do |merge_request|
-    merge_request.project.only_allow_merge_if_pipeline_succeeds?
+    merge_check_namespace_project_merge_request_path(merge_request.project.namespace,
+                                                     merge_request.project,
+                                                     merge_request)
   end
 
   expose :create_issue_to_resolve_discussions_path do |merge_request|
@@ -246,6 +227,24 @@ class MergeRequestEntity < IssuableEntity
     ci_environments_status_namespace_project_merge_request_path(merge_request.project.namespace,
                                                                 merge_request.project,
                                                                 merge_request)
+  end
+
+  expose :project_archived do |merge_request|
+    merge_request.project.archived?
+  end
+
+  expose :merge_commit_message_with_description do |merge_request|
+    merge_request.merge_commit_message(include_description: true)
+  end
+
+  expose :diverged_commits_count do |merge_request|
+    merge_request.open? &&
+      merge_request.diverged_from_target_branch? ?
+      merge_request.diverged_commits_count : 0
+  end
+
+  expose :only_allow_merge_if_pipeline_succeeds do |merge_request|
+    merge_request.project.only_allow_merge_if_pipeline_succeeds?
   end
 
   private
