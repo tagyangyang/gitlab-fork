@@ -259,7 +259,7 @@ require('./task_list');
 
       if (note.commands_changes) {
         if ('merge' in note.commands_changes) {
-          $.get(mrRefreshWidgetUrl);
+          gl.mrWidget.checkStatus();
         }
 
         if ('emoji_award' in note.commands_changes) {

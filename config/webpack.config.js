@@ -33,7 +33,6 @@ var config = {
     groups_list:          './groups_list.js',
     issuable:             './issuable/issuable_bundle.js',
     merge_conflicts:      './merge_conflicts/merge_conflicts_bundle.js',
-    merge_request_widget: './merge_request_widget/ci_bundle.js',
     monitoring:           './monitoring/monitoring_bundle.js',
     network:              './network/network_bundle.js',
     notebook_viewer:      './blob/notebook_viewer.js',
