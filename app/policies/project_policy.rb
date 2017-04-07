@@ -17,7 +17,13 @@ class ProjectPolicy < BasePolicy
   condition(:public_builds, scope: :subject) { project.public_builds? }
 
   desc "User has guest access"
-  condition(:guest) { team_access_level >= Gitlab::Access::GUEST }
+
+  # For guest access we use #is_team_member? so we can use
+  # project.members, which gets cached in subject scope.
+  # This is safe because team_access_level is guaranteed
+  # by ProjectAuthorization's validation to be at minimum
+  # GUEST
+  condition(:guest) { is_team_member? }
 
   desc "User has reporter access"
   condition(:reporter) { team_access_level >= Gitlab::Access::REPORTER }
@@ -35,9 +41,6 @@ class ProjectPolicy < BasePolicy
   condition(:internal_access) do
     project.internal? && !user.external?
   end
-
-  desc "User is a team member"
-  condition(:team_member) { !anonymous? && project.team.member?(user) }
 
   desc "User is a member of the group"
   condition(:group_member, scope: :subject) { project_group_member?(user) }
@@ -149,7 +152,7 @@ class ProjectPolicy < BasePolicy
     enable :request_access
   end
 
-  rule { owner | admin | team_member | group_member }.prevent :request_access
+  rule { owner | admin | guest | group_member }.prevent :request_access
   rule { ~request_access_enabled }.prevent :request_access
 
   rule { can?(:developer_access) }.policy do
@@ -286,6 +289,22 @@ class ProjectPolicy < BasePolicy
   end
 
   private
+
+  def is_team_member?
+    return false if @user.nil?
+
+    # when scoping by subject, we want to be greedy
+    # and load *all* the members with one query.
+    #
+    # otherwise we just make a specific query for
+    # this particular user.
+    case DeclarativePolicy.preferred_scope
+    when :subject
+      project.team.members.include?(user)
+    else
+      project.team.member?(user)
+    end
+  end
 
   def project_group_member?(user)
     return false if anonymous?
