@@ -63,7 +63,7 @@ import AwardsHandler from '~/awards_handler';
           $emojiMenu = $('.emoji-menu');
           expect($emojiMenu.length).toBe(1);
           expect($emojiMenu.hasClass('is-visible')).toBe(true);
-          expect($emojiMenu.find('#emoji_search').length).toBe(1);
+          expect($emojiMenu.find('.js-emoji-menu-search').length).toBe(1);
           return expect($('.js-awards-block.current').length).toBe(1);
         });
       });
@@ -195,15 +195,28 @@ import AwardsHandler from '~/awards_handler';
       });
     });
     describe('search', function() {
-      return it('should filter the emoji', function(done) {
+      it('should filter the emoji', function(done) {
         return openAndWaitForEmojiMenu()
           .then(() => {
             expect($('[data-name=angel]').is(':visible')).toBe(true);
             expect($('[data-name=anger]').is(':visible')).toBe(true);
-            $('#emoji_search').val('ali').trigger('input');
+            $('.js-emoji-menu-search').val('ali').trigger('input');
             expect($('[data-name=angel]').is(':visible')).toBe(false);
             expect($('[data-name=anger]').is(':visible')).toBe(false);
             expect($('[data-name=alien]').is(':visible')).toBe(true);
+          })
+          .then(done)
+          .catch((err) => {
+            done.fail(`Failed to open and build emoji menu: ${err.message}`);
+          });
+      });
+
+      it('should clear search after picking emoji', function(done) {
+        return openAndWaitForEmojiMenu()
+          .then(() => {
+            $('.js-emoji-menu-search').val('ali').trigger('input');
+            $('[data-name=alien]').click();
+            expect($('.js-emoji-menu-search').val()).toEqual('');
           })
           .then(done)
           .catch((err) => {

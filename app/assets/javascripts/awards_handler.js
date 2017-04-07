@@ -103,8 +103,13 @@ function AwardsHandler() {
     const $glEmojiElement = $target.find('gl-emoji');
     const $spriteIconElement = $target.find('.icon');
     const emoji = ($glEmojiElement.length ? $glEmojiElement : $spriteIconElement).data('name');
+
     $target.closest('.js-awards-block').addClass('current');
-    return this.addAward(this.getVotesBlock(), this.getAwardUrl(), emoji);
+    this.addAward(this.getVotesBlock(), this.getAwardUrl(), emoji);
+    // Clear the search
+    $('.js-emoji-menu-search')
+      .val('')
+      .trigger('input');
   });
 }
 
@@ -128,12 +133,12 @@ AwardsHandler.prototype.showEmojiMenu = function showEmojiMenu($addBtn) {
     if ($menu.is('.is-visible')) {
       $addBtn.removeClass('is-active');
       $menu.removeClass('is-visible');
-      $('#emoji_search').blur();
+      $('.js-emoji-menu-search').blur();
     } else {
       $addBtn.addClass('is-active');
       this.positionMenu($menu, $addBtn);
       $menu.addClass('is-visible');
-      $('#emoji_search').focus();
+      $('.js-emoji-menu-search').focus();
     }
   } else {
     $addBtn.addClass('is-loading is-active');
@@ -143,7 +148,7 @@ AwardsHandler.prototype.showEmojiMenu = function showEmojiMenu($addBtn) {
       this.positionMenu($createdMenu, $addBtn);
       return setTimeout(() => {
         $createdMenu.addClass('is-visible');
-        $('#emoji_search').focus();
+        $('.js-emoji-menu-search').focus();
       }, 200);
     });
   }
@@ -174,7 +179,7 @@ AwardsHandler.prototype.createEmojiMenu = function createEmojiMenu(callback) {
 
   const emojiMenuMarkup = `
     <div class="emoji-menu">
-      <input type="text" name="emoji_search" id="emoji_search" value="" class="emoji-search search-input form-control" placeholder="Search emoji" />
+      <input type="text" name="emoji-menu-search" value="" class="js-emoji-menu-search emoji-search search-input form-control" placeholder="Search emoji" />
 
       <div class="emoji-menu-content">
         ${frequentlyUsedCatgegory}
@@ -474,7 +479,7 @@ AwardsHandler.prototype.getFrequentlyUsedEmojis = function getFrequentlyUsedEmoj
 };
 
 AwardsHandler.prototype.setupSearch = function setupSearch() {
-  this.registerEventListener('on', $('input.emoji-search'), 'input', (e) => {
+  this.registerEventListener('on', $('.js-emoji-menu-search'), 'input', (e) => {
     const term = $(e.target).val().trim();
     // Clean previous search results
     $('ul.emoji-menu-search, h5.emoji-search-title').remove();
