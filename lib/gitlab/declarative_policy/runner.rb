@@ -94,7 +94,7 @@ module DeclarativePolicy
       loop do
         return if steps.empty?
 
-        lowest_score = 1.0/0 # infinity
+        lowest_score = 1.0 / 0 # infinity
         next_step = nil
 
         steps.each do |step|

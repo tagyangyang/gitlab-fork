@@ -9,7 +9,7 @@ require 'gitlab/declarative_policy/step'
 require 'gitlab/declarative_policy/base'
 
 module DeclarativePolicy
-  def self.policy_for(user, subject, opts={})
+  def self.policy_for(user, subject, opts = {})
     return NilPolicy.new(user, nil, opts) if subject.nil?
 
     cache = opts[:cache] || {}
