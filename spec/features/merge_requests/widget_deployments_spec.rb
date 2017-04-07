@@ -40,11 +40,11 @@ feature 'Widget Deployments Header', feature: true, js: true do
       end
 
       scenario 'does show stop button' do
-        expect(page).to have_link('Stop environment')
+        expect(page).to have_button('Stop environment')
       end
 
       scenario 'does start build when stop button clicked' do
-        click_link('Stop environment')
+        click_button('Stop environment')
 
         expect(page).to have_content('close_app')
       end
@@ -53,7 +53,7 @@ feature 'Widget Deployments Header', feature: true, js: true do
         given(:role) { :reporter }
 
         scenario 'does not show stop button' do
-          expect(page).not_to have_link('Stop environment')
+          expect(page).not_to have_button('Stop environment')
         end
       end
     end
