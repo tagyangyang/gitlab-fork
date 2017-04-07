@@ -26,7 +26,7 @@ export default {
   },
   template: `
     <div class="mr-widget-heading">
-      <div class="ci_widget">
+      <div class="ci-widget">
         <template v-if="hasCIError">
           <div class="ci-status-icon ci-status-icon-failed js-ci-error">
             <span class="js-icon-link icon-link">

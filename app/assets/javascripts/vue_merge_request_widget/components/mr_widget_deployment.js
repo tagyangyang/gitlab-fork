@@ -1,11 +1,15 @@
 import '~/lib/utils/datetime_utility';
 import { statusClassToSvgMap } from '../../vue_shared/pipeline_svg_icons';
+import MemoryUsage from './mr_widget_memory_usage';
 
 export default {
   name: 'MRWidgetDeployment',
   props: {
     mr: { type: Object, required: true },
     service: { type: Object, required: true },
+  },
+  components: {
+    'mr-widget-memory-usage': MemoryUsage,
   },
   computed: {
     svg() {
@@ -42,43 +46,56 @@ export default {
   },
   template: `
     <div class="mr-widget-heading">
-      <div class="ci_widget" v-for="deployment in mr.deployments">
-        <div class="ci-status-icon ci-status-icon-success">
-          <span class="js-icon-link icon-link">
-            <span v-html="svg" aria-hidden="true"></span>
+      <div v-for="deployment in mr.deployments">
+        <div class="ci-widget">
+          <div class="ci-status-icon ci-status-icon-success">
+            <span class="js-icon-link icon-link">
+              <span v-html="svg" aria-hidden="true"></span>
+            </span>
+          </div>
+          <span>
+            <span v-if="hasDeploymentMeta(deployment)">Deployed to</span>
+            <a
+              v-if="hasDeploymentMeta(deployment)"
+              :href="deployment.url"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              class="js-deploy-meta">
+              {{deployment.name}}
+            </a>
+            <span v-if="hasExternalUrls(deployment)">on</span>
+            <a
+              v-if="hasExternalUrls(deployment)"
+              :href="deployment.external_url"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              class="js-deploy-url">
+              <i class="fa fa-external-link" aria-hidden="true"></i>
+              {{deployment.external_url_formatted}}
+            </a>
+            <span
+              v-if="hasDeploymentTime(deployment)"
+              :data-title="deployment.deployed_at_formatted"
+              class="js-deploy-time"
+              data-toggle="tooltip"
+              data-placement="top">
+              {{formatDate(deployment.deployed_at)}}
+            </span>
+            <button
+              type="button"
+              v-if="deployment.stop_url"
+              @click="stopEnvironment(deployment)"
+              class="btn btn-default btn-xs">
+              Stop environment
+            </button>
           </span>
         </div>
-        <span>
-          <span v-if="hasDeploymentMeta(deployment)">Deployed to</span>
-          <a
-            v-if="hasDeploymentMeta(deployment)"
-            :href="deployment.url"
-            target="_blank" rel="noopener noreferrer nofollow" class="js-deploy-meta">
-            {{deployment.name}}
-          </a>
-          <span v-if="hasExternalUrls(deployment)">on</span>
-          <a
-            v-if="hasExternalUrls(deployment)"
-            :href="deployment.external_url"
-            target="_blank" rel="noopener noreferrer nofollow" class="js-deploy-url">
-            <i class="fa fa-external-link" aria-hidden="true"></i>
-            {{deployment.external_url_formatted}}
-          </a>
-          <span
-            v-if="hasDeploymentTime(deployment)"
-            :data-title="deployment.deployed_at_formatted"
-            class="js-deploy-time" data-toggle="tooltip" data-placement="top">
-            {{formatDate(deployment.deployed_at)}}
-          </span>
-          <button
-            v-if="deployment.stop_url"
-            @click="stopEnvironment(deployment)"
-            class="btn btn-default btn-xs" type="button">
-            Stop environment
-          </button>
-        </span>
+        <mr-widget-memory-usage
+          :mr="mr"
+          :service="service"
+          :metricsUrl="deployment.metrics_url"
+        />
       </div>
     </div>
   `,
 };
-
