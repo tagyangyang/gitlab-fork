@@ -58,12 +58,9 @@ module DeclarativePolicy
     private
 
     def run(debug = nil)
-      scored = @steps.map { |s| [s.score, s] }.sort_by { |(s, _)| s }
-      @steps = scored.map { |(_, s)| s }
-
       @state = State.new
 
-      scored.each do |original_score, step|
+      steps_by_score do |step, score|
         passed = nil
         case step.action
         when :enable then
@@ -72,19 +69,46 @@ module DeclarativePolicy
             @state.enable! if passed
           end
 
-          debug << inspect_step(step, original_score, passed) if debug
+          debug << inspect_step(step, score, passed) if debug
         when :prevent then
           unless @state.prevented?
             passed = step.pass?
             @state.prevent! if passed
           end
 
-          debug << inspect_step(step, original_score, passed) if debug
+          debug << inspect_step(step, score, passed) if debug
         else raise 'invalid action'
         end
       end
 
       @state
+    end
+
+    # NOTE: yes, this is quadratic. but the number of steps
+    # is likely never going to exceed about 10, and with this
+    # approach we re-score as we go, eliminating the need
+    # for some expensive conditions to be calculated
+    def steps_by_score(&b)
+      steps = Set.new(@steps)
+
+      loop do
+        return if steps.empty?
+
+        lowest_score = 1.0/0 # infinity
+        next_step = nil
+
+        steps.each do |step|
+          score = step.score
+          if score < lowest_score
+            next_step = step
+            lowest_score = score
+          end
+        end
+
+        steps.delete(next_step)
+
+        yield next_step, lowest_score
+      end
     end
 
     def inspect_step(step, original_score, passed)
