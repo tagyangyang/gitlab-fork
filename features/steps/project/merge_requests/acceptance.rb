@@ -15,7 +15,7 @@ class Spinach::Features::ProjectMergeRequestsAcceptance < Spinach::FeatureSteps
   end
 
   step 'I click on Accept Merge Request' do
-    click_button('Accept merge request')
+    click_button('Merge')
   end
 
   step 'I should see the Remove Source Branch button' do
