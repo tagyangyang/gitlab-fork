@@ -40,6 +40,11 @@ export default {
     shouldShowCherryPickForForkMR() {
       return this.mr.canBeCherryPicked && this.mr.userCanForkProject;
     },
+    // TODO: Add test for this
+    shouldShowMergedButtons() {
+      return this.shouldShowRevertForCurrentMR || this.shouldShowRevertForForkMR
+      || this.shouldShowCherryPickForCurrentMR || this.shouldShowCherryPickForForkMR;
+    },
   },
   methods: {
     removeSourceBranch() {
@@ -85,7 +90,7 @@ export default {
           <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
         </p>
       </section>
-      <div class="merged-buttons clearfix">
+      <div class="merged-buttons clearfix" v-if="shouldShowMergedButtons">
         <a
           v-if="shouldShowRevertForCurrentMR"
           class="btn btn-close btn-sm has-tooltip"
