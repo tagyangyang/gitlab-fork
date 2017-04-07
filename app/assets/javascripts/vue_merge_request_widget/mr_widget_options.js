@@ -23,7 +23,7 @@ import {
   MRWidgetStore,
   MRWidgetService,
   eventHub,
-  // stateMaps,
+  stateMaps,
   SquashBeforeMerge,
 } from './dependencies';
 
@@ -58,10 +58,10 @@ export default {
         mergeWhenPipelineSucceeds: 'mr-widget-merge-when-pipeline-succeeds',
         failedToMerge: 'mr-widget-failed-to-merge',
       };
-      return stateToComponentMap[this.mr.state];
+      return stateMaps.stateToComponentMap[this.mr.state];
     },
     shouldRenderMergeHelp() {
-      return false; // stateMaps.statesToShowHelpWidget.indexOf(this.mr.state) > -1;
+      return stateMaps.statesToShowHelpWidget.indexOf(this.mr.state) > -1;
     },
     shouldRenderPipelines() {
       return Object.keys(this.mr.pipeline).length || this.mr.hasCI;
