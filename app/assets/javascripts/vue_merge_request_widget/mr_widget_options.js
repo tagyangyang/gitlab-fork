@@ -89,7 +89,7 @@ export default {
     fetchCIStatus() {
       // TODO: Error handling
       gl.utils.setCiStatusFavicon(this.mr.pipelineStatusPath);
-      this.service.ciStatusResorce.get()
+      this.service.fetchCIStatus()
         .then(res => res.json())
         .then((res) => {
           if (res.has_ci) {
@@ -117,38 +117,44 @@ export default {
           }
         });
     },
+    bindEventHubListeners() {
+      eventHub.$on('MRWidgetUpdateRequested', (cb) => {
+        this.checkStatus(cb);
+      });
+
+      // `params` should be an Array contains a Boolean, like `[true]`
+      // Passing parameter as Boolean didn't work.
+      eventHub.$on('SetBranchRemoveFlag', (params) => {
+        this.mr.isRemovingSourceBranch = params[0];
+      });
+
+      eventHub.$on('FailedToMerge', () => {
+        this.mr.state = 'failedToMerge';
+      });
+
+      eventHub.$on('UpdateWidgetData', (data) => {
+        this.mr.setData(data);
+      });
+
+      eventHub.$on('FetchActionsContent', () => {
+        this.fetchActionsContent();
+      });
+    },
+    handleMounted() {
+      this.checkStatus();
+      this.fetchCIStatus();
+      this.initDeploymentsPolling();
+
+      if (this.mr.hasCI) {
+        this.initCIPolling();
+      }
+    },
   },
   created() {
-    eventHub.$on('MRWidgetUpdateRequested', (cb) => {
-      this.checkStatus(cb);
-    });
-
-    // `params` should be an Array contains a Boolean, like `[true]`
-    // Passing parameter as Boolean didn't work.
-    eventHub.$on('SetBranchRemoveFlag', (params) => {
-      this.mr.isRemovingSourceBranch = params[0];
-    });
-
-    eventHub.$on('FailedToMerge', () => {
-      this.mr.state = 'failedToMerge';
-    });
-
-    eventHub.$on('UpdateWidgetData', (data) => {
-      this.mr.setData(data);
-    });
-
-    eventHub.$on('FetchActionsContent', () => {
-      this.fetchActionsContent();
-    });
+    this.bindEventHubListeners();
   },
   mounted() {
-    this.checkStatus();
-    this.fetchCIStatus();
-
-    if (this.mr.hasCI) {
-      this.initCIPolling();
-    }
-    this.initDeploymentsPolling();
+    this.handleMounted();
   },
   components: {
     'mr-widget-header': WidgetHeader,

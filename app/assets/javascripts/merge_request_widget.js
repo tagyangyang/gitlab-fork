@@ -162,7 +162,7 @@ import MiniPipelineGraph from './mini_pipeline_graph_dropdown';
           _this.status = data.status;
           _this.hasCi = data.has_ci;
           _this.updateMergeButton(_this.status, _this.hasCi);
-          gl.utils.setCiStatusFavicon(_this.opts.pipeline_status_url);
+          // gl.utils.setCiStatusFavicon(_this.opts.pipeline_status_url);
           if (data.environments && data.environments.length) _this.renderEnvironments(data.environments);
           if (data.status !== _this.opts.ci_status ||
               data.sha !== _this.opts.ci_sha ||

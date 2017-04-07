@@ -26,12 +26,14 @@ export default class MergeRequestStore {
     this.deployments = this.deployments || data.deployments || [];
 
     if (data.issues_links) {
-      const { closing, mentioned_but_not_closing } = data.issues_links;
+      if (data.issues_links.closing || data.issues_links.mentioned_but_not_closing) {
+        const { closing, mentioned_but_not_closing } = data.issues_links;
 
-      this.relatedLinks = {
-        closing,
-        mentioned: mentioned_but_not_closing,
-      };
+        this.relatedLinks = {
+          closing,
+          mentioned: mentioned_but_not_closing,
+        };
+      }
     }
 
     this.updatedAt = data.updated_at;
