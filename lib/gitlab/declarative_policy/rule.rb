@@ -29,15 +29,15 @@ module DeclarativePolicy
       end
 
       def |(other)
-        Or.new([self, other])
+        Or.make([self, other])
       end
 
       def &(other)
-        And.new([self, other])
+        And.make([self, other])
       end
 
       def ~@
-        Not.new(self)
+        Not.make(self)
       end
 
       def inspect

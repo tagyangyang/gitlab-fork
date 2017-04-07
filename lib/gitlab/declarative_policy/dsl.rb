@@ -9,21 +9,25 @@ module DeclarativePolicy
     end
 
     def all?(*rules)
-      Rule::And.new(rules)
+      Rule::And.make(rules)
     end
 
     def any?(*rules)
-      Rule::Or.new(rules)
+      Rule::Or.make(rules)
     end
 
     def none?(*rules)
       ~Rule::Or.new(rules)
     end
 
+    def cond(condition)
+      Rule::Condition.new(condition)
+    end
+
     def method_missing(m, *a, &b)
       return super unless a.size == 0 && !block_given?
 
-      Rule::Condition.new(m)
+      cond(m.to_sym)
     end
   end
 
