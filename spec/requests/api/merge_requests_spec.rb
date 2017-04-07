@@ -2,6 +2,7 @@ require "spec_helper"
 
 describe API::MergeRequests, api: true  do
   include ApiHelpers
+
   let(:base_time)   { Time.now }
   let(:user)        { create(:user) }
   let(:admin)       { create(:user, :admin) }
@@ -20,6 +21,7 @@ describe API::MergeRequests, api: true  do
     context "when unauthenticated" do
       it "returns authentication error" do
         get api("/projects/#{project.id}/merge_requests")
+
         expect(response).to have_http_status(401)
       end
     end
