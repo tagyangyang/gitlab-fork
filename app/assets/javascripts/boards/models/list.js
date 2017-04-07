@@ -77,7 +77,8 @@ class List {
 
     return gl.boardService.getIssuesForList(this.id, data)
       .then((resp) => {
-        const data = resp.body;
+        const body = resp.body;
+        const data = typeof body === 'string' ? JSON.parse(body) : body;
         this.loading = false;
         this.issuesSize = data.size;
 
@@ -94,8 +95,7 @@ class List {
     this.issuesSize += 1;
 
     return gl.boardService.newIssue(this.id, issue)
-      .then((resp) => {
-        const data = resp.body;
+      .then((data) => {
         issue.id = data.iid;
       });
   }
