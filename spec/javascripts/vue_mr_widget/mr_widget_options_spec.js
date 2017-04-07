@@ -1,10 +1,8 @@
 import Vue from 'vue';
-import mockData from './mock_data';
 import mrWidgetOptions from '~/vue_merge_request_widget/mr_widget_options';
-import * as MRWidgetStore from '~/vue_merge_request_widget/stores/mr_widget_store';
-import * as MRWidgetService from '~/vue_merge_request_widget/services/mr_widget_service';
-import { statesToShowHelpWidget, stateToComponentMap } from '~/vue_merge_request_widget/stores/state_maps';
+import { stateToComponentMap } from '~/vue_merge_request_widget/stores/state_maps';
 import eventHub from '~/vue_merge_request_widget/event_hub';
+import mockData from './mock_data';
 
 const createComponent = () => {
   delete mrWidgetOptions.el; // Prevent component mounting
@@ -18,6 +16,7 @@ const returnPromise = data => new Promise((resolve) => {
     json() {
       return data;
     },
+    body: data,
   });
 });
 
@@ -111,7 +110,7 @@ describe('mrWidgetOptions', () => {
         let isCbExecuted = false;
         const cb = () => {
           isCbExecuted = true;
-        }
+        };
 
         vm.checkStatus(cb);
 
@@ -163,7 +162,7 @@ describe('mrWidgetOptions', () => {
 
     describe('fetchDeployments', () => {
       it('should fetch deployments', (done) => {
-        spyOn(vm.service, 'fetchDeployments').and.returnValue(returnPromise([ { deployment: 1 } ]));
+        spyOn(vm.service, 'fetchDeployments').and.returnValue(returnPromise([{ deployment: 1 }]));
 
         vm.fetchDeployments();
 
@@ -171,6 +170,20 @@ describe('mrWidgetOptions', () => {
           expect(vm.service.fetchDeployments).toHaveBeenCalled();
           expect(vm.mr.deployments.length).toEqual(1);
           expect(vm.mr.deployments[0].deployment).toEqual(1);
+          done();
+        }, 333);
+      });
+    });
+
+    describe('fetchActionsContent', () => {
+      it('should fetch content of Cherry Pick and Revert modals', (done) => {
+        spyOn(vm.service, 'fetchMergeActionsContent').and.returnValue(returnPromise('hello world'));
+
+        vm.fetchActionsContent();
+
+        setTimeout(() => {
+          expect(vm.service.fetchMergeActionsContent).toHaveBeenCalled();
+          expect(document.body.textContent).toContain('hello world');
           done();
         }, 333);
       });
@@ -186,7 +199,7 @@ describe('mrWidgetOptions', () => {
 
         vm.bindEventHubListeners();
 
-        eventHub.$emit('SetBranchRemoveFlag', [ 'flag' ]);
+        eventHub.$emit('SetBranchRemoveFlag', ['flag']);
         expect(vm.mr.isRemovingSourceBranch).toEqual('flag');
 
         eventHub.$emit('FailedToMerge');
@@ -195,7 +208,7 @@ describe('mrWidgetOptions', () => {
         eventHub.$emit('UpdateWidgetData', mockData);
         expect(vm.mr.setData).toHaveBeenCalledWith(mockData);
 
-        let listenersWithServiceRequest = {
+        const listenersWithServiceRequest = {
           MRWidgetUpdateRequested: true,
           FetchActionsContent: true,
         };
@@ -215,6 +228,34 @@ describe('mrWidgetOptions', () => {
 
         listenersWithServiceRequest.FetchActionsContent();
         expect(vm.fetchActionsContent).toHaveBeenCalled();
+      });
+    });
+
+    describe('handleMounted', () => {
+      it('should call required methods to do the initial kick-off', () => {
+        spyOn(vm, 'checkStatus');
+        spyOn(vm, 'fetchCIStatus');
+        spyOn(vm, 'initDeploymentsPolling');
+        spyOn(vm, 'initCIPolling');
+
+        vm.handleMounted();
+
+        expect(vm.checkStatus).toHaveBeenCalled();
+        expect(vm.fetchCIStatus).toHaveBeenCalled();
+        expect(vm.initDeploymentsPolling).toHaveBeenCalled();
+        expect(vm.initCIPolling).toHaveBeenCalled();
+      });
+
+      it('should not call CI polling if MR has no CI', () => {
+        spyOn(vm, 'checkStatus');
+        spyOn(vm, 'fetchCIStatus');
+        spyOn(vm, 'initDeploymentsPolling');
+        spyOn(vm, 'initCIPolling');
+
+        vm.mr.hasCI = false;
+        vm.handleMounted();
+
+        expect(vm.initCIPolling).not.toHaveBeenCalled();
       });
     });
   });

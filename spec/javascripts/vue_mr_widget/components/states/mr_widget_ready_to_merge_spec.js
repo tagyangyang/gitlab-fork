@@ -283,7 +283,7 @@ describe('MRWidgetMerged', () => {
       const returnPromise = state => new Promise((resolve) => {
         resolve({
           json() {
-            return { state, source_branch_exists: true }
+            return { state, source_branch_exists: true };
           },
         });
       });
@@ -296,7 +296,7 @@ describe('MRWidgetMerged', () => {
         let cpc = false; // continuePollingCalled
         let spc = false; // stopPollingCalled
 
-        vm.handleMergePolling(() => { cpc = true }, () => { spc = true });
+        vm.handleMergePolling(() => { cpc = true; }, () => { spc = true; });
         setTimeout(() => {
           expect(vm.service.poll).toHaveBeenCalled();
           expect(eventHub.$emit).toHaveBeenCalledWith('MRWidgetUpdateRequested');
@@ -316,7 +316,7 @@ describe('MRWidgetMerged', () => {
         let cpc = false; // continuePollingCalled
         let spc = false; // stopPollingCalled
 
-        vm.handleMergePolling(() => { cpc = true }, () => { spc = true });
+        vm.handleMergePolling(() => { cpc = true; }, () => { spc = true; });
         setTimeout(() => {
           expect(cpc).toBeTruthy();
           expect(spc).toBeFalsy();
@@ -341,7 +341,7 @@ describe('MRWidgetMerged', () => {
       const returnPromise = state => new Promise((resolve) => {
         resolve({
           json() {
-            return { source_branch_exists: state }
+            return { source_branch_exists: state };
           },
         });
       });
@@ -353,7 +353,7 @@ describe('MRWidgetMerged', () => {
         let cpc = false; // continuePollingCalled
         let spc = false; // stopPollingCalled
 
-        vm.handleRemoveBranchPolling(() => { cpc = true }, () => { spc = true });
+        vm.handleRemoveBranchPolling(() => { cpc = true; }, () => { spc = true; });
         setTimeout(() => {
           expect(vm.service.poll).toHaveBeenCalled();
 
@@ -376,9 +376,9 @@ describe('MRWidgetMerged', () => {
         let cpc = false; // continuePollingCalled
         let spc = false; // stopPollingCalled
 
-        vm.handleRemoveBranchPolling(() => { cpc = true }, () => { spc = true });
+        vm.handleRemoveBranchPolling(() => { cpc = true; }, () => { spc = true; });
         setTimeout(() => {
-          expect(cpc).toBeTruthy()
+          expect(cpc).toBeTruthy();
           expect(spc).toBeFalsy();
 
           done();

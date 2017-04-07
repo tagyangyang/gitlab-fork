@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 export default {
   "id": 130,
   "iid": 20,
