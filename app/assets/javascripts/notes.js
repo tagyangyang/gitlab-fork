@@ -685,7 +685,9 @@ require('./task_list');
         };
       })(this));
 
-      gl.mrWidget.checkStatus();
+      if (gl.utils.getPagePath(1) === 'merge_requests') {
+        gl.mrWidget.checkStatus();
+      }
 
       // Decrement the "Discussions" counter only once
       return this.updateNotesCount(-1);
