@@ -190,7 +190,7 @@ export default {
           class="btn btn-info dropdown-toggle"
           data-toggle="dropdown">
           <i class="fa fa-caret-down" aria-hidden="true"></i>
-          <span class="sr-only">Select Merge Moment</span>
+          <span class="sr-only">Select merge moment</span>
         </button>
         <ul
           v-if="shouldShowMergeOptionsDropdown"

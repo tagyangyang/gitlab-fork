@@ -82,7 +82,7 @@ export default class MergeRequestStore {
     this.revertInForkPath = currentUser.revert_in_fork_path;
 
     this.isPipelineActive = data.pipeline ? data.pipeline.active : false;
-    this.isPipelineFailed = data.pipeline ? data.pipeline.details.status.group === 'failed' : false;
+    this.isPipelineFailed = data.pipeline ? (data.pipeline.details.status.group === 'failed' || data.pipeline.details.status.group === 'canceled') : false;
     this.isPipelineBlocked = data.pipeline ? data.pipeline.details.status.group === 'manual' : false;
     this.isOpen = data.state === 'opened' || data.state === 'reopened' || false;
     this.hasMergeableDiscussionsState = data.mergeable_discussions_state === false;
