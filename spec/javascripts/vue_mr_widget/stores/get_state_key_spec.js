@@ -1,6 +1,6 @@
-import deviseState from '~/vue_merge_request_widget/stores/devise_state';
+import getStateKey from '~/vue_merge_request_widget/stores/get_state_key';
 
-describe('deviseState', () => {
+describe('getStateKey', () => {
   it('should return proper state name', () => {
     const context = {
       mergeStatus: 'checked',
@@ -19,7 +19,7 @@ describe('deviseState', () => {
       has_conflicts: false,
       work_in_progress: false,
     };
-    const bound = deviseState.bind(context, data);
+    const bound = getStateKey.bind(context, data);
     expect(bound()).toEqual(null);
 
     context.canBeMerged = true;

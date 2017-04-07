@@ -1,6 +1,6 @@
 import Timeago from 'timeago.js';
 import eventHub from '../event_hub';
-import { deviseState } from '../dependencies';
+import { getStateKey } from '../dependencies';
 
 export default class MergeRequestStore {
 
@@ -96,7 +96,7 @@ export default class MergeRequestStore {
 
   setState(data) {
     if (this.isOpen) {
-      this.state = deviseState.call(this, data);
+      this.state = getStateKey.call(this, data);
     } else {
       switch (data.state) {
         case 'merged':
