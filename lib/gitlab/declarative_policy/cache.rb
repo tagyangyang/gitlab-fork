@@ -15,7 +15,11 @@ module DeclarativePolicy
       private
 
       def id_for(obj)
-        obj.respond_to?(:id) ? obj.id.to_s : "##{obj.object_id}"
+        if obj.respond_to?(:id) && obj.id
+          obj.id.to_s
+        else
+          "##{obj.object_id}"
+        end
       end
     end
   end
