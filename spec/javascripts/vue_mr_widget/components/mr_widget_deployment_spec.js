@@ -30,10 +30,13 @@ const createComponent = () => {
 describe('MRWidgetDeployment', () => {
   describe('props', () => {
     it('should have props', () => {
-      const { mr } = deploymentComponent.props;
+      const { mr, service } = deploymentComponent.props;
 
       expect(mr.type instanceof Object).toBeTruthy();
       expect(mr.required).toBeTruthy();
+
+      expect(service.type instanceof Object).toBeTruthy();
+      expect(service.required).toBeTruthy();
     });
   });
 

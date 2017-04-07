@@ -7,6 +7,7 @@ export default {
   name: 'MRWidgetDeployment',
   props: {
     mr: { type: Object, required: true },
+    service: { type: Object, required: true },
   },
   components: {
     'mr-widget-memory-usage': MemoryUsage,
@@ -90,7 +91,7 @@ export default {
             </button>
           </span>
         </div>
-        <mr-widget-memory-usage
+        <mr-widget-memory-usage v-if="deployment.metrics_url"
           :mr="mr"
           :service="service"
           :metricsUrl="deployment.metrics_url"
