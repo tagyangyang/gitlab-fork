@@ -13,11 +13,7 @@ describe('Issue boards new issue form', () => {
   let vm;
   let list;
   const promiseReturn = {
-    json() {
-      return {
-        iid: 100,
-      };
-    },
+    iid: 100,
   };
   const submitIssue = () => {
     vm.$el.querySelector('.btn-success').click();

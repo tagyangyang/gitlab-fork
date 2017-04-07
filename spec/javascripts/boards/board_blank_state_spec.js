@@ -18,19 +18,15 @@ describe('Boards blank state', () => {
       if (fail) {
         reject();
       } else {
-        resolve({
-          json() {
-            return [{
-              id: 1,
-              title: 'To Do',
-              label: { id: 1 },
-            }, {
-              id: 2,
-              title: 'Doing',
-              label: { id: 2 },
-            }];
-          },
-        });
+        resolve([{
+          id: 1,
+          title: 'To Do',
+          label: { id: 1 },
+        }, {
+          id: 2,
+          title: 'Doing',
+          label: { id: 2 },
+        }]);
       }
     }));
 
