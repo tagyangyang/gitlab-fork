@@ -98,6 +98,12 @@ module API
         end
       end
 
+      class Issue < ::API::Entities::IssueBasic
+        expose :subscribed do |issue, options|
+          issue.subscribed?(options[:current_user], options[:project] || issue.project)
+        end
+      end
+
       class MergeRequest < Grape::Entity
         expose :id, :iid
         expose(:project_id) { |entity| entity.project.id }

@@ -688,6 +688,47 @@ describe API::Issues, api: true  do
       expect(json_response['confidential']).to be_falsy
     end
 
+    context 'related resource URIs exposure' do
+      context 'when issues feature available' do
+        it 'exposes related resources URIs' do
+          get api("/projects/#{project.id}/issues/#{issue.iid}", user)
+
+          relationship_urls = json_response['relationship_urls']
+
+          base_url = 'http://www.example.com/api/v4'
+
+          expect(relationship_urls['self']).to eq("#{base_url}/projects/#{project.id}/issues/#{issue.iid}")
+          expect(relationship_urls['issues']).to eq("#{base_url}/issues")
+          expect(relationship_urls['project_issues']).to eq("#{base_url}/projects/#{project.id}/issues")
+          expect(relationship_urls['project_merge_requests']).to eq("#{base_url}/projects/#{project.id}/merge_requests")
+          expect(relationship_urls['project_repo_branches']).to eq("#{base_url}/projects/#{project.id}/repository/branches")
+        end
+      end
+
+      context 'when merge requests feature not available' do
+        let(:project) do
+          create(:empty_project, :public,
+                 :merge_requests_disabled,
+                 creator_id: user.id,
+                 namespace: user.namespace)
+        end
+
+        it 'excludes merge requests related URIs' do
+          get api("/projects/#{project.id}/issues/#{issue.iid}", user)
+
+          relationship_urls = json_response['relationship_urls']
+
+          base_url = 'http://www.example.com/api/v4'
+
+          expect(relationship_urls.has_key?('project_merge_requests')).to be_falsy
+          expect(relationship_urls['self']).to eq("#{base_url}/projects/#{project.id}/issues/#{issue.iid}")
+          expect(relationship_urls['issues']).to eq("#{base_url}/issues")
+          expect(relationship_urls['project_issues']).to eq("#{base_url}/projects/#{project.id}/issues")
+          expect(relationship_urls['project_repo_branches']).to eq("#{base_url}/projects/#{project.id}/repository/branches")
+        end
+      end
+    end
+
     it "returns a project issue by internal id" do
       get api("/projects/#{project.id}/issues/#{issue.iid}", user)
 

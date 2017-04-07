@@ -2,6 +2,7 @@ module API
   class API < Grape::API
     include APIGuard
 
+    prefix :api
     version %w(v3 v4), using: :path
 
     version 'v3', using: :path do

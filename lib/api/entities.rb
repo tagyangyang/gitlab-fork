@@ -266,6 +266,30 @@ module API
     end
 
     class Issue < IssueBasic
+      include ::API::Helpers::RelatedResourcesHelpers
+
+      expose :relationship_urls do
+        expose :self do |_, options|
+          expose_url(options)
+        end
+
+        expose :issues, if: @@issues_available do |issue, options|
+          expose_url(options, api_v4_issues_path)
+        end
+
+        expose :project_issues, if: @@issues_available do |issue, options|
+          expose_url(options, api_v4_projects_issues_path(id: issue.project.id))
+        end
+
+        expose :project_merge_requests, if: @@merge_requests_available do |issue, options|
+          expose_url(options, api_v4_projects_merge_requests_path(id: issue.project.id))
+        end
+
+        expose :project_repo_branches do |issue, options|
+          expose_url(options, api_v4_projects_repository_branches_path(id: issue.project.id))
+        end
+      end
+
       expose :subscribed do |issue, options|
         issue.subscribed?(options[:current_user], options[:project] || issue.project)
       end

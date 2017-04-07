@@ -1,3 +1,13 @@
+GIT
+  remote: git://github.com/oswaldoferreira/grape-route-helpers.git
+  revision: fe80756582958a40b87f53d7e257ae8c0a8aaccd
+  branch: master
+  specs:
+    grape-route-helpers (2.1.0)
+      activesupport
+      grape (>= 0.19.0)
+      rake
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -910,6 +920,7 @@ DEPENDENCIES
   google-api-client (~> 0.8.6)
   grape (~> 0.19.0)
   grape-entity (~> 0.6.0)
+  grape-route-helpers!
   haml_lint (~> 0.21.0)
   hamlit (~> 2.6.1)
   health_check (~> 2.6.0)

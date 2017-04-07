@@ -16,6 +16,7 @@ gem 'mysql2', '~> 0.3.16', group: :mysql
 gem 'pg', '~> 0.18.2', group: :postgres
 
 gem 'rugged', '~> 0.25.1.1'
+gem 'grape-route-helpers', github: 'oswaldoferreira/grape-route-helpers', branch: 'master'
 
 # Authentication libraries
 gem 'devise', '~> 4.2'
