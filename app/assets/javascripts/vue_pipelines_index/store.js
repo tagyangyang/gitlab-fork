@@ -14,7 +14,7 @@
 
       return this.$http.get(`${url}?scope=${apiScope}&page=${pageNum}`)
       .then((response) => {
-        const pageInfo = pageValues(response.Headers);
+        const pageInfo = pageValues(response.headers);
         this.pageInfo = Object.assign({}, this.pageInfo, pageInfo);
 
         const res = JSON.parse(response.body);

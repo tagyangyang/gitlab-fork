@@ -107,14 +107,14 @@ export default Vue.component('environment-component', {
 
       return this.service.get(scope, pageNumber)
         .then(resp => ({
-          headers: resp.Headers,
+          headers: resp.headers,
           body: resp.body,
         }))
         .then((response) => {
           this.store.storeAvailableCount(response.body.available_count);
           this.store.storeStoppedCount(response.body.stopped_count);
           this.store.storeEnvironments(response.body.environments);
-          this.store.setPagination(response.Headers);
+          this.store.setPagination(response.headers);
         })
         .then(() => {
           this.isLoading = false;
@@ -129,7 +129,7 @@ export default Vue.component('environment-component', {
       this.isLoadingFolderContent = true;
 
       this.service.getFolderContent(folderUrl)
-        .then(resp => resp.json())
+        .then(resp => resp.body)
         .then((response) => {
           this.store.setfolderContent(folder, response.environments);
           this.isLoadingFolderContent = false;

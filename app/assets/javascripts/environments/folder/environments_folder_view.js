@@ -85,14 +85,14 @@ export default Vue.component('environment-folder-view', {
 
     return this.service.get()
       .then(resp => ({
-        headers: resp.Headers,
+        headers: resp.headers,
         body: resp.body,
       }))
       .then((response) => {
         this.store.storeAvailableCount(response.body.available_count);
         this.store.storeStoppedCount(response.body.stopped_count);
         this.store.storeEnvironments(response.body.environments);
-        this.store.setPagination(response.Headers);
+        this.store.setPagination(response.headers);
       })
       .then(() => {
         this.isLoading = false;

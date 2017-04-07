@@ -25,7 +25,7 @@ class BoardService {
     });
 
     Vue.http.interceptors.push((request, next) => {
-      request.Headers['X-CSRF-Token'] = $.rails.csrfToken();
+      request.headers['X-CSRF-Token'] = $.rails.csrfToken();
       next();
     });
   }

@@ -50,7 +50,7 @@ export default () => {
       loadFile() {
         this.$http.get(el.dataset.endpoint)
           .then((res) => {
-            this.json = res.json();
+            this.json = res.body;
             this.loading = false;
           })
           .catch((e) => {
