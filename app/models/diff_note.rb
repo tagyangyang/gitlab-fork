@@ -72,12 +72,6 @@ class DiffNote < Note
     self.original_position.diff_refs == diff_refs
   end
 
-  def latest_merge_request_diff
-    return unless for_merge_request?
-
-    self.noteable.merge_request_diff_for(self.position.diff_refs)
-  end
-
   private
 
   def supported?

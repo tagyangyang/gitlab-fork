@@ -367,12 +367,26 @@ class MergeRequest < ActiveRecord::Base
     merge_request_diff(true)
   end
 
-  def merge_request_diff_for(diff_refs)
-    @merge_request_diffs_by_diff_refs ||= Hash.new do |h, diff_refs|
-      h[diff_refs] = merge_request_diffs.viewable.select_without_diff.find_by_diff_refs(diff_refs)
+  def version_params_for(diff_refs)
+    @version_params_by_diff_refs ||= Hash.new do |h, diff_refs|
+      diffs = merge_request_diffs.viewable.select_without_diff
+
+      h[diff_refs] =
+        if diff_refs == self.diff_sha_refs
+          {}
+        elsif diff = diffs.find_by_diff_refs(diff_refs)
+          { diff_id: diff.id }
+        elsif diff = diffs.find_by(head_commit_sha: diff_refs.head_sha)
+          {
+            diff_id: diff.id,
+            start_sha: diff_refs.start_sha
+          }
+        else
+          nil
+        end
     end
 
-    @merge_request_diffs_by_diff_refs[diff_refs]
+    @version_params_by_diff_refs[diff_refs]
   end
 
   def reload_diff_if_branch_changed

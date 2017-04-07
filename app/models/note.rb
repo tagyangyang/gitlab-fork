@@ -146,10 +146,6 @@ class Note < ActiveRecord::Base
     true
   end
 
-  def latest_merge_request_diff
-    nil
-  end
-
   def max_attachment_size
     current_application_settings.max_attachment_size.megabytes.to_i
   end

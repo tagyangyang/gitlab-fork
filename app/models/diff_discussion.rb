@@ -10,7 +10,6 @@ class DiffDiscussion < Discussion
 
   delegate  :position,
             :original_position,
-            :latest_merge_request_diff,
 
             to: :first_note
 

@@ -75,11 +75,11 @@
         = succeed '.' do
           %code= @merge_request.target_branch
 
-    - if @diff_notes_disabled || !@merge_request_diff.latest?
+    - if @start_sha.present? || !@merge_request_diff.latest?
       .comments-disabled-notif.content-block
         = icon('info-circle')
         - if @start_sha
-          Comments are disabled because you're comparing two versions of this merge request.
+          Not all comments are displayed because you're comparing two versions of this merge request.
         - else
           Not all comments are displayed because you're viewing an old version of this merge request.
 

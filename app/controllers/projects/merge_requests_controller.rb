@@ -120,7 +120,8 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       define_diff_comment_vars
     else
       build_merge_request
-      @diffs = @merge_request.diffs(diff_options)
+      @compare = @merge_request
+      @diffs = @compare.diffs(diff_options)
       @diff_notes_disabled = true
       @grouped_diff_discussions = {}
     end
@@ -582,12 +583,14 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       @start_sha = start_sha if @start_version
     end
 
-    @diffs =
+    @compare =
       if @start_sha
-        @merge_request_diff.compare_with(@start_sha).diffs(diff_options)
+        @merge_request_diff.compare_with(@start_sha)
       else
-        @merge_request_diff.diffs(diff_options)
+        @merge_request_diff
       end
+
+    @diffs = @compare.diffs(diff_options)
   end
 
   def define_diff_comment_vars
@@ -596,11 +599,11 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       noteable_id: @merge_request.id
     }
 
-    @diff_notes_disabled = @start_sha.present?
+    @diff_notes_disabled = false
 
     @use_legacy_diff_notes = !@merge_request.has_complete_diff_refs?
 
-    @grouped_diff_discussions = @merge_request.grouped_diff_discussions(@merge_request_diff.diff_refs)
+    @grouped_diff_discussions = @merge_request.grouped_diff_discussions(@compare.diff_refs)
     @notes = prepare_notes_for_rendering(@grouped_diff_discussions.values.flatten.flat_map(&:notes))
   end
 
