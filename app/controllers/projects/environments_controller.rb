@@ -88,7 +88,10 @@ class Projects::EnvironmentsController < Projects::ApplicationController
         namespace_project_environment_url(project.namespace, project, @environment)
       end
 
-    render json: { redirect_url: action_or_env_url }
+    respond_to do |format|
+      format.html { redirect_to action_or_env_url }
+      format.json { render json: { redirect_url: action_or_env_url } }
+    end
   end
 
   def terminal
