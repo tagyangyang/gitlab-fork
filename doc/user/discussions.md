@@ -122,7 +122,7 @@ add a note referring to the newly created issue.
 You can now proceed to merge the merge request from the UI.
 
 
-## Issues, commits, snippets and merge requests
+## Issue, commit, snippet and merge request discussions
 
 > [Introduced][ce-7527] in GitLab 9.1.
 
