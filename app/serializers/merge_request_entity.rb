@@ -1,7 +1,6 @@
 class MergeRequestEntity < IssuableEntity
-  include RequestAwareEntity
   include GitlabMarkdownHelper
-  include TreeHelper
+  include RequestAwareEntity
 
   expose :in_progress_merge_commit_sha
   expose :locked_at
@@ -41,7 +40,6 @@ class MergeRequestEntity < IssuableEntity
   expose :conflicts_can_be_resolved_in_ui?, as: :conflicts_can_be_resolved_in_ui
   expose :branch_missing?, as: :branch_missing
   expose :has_no_commits?, as: :has_no_commits
-  expose :can_be_cherry_picked?, as: :can_be_cherry_picked
   expose :cannot_be_merged?, as: :has_conflicts
   expose :can_be_merged?, as: :can_be_merged
 
@@ -79,75 +77,20 @@ class MergeRequestEntity < IssuableEntity
   end
 
   expose :current_user do
-    expose :can_create_issue do |merge_request|
-      merge_request.project.issues_enabled? &&
-        can?(request.current_user, :create_issue, merge_request.project)
-    end
-
-    expose :can_update_merge_request do |merge_request|
-      merge_request.project.merge_requests_enabled? &&
-        can?(request.current_user, :update_merge_request, merge_request.project)
-    end
-
     expose :can_resolve_conflicts do |merge_request|
-      merge_request.conflicts_can_be_resolved_by?(request.current_user)
+      merge_request.conflicts_can_be_resolved_by?(current_user)
     end
 
     expose :can_remove_source_branch do |merge_request|
-      merge_request.can_remove_source_branch?(request.current_user)
+      merge_request.can_remove_source_branch?(current_user)
     end
 
-    expose :can_merge do |merge_request|
-      merge_request.can_be_merged_by?(request.current_user)
+    expose :can_revert_on_current_merge_request do |merge_request|
+      presenter(merge_request).can_revert_on_current_merge_request?
     end
 
-    expose :can_merge_via_cli do |merge_request|
-      merge_request.can_be_merged_via_command_line_by?(request.current_user)
-    end
-
-    expose :can_revert do |merge_request|
-      merge_request.can_be_reverted?(request.current_user)
-    end
-
-    expose :can_cancel_automatic_merge do |merge_request|
-      merge_request.can_cancel_merge_when_pipeline_succeeds?(request.current_user)
-    end
-
-    expose :can_collaborate_with_project do |merge_request|
-      can?(current_user, :push_code, merge_request.project) ||
-        (current_user && current_user.already_forked?(merge_request.project))
-    end
-
-    expose :can_fork_project do |merge_request|
-      can?(current_user, :fork_project, merge_request.project)
-    end
-
-    expose :cherry_pick_in_fork_path do |merge_request|
-      if current_user
-        continue_params = {
-          to: mr_path(merge_request),
-          notice: "#{edit_in_new_fork_notice} Try to cherry-pick this commit again.",
-          notice_now: edit_in_new_fork_notice_now
-        }
-
-        namespace_project_forks_path(merge_request.project.namespace, merge_request.project,
-                                     namespace_key: current_user.namespace.id,
-                                     continue: continue_params)
-      end
-    end
-
-    expose :revert_in_fork_path do |merge_request|
-      if current_user
-        continue_params = {
-          to: mr_path(merge_request),
-          notice: "#{edit_in_new_fork_notice} Try to revert this commit again.",
-          notice_now: edit_in_new_fork_notice_now
-        }
-
-        namespace_project_forks_path(merge_request.project.namespace, merge_request.project,
-                                     namespace_key: current_user.namespace.id,
-                                     continue: continue_params)
-      end
+    expose :can_cherry_pick_on_current_merge_request do |merge_request|
+      presenter(merge_request).can_cherry_pick_on_current_merge_request?
     end
   end
 
@@ -172,22 +115,27 @@ class MergeRequestEntity < IssuableEntity
   end
 
   expose :remove_wip_path do |merge_request|
-    remove_wip_namespace_project_merge_request_path(merge_request.project.namespace,
-                                                    merge_request.project,
-                                                    merge_request)
-  end
-
-  expose :merge_path do |merge_request|
-    merge_namespace_project_merge_request_path(merge_request.project.namespace,
-                                               merge_request.project,
-                                               merge_request)
+    presenter(merge_request).remove_wip_path
   end
 
   expose :cancel_merge_when_pipeline_succeeds_path do |merge_request|
-    cancel_merge_when_pipeline_succeeds_namespace_project_merge_request_path(
-      merge_request.project.namespace,
-      merge_request.project,
-      merge_request)
+    presenter(merge_request).cancel_merge_when_pipeline_succeeds_path
+  end
+
+  expose :create_issue_to_resolve_discussions_path do |merge_request|
+    presenter(merge_request).create_issue_to_resolve_discussions_path
+  end
+
+  expose :merge_path do |merge_request|
+    presenter(merge_request).merge_path
+  end
+
+  expose :cherry_pick_in_fork_path do |merge_request|
+    presenter(merge_request).cherry_pick_in_fork_path
+  end
+
+  expose :revert_in_fork_path do |merge_request|
+    presenter(merge_request).revert_in_fork_path
   end
 
   expose :email_patches_path do |merge_request|
@@ -223,12 +171,6 @@ class MergeRequestEntity < IssuableEntity
                                                      merge_request)
   end
 
-  expose :create_issue_to_resolve_discussions_path do |merge_request|
-    new_namespace_project_issue_path(merge_request.project.namespace,
-                                     merge_request.project,
-                                     merge_request_for_resolving_discussions_of: merge_request.iid)
-  end
-
   expose :ci_environments_status_url do |merge_request|
     ci_environments_status_namespace_project_merge_request_path(merge_request.project.namespace,
                                                                 merge_request.project,
@@ -261,10 +203,8 @@ class MergeRequestEntity < IssuableEntity
 
   private
 
-  def mr_path(merge_request)
-    namespace_project_merge_request_path(merge_request.project.namespace,
-                                         merge_request.project,
-                                         merge_request)
+  def presenter(merge_request)
+    @presenter ||= MergeRequestPresenter.new(merge_request, current_user: current_user)
   end
 
   delegate :current_user, to: :request

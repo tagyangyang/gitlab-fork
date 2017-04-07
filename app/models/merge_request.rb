@@ -846,7 +846,7 @@ class MergeRequest < ActiveRecord::Base
   end
 
   def can_be_cherry_picked?
-    merge_commit
+    merge_commit.present?
   end
 
   def has_complete_diff_refs?

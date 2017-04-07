@@ -491,8 +491,8 @@ class Projects::MergeRequestsController < Projects::ApplicationController
             end
 
           metrics_url =
-            if environment.has_metrics? && can?(current_user, :read_deployment, deployment)
-              metrics_namespace_project_environment_deployment_path(environment.project.namespace,
+            if can?(current_user, :read_environment, environment) && environment.has_metrics?
+              metrics_namespace_project_environment_path(environment.project.namespace,
                                                          environment.project,
                                                          environment,
                                                          deployment)
@@ -721,14 +721,6 @@ class Projects::MergeRequestsController < Projects::ApplicationController
 
   private
 
-  def serializer
-    if params[:basic]
-      MergeRequestBasicSerializer.new
-    else
-      MergeRequestSerializer.new(current_user: current_user, project: merge_request.project)
-    end
-  end
-
   def merge!
     # Disable the CI check if merge_when_pipeline_succeeds is enabled since we have
     # to wait until CI completes to know
@@ -762,6 +754,14 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       MergeWorker.perform_async(@merge_request.id, current_user.id, params)
 
       :success
+    end
+  end
+
+  def serializer
+    if params[:basic]
+      MergeRequestBasicSerializer.new
+    else
+      MergeRequestSerializer.new(current_user: current_user, project: merge_request.project)
     end
   end
 end

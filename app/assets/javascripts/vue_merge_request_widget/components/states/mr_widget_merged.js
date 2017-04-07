@@ -26,24 +26,11 @@ export default {
       const { sourceBranchRemoved, isRemovingSourceBranch } = this.mr;
       return !sourceBranchRemoved && (isRemovingSourceBranch || this.isMakingRequest);
     },
-    shouldShowRevertForCurrentMR() {
-      return this.mr.canBeReverted && this.mr.userCanCollaborateWithProject;
-    },
-    // TODO: Remove UJS
-    shouldShowRevertForForkMR() {
-      return this.mr.canBeReverted && this.mr.userCanForkProject;
-    },
-    shouldShowCherryPickForCurrentMR() {
-      return this.mr.canBeCherryPicked && this.mr.userCanCollaborateWithProject;
-    },
-    // TODO: Remove UJS
-    shouldShowCherryPickForForkMR() {
-      return this.mr.canBeCherryPicked && this.mr.userCanForkProject;
-    },
-    // TODO: Add test for this
     shouldShowMergedButtons() {
-      return this.shouldShowRevertForCurrentMR || this.shouldShowRevertForForkMR
-      || this.shouldShowCherryPickForCurrentMR || this.shouldShowCherryPickForForkMR;
+      const { canRevertInCurrentMR, canCherryPickInCurrentMR, revertInForkPath, cherryPickInForkPath } = this.mr;
+
+      return canRevertInCurrentMR || canCherryPickInCurrentMR || 
+        revertInForkPath || cherryPickInForkPath;
     },
   },
   methods: {
@@ -92,27 +79,27 @@ export default {
       </section>
       <div class="merged-buttons clearfix" v-if="shouldShowMergedButtons">
         <a
-          v-if="shouldShowRevertForCurrentMR"
+          v-if="mr.canRevertInCurrentMR"
           class="btn btn-close btn-sm has-tooltip"
           href="#modal-revert-commit"
           data-toggle="modal"
           data-container="body"
           title="Revert this merge request in a new merge request">Revert</a>
         <a
-          v-else-if="shouldShowRevertForForkMR"
+          v-else-if="mr.revertInForkPath"
           class="btn btn-close btn-sm has-tooltip"
           data-method="post"
           :href="mr.revertInForkPath"
           title="Revert this merge request in a new merge request">Revert</a>
         <a
-          v-if="shouldShowCherryPickForCurrentMR"
+          v-if="mr.canCherryPickInCurrentMR"
           class="btn btn-default btn-sm has-tooltip"
           href="#modal-cherry-pick-commit"
           data-toggle="modal"
           data-container="body"
           title="Cherry-pick this merge request in a new merge request">Cherry-pick</a>
         <a
-          v-else-if="shouldShowCherryPickForForkMR"
+          v-else-if="mr.cherryPickInForkPath"
           class="btn btn-default btn-sm has-tooltip"
           data-method="post"
           :href="mr.cherryPickInForkPath"

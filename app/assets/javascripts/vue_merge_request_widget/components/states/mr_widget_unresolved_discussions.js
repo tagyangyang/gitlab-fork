@@ -12,7 +12,7 @@ export default {
         <span v-else>.</span>
       </span>
       <a
-        v-if="mr.canCreateIssue"
+        v-if="mr.createIssueToResolveDiscussionsPath"
         :href="mr.createIssueToResolveDiscussionsPath"
         class="btn btn-default btn-xs js-create-issue">
         Create an issue to resolve them later</a>

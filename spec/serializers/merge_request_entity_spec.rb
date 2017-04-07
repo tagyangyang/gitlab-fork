@@ -35,16 +35,33 @@ describe MergeRequestEntity do
 
   it 'has important MergeRequest attributes' do
     expect(subject).to include(:diff_head_sha, :merge_commit_message,
-                              :can_be_merged, :can_be_cherry_picked,
                               :has_conflicts, :has_ci)
   end
 
+  it 'has cancel_merge_when_pipeline_succeeds_path' do
+    project.team << [user, :master]
+
+    expect(subject[:cancel_merge_when_pipeline_succeeds_path]).
+      to eq("/#{resource.project.full_path}/merge_requests/#{resource.iid}/cancel_merge_when_pipeline_succeeds")
+  end
+
   it 'has merge_path' do
+    project.team << [user, :master]
+
     expect(subject[:merge_path])
       .to eq("/#{resource.project.full_path}/merge_requests/#{resource.iid}/merge")
   end
 
+  it 'has create_issue_to_resolve_discussions_path' do
+    project.team << [user, :master]
+
+    expect(subject[:create_issue_to_resolve_discussions_path])
+      .to eq("/#{resource.project.full_path}/issues/new?merge_request_for_resolving_discussions_of=#{resource.iid}")
+  end
+
   it 'has remove_wip_path' do
+    project.team << [user, :master]
+
     expect(subject[:remove_wip_path])
       .to eq("/#{resource.project.full_path}/merge_requests/#{resource.iid}/remove_wip")
   end
@@ -205,24 +222,6 @@ describe MergeRequestEntity do
         allow(resource).to receive_messages(open?: true, diverged_from_target_branch?: false)
 
         expect(subject[:diverged_commits_count]).to be_zero
-      end
-    end
-  end
-
-  context 'current_user' do
-    describe 'can_update_merge_request' do
-      context 'user can update issue' do
-        it 'returns true' do
-          resource.project.team << [user, :developer]
-
-          expect(subject[:current_user][:can_update_merge_request]).to eq(true)
-        end
-      end
-
-      context 'user cannot update issue' do
-        it 'returns false' do
-          expect(subject[:current_user][:can_update_merge_request]).to eq(false)
-        end
       end
     end
   end
