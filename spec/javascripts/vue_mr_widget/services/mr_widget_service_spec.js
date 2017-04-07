@@ -46,6 +46,6 @@ describe('MRWidgetService', () => {
     expect(service.poll()).toBeDefined();
     expect(service.checkStatus()).toBeDefined();
     expect(service.fetchMergeActionsContent()).toBeDefined();
-    expect(service.stopEnvironment()).toBeDefined();
+    expect(MRWidgetService.stopEnvironment()).toBeDefined();
   });
 });

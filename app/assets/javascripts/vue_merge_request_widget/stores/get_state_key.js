@@ -1,4 +1,4 @@
-export default function(data) {
+export default function (data) {
   if (data.project_archived) {
     return 'archived';
   } else if (data.branch_missing) {
@@ -25,5 +25,5 @@ export default function(data) {
     return 'readyToMerge';
   }
   return null;
-};
+}
 

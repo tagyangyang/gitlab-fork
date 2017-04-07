@@ -1,12 +1,12 @@
 import '~/lib/utils/datetime_utility';
 import { statusClassToSvgMap } from '../../vue_shared/pipeline_svg_icons';
 import MemoryUsage from './mr_widget_memory_usage';
+import MRWidgetService from '../services/mr_widget_service';
 
 export default {
   name: 'MRWidgetDeployment',
   props: {
     mr: { type: Object, required: true },
-    service: { type: Object, required: true },
   },
   components: {
     'mr-widget-memory-usage': MemoryUsage,
@@ -34,7 +34,7 @@ export default {
       const isConfirmed = confirm(msg); // eslint-disable-line
 
       if (isConfirmed) {
-        this.service.stopEnvironment(deployment.stop_url)
+        MRWidgetService.stopEnvironment(deployment.stop_url)
           .then(res => res.json())
           .then((res) => {
             if (res.redirect_url) {

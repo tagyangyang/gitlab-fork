@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import deploymentComponent from '~/vue_merge_request_widget/components/mr_widget_deployment';
+import MRWidgetService from '~/vue_merge_request_widget/services/mr_widget_service';
 import { statusClassToSvgMap } from '~/vue_shared/pipeline_svg_icons';
 
 const deploymentMockData = [
@@ -19,26 +20,20 @@ const createComponent = () => {
   const mr = {
     deployments: deploymentMockData,
   };
-  const service = {
-    stopEnvironment() {},
-  };
 
   return new Component({
     el: document.createElement('div'),
-    propsData: { mr, service },
+    propsData: { mr },
   });
 };
 
 describe('MRWidgetDeployment', () => {
   describe('props', () => {
     it('should have props', () => {
-      const { mr, service } = deploymentComponent.props;
+      const { mr } = deploymentComponent.props;
 
       expect(mr.type instanceof Object).toBeTruthy();
       expect(mr.required).toBeTruthy();
-
-      expect(service.type instanceof Object).toBeTruthy();
-      expect(service.required).toBeTruthy();
     });
   });
 
@@ -116,12 +111,12 @@ describe('MRWidgetDeployment', () => {
 
       it('should show a confirm dialog and call service.stopEnvironment when confirmed', (done) => {
         spyOn(window, 'confirm').and.returnValue(true);
-        spyOn(vm.service, 'stopEnvironment').and.returnValue(returnPromise(true));
+        spyOn(MRWidgetService, 'stopEnvironment').and.returnValue(returnPromise(true));
         spyOn(gl.utils, 'visitUrl').and.returnValue(true);
         vm = mockStopEnvironment();
 
         expect(window.confirm).toHaveBeenCalled();
-        expect(vm.service.stopEnvironment).toHaveBeenCalledWith(deploymentMockData.stop_url);
+        expect(MRWidgetService.stopEnvironment).toHaveBeenCalledWith(deploymentMockData.stop_url);
         setTimeout(() => {
           expect(gl.utils.visitUrl).toHaveBeenCalledWith(url);
           done();
@@ -130,11 +125,11 @@ describe('MRWidgetDeployment', () => {
 
       it('should show a confirm dialog but should not work if the dialog is rejected', () => {
         spyOn(window, 'confirm').and.returnValue(false);
-        spyOn(vm.service, 'stopEnvironment').and.returnValue(returnPromise(false));
+        spyOn(MRWidgetService, 'stopEnvironment').and.returnValue(returnPromise(false));
         vm = mockStopEnvironment();
 
         expect(window.confirm).toHaveBeenCalled();
-        expect(vm.service.stopEnvironment).not.toHaveBeenCalled();
+        expect(MRWidgetService.stopEnvironment).not.toHaveBeenCalled();
       });
     });
   });

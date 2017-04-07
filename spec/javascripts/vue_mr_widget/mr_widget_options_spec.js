@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import mrWidgetOptions from '~/vue_merge_request_widget/mr_widget_options';
-import { stateToComponentMap } from '~/vue_merge_request_widget/stores/state_maps';
 import eventHub from '~/vue_merge_request_widget/event_hub';
 import mockData from './mock_data';
 
@@ -37,12 +36,12 @@ describe('mrWidgetOptions', () => {
   describe('computed', () => {
     describe('componentName', () => {
       it('should return merged component', () => {
-        expect(vm.componentName).toEqual(stateToComponentMap.merged);
+        expect(vm.componentName).toEqual('mr-widget-merged');
       });
 
       it('should return conflicts component', () => {
         vm.mr.state = 'conflicts';
-        expect(vm.componentName).toEqual(stateToComponentMap.conflicts);
+        expect(vm.componentName).toEqual('mr-widget-conflicts');
       });
     });
 

@@ -54,7 +54,7 @@ export default class MRWidgetService {
     return this.mergeActionsContentResource.get();
   }
 
-  stopEnvironment(url) {
+  static stopEnvironment(url) {
     return Vue.http.post(url);
   }
 
