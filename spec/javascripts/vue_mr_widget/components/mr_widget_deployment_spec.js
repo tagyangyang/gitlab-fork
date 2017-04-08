@@ -20,10 +20,11 @@ const createComponent = () => {
   const mr = {
     deployments: deploymentMockData,
   };
+  const service = {};
 
   return new Component({
     el: document.createElement('div'),
-    propsData: { mr },
+    propsData: { mr, service },
   });
 };
 
@@ -163,7 +164,7 @@ describe('MRWidgetDeployment', () => {
       vm.mr.deployments.push(deployment);
 
       Vue.nextTick(() => {
-        expect(el.querySelectorAll('.ci_widget').length).toEqual(3);
+        expect(el.querySelectorAll('.ci-widget').length).toEqual(3);
         done();
       });
     });
