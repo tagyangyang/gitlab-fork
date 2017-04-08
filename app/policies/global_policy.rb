@@ -26,6 +26,7 @@ class GlobalPolicy < BasePolicy
     prevent :access_api
     prevent :access_git
     prevent :receive_notifications
+    prevent :use_slash_commands
   end
 
   rule { can_create_group }.policy do
