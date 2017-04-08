@@ -378,7 +378,7 @@ class Spinach::Features::ProjectMergeRequests < Spinach::FeatureSteps
   end
 
   step 'merge request is mergeable' do
-    expect(page).to have_button 'Accept merge request'
+    expect(page).to have_button 'Merge'
   end
 
   step 'I modify merge commit message' do
