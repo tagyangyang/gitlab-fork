@@ -32,7 +32,7 @@ export default {
     },
     stopEnvironment(deployment) {
       const msg = 'Are you sure you want to stop this environment?';
-      const isConfirmed = confirm(msg); // eslint-disable-line
+      const isConfirmed = confirm(msg); // eslint-disable-line no-alert
 
       if (isConfirmed) {
         MRWidgetService.stopEnvironment(deployment.stop_url)
