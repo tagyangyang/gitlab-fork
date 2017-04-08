@@ -327,11 +327,7 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       .new(project, current_user, wip_event: 'unwip')
       .execute(@merge_request)
 
-    respond_to do |format|
-      format.json do
-        render json: serializer.represent(@merge_request).to_json
-      end
-    end
+    render json: serializer.represent(@merge_request).to_json
   end
 
   def merge_check
