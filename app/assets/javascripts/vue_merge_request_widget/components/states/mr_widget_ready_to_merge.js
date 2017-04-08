@@ -231,11 +231,11 @@ export default {
         <!-- Placeholder for EE extension of this component -->
         <squash-before-merge v-if="mr.enableSquashBeforeMerge" :mr="mr" :is-merge-button-disabled="isMergeButtonDisabled"/>
 
-        <a
-          @click.prevent="toggleCommitMessageEditor"
+        <button
+          @click="toggleCommitMessageEditor"
           :disabled="isMergeButtonDisabled"
           class="btn btn-default btn-xs"
-          href="#">Modify commit message</a>
+          type="button">Modify commit message</button>
         <div class="prepend-top-default commit-message-editor" v-if="showCommitMessageEditor">
           <div class="form-group clearfix">
             <label class="control-label" for="commit-message">Commit message</label>
