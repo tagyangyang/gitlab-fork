@@ -100,7 +100,6 @@ constraints(ProjectUrlConstrainer.new) do
           get :merge_check
           get :commit_change_content
           post :merge
-          get :merge_widget_refresh
           post :cancel_merge_when_pipeline_succeeds
           get :ci_status
           get :pipeline_status

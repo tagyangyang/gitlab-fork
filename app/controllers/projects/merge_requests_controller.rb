@@ -327,32 +327,17 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       .new(project, current_user, wip_event: 'unwip')
       .execute(@merge_request)
 
-    # TODO: @oswaldo - Handle only JSON after deleting existing MR widget.
     respond_to do |format|
       format.json do
         render json: serializer.represent(@merge_request).to_json
-      end
-
-      format.html do
-        redirect_to namespace_project_merge_request_path(@project.namespace, @project, @merge_request),
-          notice: "The merge request can now be merged."
       end
     end
   end
 
   def merge_check
     @merge_request.check_if_can_be_merged
-    @pipelines = @merge_request.all_pipelines
 
-    respond_to do |format|
-      format.js do
-        render partial: "projects/merge_requests/widget/show.html.haml", layout: false
-      end
-
-      format.json do
-        render json: serializer.represent(@merge_request).to_json
-      end
-    end
+    render json: serializer.represent(@merge_request).to_json
   end
 
   def commit_change_content
@@ -368,40 +353,15 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       .new(@project, current_user)
       .cancel(@merge_request)
 
-    # TODO: @oswaldo - Handle only JSON after deleting existing MR widget.
-    respond_to do |format|
-      format.json do
-        render json: serializer.represent(@merge_request.reload).to_json
-      end
-
-      format.js
-    end
+    render json: serializer.represent(@merge_request.reload).to_json
   end
 
   def merge
     return access_denied! unless @merge_request.can_be_merged_by?(current_user)
 
-    @status = merge!
+    status = merge!
 
-    # TODO: @oswaldo - Handle only JSON after deleting existing MR widget.
-    respond_to do |format|
-      format.json { render json: { status: @status } }
-      format.js
-    end
-  end
-
-  def merge_widget_refresh
-    @status =
-      if merge_request.merge_when_pipeline_succeeds
-        :merge_when_pipeline_succeeds
-      else
-        # Only MRs that can be merged end in this action
-        # MR can be already picked up for merge / merged already or can be waiting for worker to be picked up
-        # in last case it does not have any special status. Possible error is handled inside widget js function
-        :success
-      end
-
-    render 'merge'
+    render json: { status: status }
   end
 
   def branch_from

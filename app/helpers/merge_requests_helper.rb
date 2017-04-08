@@ -19,14 +19,6 @@ module MergeRequestsHelper
     }
   end
 
-  def mr_widget_refresh_url(mr)
-    if mr && mr.target_project
-      merge_widget_refresh_namespace_project_merge_request_url(mr.target_project.namespace, mr.target_project, mr)
-    else
-      ''
-    end
-  end
-
   def mr_css_classes(mr)
     classes = "merge-request"
     classes << " closed" if mr.closed?
