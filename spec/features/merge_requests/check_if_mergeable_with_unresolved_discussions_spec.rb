@@ -20,7 +20,7 @@ feature 'Check if mergeable with unresolved discussions', js: true, feature: tru
         visit_merge_request(merge_request)
 
         expect(page).not_to have_button 'Merge'
-        expect(page).to have_content('This merge request has unresolved discussions')
+        expect(page).to have_content('There are unresolved discussions.')
       end
     end
 
