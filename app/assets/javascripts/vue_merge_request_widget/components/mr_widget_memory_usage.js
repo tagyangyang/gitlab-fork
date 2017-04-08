@@ -1,5 +1,6 @@
 import statusCodes from '~/lib/utils/http_status';
 import MemoryGraph from '../../vue_shared/components/memory_graph';
+import MRWidgetService from '../services/mr_widget_service';
 
 export default {
   name: 'MemoryUsage',
@@ -43,7 +44,7 @@ export default {
   mounted() {
     this.$props.loadingMetrics = true;
     gl.utils.backOff((next, stop) => {
-      this.service.fetchMetrics(this.$props.metricsUrl)
+      MRWidgetService.fetchMetrics(this.$props.metricsUrl)
         .then((res) => {
           if (res.status === statusCodes.NO_CONTENT) {
             this.backOffRequestCounter = this.backOffRequestCounter += 1;

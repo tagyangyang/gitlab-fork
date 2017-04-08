@@ -58,7 +58,7 @@ export default class MRWidgetService {
     return Vue.http.post(url);
   }
 
-  fetchMetrics(metricsUrl) {
+  static fetchMetrics(metricsUrl) {
     return Vue.http.get(`${metricsUrl}.json`);
   }
 }
