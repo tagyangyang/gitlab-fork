@@ -20,9 +20,14 @@ class CommitStatus < ActiveRecord::Base
   alias_attribute :author, :user
 
   scope :latest, -> do
-    max_id = unscope(:select).select("max(#{quoted_table_name}.id)")
+    is_latest = <<-SQL.strip_heredoc
+      SELECT max(other_builds.id)
+      FROM #{quoted_table_name} other_builds
+      WHERE other_builds.commit_id = ci_builds.commit_id
+        AND other_builds.name = ci_builds.name
+    SQL
 
-    where(id: max_id.group(:name, :commit_id))
+    where("#{quoted_table_name}.id = (#{is_latest})")
   end
 
   scope :failed_but_allowed, -> do
