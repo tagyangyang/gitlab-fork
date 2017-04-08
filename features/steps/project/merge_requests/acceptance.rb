@@ -11,7 +11,7 @@ class Spinach::Features::ProjectMergeRequestsAcceptance < Spinach::FeatureSteps
   end
 
   step 'I click on "Remove source branch" option' do
-    check('Remove source branch')
+    uncheck('Remove source branch')
   end
 
   step 'I click on Accept Merge Request' do
