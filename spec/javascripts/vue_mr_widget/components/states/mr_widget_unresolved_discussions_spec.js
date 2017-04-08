@@ -19,7 +19,6 @@ describe('MRWidgetUnresolvedDiscussions', () => {
     beforeEach(() => {
       const Component = Vue.extend(unresolvedDiscussionsComponent);
       const mr = {
-        canCreateIssue: true,
         createIssueToResolveDiscussionsPath: path,
       };
       vm = new Component({
@@ -37,7 +36,7 @@ describe('MRWidgetUnresolvedDiscussions', () => {
     });
 
     it('should not show create issue button if user cannot create issue', (done) => {
-      vm.mr.canCreateIssue = false;
+      vm.mr.createIssueToResolveDiscussionsPath = '';
 
       Vue.nextTick(() => {
         expect(el.querySelector('.js-create-issue')).toEqual(null);

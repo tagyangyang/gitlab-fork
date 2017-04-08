@@ -7,13 +7,13 @@ const targetBranch = 'foo';
 const createComponent = () => {
   const Component = Vue.extend(mergedComponent);
   const mr = {
-    canRemoveSourceBranch: true,
     isRemovingSourceBranch: false,
-    userCanCollaborateWithProject: true,
-    canBeReverted: true,
+    cherryPickInForkPath: false,
+    canCherryPickInCurrentMR: true,
+    revertInForkPath: false,
+    canRevertInCurrentMR: true,
+    canRemoveSourceBranch: true,
     sourceBranchRemoved: true,
-    userCanForkProject: true,
-    canBeCherryPicked: true,
     mergedBy: {},
     mergedAt: '',
     updatedAt: '',
@@ -99,58 +99,7 @@ describe('MRWidgetMerged', () => {
         expect(vm.shouldShowSourceBranchRemoving).toBeTruthy();
       });
     });
-    describe('shouldShowRevertForCurrentMR', () => {
-      it('should correct value when fields changed', () => {
-        const vm = createComponent();
-        expect(vm.shouldShowRevertForCurrentMR).toBeTruthy();
 
-        vm.mr.canBeReverted = false;
-        expect(vm.shouldShowRevertForCurrentMR).toBeFalsy();
-
-        vm.mr.canBeReverted = true;
-        vm.mr.userCanCollaborateWithProject = false;
-        expect(vm.shouldShowRevertForCurrentMR).toBeFalsy();
-      });
-    });
-    describe('shouldShowRevertForForkMR', () => {
-      it('should correct value when fields changed', () => {
-        const vm = createComponent();
-        expect(vm.shouldShowRevertForForkMR).toBeTruthy();
-
-        vm.mr.canBeReverted = false;
-        expect(vm.shouldShowRevertForForkMR).toBeFalsy();
-
-        vm.mr.canBeReverted = true;
-        vm.mr.userCanForkProject = false;
-        expect(vm.shouldShowRevertForForkMR).toBeFalsy();
-      });
-    });
-    describe('shouldShowCherryPickForCurrentMR', () => {
-      it('should correct value when fields changed', () => {
-        const vm = createComponent();
-        expect(vm.shouldShowCherryPickForCurrentMR).toBeTruthy();
-
-        vm.mr.canBeCherryPicked = false;
-        expect(vm.shouldShowCherryPickForCurrentMR).toBeFalsy();
-
-        vm.mr.canBeCherryPicked = true;
-        vm.mr.userCanCollaborateWithProject = false;
-        expect(vm.shouldShowCherryPickForCurrentMR).toBeFalsy();
-      });
-    });
-    describe('shouldShowCherryPickForForkMR', () => {
-      it('should correct value when fields changed', () => {
-        const vm = createComponent();
-        expect(vm.shouldShowCherryPickForForkMR).toBeTruthy();
-
-        vm.mr.canBeCherryPicked = false;
-        expect(vm.shouldShowCherryPickForForkMR).toBeFalsy();
-
-        vm.mr.canBeCherryPicked = true;
-        vm.mr.userCanForkProject = false;
-        expect(vm.shouldShowCherryPickForForkMR).toBeFalsy();
-      });
-    });
   });
 
   describe('methods', () => {

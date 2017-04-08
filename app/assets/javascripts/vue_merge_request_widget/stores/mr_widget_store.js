@@ -71,7 +71,6 @@ export default class MergeRequestStore {
     this.canMerge = !!data.merge_path;
     this.canCreateIssue = currentUser.can_create_issue || false;
     this.canCancelAutomaticMerge = !!data.cancel_merge_when_pipeline_succeeds_path;
-    this.canUpdateMergeRequest = currentUser.can_update_merge_request || false;
     this.canResolveConflictsInUI = data.conflicts_can_be_resolved_in_ui || false;
     this.canBeMerged = data.can_be_merged || false;
 

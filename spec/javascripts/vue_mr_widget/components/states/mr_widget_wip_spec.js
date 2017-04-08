@@ -6,7 +6,7 @@ const createComponent = () => {
   const Component = Vue.extend(wipComponent);
   const mr = {
     title: 'The best MR ever',
-    canUpdateMergeRequest: true,
+    removeWIPPath: '/path/to/remove/wip',
   };
   const service = {
     removeWIP() {},
@@ -77,7 +77,7 @@ describe('MRWidgetWIP', () => {
     });
 
     it('should not show removeWIP button is user cannot update MR', (done) => {
-      vm.mr.canUpdateMergeRequest = false;
+      vm.mr.removeWIPPath = '';
 
       Vue.nextTick(() => {
         expect(el.querySelector('.js-remove-wip')).toEqual(null);
