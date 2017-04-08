@@ -392,7 +392,7 @@ class Spinach::Features::ProjectMergeRequests < Spinach::FeatureSteps
 
   step 'I accept this merge request' do
     page.within '.mr-state-widget' do
-      click_button "Accept merge request"
+      click_button "Merge"
     end
   end
 
