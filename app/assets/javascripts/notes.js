@@ -259,7 +259,7 @@ require('./task_list');
 
       if (note.commands_changes) {
         if ('merge' in note.commands_changes) {
-          gl.mrWidget.checkStatus();
+          this.checkMergeRequestStatus();
         }
 
         if ('emoji_award' in note.commands_changes) {
@@ -377,7 +377,7 @@ require('./task_list');
       }
 
       gl.utils.localTimeAgo($('.js-timeago'), false);
-      gl.mrWidget.checkStatus();
+      this.checkMergeRequestStatus();
       return this.updateNotesCount(1);
     };
 
@@ -685,11 +685,7 @@ require('./task_list');
         };
       })(this));
 
-      if (gl.utils.getPagePath(1) === 'merge_requests') {
-        gl.mrWidget.checkStatus();
-      }
-
-      // Decrement the "Discussions" counter only once
+      this.checkMergeRequestStatus();
       return this.updateNotesCount(-1);
     };
 
@@ -1013,6 +1009,12 @@ require('./task_list');
           $systemNote.find('.note-text').addClass('system-note-commit-list hide-shade');
         }
       });
+    };
+
+    Notes.prototype.checkMergeRequestStatus = function() {
+      if (gl.utils.getPagePath(1) === 'merge_requests') {
+        gl.mrWidget.checkStatus();
+      }
     };
 
     return Notes;
