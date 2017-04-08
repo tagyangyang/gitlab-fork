@@ -1,0 +1,5 @@
+- if error = viewer.render_error(blob)
+  = render 'render_error', viewer: viewer, blob: blob, error: error
+- else
+  - blob.load_all_data!(@repository) unless viewer.client_side?
+  = render viewer.partial_path, viewer: viewer, blob: blob

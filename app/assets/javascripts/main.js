@@ -84,6 +84,7 @@ import './api';
 import './aside';
 import './autosave';
 import AwardsHandler from './awards_handler';
+import './blob/viewer';
 import './breakpoints';
 import './broadcast_message';
 import './build';

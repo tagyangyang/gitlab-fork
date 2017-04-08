@@ -25,6 +25,7 @@
 #blob-content-holder.blob-content-holder
   %article.file-holder
     = render "projects/blob/header", blob: blob
+
     - if current_user
       .js-file-fork-suggestion-section.file-fork-suggestion.hidden
         %span.file-fork-suggestion-note
@@ -33,9 +34,7 @@
         %button.js-cancel-fork-suggestion.btn.btn-grouped{ type: 'button' }
           Cancel
 
-    - if blob.empty?
-      .file-content.code
-        .nothing-here-block
-          Empty file
-    - else
-      = render blob.to_partial_path(@project), blob: blob
+    - viewers = [blob.simple_viewer, blob.rich_viewer].compact
+    - viewers.each_with_index do |viewer, i|
+      .blob-viewer{ data: { type: viewer.type }, class: ('hide' if i < viewers.length - 1) }
+        = render 'viewer', viewer: viewer, blob: blob

@@ -1,0 +1,20 @@
+- reason = blob_render_error_reason(error)
+.file-content.code
+  .nothing-here-block
+    - if viewer.rich?
+      The file could not be rendered because #{reason}.
+
+      You can
+
+      - if blob.rendered_as_text?
+        = link_to('view the code', '#', class: 'js-blob-viewer-switcher', data: { viewer: 'simple' })
+      - else
+        = link_to('download', blob_raw_url, target: '_blank', rel: 'noopener noreferrer')
+        it
+
+      instead.
+    - else
+      The file could not be displayed because #{reason}.
+      You can
+      = link_to('download', blob_raw_url, target: '_blank', rel: 'noopener noreferrer')
+      it instead.
