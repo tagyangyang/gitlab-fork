@@ -32,6 +32,7 @@ describe 'Merge request', :feature, :js do
       wait_for_ajax
 
       expect(page).to have_selector('.accept-merge-request')
+      expect(find('.accept-merge-request')['disabled']).not_to be(true)
     end
   end
 
@@ -53,14 +54,15 @@ describe 'Merge request', :feature, :js do
 
       page.within('.mr-widget-heading') do
         expect(page).to have_content("Deployed to #{environment.name}")
-        expect(find('.js-environment-link')[:href]).to include(environment.formatted_external_url)
+        expect(find('.js-deploy-url')[:href]).to include(environment.formatted_external_url)
       end
     end
 
     it 'shows green accept merge request button' do
       # Wait for the `ci_status` and `merge_check` requests
       wait_for_ajax
-      expect(page).to have_selector('.accept-merge-request.btn-create')
+      expect(page).to have_selector('.accept-merge-request')
+      expect(find('.accept-merge-request')['disabled']).not_to be(true)
     end
   end
 
@@ -137,7 +139,7 @@ describe 'Merge request', :feature, :js do
     it 'has info button when MWBS button' do
       # Wait for the `ci_status` and `merge_check` requests
       wait_for_ajax
-      expect(page).to have_selector('.merge-when-pipeline-succeeds.btn-info')
+      expect(page).to have_selector('.accept-merge-request.btn-info')
     end
   end
 
