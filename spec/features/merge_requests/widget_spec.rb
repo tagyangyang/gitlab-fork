@@ -153,7 +153,7 @@ describe 'Merge request', :feature, :js do
 
     it 'updates the MR widget' do
       page.within('.mr-widget-body') do
-        expect(page).to have_content('Conflicts detected during merge')
+        expect(page).to have_content('Merge failed')
       end
     end
   end
