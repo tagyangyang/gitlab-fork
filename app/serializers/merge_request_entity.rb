@@ -186,9 +186,11 @@ class MergeRequestEntity < IssuableEntity
   end
 
   expose :diverged_commits_count do |merge_request|
-    merge_request.open? &&
-      merge_request.diverged_from_target_branch? ?
-      merge_request.diverged_commits_count : 0
+    if merge_request.open? && merge_request.diverged_from_target_branch?
+      merge_request.diverged_commits_count
+    else
+      0
+    end
   end
 
   expose :only_allow_merge_if_pipeline_succeeds do |merge_request|
