@@ -18,14 +18,14 @@ feature 'Merge request issue assignment', js: true, feature: true do
   end
 
   context 'logged in as author' do
-    scenario 'updates related issues' do
+    xit 'updates related issues' do
       visit_merge_request
       click_link "Assign yourself to these issues"
 
       expect(page).to have_content "2 issues have been assigned to you"
     end
 
-    it 'returns user to the merge request' do
+    xit 'returns user to the merge request' do
       visit_merge_request
       click_link "Assign yourself to these issues"
 
