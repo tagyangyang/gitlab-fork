@@ -757,7 +757,6 @@ ActiveRecord::Schema.define(version: 20170407140450) do
     t.datetime "resolved_at"
     t.integer "resolved_by_id"
     t.string "discussion_id"
-    t.string "original_discussion_id"
     t.text "note_html"
   end
 
@@ -952,9 +951,9 @@ ActiveRecord::Schema.define(version: 20170407140450) do
     t.boolean "lfs_enabled"
     t.text "description_html"
     t.boolean "only_allow_merge_if_all_discussions_are_resolved"
-    t.integer "auto_cancel_pending_pipelines", default: 0, null: false
     t.boolean "printing_merge_request_link_enabled", default: true, null: false
     t.string "import_jid"
+    t.integer "auto_cancel_pending_pipelines", default: 0, null: false
   end
 
   add_index "projects", ["ci_id"], name: "index_projects_on_ci_id", using: :btree
@@ -1055,6 +1054,7 @@ ActiveRecord::Schema.define(version: 20170407140450) do
     t.string "line_code"
     t.string "note_type"
     t.text "position"
+    t.string "in_reply_to_discussion_id"
   end
 
   add_index "sent_notifications", ["reply_key"], name: "index_sent_notifications_on_reply_key", unique: true, using: :btree
