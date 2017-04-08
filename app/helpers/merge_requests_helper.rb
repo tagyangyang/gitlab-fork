@@ -47,7 +47,7 @@ module MergeRequestsHelper
     end
   end
 
-  # TODO: @oswaldo - Delete when removing old widget parts
+  # TODO: Remove when moving mr_change_branches_path data to MR serializer
   def issues_sentence(issues)
     # Sorting based on the `#123` or `group/project#123` reference will sort
     # local issues first.
@@ -56,14 +56,23 @@ module MergeRequestsHelper
     end.sort.to_sentence
   end
 
-  # TODO: @oswaldo - Delete when removing old widget parts
+  # TODO: Remove when mr_assign_issues_link data goes to MR serializer
   def mr_closes_issues
     @mr_closes_issues ||= @merge_request.closes_issues(current_user)
   end
 
-  # TODO: @oswaldo - Delete when removing old widget parts
-  def mr_issues_mentioned_but_not_closing
-    @mr_issues_mentioned_but_not_closing ||= @merge_request.issues_mentioned_but_not_closing(current_user)
+  # TODO: Move to MR serializer
+  def mr_assign_issues_link
+    issues = MergeRequests::AssignIssuesService.new(@project,
+                                                    current_user,
+                                                    merge_request: @merge_request,
+                                                    closes_issues: mr_closes_issues
+                                                   ).assignable_issues
+    path = assign_related_issues_namespace_project_merge_request_path(@project.namespace, @project, @merge_request)
+    if issues.present?
+      pluralize_this_issue = issues.count > 1 ? "these issues" : "this issue"
+      link_to "Assign yourself to #{pluralize_this_issue}", path, method: :post
+    end
   end
 
   def mr_change_branches_path(merge_request)
@@ -77,19 +86,6 @@ module MergeRequestsHelper
       },
       change_branches: true
     )
-  end
-
-  def mr_assign_issues_link
-    issues = MergeRequests::AssignIssuesService.new(@project,
-                                                    current_user,
-                                                    merge_request: @merge_request,
-                                                    closes_issues: mr_closes_issues
-                                                   ).assignable_issues
-    path = assign_related_issues_namespace_project_merge_request_path(@project.namespace, @project, @merge_request)
-    if issues.present?
-      pluralize_this_issue = issues.count > 1 ? "these issues" : "this issue"
-      link_to "Assign yourself to #{pluralize_this_issue}", path, method: :post
-    end
   end
 
   def source_branch_with_namespace(merge_request)
