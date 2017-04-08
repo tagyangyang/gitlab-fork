@@ -27,9 +27,10 @@ export default {
       return !sourceBranchRemoved && (isRemovingSourceBranch || this.isMakingRequest);
     },
     shouldShowMergedButtons() {
-      const { canRevertInCurrentMR, canCherryPickInCurrentMR, revertInForkPath, cherryPickInForkPath } = this.mr;
+      const { canRevertInCurrentMR, canCherryPickInCurrentMR, revertInForkPath,
+        cherryPickInForkPath } = this.mr;
 
-      return canRevertInCurrentMR || canCherryPickInCurrentMR || 
+      return canRevertInCurrentMR || canCherryPickInCurrentMR ||
         revertInForkPath || cherryPickInForkPath;
     },
   },
