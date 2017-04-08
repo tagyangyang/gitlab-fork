@@ -3,7 +3,7 @@ class NotePolicy < BasePolicy
 
   condition(:is_author) { @user && @subject.author == @user }
   condition(:for_merge_request) { @subject.for_merge_request? }
-  condition(:is_noteable_author) { @user && @subject.notable.author_id == @user.id }
+  condition(:is_noteable_author) { @user && @subject.noteable.author_id == @user.id }
 
   condition(:editable, scope: :subject) { @subject.editable? }
 
