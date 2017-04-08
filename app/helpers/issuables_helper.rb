@@ -37,7 +37,10 @@ module IssuablesHelper
     when Issue
       IssueSerializer.new.represent(issuable).to_json
     when MergeRequest
-      @merge_request_json
+      MergeRequestSerializer
+        .new(current_user: current_user, project: issuable.project)
+        .represent(issuable)
+        .to_json
     end
   end
 

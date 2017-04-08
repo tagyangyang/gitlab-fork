@@ -203,11 +203,11 @@ class MergeRequestEntity < IssuableEntity
 
   private
 
+  delegate :current_user, to: :request
+
   def presenter(merge_request)
     @presenter ||= MergeRequestPresenter.new(merge_request, current_user: current_user)
   end
-
-  delegate :current_user, to: :request
 
   def issues_sentence(project, issues)
     # Sorting based on the `#123` or `group/project#123` reference will sort

@@ -16,7 +16,7 @@
       = render "projects/merge_requests/show/how_to_merge"
 
     :javascript
-      window.gl.mrWidgetData = #{@merge_request_json}
+      window.gl.mrWidgetData = #{serialize_issuable(@merge_request)}
 
     #js-vue-mr-widget.mr-widget
 

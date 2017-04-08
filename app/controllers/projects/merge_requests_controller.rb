@@ -80,7 +80,7 @@ class Projects::MergeRequestsController < Projects::ApplicationController
       end
 
       format.json do
-        render json: @merge_request_json
+        render json: serializer.represent(@merge_request).to_json
       end
 
       format.patch  do
@@ -568,8 +568,6 @@ class Projects::MergeRequestsController < Projects::ApplicationController
 
     labels
     define_pipelines_vars
-
-    @merge_request_json = serializer.represent(@merge_request).to_json
   end
 
   # Discussion tab data is rendered on html responses of actions
