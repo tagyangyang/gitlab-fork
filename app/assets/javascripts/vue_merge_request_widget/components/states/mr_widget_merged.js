@@ -71,7 +71,7 @@ export default {
           <button
             @click="removeSourceBranch"
             :class="{ disabled: isMakingRequest }"
-            type="button" class="btn btn-xs btn-default">Remove Source Branch</button>
+            type="button" class="btn btn-xs btn-default js-remove-branch-button">Remove Source Branch</button>
         </p>
         <p v-if="shouldShowSourceBranchRemoving">
           The source branch is being removed.

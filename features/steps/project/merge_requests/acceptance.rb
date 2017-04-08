@@ -19,11 +19,11 @@ class Spinach::Features::ProjectMergeRequestsAcceptance < Spinach::FeatureSteps
   end
 
   step 'I should see the Remove Source Branch button' do
-    expect(page).to have_link('Remove source branch')
+    expect(page).to have_selector('.js-remove-branch-button')
   end
 
   step 'I should not see the Remove Source Branch button' do
-    expect(page).not_to have_link('Remove source branch')
+    expect(page).not_to have_selector('.js-remove-branch-button')
   end
 
   step 'There is an open Merge Request' do
